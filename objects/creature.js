@@ -43,6 +43,9 @@ class stat {
       
       wildLevel /= (1 + IB * 0.2 * m.IBM);
       
+      // Prevents division by 0
+      if (m.Iw == 0)
+         return this.Lw = 0;
       this.Lw = Math.max(Math.round((wildLevel - 1) / (m.Iw * m.IwM)), 0);
       return this.Lw;
    }

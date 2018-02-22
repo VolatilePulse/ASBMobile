@@ -52,11 +52,11 @@ function Extract() {
    
    // Assign values from DOM elements
    var species = speciesDOM.value;
-   var level = Number(levelDOM.value);
+   var level = levelDOM.value;
    var isWild = isWildDOM.checked;
    var isTamed = isTamedDOM.checked;
    var isBred = isBredDOM.checked;
-   var imprintBonus = Number(imprintBonusDOM.value / 100);
+   var imprintBonus = imprintBonusDOM.value / 100;
    var exactly = exactlyDOM.checked;
    var values = [8];
    

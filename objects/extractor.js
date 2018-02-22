@@ -59,6 +59,45 @@ class extraction {
       return number / Math.pow(10, n);
    }
    
+   // Recursively remove values that don't have a matching set in the remaining stats
+   matchingStatLevels(index, stat) {
+      var self = this;
+      var indices = [index];
+      var runningWildLevel = stat.Lw;
+      var runningDomLevel = stat.Ld;
+      function _matchingStatLevels(indices) {
+         for (var i = 0; i < 7; i ++) {
+            if (!indices.includes(i) && self.results[i].checked)
+               indices.push(i);
+            // This only has one stat in it and is deemed good, or we are already using this index
+            if (indices.includes(i))
+               continue;
+
+            // This stat hasn't been checked yet
+            for (var j = 0; j < self.results[i].length; j ++) {
+               runningWildLevel += self.results[i][j].Lw;
+               runningDomLevel += self.results[i][j].Ld;
+               indices.push(i);
+
+               // Revert the changes we made
+               if (!(_matchingStatLevels(indices))){
+                  runningWildLevel -= self.results[i][j].Lw;
+                  runningDomLevel -= self.results[i][j].Ld;
+                  indices.pop();
+                  continue;
+               }
+            }
+         }
+
+         // We have looped all of the stats and there is a combination of other stats
+         if ((runningWildLevel == self.wildFreeMax) && (runningDomLevel == self.domFreeMax) && indices.length == 7)
+            return true;
+
+         return false;
+      }
+      return _matchingStatLevels(indices);
+   }
+   
    extractLevels() {
       // If tame isn't bred (ignore wild level steps) and setting is enabled, consider wild steps (as set in settings)
       // TODO: Add consider wild levels
@@ -138,7 +177,7 @@ class extraction {
             // Calculate the highest Lw could be
             maxLw = tempStat.calculateWildLevel(this.m[i], this.values[i], !this.wild, 0, this.IB);
             
-            if (maxLw > this.levelBeforeDom)
+            if (maxLw > this.levelBeforeDom || (maxLw == 0 && this.m[i].Iw == 0))
                maxLw = this.levelBeforeDom;
             
             // Reset Lw to find max possible Ld
@@ -157,11 +196,11 @@ class extraction {
             // Loop all possible Lws
             for (tempStat.Lw = 0; tempStat.Lw <= maxLw; tempStat.Lw ++) {
                // We don't need to calculate TE to extract the levels
-               if (this.bred || this.m[i].Tm != 0) {
+               if (this.bred || this.m[i].Tm == 0) {
                   if (tempStat.calculateDomLevel(this.m[i], this.values[i], !this.wild, this.TE, this.IB) > maxLd)
                      continue;
                   
-                  if (this.values[i] == this.roundTo(tempStat.calculateValue(this.m[i], !this.wild, this.TE, this.IB), this.m[i].precision))
+                  if (this.roundTo(this.values[i], this.m[i].precision) == this.roundTo(tempStat.calculateValue(this.m[i], !this.wild, this.TE, this.IB), this.m[i].precision))
                      this.results[i].push(new stat(tempStat));
                   
                   // If it doesn't calculate properly, it may have used a different IB
@@ -212,10 +251,10 @@ class extraction {
    }
 
    filterResults() {
-      // Easy removal of stats
       do {
          var removed = false;
          for (var i = 0; i < 7; i ++) {
+            // One stat possibility is good
             if (!this.results[i].checked && this.results[i].length == 1) {
                this.wildFreeMax -= this.results[i][0].Lw;
                this.domFreeMin -= this.results[i][0].Ld;
@@ -225,19 +264,16 @@ class extraction {
             }
             else if (this.results[i].length > 1) {
                for (var j = 0; j < this.results[i].length; j ++) {
-                  if (this.results[i][j].Lw > this.wildFreeMax || this.results[i][j].Ld > this.domFreeMax) {
+                  // Simple stat removal followed by a recursive stat removal
+                  if (this.results[i][j].Lw > this.wildFreeMax || this.results[i][j].Ld > this.domFreeMax || !this.matchingStatLevels(i, this.results[i][j])) {
                      this.results[i].splice(j, 1);
                      j --;
                      removed = true;
-                     console.log("Removed");
                   }
                }
             }
          }
       } while (removed);
-      
-      // Harder removal of stats
-      // Recursively remove values that don't have a matching set in the remaining stats
    }
 /*      for (s = 0; s < 7; s++) {
           if (results[s].Count == 1) {
