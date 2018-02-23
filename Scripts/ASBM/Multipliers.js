@@ -1,4 +1,8 @@
-class statMultiplier {
+"use strict";
+
+var ASBM = ASBM || {};
+
+ASBM.StatMultiplier = class {
    constructor(stat) {
       if (!stat)
          stat = [0,0,0,0,0];
@@ -9,22 +13,18 @@ class statMultiplier {
       this.TBHM = 1; // Tame multiply as %
       this.Ta = stat[3]; // Tame add
       this.Tm = stat[4]; // Tame multiply as %
-      this.active = true;
-      this.precision = 1;
    }
 }
 
-class statMultipliers {
+ASBM.StatMultipliers = class {
    constructor(stats, TBHM = 1, oxygenNotUsed = false, speedImprintIgnored = false) {
       for (var i = 0; i < 8; i ++)
-         this[i] = new statMultiplier(stats ? stats[i] : null);
-      
-      // Melee and speed require a higher precision
-      this[5].precision = 3;
-      this[6].precision = 3;
+         this[i] = new ASBM.StatMultiplier(stats ? stats[i] : null);
       
       this[0].TBHM = TBHM;
-      this[2].active = !oxygenNotUsed;
+
+      if (oxygenNotUsed)
+         this[2].notUsed = oxygenNotUsed;
       
       // These values are not imprint increased
       this[1].IBM = 0;
@@ -34,7 +34,7 @@ class statMultipliers {
    }
 }
 
-class serverMultiplier {
+ASBM.ServerMultiplier = class {
    constructor(settingArray, settingObj, IBM) {
       this.IBM = IBM; // Imprint Bonus Multiplier
       
@@ -49,12 +49,12 @@ class serverMultiplier {
    }
 }
 
-class server {
+ASBM.Server = class {
    constructor(settingsArray, settingsObj, singlePlayer = false, IBM = 1) {
       this.singlePlayer = singlePlayer; // singlePlayer Setting
       
       for (var i = 0; i < 8; i ++)
          if (settingsArray[i])
-            this[i] = new serverMultiplier(settingsArray[i], (settingsObj ? settingsObj[i] : null), IBM);
+            this[i] = new ASBM.ServerMultiplier(settingsArray[i], (settingsObj ? settingsObj[i] : null), IBM);
    }
 }

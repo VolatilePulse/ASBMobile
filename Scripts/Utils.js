@@ -1,0 +1,88 @@
+/**
+ * @fileOverview Miscellaneous functions used throughout the app
+ */
+
+"use strict";
+
+var Utils = {
+   /**
+    * @description Async JSON file read
+    * @param {string} file Path to the file
+    * @param {function} callback On success, function to call with returned data
+    * @namespace Utils
+    */
+   AsyncFileRead(file, callback) {
+      var rawFile = new XMLHttpRequest();
+      rawFile.overrideMimeType("application/json");
+      rawFile.open("GET", file, true);
+      rawFile.onreadystatechange = function() {
+         if (rawFile.readyState === 4 && rawFile.status == "200")
+            callback(rawFile.responseText);
+      }
+      rawFile.send(null);
+   },
+
+   /**
+    * @description Returns the precision to match the displayed in game values.
+    * @param {number} index Number corresponding with the index of a stat
+    * @returns {number} The number of decimal places the stat must meet
+    * @name Precision
+    * @see RoundTo
+    */
+   Precision(index) {
+      if (index == TORPOR || index == SPEED)
+         return 3;
+      return 1;
+   },
+   
+   /**
+    * @description Rounds a number to a set decimal place for comparison
+    * @param {number} num Value that needs rounded
+    * @param {number} n Number of decimals to be rounded to
+    * @returns {float} Decimal rounded to the specified precision
+    * @name RoundTo
+    * @see Precision
+    */
+   RoundTo(num, n = 0) {
+      var number = num * Math.pow(10, n);
+      number = Math.round(number);
+      return number / Math.pow(10, n);
+   },
+
+   /**
+    * @description Simple object check.
+    * @namespace Utils
+    * @param item
+    * @returns {boolean}
+    */
+   IsObject(item) {
+      return (item && typeof item === 'object' && !Array.isArray(item));
+   },
+
+   /**
+    * @description Deep merge two objects.
+    * @namespace Utils
+    * @param target
+    * @param ...sources
+    */
+   DeepMerge(target, ...sources) {
+      if (!sources.length)
+         return target;
+
+      const source = sources.shift();
+
+      if (Utils.IsObject(target) && Utils.IsObject(source)) {
+         for (const key in source) {
+            if (Utils.IsObject(source[key])) {
+               if (!target[key])
+                  Object.assign(target, {[key]: {}});
+               Utils.DeepMerge(target[key], source[key]);
+            }
+            else
+               Object.assign(target, {[key]: source[key]});
+         }
+      }
+
+      return Utils.DeepMerge(target, ...sources);
+   }
+}

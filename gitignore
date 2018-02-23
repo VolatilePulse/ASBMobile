@@ -1,0 +1,20 @@
+*.userprefs
+.vs/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+node_modules
+
+# OS/editor/temp stuff
+*.stackdump
+*.bak
+*~
+.DS_Store
+.DS_Store?
+._*
+[Dd]esktop.ini
+Thumbs.db
+tags
