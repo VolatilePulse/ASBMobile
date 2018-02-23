@@ -45,7 +45,7 @@ ASBM.UI = {
       var values = [8];
       
       for (var i = 0; i < valuesDOM.length; i ++)
-         values[i] = valuesDOM[i].value;
+         values[i] = parseFloat(valuesDOM[i].value);
       
       // Convert melee and speed to decimals
       values[5] /= 100;
@@ -56,6 +56,6 @@ ASBM.UI = {
       
       app.extractObject = new ASBM.Extraction(multipliers, values, level, isWild, isTamed, isBred, imprintBonus, exactly);
       app.extractObject.extractLevels();
-      console.log(extractObject.results);
+      console.log(app.extractObject.results);
    }
 }

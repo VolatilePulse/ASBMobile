@@ -8,40 +8,40 @@ var ASBM = ASBM || {};
 
 ASBM.Extraction = class {
    constructor(multipliers, values, level, isWild = true, isTamed = false, isBred = false, imprintBonus = 0, exactly = false) {
-      m: multipliers;
-      values: values;
-      level: level;
-      wild: isWild;
-      tamed: isTamed;
-      bred: isBred;
-      imprintingBonus: imprintBonus;
-      exactly: exactly;
+      this.m = multipliers;
+      this.values= values;
+      this.level= level;
+      this.wild= isWild;
+      this.tamed= isTamed;
+      this.bred= isBred;
+      this.imprintingBonus= imprintBonus;
+      this.exactly= exactly;
       
-      TE: 0;
-      IB: 0;
+      this.TE = 0;
+      this.IB = 0;
       
-      results: [ [],[],[],[],[],[],[],[]];
+      this.results = [ [],[],[],[],[],[],[],[]];
 
       // determines how many levels are missing to equal creature level
-      wildFreeMax: 0;
-      domFreeMin: 0;
-      domFreeMax: 0; // unassigned levels
-      levelBeforeDom: 0;
+      this.wildFreeMax = 0;
+      this.domFreeMin = 0;
+      this.domFreeMax = 0; // unassigned levels
+      this.levelBeforeDom = 0;
       
       // Change variables based on wild, tamed, bred
       if (this.wild) {
-         TE: 0;
-         imprintingBonus: 0;
-         IB: 0;
+            this.TE = 0;
+            this.imprintingBonus = 0;
+            this.IB = 0;
       }
       
       else if(this.tamed) {
-         imprintingBonus: 0;
-         IB: 0;
+            this.imprintingBonus = 0;
+            this.IB = 0;
       }
       
       else
-         TE: 1;
+      this.TE = 1;
    }
    
    extractLevels() {
@@ -76,7 +76,7 @@ ASBM.Extraction = class {
                                  this.imprintingBonus - (5 / Math.pow(10, 3)));
             
             // Check the food stat for the IB as well (Only works if food is unleveled)
-            var tempHealthStat = new stat();
+            var tempHealthStat = new ASBM.Stat();
             tempHealthStat.calculateWildLevel(this.m[3], this.values[3], !this.wild, this.TE, this.imprintingBonus);
             var imprintingBonusFromFood = tempHealthStat.calculateIB(this.m[3], this.values[3]);
             
@@ -100,18 +100,18 @@ ASBM.Extraction = class {
       
       // Loop all stats except for torpor
       for (var i = 0; i < 7; i ++) {
-         tempStat = new stat;
+         tempStat = new ASBM.Stat;
          
          // If the stat can't be calculated, set it to 0, 0 so it has atleast 1 result
          if (this.m[i].B <= 0 || !this.m[i].active)
-            this.results[i].push(new stat);
+            this.results[i].push(new ASBM.Stat);
          
          // Since wilds don't level torpor, it makes it easy to calculate
          else if (this.wild) {
             tempStat.calculateWildLevel(this.m[i], this.values[i]);
             // Make sure it is valid
             if (this.values[i] == this.roundTo(tempStat.calculateValue(this.m[i]), this.m[i].precision))
-               this.results[i].push(new stat(tempStat));
+               this.results[i].push(new ASBM.Stat(tempStat));
          }
          
          // Otherwise, we need to do some extra work
@@ -147,7 +147,7 @@ ASBM.Extraction = class {
                      continue;
                   
                   if (this.roundTo(this.values[i], this.m[i].precision) == this.roundTo(tempStat.calculateValue(this.m[i], !this.wild, this.TE, this.IB), this.m[i].precision))
-                     this.results[i].push(new stat(tempStat));
+                     this.results[i].push(new ASBM.Stat(tempStat));
                   
                   // If it doesn't calculate properly, it may have used a different IB
                   else if (this.bred) {
@@ -157,11 +157,11 @@ ASBM.Extraction = class {
                         
                         if (maxTempIB < maxIB && maxTempIB >= minIB) {
                            this.IB = maxIB = maxTempIB;
-                           this.results[i].push(new stat(tempStat));
+                           this.results[i].push(new ASBM.Stat(tempStat));
                         }
                         else if (minIB < minTempIB && minTempIB < maxIB) {
                            this.IB = minIB = minTempIB;
-                           this.results[i].push(new stat(tempStat));
+                           this.results[i].push(new ASBM.Stat(tempStat));
                         }
                      }
                   }
@@ -177,8 +177,8 @@ ASBM.Extraction = class {
                         
                         // If the TE allows the stat to calculate properly, add it as a possible result
                         if (this.roundTo(this.values[i], this.m[i].precision) == this.roundTo(tempStat.calculateValue(this.m[i], !this.wild, tamingEffectiveness, this.IB), this.m[i].precision)) {
-                           // Create a new stat to hold all of the information
-                           var TEStat = new stat(tempStat);
+                           // Create a new ASBM.Stat to hold all of the information
+                           var TEStat = new ASBM.Stat(tempStat);
                            TEStat.wildLevel = Math.round(this.levelBeforeDom / (1 + 0.5 * tamingEffectiveness));
                            TEStat.TE = tamingEffectiveness;
                            this.results[i].push(TEStat);
