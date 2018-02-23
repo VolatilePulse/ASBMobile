@@ -44,9 +44,10 @@ var Utils = {
     * @see Precision
     */
    RoundTo(num, n = 0) {
-      var number = num * Math.pow(10, n);
-      number = Math.round(number);
-      return number / Math.pow(10, n);
+      return +Number.toFixed(num + 1E-10, n);
+      //var number = num * Math.pow(10, n);
+      //number = Math.round(number);
+      //return number / Math.pow(10, n);
    },
 
    /**
