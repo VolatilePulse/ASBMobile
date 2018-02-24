@@ -1,0 +1,14 @@
+{
+  "name": "Ark Smart Breeding Mobile",
+  "short_name": "ASBMobile",
+  "lang": "en-US",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#fff",
+  "description": "A minimalist version of ASB",
+  "icons": [{
+    "src": "favicon.ico",
+    "sizes": "48x48",
+    "type": "image/x-icon"
+  }]
+}

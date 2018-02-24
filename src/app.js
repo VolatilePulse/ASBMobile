@@ -17,6 +17,11 @@ var app = {
     myMultipliers: {},
     
    Init() {
+      // Proposed future syntax
+      // Utils.AsyncFileRead("values.json")
+      //    .then(text => Data.ObjectCreation(text))
+      //    .then(creatures => app.VueInit(creatures))
+      //    .catch(error => app.CriticalError);
       Utils.AsyncFileRead("values.json", Data.LoadValues);
       document.getElementById("extractButton").addEventListener("click", ASBM.UI.Extract);
    }
@@ -40,7 +45,6 @@ if ('serviceWorker' in navigator) {
 
 // Adds all necessary scripts
 document.write(
-   '<script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>' +
    '<script type="application/javascript" src="src/ASBM/Creature.js"></script>' + 
    '<script type="application/javascript" src="src/ASBM/Extractor.js"></script>' + 
    '<script type="application/javascript" src="src/ASBM/Library.js"></script>' + 

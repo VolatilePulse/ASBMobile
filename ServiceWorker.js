@@ -24,7 +24,8 @@ var filesToCache = [
    '/src/ASBM/Library.js',
    '/src/ASBM/Multipliers.js',
    '/src/ASBM/UI.js',
-   'https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js'
+   'https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js',
+   'https://unpkg.com/dexie@latest/dist/dexie.js'
 ];
 
 // caches refers to the entire cache, including multiple caches (if any)
