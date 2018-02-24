@@ -24,10 +24,19 @@ var app = {
 
 // Register Service Worker
 if ('serviceWorker' in navigator) {
-   navigator.serviceWorker
-            .register('./ServiceWorker.js')
-            .then(function() { console.log("Service Worker Registered!"); });
-}
+   // Service worker must be added during the load event
+   window.addEventListener('load', function() {
+
+      // Attempt to register our Service work
+      navigator.serviceWorker.register('/ServiceWorker.js').then(function(registration) {
+         // Registration was successful
+         console.log('ServiceWorker registration successful with scope: ', registration.scope);
+      }, function(err) {
+         // registration failed :(
+         console.log('ServiceWorker registration failed: ', err);
+      });
+   });
+ }
 
 // Adds all necessary scripts
 document.write(
