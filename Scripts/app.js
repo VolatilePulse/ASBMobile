@@ -31,6 +31,7 @@ document.write(
    '<script type="application/javascript" src="Scripts/ASBM/Multipliers.js"></script>' + 
    '<script type="application/javascript" src="Scripts/ASBM/UI.js"></script>' + 
    '<script type="application/javascript" src="Scripts/Data.js"></script>' + 
-   '<script type="application/javascript" src="Scripts/Utils.js"></script>'
+   '<script type="application/javascript" src="Scripts/Utils.js"></script>' + 
+   '<script type="application/javascript" src="Scripts/Ark.js"></script>' 
 );
 document.addEventListener("DOMContentLoaded", app.Init);

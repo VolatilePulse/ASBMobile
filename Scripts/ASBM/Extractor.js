@@ -9,18 +9,18 @@ var ASBM = ASBM || {};
 ASBM.Extraction = class {
    constructor(multipliers, values, level, isWild = true, isTamed = false, isBred = false, imprintBonus = 0, exactly = false) {
       this.m = multipliers;
-      this.values= values;
-      this.level= level;
-      this.wild= isWild;
-      this.tamed= isTamed;
-      this.bred= isBred;
-      this.imprintingBonus= imprintBonus;
-      this.exactly= exactly;
+      this.values = values;
+      this.level = level;
+      this.wild = isWild;
+      this.tamed = isTamed;
+      this.bred = isBred;
+      this.imprintingBonus = imprintBonus;
+      this.exactly = exactly;
       
       this.TE = 0;
       this.IB = 0;
       
-      this.results = [ [],[],[],[],[],[],[],[]];
+      this.results = [[],[],[],[],[],[],[],[]];
 
       // determines how many levels are missing to equal creature level
       this.wildFreeMax = 0;
@@ -69,24 +69,22 @@ ASBM.Extraction = class {
             // One of the most precise ways to get the exact torpor
             this.IB = torporStat.calculateIB(this.m[TORPOR], this.values[TORPOR]);
             // IB *must* be lower than this
-            var maxIB = Math.min(torporStat.calculateIB(this.m[7], this.values[7] + (5 / Math.pow(10, this.m[7].precision + 1))),
-                                 this.imprintingBonus + (5 / Math.pow(10, 3)));
+            var maxIB = Math.min(torporStat.calculateIB(this.m[7], this.values[7] + (0.5 / Math.pow(10, Utils.Precision(TORPOR)))), this.imprintingBonus + (5 /10E3));
             // IB can be equal or greater than this
-            var minIB = Math.max(torporStat.calculateIB(this.m[7], this.values[7] - (5 / Math.pow(10, this.m[7].precision + 1))),
-                                 this.imprintingBonus - (5 / Math.pow(10, 3)));
+            var minIB = Math.max(torporStat.calculateIB(this.m[7], this.values[7] - (0.5 / Math.pow(10, Utils.Precision(TORPOR)))), this.imprintingBonus - (5 / 10E3));
             
             // Check the food stat for the IB as well (Only works if food is unleveled)
             var tempHealthStat = new ASBM.Stat();
-            tempHealthStat.calculateWildLevel(this.m[3], this.values[3], !this.wild, this.TE, this.imprintingBonus);
-            var imprintingBonusFromFood = tempHealthStat.calculateIB(this.m[3], this.values[3]);
+            tempHealthStat.calculateWildLevel(this.m[FOOD], this.values[FOOD], !this.wild, this.TE, this.imprintingBonus);
+            var imprintingBonusFromFood = tempHealthStat.calculateIB(this.m[FOOD], this.values[FOOD]);
             
             // Check to see if the new IB still allows torpor to extract correctly
-            if (this.values[7] == this.roundTo(tempStat.calculateValue(this.m[7], !this.wild, this.TE, imprintingBonusFromFood), this.m[7].precision))
+            if (this.values[TORPOR] == Utils.RoundTo(tempStat.calculateValue(this.m[TORPOR], !this.wild, this.TE, imprintingBonusFromFood), Utils.Precision(TORPOR)))
                this.IB = imprintingBonusFromFood;
             
             // If IB > 99.9% it is likely 100% or a whole number higher than 100%
             if (this.IB > 0.999)
-               this.IB = this.roundTo(this.IB, 2);
+               this.IB = Utils.RoundTo(this.IB, 2);
             
             // IB can't be lower than 0
             if (this.IB < 0)
@@ -103,14 +101,14 @@ ASBM.Extraction = class {
          tempStat = new ASBM.Stat;
          
          // If the stat can't be calculated, set it to 0, 0 so it has atleast 1 result
-         if (this.m[i].B <= 0 || !this.m[i].active)
+         if (this.m[i].B <= 0 || this.m[i].notUsed)
             this.results[i].push(new ASBM.Stat);
          
          // Since wilds don't level torpor, it makes it easy to calculate
          else if (this.wild) {
             tempStat.calculateWildLevel(this.m[i], this.values[i]);
             // Make sure it is valid
-            if (this.values[i] == this.roundTo(tempStat.calculateValue(this.m[i]), this.m[i].precision))
+            if (this.values[i] == Utils.RoundTo(tempStat.calculateValue(this.m[i]), Ark.Precision(i)))
                this.results[i].push(new ASBM.Stat(tempStat));
          }
          
@@ -146,14 +144,14 @@ ASBM.Extraction = class {
                   if (tempStat.calculateDomLevel(this.m[i], this.values[i], !this.wild, this.TE, this.IB) > maxLd)
                      continue;
                   
-                  if (this.roundTo(this.values[i], this.m[i].precision) == this.roundTo(tempStat.calculateValue(this.m[i], !this.wild, this.TE, this.IB), this.m[i].precision))
+                  if (Utils.RoundTo(this.values[i], Ark.Precision(i)) == Utils.RoundTo(tempStat.calculateValue(this.m[i], !this.wild, this.TE, this.IB), Ark.Precision(i)))
                      this.results[i].push(new ASBM.Stat(tempStat));
                   
                   // If it doesn't calculate properly, it may have used a different IB
                   else if (this.bred) {
-                     if (this.roundTo(tempStat.calculateIB(this.m[i], this.values[i]), 2) == this.imprintingBonus) {
-                        var maxTempIB = tempStat.calculateIB(this.m[i], this.values[i] + (5 / Math.pow(10, this.m[i].precision + 1)));
-                        var minTempIB = tempStat.calculateIB(this.m[i], this.values[i] - (5 / Math.pow(10, this.m[i].precision + 1)));
+                     if (Utils.RoundTo(tempStat.calculateIB(this.m[i], this.values[i]), 2) == this.imprintingBonus) {
+                        var maxTempIB = tempStat.calculateIB(this.m[i], this.values[i] + (5 / Math.pow(10, Ark.Precision(i) + 1)));
+                        var minTempIB = tempStat.calculateIB(this.m[i], this.values[i] - (5 / Math.pow(10, Ark.Precision(i) + 1)));
                         
                         if (maxTempIB < maxIB && maxTempIB >= minIB) {
                            this.IB = maxIB = maxTempIB;
@@ -176,10 +174,10 @@ ASBM.Extraction = class {
                      if (tamingEffectiveness >= 0 && tamingEffectiveness <= 1) {
                         
                         // If the TE allows the stat to calculate properly, add it as a possible result
-                        if (this.roundTo(this.values[i], this.m[i].precision) == this.roundTo(tempStat.calculateValue(this.m[i], !this.wild, tamingEffectiveness, this.IB), this.m[i].precision)) {
+                        if (Utils.RoundTo(this.values[i], Ark.Precision(i)) == Utils.RoundTo(tempStat.calculateValue(this.m[i], !this.wild, tamingEffectiveness, this.IB), Ark.Precision(i))) {
                            // Create a new ASBM.Stat to hold all of the information
                            var TEStat = new ASBM.Stat(tempStat);
-                           TEStat.wildLevel = Math.round(this.levelBeforeDom / (1 + 0.5 * tamingEffectiveness));
+                           TEStat.wildLevel = Utils.RoundTo(this.levelBeforeDom / (1 + 0.5 * tamingEffectiveness), 0);
                            TEStat.TE = tamingEffectiveness;
                            this.results[i].push(TEStat);
                         }

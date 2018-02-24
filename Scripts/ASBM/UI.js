@@ -42,20 +42,19 @@ ASBM.UI = {
       var isBred = isBredDOM.checked;
       var imprintBonus = imprintBonusDOM.value / 100;
       var exactly = exactlyDOM.checked;
-      var values = [8];
+      var values = [];
       
       for (var i = 0; i < valuesDOM.length; i ++)
          values[i] = parseFloat(valuesDOM[i].value);
       
       // Convert melee and speed to decimals
-      values[5] /= 100;
-      values[6] /= 100;
+      values[DAMAGE] /= 100; values[DAMAGE] = Utils.RoundTo(values[DAMAGE], Ark.Precision(DAMAGE));
+      values[SPEED] /= 100; values[SPEED] = Utils.RoundTo(values[SPEED], Ark.Precision(SPEED));
       
       // Create other important variables
       var multipliers = Utils.DeepMerge({}, app.officialServerSettings, app.myMultipliers[species]);
       
       app.extractObject = new ASBM.Extraction(multipliers, values, level, isWild, isTamed, isBred, imprintBonus, exactly);
       app.extractObject.extractLevels();
-      console.log(app.extractObject.results);
    }
 }

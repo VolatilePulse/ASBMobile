@@ -4,10 +4,13 @@ var ASBM = ASBM || {};
 
 ASBM.Stat = class {
    constructor(Lw = 0, Ld = 0) {
+      // Copy Constructor
       if (Utils.IsObject(Lw)) {
          this.Lw = Lw.Lw;
          this.Ld = Lw.Ld;
       }
+
+      // Constructor from an array/Empty Constructor
       else {
          this.Lw = Lw;
          this.Ld = Ld;
@@ -24,7 +27,7 @@ ASBM.Stat = class {
       if (tamed)
          v += m.Ta * m.TaM;
 
-      v *= this.TmMultiplier(tamed, m.Tm, m.TmM, TE);
+      v *= this.calculateTmM(tamed, m.Tm, m.TmM, TE);
       v *= (1 + this.Ld * m.Id * m.IdM);
       return v;
    }
@@ -118,6 +121,6 @@ ASBM.Creature = class {
       level: 0;
       
       for (var i = 0; i < 8; i ++)
-         this.stats.push(new stat());
+         this.stats.push(new ASBM.Stat());
    }
 }

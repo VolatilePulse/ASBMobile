@@ -21,19 +21,6 @@ var Utils = {
       }
       rawFile.send(null);
    },
-
-   /**
-    * @description Returns the precision to match the displayed in game values.
-    * @param {number} index Number corresponding with the index of a stat
-    * @returns {number} The number of decimal places the stat must meet
-    * @name Precision
-    * @see RoundTo
-    */
-   Precision(index) {
-      if (index == TORPOR || index == SPEED)
-         return 3;
-      return 1;
-   },
    
    /**
     * @description Rounds a number to a set decimal place for comparison
@@ -44,10 +31,7 @@ var Utils = {
     * @see Precision
     */
    RoundTo(num, n = 0) {
-      return +Number.toFixed(num + 1E-10, n);
-      //var number = num * Math.pow(10, n);
-      //number = Math.round(number);
-      //return number / Math.pow(10, n);
+      return +Number(num + 1E-10).toFixed(n);
    },
 
    /**
