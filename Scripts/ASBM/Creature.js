@@ -48,14 +48,15 @@ ASBM.Stat = class {
       
       wildLevel /= (m.B * m.TBHM);
       wildLevel /= (1 + IB * 0.2 * m.IBM);
-      this.Lw = Math.max(Math.round((wildLevel - 1) / (m.Iw * m.IwM)), 0);
+      this.Lw = Math.max(Utils.RoundTo((wildLevel - 1) / (m.Iw * m.IwM), 0), 0);
       return this.Lw;
    }
    
    calculateDomLevel(m, v, tamed = false, TE = 0, IB = 0) {
       //  Ld = ((V / (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) / (1 + TE * Tm * TmM)) - 1) / (Id * IdM)
       
-      if (!tamed)
+      // Prevents division by 0
+      if (m.Id == 0 || !tamed)
          return this.Ld = 0;
       
       var domLevel = m.B * m.TBHM;
@@ -63,7 +64,7 @@ ASBM.Stat = class {
       domLevel *= (1 + IB * 0.2 * m.IBM);
       domLevel = v / (domLevel + m.Ta * m.TaM);
       domLevel /= this.calculateTmM(tamed, m.Tm, m.TmM, TE);
-      this.Ld = Math.max(Math.round((domLevel - 1) / (m.Id * m.IdM)), 0);
+      this.Ld = Math.max(Utils.RoundTo((domLevel - 1) / (m.Id * m.IdM), 0), 0);
       return this.Ld;
    }
    
@@ -85,7 +86,7 @@ ASBM.Stat = class {
       // IB = ((V / (1 + TE * Tm * TmM) / (1 + Ld * Id * IdM) - Ta * TaM) / (B * (1 + Lw * Iw * IwM) * TBHM) - 1)  / (0.2 * IBM)
       
       if (!tamed)
-         return -1;
+         return 0;
       
       var IB = v;
       IB /= this.calculateTmM(tamed, m.Tm, m.TmM, TE);

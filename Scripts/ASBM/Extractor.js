@@ -89,10 +89,6 @@ ASBM.Extraction = class {
             // IB can't be lower than 0
             if (this.IB < 0)
                this.IB = 0;
-            
-            // Check to see if we changed the IB
-            if (Math.abs(this.IB - this.imprintingBonus) > 0)
-               this.imprintingChanged = true;
          }
       }
       
@@ -114,12 +110,8 @@ ASBM.Extraction = class {
          
          // Otherwise, we need to do some extra work
          else {
-            var maxLw = 0;
-            var maxLd = 0;
-            var tamingEffectiveness = -1;
-            
             // Calculate the highest Lw could be
-            maxLw = tempStat.calculateWildLevel(this.m[i], this.values[i], !this.wild, 0, this.IB);
+            var maxLw = tempStat.calculateWildLevel(this.m[i], this.values[i], !this.wild, 0, this.IB);
             
             if (maxLw > this.levelBeforeDom || (maxLw == 0 && this.m[i].Iw == 0))
                maxLw = this.levelBeforeDom;
@@ -128,14 +120,11 @@ ASBM.Extraction = class {
             tempStat.Lw = 0;
             
             // Calculate the highest Ld could be
-            maxLd = tempStat.calculateDomLevel(this.m[i], this.values[i], !this.wild, 0, this.IB);
+            var maxLd = tempStat.calculateDomLevel(this.m[i], this.values[i], !this.wild, 0, this.IB);
             
             // Adjust Ld to max/min
             if (maxLd > this.domFreeMax)
                maxLd = this.domFreeMax;
-            
-            if (maxLd < 0)
-               maxLd = 0;
             
             // Loop all possible Lws
             for (tempStat.Lw = 0; tempStat.Lw <= maxLw; tempStat.Lw ++) {
@@ -150,8 +139,8 @@ ASBM.Extraction = class {
                   // If it doesn't calculate properly, it may have used a different IB
                   else if (this.bred) {
                      if (Utils.RoundTo(tempStat.calculateIB(this.m[i], this.values[i]), 2) == this.imprintingBonus) {
-                        var maxTempIB = tempStat.calculateIB(this.m[i], this.values[i] + (5 / Math.pow(10, Ark.Precision(i) + 1)));
-                        var minTempIB = tempStat.calculateIB(this.m[i], this.values[i] - (5 / Math.pow(10, Ark.Precision(i) + 1)));
+                        var maxTempIB = tempStat.calculateIB(this.m[i], this.values[i] + (0.5 / Math.pow(10, Ark.Precision(i))));
+                        var minTempIB = tempStat.calculateIB(this.m[i], this.values[i] - (0.5 / Math.pow(10, Ark.Precision(i))));
                         
                         if (maxTempIB < maxIB && maxTempIB >= minIB) {
                            this.IB = maxIB = maxTempIB;
@@ -170,7 +159,7 @@ ASBM.Extraction = class {
                   for (tempStat.Ld = 0; tempStat.Ld <= maxLd; tempStat.Ld ++) {
 
                      // Attempts to calculate the TE
-                     tamingEffectiveness = tempStat.calculateTE(this.m[i], this.values[i]);
+                     var tamingEffectiveness = tempStat.calculateTE(this.m[i], this.values[i]);
                      if (tamingEffectiveness >= 0 && tamingEffectiveness <= 1) {
                         
                         // If the TE allows the stat to calculate properly, add it as a possible result

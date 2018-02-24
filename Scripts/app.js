@@ -22,16 +22,23 @@ var app = {
    }
 }
 
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+   navigator.serviceWorker
+            .register('./ServiceWorker.js')
+            .then(function() { console.log("Service Worker Registered!"); });
+}
+
 // Adds all necessary scripts
 document.write(
    '<script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>' +
-   '<script type="application/javascript" src="Scripts/ASBM/Creature.js"></script>' + 
-   '<script type="application/javascript" src="Scripts/ASBM/Extractor.js"></script>' + 
-   '<script type="application/javascript" src="Scripts/ASBM/Library.js"></script>' + 
-   '<script type="application/javascript" src="Scripts/ASBM/Multipliers.js"></script>' + 
-   '<script type="application/javascript" src="Scripts/ASBM/UI.js"></script>' + 
-   '<script type="application/javascript" src="Scripts/Data.js"></script>' + 
-   '<script type="application/javascript" src="Scripts/Utils.js"></script>' + 
-   '<script type="application/javascript" src="Scripts/Ark.js"></script>' 
+   '<script type="application/javascript" src="src/ASBM/Creature.js"></script>' + 
+   '<script type="application/javascript" src="src/ASBM/Extractor.js"></script>' + 
+   '<script type="application/javascript" src="src/ASBM/Library.js"></script>' + 
+   '<script type="application/javascript" src="src/ASBM/Multipliers.js"></script>' + 
+   '<script type="application/javascript" src="src/ASBM/UI.js"></script>' + 
+   '<script type="application/javascript" src="src/Data.js"></script>' + 
+   '<script type="application/javascript" src="src/Utils.js"></script>' + 
+   '<script type="application/javascript" src="src/Ark.js"></script>' 
 );
 document.addEventListener("DOMContentLoaded", app.Init);
