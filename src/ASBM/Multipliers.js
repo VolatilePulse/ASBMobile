@@ -4,15 +4,31 @@ var ASBM = ASBM || {};
 
 ASBM.StatMultiplier = class {
    constructor(stat) {
-      if (!stat)
-         stat = [0,0,0,0,0];
-      
-      this.B = stat[0]; // Base Value
-      this.Id = stat[2]; // Increase/Dom Level as %
-      this.Iw = stat[1]; // Increase/Wild Level as %
-      this.TBHM = 1; // Tame multiply as %
-      this.Ta = stat[3]; // Tame add
-      this.Tm = stat[4]; // Tame multiply as %
+      // Copy Constructor
+      if (Utils.IsObject(stat)) {
+         this.B = stat.B;
+         this.Id = stat.Id;
+         this.Iw = stat.Iw;
+         this.TBHM = stat.TBHM;
+         this.Ta = stat.Ta;
+         this.Tm = stat.Tm;
+         
+         if (stat.IBM)
+            this.IBM = stat.IBM;
+         if (stat.notUsed)
+            this.notUsed = stat.notUsed;
+      }
+      else {
+         if (!stat)
+            stat = [0,0,0,0,0];
+         
+         this.B = stat[0]; // Base Value
+         this.Id = stat[2]; // Increase/Dom Level as %
+         this.Iw = stat[1]; // Increase/Wild Level as %
+         this.TBHM = 1; // Tame multiply as %
+         this.Ta = stat[3]; // Tame add
+         this.Tm = stat[4]; // Tame multiply as %
+      }
    }
 }
 
@@ -49,6 +65,7 @@ ASBM.ServerMultiplier = class {
    }
 }
 
+// TODO Handle any cases where the user chose to override official, even if it is the same
 ASBM.Server = class {
    constructor(settingsArray, settingsObj, singlePlayer = false, IBM = 1) {
       this.singlePlayer = singlePlayer; // singlePlayer Setting
