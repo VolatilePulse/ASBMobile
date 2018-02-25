@@ -6,7 +6,7 @@
 
 var ASBM = ASBM || {};
 
-ASBM.Extraction = class {
+ASBM.Extractor = class {
    constructor(multipliers, values, level, isWild = true, isTamed = false, isBred = false, imprintBonus = 0, exactly = false) {
       this.m = multipliers;
       this.values = values;
@@ -45,7 +45,7 @@ ASBM.Extraction = class {
    }
    
    // FIXME: Creatures that don't use Oxygen aren't extracted properly
-   extractLevels() {
+   extract() {
       // If tame isn't bred (ignore wild level steps) and setting is enabled, consider wild steps (as set in settings)
       // TODO: Add consider wild levels
       // considerWildLevelSteps = considerWildLevelSteps && !bred;
@@ -196,15 +196,15 @@ ASBM.Extraction = class {
             // Until Ark handles unused stats better, this is the best we can do
             if (this.m[i].notUsed) {
                // We have to set speed too, unfortunately
-               // FIXME: Can't do this since Speed could have a level in it
-               this.results[i] = this.results[SPEED] = [new ASBM.Stat(-1,0)];
+               this.results[i] = [new ASBM.Stat(-1,0)];
+               this.results[SPEED] = [new ASBM.Stat(-1, this.results[SPEED][0].Ld)];
+               this.domFreeMax -= this.results[SPEED][0].Ld;
                this.results[i].checked = this.results[SPEED].checked = true;
             }
 
             // One stat possibility is good
             if (!this.results[i].checked && this.results[i].length == 1) {
                this.wildFreeMax -= this.results[i][0].Lw;
-               this.domFreeMin -= this.results[i][0].Ld;
                this.domFreeMax -= this.results[i][0].Ld;
                this.results[i].checked = true;
                removed = true;

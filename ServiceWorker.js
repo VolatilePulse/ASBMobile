@@ -14,7 +14,9 @@ var filesToCache = [
    '/img/Stamina.png',
    '/img/Torpor.png',
    '/img/Weight.png',
-   '/src/app.js',
+   // TODO: Add src files back in before release or once we find a way to set a cache expiry policy/auto caching
+   // based on header alone.
+   /*'/src/app.js',
    '/src/Ark.js',
    '/src/Data.js',
    '/src/Utils.js',
@@ -24,7 +26,7 @@ var filesToCache = [
    '/src/ASBM/Multipliers.js',
    '/src/ASBM/UI.js',
    'https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js',
-   'https://unpkg.com/dexie@latest/dist/dexie.js'
+   'https://unpkg.com/dexie@latest/dist/dexie.js'*/
 ];
 
 // caches refers to the entire cache, including multiple caches (if any)

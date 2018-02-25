@@ -47,7 +47,7 @@ ASBM.UI = {
       // Create other important variables
       var multipliers = Utils.DeepMerge({}, app.officialServerSettings, app.myMultipliers[species]);
       
-      app.extractObject = new ASBM.Extraction(multipliers, values, level, isWild, isTamed, isBred, imprintBonus, exactly);
-      app.extractObject.extractLevels();
+      app.extractObject = new ASBM.Extractor(multipliers, values, level, isWild, isTamed, isBred, imprintBonus, exactly);
+      app.extractObject.extract();
    }
 }

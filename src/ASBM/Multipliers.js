@@ -24,12 +24,12 @@ ASBM.StatMultiplier = class {
          if (!stat)
             stat = [0,0,0,0,0];
          
-         this.B = stat[0]; // Base Value
-         this.Id = stat[2]; // Increase/Dom Level as %
-         this.Iw = stat[1]; // Increase/Wild Level as %
+         this.B = stat[STAT_B]; // Base Value
+         this.Id = stat[STAT_ID]; // Increase/Dom Level as %
+         this.Iw = stat[STAT_IW]; // Increase/Wild Level as %
          this.TBHM = 1; // Tame multiply as %
-         this.Ta = stat[3]; // Tame add
-         this.Tm = stat[4]; // Tame multiply as %
+         this.Ta = stat[STAT_TA]; // Tame add
+         this.Tm = stat[STAT_TM]; // Tame multiply as %
       }
    }
 }
@@ -39,17 +39,17 @@ ASBM.StatMultipliers = class {
       for (var i = 0; i < 8; i ++)
          this[i] = new ASBM.StatMultiplier(stats ? stats[i] : null);
       
-      this[0].TBHM = TBHM;
+      this[HEALTH].TBHM = TBHM;
 
       if (oxygenNotUsed) {
-         this[2].notUsed = oxygenNotUsed;
-         this[2].Iw = 0;
+         this[OXYGEN].notUsed = oxygenNotUsed;
+         this[OXYGEN].Iw = 0;
       }      
       // These values are not imprint increased
-      this[1].IBM = 0;
-      this[2].IBM = 0;
+      this[STAMINA].IBM = 0;
+      this[OXYGEN].IBM = 0;
       if (speedImprintIgnored)
-         this[6].IBM = 0;
+         this[SPEED].IBM = 0;
    }
 }
 
@@ -57,14 +57,14 @@ ASBM.ServerMultiplier = class {
    constructor(settingArray, settingObj, IBM) {
       this.IBM = IBM; // Imprint Bonus Multiplier
       
-      if (!settingObj || (settingArray[0] != settingObj.TaM && settingArray[0]))
-         this.TaM = settingArray[0]; // Tame-Add Multiplier
-      if (!settingObj || (settingArray[1] != settingObj.TmM && settingArray[1]))
-         this.TmM = settingArray[1]; // Tame-Aff Multiplier
-      if (!settingObj || (settingArray[2] != settingObj.IdM && settingArray[2]))
-         this.IdM = settingArray[2]; // Increase Dom Multiplier
-      if (!settingObj || (settingArray[3] != settingObj.IwM && settingArray[3]))
-         this.IwM = settingArray[3]; // Increase Wild Multiplier
+      if (!settingObj || (settingArray[SERVER_TAM] != settingObj.TaM && settingArray[0]))
+         this.TaM = settingArray[SERVER_TAM]; // Tame-Add Multiplier
+      if (!settingObj || (settingArray[SERVER_TMM] != settingObj.TmM && settingArray[1]))
+         this.TmM = settingArray[SERVER_TMM]; // Tame-Aff Multiplier
+      if (!settingObj || (settingArray[SERVER_IDM] != settingObj.IdM && settingArray[2]))
+         this.IdM = settingArray[SERVER_IDM]; // Increase Dom Multiplier
+      if (!settingObj || (settingArray[SERVER_IWM] != settingObj.IwM && settingArray[3]))
+         this.IwM = settingArray[SERVER_IWM]; // Increase Wild Multiplier
    }
 }
 
