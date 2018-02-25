@@ -15,7 +15,8 @@ ASBM.UI = {
          document.getElementById("inputSpecies").add(temp);
       }
    },
-
+   
+   // TODO: Prevent user from crashing the app by entering bad data
    Extract() {
       // Grab DOM elements
       var speciesDOM = document.getElementById("inputSpecies");

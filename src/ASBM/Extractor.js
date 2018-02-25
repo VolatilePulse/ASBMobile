@@ -230,11 +230,28 @@ ASBM.Extractor = class {
    //    bool want stat pair?
    //    indices an array of indexs: [[1,2], [5,2], [10,0]]
    //    stat... an array of stats for ones that have been checked so far
-   matchingStats(bool, indices) {
+   matchingStats(returnBool, indices) {
+      if (indices.length < 7) {
+         for (var i = 6; i >= 0; i --) {
+            for (var index = 0; index < indices.length; index ++) {
+               // We have already checked this stat
+               if (i == indices[index][0])
+                  var breakLoop = true;
+            }
+               
+            for (var j = 0; j < this.results[i].length && !breakLoop; j ++) {
+               indices.push([i,j]);
+               var returnValue = this.matchingStats(returnBool, indices);
+               if (returnValue == [] || !returnValue) {
+                  indices.pop();
+                  continue;
+               }
+               return returnValue;
+            }
+         }
+      }
       // We've reached the end of our loop
-      if (indices.length == 7) {
-         // Do some maths
-         console.log(indices);
+      else {
          var wildLevels = 0, domLevels = 0, unusedStat = false;
          for (var i = 0; i < 7; i ++) {
             if (this.results[indices[i][0]][indices[i][1]].notUsed)
@@ -247,7 +264,7 @@ ASBM.Extractor = class {
          }
 
          if ((unusedStat || wildLevels == this.wildFreeMax) && domLevels == this.domFreeMax) {
-            if (bool)
+            if (returnBool)
                return true;
             // Loop the stats through the indices
             for (var i = 0; i < indices.length; i ++) {
@@ -261,25 +278,9 @@ ASBM.Extractor = class {
             return indices;
          }
       }
-      else
-         for (var i = 0; i < 7; i ++)
-            for (var index = 0; index < indices.length; index ++)
-               // We have already checked this stat
-               if (i == indices[index][0])
-                  continue;
-               else
-                  for (var j = 0; j < this.results[i].length; j ++) {
-                     indices.push([i,j]);
-                     var returnValue = this.matchingStats(bool, indices);
-                     if (returnValue == [] || !returnValue) {
-                        indices.pop();
-                        continue;
-                     }
-                     return returnValue;
-                  }
 
       // If we made it this far, we have failed something
-      if (bool)
+      if (returnBool)
          return false;
       return [];
    }
