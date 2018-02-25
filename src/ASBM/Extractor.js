@@ -217,7 +217,7 @@ ASBM.Extractor = class {
             else if (this.results[i].length > 1) {
                for (var j = 0; j < this.results[i].length; j++) {
                   // Simple stat removal followed by a recursive stat removal
-                  if (this.results[i][j].Lw > this.wildFreeMax || this.results[i][j].Ld > this.domFreeMax) {
+                  if (this.results[i][j].Lw > this.wildFreeMax || this.results[i][j].Ld > this.domFreeMax || !this.matchingStats(true, [[i, j]])) {
                      this.results[i].splice(j, 1);
                      j--;
                      removed = true;
@@ -225,21 +225,13 @@ ASBM.Extractor = class {
                }
             }
          }
-         for (var i = 0; i < 7; i++)
-            for (var j = 0; j < this.results[i].length; j++)
-               if (!this.results[i].checked && !this.matchingStats(true, [[i, j]])) {
-                  this.results[i].splice(j, 1);
-                  j--;
-                  removed = true;
-               }
       } while (removed);
    }
 
    // Params:
    //    returnBool want a boolean?
    //    indices an array of indexs: [[1,2], [5,2], [3,10]]
-   matchingStats(returnBool, indices) {
-      top:
+   matchingStats(returnBool, indices) { top:
       // We only want to add a stat that has more than one possibility
       for (var i = 0; i < 7; i++) {
          for (var index = indices.length - 1; index >= 0; index--) {
@@ -264,6 +256,26 @@ ASBM.Extractor = class {
             return returnValue;
          }
       }
+
+      // We have to make sure we haven't missed out on a stat
+      for (var i = 0; i < 7; i ++)
+         // The stat hasn't been checked yet
+         if (!this.results[i].checked)
+            // Check our indices to make sure it exists
+            for (var j = 0, found = false; j < indices.length; j ++) {
+               // We have the stat in our indices
+               if (indices[j][0] == i) {
+                  found = true;
+                  break;
+               }
+               // We missed a stat!
+               if (!found && j == indices.length - 1) {
+                  if (returnBool)
+                     return false;
+                  else
+                     return [];
+               }
+            }
 
       // We've run out of stats to add to our indices so lets test them for valid results
       var wildLevels = 0, domLevels = 0;
