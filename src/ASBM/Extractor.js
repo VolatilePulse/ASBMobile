@@ -195,12 +195,16 @@ ASBM.Extractor = class {
          for (var i = 0; i < 7; i++) {
             // Until Ark handles unused stats better, this is the best we can do
             if (!this.results[i].checked && this.m[i].notUsed) {
-               // We have to set speed too, unfortunately
                this.unusedStat = true;
+               // No valid possibility that we can check for, so set to -1
                this.results[i] = [new ASBM.Stat(-1, 0)];
+               // We have to set speed too, unfortunately
                this.results[SPEED] = [new ASBM.Stat(-1, this.results[SPEED][0].Ld)];
+               // Since dom could have been leveled, adjust the free levels
                this.domFreeMax -= this.results[SPEED][0].Ld;
+               // Make sure we eliminate it from future checks
                this.results[i].checked = this.results[SPEED].checked = true;
+               removed = true;
             }
 
             // One stat possibility is good
@@ -223,7 +227,7 @@ ASBM.Extractor = class {
          }
          for (var i = 0; i < 7; i++)
             for (var j = 0; j < this.results[i].length; j++)
-               if (!this.results[i][j].checked && !this.matchingStats(true, [[i, j]])) {
+               if (!this.results[i].checked && !this.matchingStats(true, [[i, j]])) {
                   this.results[i].splice(j, 1);
                   j--;
                   removed = true;
@@ -284,49 +288,5 @@ ASBM.Extractor = class {
       if (returnBool)
          return false;
       return [];
-   }
-   // Recursively remove values that don't have a matching set in the remaining stats
-   matchingStatLevels(index, stat) {
-      var self = this;
-      var indices = [index];
-      var runningWildLevel = stat.Lw;
-      var runningDomLevel = stat.Ld;
-      function _matchingStatLevels(indices) {
-         for (var i = 0; i < 7; i++) {
-            if (!indices.includes(i) && self.results[i].checked)
-               indices.push(i);
-            // This only has one stat in it and is deemed good, or we are already using this index
-            if (indices.includes(i))
-               continue;
-
-            // This stat hasn't been checked yet
-            for (var j = 0; j < self.results[i].length; j++) {
-               runningWildLevel += self.results[i][j].Lw;
-               runningDomLevel += self.results[i][j].Ld;
-               indices.push(i);
-
-               // Revert the changes we made
-               // TODO: Add Checking for same TE
-               if (!(_matchingStatLevels(indices))) {
-                  runningWildLevel -= self.results[i][j].Lw;
-                  runningDomLevel -= self.results[i][j].Ld;
-                  indices.pop();
-               }
-            }
-         }
-
-         // We have looped all of the stats and there is a combination of other stats
-         if ((runningWildLevel == self.wildFreeMax) && (runningDomLevel == self.domFreeMax) && indices.length == 7)
-            return true;
-
-         // Handle special cases of a stat not being used
-         for (var i = 0; i < 7; i++) {
-            if (self.results[i].notUsed && runningDomLevel == self.domFreeMax && indices.length == 7)
-               return true;
-         }
-
-         return false;
-      }
-      return _matchingStatLevels(indices);
    }
 }
