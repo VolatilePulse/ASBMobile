@@ -212,7 +212,7 @@ ASBM.Extractor = class {
             else if (this.results[i].length > 1) {
                for (var j = 0; j < this.results[i].length; j ++) {
                   // Simple stat removal followed by a recursive stat removal
-                  if (this.results[i][j].Lw > this.wildFreeMax || this.results[i][j].Ld > this.domFreeMax || !this.matchingStatLevels(i, this.results[i][j])) {
+                  if (this.results[i][j].Lw > this.wildFreeMax || this.results[i][j].Ld > this.domFreeMax || !this.matchingStats(true, [i, j])) {
                      this.results[i].splice(j, 1);
                      j --;
                      removed = true;
@@ -223,6 +223,58 @@ ASBM.Extractor = class {
       } while (removed);
    }
    
+   // Redesign the Recursion to better address different situations
+   // Function should accept a bool to either return true/false if it's a valid stat
+   //    or the matching stats for the one passed
+   // Params:
+   //    bool want stat pair?
+   //    indices an array of indexs: [[1,2], [5,2], [10,0]]
+   //    stat... an array of stats for ones that have been checked so far
+   matchingStats(bool, indices) {
+      // We've reached the end of our loop
+      if (indices.length == 7) {
+         // Do some maths
+         var wildLevels = 0, domLevels = 0, unusedStat = false;
+         for (var i = 0; i < 7; i ++) {
+            if (this.results[indices[i][0]][indices[i][1]].notUsed)
+               unusedStat = true;
+            if (!this.results[indices[i][0]][indices[i][1]].checked) {
+               if (this.results[indices[i][0]][indices[i][1]].Lw > 0)
+                  wildLevels += this.results[indices[i][0]][indices[i][1]].Lw;
+               domLevels += this.results[indices[i][0]][indices[i][1]].Ld;
+            }
+         }
+
+         if ((unusedStat || wildLevels == this.wildFreeMax) && domLevels == this.domFreeMax) {
+            if (bool)
+               return true;
+            // Loop the stats through the indices
+            for (var i = 0; i < indices.length; i ++) {
+               if (indices[i].length == 1) {
+                  indices.splice(i, 1);
+                  i --;
+                  continue;
+               }
+            }
+
+            return indices;
+         }
+      }
+      else
+         for (var i = 0; i < 7; i ++)
+            for (var index = 0; index < indices.length; index ++)
+               // We have already checked this stat
+               if (i == indices[index][0])
+                  continue;
+               else
+                  for (var j = 0; j < this.results[i].length; j ++)
+                     return this.matchingStats(bool, indices.push([i,j]));
+
+      // If we made it this far, we have failed something
+      if (bool)
+         return false;
+      return [];
+   }
    // Recursively remove values that don't have a matching set in the remaining stats
    matchingStatLevels(index, stat) {
       var self = this;
