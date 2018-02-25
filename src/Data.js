@@ -4,10 +4,7 @@
 
 "use strict";
 
-const DB_VER_M = 1, DB_VER_L = 1;
-
 var Data = {
-   multipliersDB: new Dexie("Multipliers"),
 
    /**
     * @description Creates an ASBM ready object using a JSON String
@@ -18,46 +15,49 @@ var Data = {
    // This function is only called either when the values.json file needs update (and is passed the text from the file)
    // Or in order to populate the app objects
    LoadValues(text) {
-      return new Promise(function(resolve, reject) {
+      return new Promise((resolve, reject) => {
          // Define our DB
-         Data.multipliersDB.version(DB_VER_M).stores({statMultiplier: '[species+statIndex]'});
+         app.multipliersDB.version(1).stores({statMultiplier: '[species+statIndex]'});
+         let promises = [];
 
          // Check to see if the values need updated
          // TODO Handle new values.json fetched from server
-         if (false) {
+         if (text) {
             // Create the objects from file
             var jsonObject = JSON.parse(text);
-            for(var i in jsonObject.species) {
-               var temp = document.createElement("option");
-               temp.text = jsonObject.species[i].name;
-               document.getElementById("inputSpecies").add(temp);
-               app.myMultipliers[jsonObject.species[i].name] = new ASBM.StatMultipliers(jsonObject.species[i].statsRaw, jsonObject.species[i].TBHM, jsonObject.species[i].doesNotUseOxygen, jsonObject.species[i].NoImprintingForSpeed);
-            }
+            for(var i in jsonObject.species)
+               app.myMultipliers[jsonObject.species[i].name] =
+                  new ASBM.StatMultipliers(jsonObject.species[i].statsRaw,
+                                           jsonObject.species[i].TBHM,
+                                           jsonObject.species[i].doesNotUseOxygen,
+                                           jsonObject.species[i].NoImprintingForSpeed);
 
             app.officialServerSettings = new ASBM.Server(jsonObject.statMultipliers, null, false, jsonObject.imprintingMultiplier);
             app.officialSPSettings = new ASBM.Server(jsonObject.statMultipliersSP, app.officialServerSettings, true, jsonObject.imprintingMultiplier);
             
             // Create the DB
             for (var species in app.myMultipliers) {
-               for (var index = 0; index < 8; index ++)
-                  Data.multipliersDB.statMultiplier
-                     .put(Object.assign({}, app.myMultipliers[species][index], {species: species, statIndex: index}))
-                     .catch(error => reject(error)); // Let an error handler deal with any errors we recieve
+               for (var index = 0; index < 8; index ++) {
+                  let putPromise = app.multipliersDB.statMultiplier
+                     .put(Object.assign({}, app.myMultipliers[species][index], {species: species, statIndex: index}));
+                  promises.push(putPromise);
+               }
             }
          }
 
          // Otherwise the DB already exists
          else {
-            var testObj = {{}, {}};
-            Data.multipliersDB.statMultiplier
+            var testObj = {};
+            let readPromise = app.multipliersDB.statMultiplier
                .toCollection()
-               .each(obj => (testObj[obj.species][obj.statIndex] = new ASBM.StatMultiplier(obj)))
-               .then(() => console.log(testObj))
-               .catch(error => console.log(error));
+               .each(obj => {
+                  if (testObj[obj.species] == undefined)
+                     testObj[obj.species] = [];
+                  testObj[obj.species][obj.statIndex] = new ASBM.StatMultiplier(obj)});
+            promises.push(readPromise);
          }
 
-         // Allows the Promise to return a good state
-         resolve(undefined);
+         Promise.all(promises).then(() => resolve()).catch(err => reject(err));
    })},
 
    // Attempt to make LoadValues a promise instead of a function

@@ -11,15 +11,15 @@ var Utils = {
     * @param {function} callback On success, function to call with returned data
     * @namespace Utils
     */
-   AsyncFileRead(file, callback) {
-      var rawFile = new XMLHttpRequest();
-      rawFile.overrideMimeType("application/json");
-      rawFile.open("GET", file, true);
-      rawFile.onreadystatechange = function() {
-         if (rawFile.readyState === 4 && rawFile.status == "200")
-            callback(rawFile.responseText);
-      }
-      rawFile.send(null);
+   AsyncFileRead(filePath) {
+      return new Promise((resolve, reject) => {
+         const xhr = new XMLHttpRequest();
+         xhr.overrideMimeType("application/json");
+         xhr.open("GET", filePath);
+         xhr.onload = () => resolve(xhr.responseText);
+         xhr.onerror = () => reject(xhr.statusText);
+         xhr.send();
+      });
    },
    
    /**

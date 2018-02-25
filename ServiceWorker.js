@@ -5,7 +5,6 @@ var filesToCache = [
    '/',
    '/index.html',
    '/favicon.ico',
-   '/values.json',
    '/css/w3.css',
    '/img/Food.png',
    '/img/Health.png',

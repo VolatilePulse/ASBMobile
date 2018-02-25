@@ -5,16 +5,18 @@
 "use strict";
 
 const HEALTH = 0, STAMINA = 1, OXYGEN = 2, FOOD = 3, WEIGHT = 4, DAMAGE = 5, SPEED = 6, TORPOR = 7;
+const DB_VER_M = 1, DB_VER_L = 1;
 
 var app = {
    /**
     * @description Initializes all variables that require the page to finish loading
     */
-    speciesDB: {},
-    officialServerSettings: {},
-    officialSPSettings: {},
-    extractObject: {},
-    myMultipliers: {},
+   speciesDB: {},
+   officialServerSettings: {},
+   officialSPSettings: {},
+   extractObject: {},
+   myMultipliers: {},
+   multipliersDB: new Dexie("Multipliers"),
     
    Init() {
       // Proposed future syntax
@@ -22,7 +24,15 @@ var app = {
       //    .then(text => Data.ObjectCreation(text))
       //    .then(creatures => app.VueInit(creatures))
       //    .catch(error => app.CriticalError);
-      Utils.AsyncFileRead("values.json", Data.LoadValues);
+      Utils.AsyncFileRead("values.json")
+         .then(json => Data.LoadValues(json))
+         .then(() => {
+            for (var species in app.myMultipliers) {
+               var temp = document.createElement("option");
+               temp.text = species;
+               document.getElementById("inputSpecies").add(temp);
+            }})
+         .catch(error => console.log(error));
       document.getElementById("extractButton").addEventListener("click", ASBM.UI.Extract);
    }
 }
