@@ -46,7 +46,7 @@ ASBM.UI = {
             target.Ld = options[0].Ld;
          }
 
-         target.optionsText = options.map(stat => `(${stat.Lw} + ${stat.Ld})`).join(', ');
+         target.optionsText = options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(',');
 
          Object.assign(app.extractor.results[i], target);
       }
