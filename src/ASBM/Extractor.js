@@ -217,11 +217,21 @@ ASBM.Extractor = class {
             else if (this.results[i].length > 1) {
                for (var j = 0; j < this.results[i].length; j++) {
                   // Simple stat removal followed by a recursive stat removal
-                  if (this.results[i][j].Lw > this.wildFreeMax || this.results[i][j].Ld > this.domFreeMax || !this.matchingStats(true, [[i, j]])) {
+                  if (this.results[i][j].Lw > this.wildFreeMax || this.results[i][j].Ld > this.domFreeMax) {
                      this.results[i].splice(j, 1);
                      j--;
                      removed = true;
                   }
+               }
+            }
+         }
+
+         for (var i = 0; i < 7; i++) {
+            for (var j = 0; j < this.results[i].length; j++) {
+               if (!this.matchingStats(true, [[i, j]])) {
+                     this.results[i].splice(j, 1);
+                     j--;
+                     removed = true;
                }
             }
          }
@@ -262,14 +272,12 @@ ASBM.Extractor = class {
          // The stat hasn't been checked yet
          if (!this.results[i].checked)
             // Check our indices to make sure it exists
-            for (var j = 0, found = false; j < indices.length; j ++) {
+            for (var j = 0; j < indices.length; j ++) {
                // We have the stat in our indices
-               if (indices[j][0] == i) {
-                  found = true;
+               if (indices[j][0] == i)
                   break;
-               }
                // We missed a stat!
-               if (!found && j == indices.length - 1) {
+               if (j == indices.length - 1) {
                   if (returnBool)
                      return false;
                   else
