@@ -2,6 +2,8 @@
 
 var ASBM = ASBM || {};
 
+
+// TODO Better layout of the constructors for the entire file to handle Copies and Empty
 ASBM.StatMultiplier = class {
    constructor(stat) {
       // Copy Constructor

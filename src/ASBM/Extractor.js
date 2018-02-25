@@ -193,6 +193,14 @@ ASBM.Extraction = class {
       do {
          var removed = false;
          for (var i = 0; i < 7; i ++) {
+            // Until Ark handles unused stats better, this is the best we can do
+            if (this.m[i].notUsed) {
+               // We have to set speed too, unfortunately
+               // FIXME: Can't do this since Speed could have a level in it
+               this.results[i] = this.results[SPEED] = [new ASBM.Stat(-1,0)];
+               this.results[i].checked = this.results[SPEED].checked = true;
+            }
+
             // One stat possibility is good
             if (!this.results[i].checked && this.results[i].length == 1) {
                this.wildFreeMax -= this.results[i][0].Lw;
@@ -248,6 +256,12 @@ ASBM.Extraction = class {
          // We have looped all of the stats and there is a combination of other stats
          if ((runningWildLevel == self.wildFreeMax) && (runningDomLevel == self.domFreeMax) && indices.length == 7)
             return true;
+         
+         // Handle special cases of a stat not being used
+         for (var i = 0; i < 7; i ++) {
+            if (self.results[i].notUsed && runningDomLevel == self.domFreeMax && indices.length == 7)
+               return true;
+         }
 
          return false;
       }

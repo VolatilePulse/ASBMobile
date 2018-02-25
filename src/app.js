@@ -128,9 +128,9 @@ function Testing() {
       console.log(testCase[i].results);
       console.log("Actual:");
       console.log(app.extractObject.results);
-      console.log(Utils.DeepMerge(tempObj, app.officialServerSettings, ((testCase[i].server.singlePlayer) ? app.officialSPSettings : {})));
-      console.log(tempObj);
       console.log("Server:");
-      console.log(Utils.DeepMerge(tempObj, testCase[i].server));
+      console.log(Utils.DeepMerge({}, app.officialServerSettings));
+      console.log(Utils.DeepMerge({}, app.officialServerSettings, ((testCase[i].server.singlePlayer) ? app.officialSPSettings : {})));
+      console.log(Utils.DeepMerge({}, app.officialServerSettings, ((testCase[i].server.singlePlayer) ? app.officialSPSettings : {}, testCase[i].server)));
    }
 }

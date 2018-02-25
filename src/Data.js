@@ -50,13 +50,13 @@ var Data = {
                   continue;
                   
                if (jsonObject.statMultipliersSP[i][0]) //TaM
-                  jsonObject.statMultipliersSP[i][0] *= app.officialServerSettings[i].TaM;
+                  jsonObject.statMultipliersSP[i][0] = Utils.RoundTo(jsonObject.statMultipliersSP[i][0] * app.officialServerSettings[i].TaM, 6);
                if (jsonObject.statMultipliersSP[i][1]) //TmM
-                  jsonObject.statMultipliersSP[i][1] *= app.officialServerSettings[i].TmM;
+                  jsonObject.statMultipliersSP[i][1] = Utils.RoundTo(jsonObject.statMultipliersSP[i][1] * app.officialServerSettings[i].TmM, 6);
                if (jsonObject.statMultipliersSP[i][2]) //IdM
-                  jsonObject.statMultipliersSP[i][2] *= app.officialServerSettings[i].IdM;
+                  jsonObject.statMultipliersSP[i][2] = Utils.RoundTo(jsonObject.statMultipliersSP[i][2] * app.officialServerSettings[i].IdM, 6);
                if (jsonObject.statMultipliersSP[i][3]) //IwM
-                  jsonObject.statMultipliersSP[i][3] *= app.officialServerSettings[i].IwM;
+                  jsonObject.statMultipliersSP[i][3] = Utils.RoundTo(jsonObject.statMultipliersSP[i][3] * app.officialServerSettings[i].IwM, 6);
             }
             app.officialSPSettings = new ASBM.Server(jsonObject.statMultipliersSP, app.officialServerSettings, true, jsonObject.imprintingMultiplier);
          }
