@@ -44,6 +44,7 @@ ASBM.Extraction = class {
       this.TE = 1;
    }
    
+   // FIXME: Creatures that don't use Oxygen aren't extracted properly
    extractLevels() {
       // If tame isn't bred (ignore wild level steps) and setting is enabled, consider wild steps (as set in settings)
       // TODO: Add consider wild levels
@@ -95,9 +96,14 @@ ASBM.Extraction = class {
       // Loop all stats except for torpor
       for (var i = 0; i < 7; i ++) {
          tempStat = new ASBM.Stat;
+
+         // IF a stat isn't used, we need to set the Value to it's Base so it can still calculate
+         if (this.m[i].notUsed) {
+            this.values[i] = Utils.RoundTo(tempStat.calculateValue(this.m[i], !this.wild, this.TE, this.IB), Ark.Precision(i));
+         }
          
          // If the stat can't be calculated, set it to 0, 0 so it has atleast 1 result
-         if (this.m[i].B <= 0 || this.m[i].notUsed)
+         if (this.m[i].B <= 0)
             this.results[i].push(new ASBM.Stat);
          
          // Since wilds don't level torpor, it makes it easy to calculate

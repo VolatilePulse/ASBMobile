@@ -39,9 +39,10 @@ ASBM.StatMultipliers = class {
       
       this[0].TBHM = TBHM;
 
-      if (oxygenNotUsed)
+      if (oxygenNotUsed) {
          this[2].notUsed = oxygenNotUsed;
-      
+         this[2].Iw = 0;
+      }      
       // These values are not imprint increased
       this[1].IBM = 0;
       this[2].IBM = 0;
@@ -58,9 +59,9 @@ ASBM.ServerMultiplier = class {
          this.TaM = settingArray[0]; // Tame-Add Multiplier
       if (!settingObj || (settingArray[1] != settingObj.TmM && settingArray[1]))
          this.TmM = settingArray[1]; // Tame-Aff Multiplier
-      if (!settingObj || (settingArray[3] != settingObj.IdM && settingArray[3]))
+      if (!settingObj || (settingArray[2] != settingObj.IdM && settingArray[2]))
          this.IdM = settingArray[2]; // Increase Dom Multiplier
-      if (!settingObj || (settingArray[2] != settingObj.IwM && settingArray[2]))
+      if (!settingObj || (settingArray[3] != settingObj.IwM && settingArray[3]))
          this.IwM = settingArray[3]; // Increase Wild Multiplier
    }
 }

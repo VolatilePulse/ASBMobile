@@ -7,23 +7,16 @@
 var ASBM = ASBM || {};
 
 ASBM.UI = {
+   // Populates the Drop Down Element with the Species
+   DropDownInit() {
+      for (var species in app.myMultipliers) {
+         var temp = document.createElement("option");
+         temp.text = species;
+         document.getElementById("inputSpecies").add(temp);
+      }
+   },
+
    Extract() {
-      // Testing purposes
-      document.getElementById("inputSpecies").value = "Rex";
-      document.getElementById("inputLevel").value = 152;
-      document.getElementById("inputWild").checked = false;
-      document.getElementById("inputTamed").checked = true;
-      document.getElementById("inputBred").checked = false;
-      document.getElementById("inputImprint").value = 39;
-      document.getElementById("inputHealth").value = 5280.1;
-      document.getElementById("inputStamina").value = 1386.0;
-      document.getElementById("inputOxygen").value = 315.0;
-      document.getElementById("inputFood").value = 11100.0;
-      document.getElementById("inputWeight").value = 650.0;
-      document.getElementById("inputMelee").value = 270.4;
-      document.getElementById("inputSpeed").value = 100.0;
-      document.getElementById("inputTorpor").value = 15593.5;
-      
       // Grab DOM elements
       var speciesDOM = document.getElementById("inputSpecies");
       var levelDOM = document.getElementById("inputLevel");
