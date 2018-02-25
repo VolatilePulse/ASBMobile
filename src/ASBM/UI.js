@@ -37,18 +37,7 @@ ASBM.UI = {
       let extractObject = new ASBM.Extractor(multipliers, values, level, isWild, isTamed, isBred, imprintBonus, exactly);
       extractObject.extract();
 
-      // Copy the results into `app` so they will be displayed
-      for (var i = 0; i < 8; i++) {
-         let target = {};
-         let options = extractObject.results[i];
-         if (options.length) {
-            target.Lw = options[0].Lw;
-            target.Ld = options[0].Ld;
-         }
-
-         target.optionsText = options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(',');
-
-         Object.assign(app.extractor.results[i], target);
-      }
+      // Copy into `app` so they will be displayed
+      app.extractor.results = extractObject.results;
    }
 }

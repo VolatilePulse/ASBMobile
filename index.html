@@ -30,10 +30,12 @@
             <label style="margin-right: 12px">Tamed</label>
             <input type="radio" value="Bred" v-model="extractor.mode">
             <label style="margin-right: 12px">Bred</label>
-            <label>Imprint:</label>
-            <input type="number" v-model.number="extractor.imprint">
-            <label>Exactly:</label>
-            <input type="checkbox" v-model="extractor.exactly">
+            <span v-show="extractor.mode=='Bred'">
+               <label>Imprint:</label>
+               <input type="number" v-model.number="extractor.imprint">
+               <label>Exactly:</label>
+               <input type="checkbox" v-model="extractor.exactly">
+            </span>
          </fieldset>
          <fieldset>
             <legend>Stats</legend>
@@ -41,9 +43,13 @@
             <div v-for="i in 8" class="w3-container w3-round-large w3-border-black w3-leftbar">
                <img v-bind:src="'img/'+statImages[i-1]" style="height:25px; width:25px; object-fit: contain">
                <input type="number" class="w3-round-large w3-border-large" v-model.number="extractor.stats[i-1]">
-               <label>{{extractor.results[i-1].Lw}}</label>
-               <label>{{extractor.results[i-1].Ld}}</label>
-               <label>{{extractor.results[i-1].optionsText}}</label>
+               <span v-if="extractor.results[i-1].length > 0">
+                  <label>{{extractor.results[i-1][0].Lw}}</label>
+                  <label>{{extractor.results[i-1][0].Ld}}</label>
+               </span>
+               <span v-if="extractor.results[i-1].length > 1">
+                  <label>{{debugShowOptions(extractor.results[i-1])}}</label>
+               </span>
             </div>
          </fieldset>
          Sum Should be

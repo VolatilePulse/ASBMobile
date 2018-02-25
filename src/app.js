@@ -74,10 +74,13 @@ function Init() {
             // ^ above line creates placeholders for stat results
          },
       },
+      computed: {
+      },
       methods: {
          extract: ASBM.UI.Extract,
          testData: Testing,
          insertDummyData: InsertDummyData,
+         debugShowOptions: options => options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(','),
       },
    });
 
