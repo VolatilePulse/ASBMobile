@@ -70,9 +70,9 @@ ASBM.Extractor = class {
             // One of the most precise ways to get the exact torpor
             this.IB = torporStat.calculateIB(this.m[TORPOR], this.values[TORPOR]);
             // IB *must* be lower than this
-            var maxIB = Math.min(torporStat.calculateIB(this.m[7], this.values[7] + (0.5 / Math.pow(10, Utils.Precision(TORPOR)))), this.imprintingBonus + (5 /10E3));
+            var maxIB = Math.min(torporStat.calculateIB(this.m[7], this.values[7] + (0.5 / Math.pow(10, Ark.Precision(TORPOR)))), this.imprintingBonus + (5 /10E3));
             // IB can be equal or greater than this
-            var minIB = Math.max(torporStat.calculateIB(this.m[7], this.values[7] - (0.5 / Math.pow(10, Utils.Precision(TORPOR)))), this.imprintingBonus - (5 / 10E3));
+            var minIB = Math.max(torporStat.calculateIB(this.m[7], this.values[7] - (0.5 / Math.pow(10, Ark.Precision(TORPOR)))), this.imprintingBonus - (5 / 10E3));
             
             // Check the food stat for the IB as well (Only works if food is unleveled)
             var tempHealthStat = new ASBM.Stat();
@@ -275,7 +275,7 @@ ASBM.Extractor = class {
                return true;
             // Loop the stats through the indices
             for (var i = 0; i < indices.length; i ++) {
-               if (indices[i].length == 1) {
+               if (this.results[indices[i]].length == 1) {
                   indices.splice(i, 1);
                   i --;
                }

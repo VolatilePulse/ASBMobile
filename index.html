@@ -1,90 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
-   <head>
-      <meta charset="utf-8">
-      <meta http-equiv="X-UA-Compatible" content="IE=edge">
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <link rel="manifest" content="manifest.json">
-      <link rel="stylesheet" href="/css/w3.css">
-      <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>
-      <script type="application/javascript" src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
-      <script type="application/javascript" src="/src/app.js"></script>
-   </head>
-   <body>
-      <form name="Extractor">
+
+<head>
+   <meta charset="utf-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   <link rel="manifest" content="manifest.json">
+   <link rel="stylesheet" href="/css/w3.css">
+   <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>
+   <script type="application/javascript" src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+   <script type="application/javascript" src="/src/app.js"></script>
+</head>
+
+<body>
+   <div id="app">
+      <p v-if="!dataLoaded">Loading...</p>
+      <form name="Extractor" v-if="dataLoaded">
          <fieldset>
-         <select id="inputSpecies"></select>
-         <label>Level</label><input type="number" id="inputLevel">
+            <select v-model="extractor.species">
+               <option v-for="name in speciesNames" v-bind:value="name">{{name}}</option>
+            </select>
+            <label>Level</label>
+            <input type="number" v-model.number="extractor.level">
          </fieldset>
          <fieldset>
-         <label>Wild</label><input type="radio" value="Wild" id="inputWild" name="WTB" checked>
-         <label>Tamed</label><input type="radio" value="Tamed" id="inputTamed" name="WTB">
-         <label>Bred</label><input type="radio" value="Bred" id="inputBred" name="WTB">
-            <input type="number" id="inputImprint">
-            <input type="checkbox" id="inputExactly" value="Exactly">
+            <input type="radio" value="Wild" checked v-model="extractor.mode">
+            <label style="margin-right: 12px">Wild</label>
+            <input type="radio" value="Tamed" v-model="extractor.mode">
+            <label style="margin-right: 12px">Tamed</label>
+            <input type="radio" value="Bred" v-model="extractor.mode">
+            <label style="margin-right: 12px">Bred</label>
+            <label>Imprint:</label>
+            <input type="number" v-model.number="extractor.imprint">
+            <label>Exactly:</label>
+            <input type="checkbox" v-model="extractor.exactly">
          </fieldset>
-         <fieldset><legend>Stats</legend>
+         <fieldset>
+            <legend>Stats</legend>
             Current stat-value Wild-lvl Dom-lvl Breeding Value
-            <div class="w3-container w3-round-large w3-border-black w3-leftbar">
-               <img src="img/Health.png" style="height:25px; width:25px; object-fit: contain">
-               <input type="number" id="inputHealth" class="w3-round-large w3-border-large" name="Values">
-               <label id="healthLw">0</label>
-               <label id="healthDw">0</label>
-               <label id="healthBreed">0</label>
-            </div>
-            <div class="w3-container w3-round-large w3-border-black w3-leftbar">
-               <img src="img/Stamina.png" style="height:25px; width:25px; object-fit: contain">
-               <input type="number" id="inputStamina" class="w3-round-large w3-border-large" name="Values">
-               <label id="staminaLw">0</label>
-               <label id="staminaDw">0</label>
-               <label id="staminaBreed">0</label>
-            </div>
-            <div class="w3-container w3-round-large w3-border-black w3-leftbar">
-               <img src="img/Oxygen.png" style="height:25px; width:25px; object-fit: contain">
-               <input type="number" id="inputOxygen" class="w3-round-large w3-border-large" name="Values">
-               <label id="oxygenLw">0</label>
-               <label>0</label>
-               <label>0</label>
-            </div>
-            <div class="w3-container w3-round-large w3-border-black w3-leftbar">
-               <img src="img/Food.png" style="height:25px; width:25px; object-fit: contain">
-               <input type="number" id="inputFood" class="w3-round-large w3-border-large" name="Values">
-               <label id="foodLw">0</label>
-               <label>0</label>
-               <label>0</label>
-            </div>
-            <div class="w3-container w3-round-large w3-border-black w3-leftbar">
-               <img src="img/Weight.png" style="height:25px; width:25px; object-fit: contain">
-               <input type="number" id="inputWeight" class="w3-round-large w3-border-large" name="Values">
-               <label id="weightLw">0</label>
-               <label>0</label>
-               <label>0</label>
-            </div>
-            <div class="w3-container w3-round-large w3-border-black w3-leftbar">
-               <img src="img/Melee.png" style="height:25px; width:25px; object-fit: contain">
-               <input type="number" id="inputMelee" class="w3-round-large w3-border-large" name="Values">
-               <label id="meleeLw">0</label>
-               <label>0</label>
-               <label>0</label>
-            </div>
-            <div class="w3-container w3-round-large w3-border-black w3-leftbar">
-               <img src="img/Speed.png" style="height:25px; width:25px; object-fit: contain">
-               <input type="number" id="inputSpeed" class="w3-round-large w3-border-large" name="Values">
-               <label id="speedLw">0</label>
-               <label>0</label>
-               <label>0</label>
-            </div>
-            <div class="w3-container w3-round-large w3-border-black w3-leftbar">
-               <img src="img/Torpor.png" style="height:25px; width:25px; object-fit: contain">
-               <input type="number" id="inputTorpor" class="w3-round-large w3-border-large" name="Values">
-               <label id="torporLw">0</label>
-               <label>0</label>
-               <label>0</label>
+            <div v-for="i in 8" class="w3-container w3-round-large w3-border-black w3-leftbar">
+               <img v-bind:src="'img/'+statImages[i-1]" style="height:25px; width:25px; object-fit: contain">
+               <input type="number" class="w3-round-large w3-border-large" v-model.number="extractor.stats[i-1]">
+               <label>{{extractor.results[i-1].Lw}}</label>
+               <label>{{extractor.results[i-1].Ld}}</label>
+               <label>{{extractor.results[i-1].optionsText}}</label>
             </div>
          </fieldset>
          Sum Should be
-         <input type="button" value="Extract" id="extractButton">
-         <input type="button" value="Test Cases" id="TestCases">
+         <input type="button" value="Extract" id="extractButton" v-on:click="extract">
       </form>
-   </body>
+      <br/>
+      <input type="button" value="Test Cases" id="TestCases" v-on:click="testData">
+      <br/>
+      <p>Insert dummy data:</p>
+      <span v-for="data in dummyData">
+         <a v-on:click.prevent="insertDummyData(data)" href="#dummyData">{{data.tag}}</a>
+         <br/>
+      </span>
+      <br/>
+   </div>
+</body>
+
 </html>

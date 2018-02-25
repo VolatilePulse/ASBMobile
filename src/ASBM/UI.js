@@ -2,7 +2,7 @@
  * @fileOverview Controls the interaction between the DOM and Javascript
  */
 
- "use strict";
+"use strict";
 
 var ASBM = ASBM || {};
 
@@ -10,45 +10,45 @@ ASBM.UI = {
    // Populates the Drop Down Element with the Species
    DropDownInit() {
       for (var species in app.myMultipliers) {
-         var temp = document.createElement("option");
-         temp.text = species;
-         document.getElementById("inputSpecies").add(temp);
+         app.speciesNames.push(species);
       }
    },
-   
+
    // TODO: Prevent user from crashing the app by entering bad data
    Extract() {
-      // Grab DOM elements
-      var speciesDOM = document.getElementById("inputSpecies");
-      var levelDOM = document.getElementById("inputLevel");
-      var isWildDOM = document.getElementById("inputWild");
-      var isTamedDOM = document.getElementById("inputTamed");
-      var isBredDOM = document.getElementById("inputBred");
-      var imprintBonusDOM = document.getElementById("inputImprint");
-      var exactlyDOM = document.getElementById("inputExactly");
-      var valuesDOM = document.getElementsByName("Values");
-      
-      // Assign values from DOM elements
-      var species = speciesDOM.value;
-      var level = levelDOM.value;
-      var isWild = isWildDOM.checked;
-      var isTamed = isTamedDOM.checked;
-      var isBred = isBredDOM.checked;
-      var imprintBonus = imprintBonusDOM.value / 100;
-      var exactly = exactlyDOM.checked;
-      var values = [];
-      
-      for (var i = 0; i < valuesDOM.length; i ++)
-         values[i] = parseFloat(valuesDOM[i].value);
-      
+      // Read values from the UI
+      var species = app.extractor.species;
+      var level = app.extractor.level;
+      var isWild = (app.extractor.mode == "Wild");
+      var isTamed = (app.extractor.mode == "Tamed");
+      var isBred = (app.extractor.mode == "Bred");
+      var imprintBonus = app.extractor.imprint / 100;
+      var exactly = !!app.extractor.exactly;
+
+      var values = app.extractor.stats.slice(); // take a copy so we can modify it
+
       // Convert melee and speed to decimals
       values[DAMAGE] /= 100; values[DAMAGE] = Utils.RoundTo(values[DAMAGE], Ark.Precision(DAMAGE));
       values[SPEED] /= 100; values[SPEED] = Utils.RoundTo(values[SPEED], Ark.Precision(SPEED));
-      
+
       // Create other important variables
       var multipliers = Utils.DeepMerge({}, app.officialServerSettings, app.myMultipliers[species]);
-      
-      app.extractObject = new ASBM.Extractor(multipliers, values, level, isWild, isTamed, isBred, imprintBonus, exactly);
-      app.extractObject.extract();
+
+      let extractObject = new ASBM.Extractor(multipliers, values, level, isWild, isTamed, isBred, imprintBonus, exactly);
+      extractObject.extract();
+
+      // Copy the results into `app` so they will be displayed
+      for (var i = 0; i < 8; i++) {
+         let target = {};
+         let options = extractObject.results[i];
+         if (options.length) {
+            target.Lw = options[0].Lw;
+            target.Ld = options[0].Ld;
+         }
+
+         target.optionsText = options.map(stat => `(${stat.Lw} + ${stat.Ld})`).join(', ');
+
+         Object.assign(app.extractor.results[i], target);
+      }
    }
 }
