@@ -24,24 +24,24 @@ ASBM.Extractor = class {
 
       // determines how many levels are missing to equal creature level
       this.wildFreeMax = 0;
-      this.domFreeMin = 0;
       this.domFreeMax = 0; // unassigned levels
       this.levelBeforeDom = 0;
+      this.unusedStat = false;
       
       // Change variables based on wild, tamed, bred
       if (this.wild) {
-            this.TE = 0;
-            this.imprintingBonus = 0;
-            this.IB = 0;
+         this.TE = 0;
+         this.imprintingBonus = 0;
+         this.IB = 0;
       }
       
       else if(this.tamed) {
-            this.imprintingBonus = 0;
-            this.IB = 0;
+         this.imprintingBonus = 0;
+         this.IB = 0;
       }
       
       else
-      this.TE = 1;
+         this.TE = 1;
    }
    
    // FIXME: Creatures that don't use Oxygen aren't extracted properly
@@ -196,6 +196,7 @@ ASBM.Extractor = class {
             // Until Ark handles unused stats better, this is the best we can do
             if (!this.results[i].checked && this.m[i].notUsed) {
                // We have to set speed too, unfortunately
+               this.unusedStat = true;
                this.results[i] = [new ASBM.Stat(-1,0)];
                this.results[SPEED] = [new ASBM.Stat(-1, this.results[SPEED][0].Ld)];
                this.domFreeMax -= this.results[SPEED][0].Ld;
@@ -222,7 +223,7 @@ ASBM.Extractor = class {
          }
          for (var i = 0; i < 7; i ++)
             for(var j = 0; j < this.results[i].length; j ++)
-               if (!this.matchingStats(true, [[i, j]])) {
+               if (!this.results[i][j].checked && !this.matchingStats(true, [[i, j]])) {
                   this.results[i].splice(j, 1);
                   j --;
                   removed = true;
@@ -230,59 +231,52 @@ ASBM.Extractor = class {
       } while (removed);
    }
    
-   // Redesign the Recursion to better address different situations
-   // Function should accept a bool to either return true/false if it's a valid stat
-   //    or the matching stats for the one passed
    // Params:
-   //    bool want stat pair?
-   //    indices an array of indexs: [[1,2], [5,2], [10,0]]
-   //    stat... an array of stats for ones that have been checked so far
-   matchingStats(returnBool, indices) {
-      if (indices.length < 7) { top:
-         for (var i = 0; i < 7; i ++) {
-            for (var index = indices.length - 1; index >= 0; index --) {
-               // We have already checked this stat
-               if (i == indices[index][0])
-                  continue top;
+   //    returnBool want a boolean?
+   //    indices an array of indexs: [[1,2], [5,2], [3,10]]
+   matchingStats(returnBool, indices) {top:
+      // We only want to add a stat that has more than one possibility
+      for (var i = 0; i < 7; i ++) {
+         for (var index = indices.length - 1; index >= 0; index --) {
+            // We have already checked this stat
+            if (this.results[i].checked || i == indices[index][0])
+               continue top;
+         }
+            
+         // We only made it this far if we don't have a possibility for this stat in our indices array
+         // and there is more than one possibility for this stat
+         for (var j = 0; j < this.results[i].length; j ++) {
+            // add that stat to the indices
+            indices.push([i,j]);
+            var returnValue = this.matchingStats(returnBool, indices);
+            // On the event of a failure, remove that index, and try the next stat
+            if (returnValue == [] || !returnValue) {
+               indices.pop();
+               continue;
             }
-               
-            for (var j = 0; j < this.results[i].length; j ++) {
-               indices.push([i,j]);
-               var returnValue = this.matchingStats(returnBool, indices);
-               if (returnValue == [] || !returnValue) {
-                  indices.pop();
-                  continue;
-               }
-               return returnValue;
-            }
+            // We only made it here on a successful match
+            // returnValue will either be true or an array of stat index pairs
+            return returnValue;
          }
       }
-      // We've reached the end of our loop
-      else {
-         var wildLevels = 0, domLevels = 0, unusedStat = false;
-         for (var i = 0; i < 7; i ++) {
-            if (this.results[indices[i][0]][indices[i][1]].notUsed)
-               unusedStat = true;
-            if (!this.results[indices[i][0]][indices[i][1]].checked) {
-               if (this.results[indices[i][0]][indices[i][1]].Lw > 0)
-                  wildLevels += this.results[indices[i][0]][indices[i][1]].Lw;
-               domLevels += this.results[indices[i][0]][indices[i][1]].Ld;
-            }
-         }
 
-         if ((unusedStat || wildLevels == this.wildFreeMax) && domLevels == this.domFreeMax) {
-            if (returnBool)
-               return true;
-            // Loop the stats through the indices
-            for (var i = 0; i < indices.length; i ++) {
-               if (indices[i].length == 1) {
-                  indices.splice(i, 1);
-                  i --;
-               }
-            }
+      // We've run out of stats to add to our indices so lets test them for valid results
+      var wildLevels = 0, domLevels = 0;
+      // Loop through our possibilities
+      for (var i = 0; i < indices.length; i ++) {
+         if (this.results[indices[i][0]][indices[i][1]].Lw > 0)
+            wildLevels += this.results[indices[i][0]][indices[i][1]].Lw;
+         domLevels += this.results[indices[i][0]][indices[i][1]].Ld;
+      }
 
-            return indices;
-         }
+      // check to see if the stat possibilities add up to the missing dom levels
+      // and wild levels as long as we don't have an unused stat
+      if ((this.unusedStat || wildLevels == this.wildFreeMax) && domLevels == this.domFreeMax) {
+         if (returnBool)
+            return true;
+         
+         // Return the indices to the caller
+         return indices;
       }
 
       // If we made it this far, we have failed something
