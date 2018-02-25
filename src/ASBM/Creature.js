@@ -19,9 +19,10 @@ ASBM.Stat = class {
    
    calculateValue(m, tamed = false, TE = 0, IB = 0) {
       // V = (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) * (1 + TE * Tm * TmM) * (1 + Ld * Id * IdM)
-      
+
       var v = m.B * m.TBHM;
-      v *= (1 + this.Lw * m.Iw * m.IwM);
+      if (this.Lw > 0)
+         v *= (1 + this.Lw * m.Iw * m.IwM);
       v *= (1 + IB * 0.2 * m.IBM);
       
       if (tamed)
