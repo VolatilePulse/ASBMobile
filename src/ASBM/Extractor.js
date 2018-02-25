@@ -194,7 +194,7 @@ ASBM.Extractor = class {
          var removed = false;
          for (var i = 0; i < 7; i ++) {
             // Until Ark handles unused stats better, this is the best we can do
-            if (this.m[i].notUsed) {
+            if (!this.results[i].checked && this.m[i].notUsed) {
                // We have to set speed too, unfortunately
                this.results[i] = [new ASBM.Stat(-1,0)];
                this.results[SPEED] = [new ASBM.Stat(-1, this.results[SPEED][0].Ld)];
@@ -212,7 +212,7 @@ ASBM.Extractor = class {
             else if (this.results[i].length > 1) {
                for (var j = 0; j < this.results[i].length; j ++) {
                   // Simple stat removal followed by a recursive stat removal
-                  if (this.results[i][j].Lw > this.wildFreeMax || this.results[i][j].Ld > this.domFreeMax || !this.matchingStats(true, [[i, j]])) {
+                  if (this.results[i][j].Lw > this.wildFreeMax || this.results[i][j].Ld > this.domFreeMax) {
                      this.results[i].splice(j, 1);
                      j --;
                      removed = true;
@@ -220,6 +220,13 @@ ASBM.Extractor = class {
                }
             }
          }
+         for (var i = 0; i < 7; i ++)
+            for(var j = 0; j < this.results[i].length; j ++)
+               if (!this.matchingStats(true, [[i, j]])) {
+                  this.results[i].splice(j, 1);
+                  j --;
+                  removed = true;
+               }
       } while (removed);
    }
    
@@ -231,15 +238,15 @@ ASBM.Extractor = class {
    //    indices an array of indexs: [[1,2], [5,2], [10,0]]
    //    stat... an array of stats for ones that have been checked so far
    matchingStats(returnBool, indices) {
-      if (indices.length < 7) {
-         for (var i = 6; i >= 0; i --) {
-            for (var index = 0; index < indices.length; index ++) {
+      if (indices.length < 7) { top:
+         for (var i = 0; i < 7; i ++) {
+            for (var index = indices.length - 1; index >= 0; index --) {
                // We have already checked this stat
                if (i == indices[index][0])
-                  var breakLoop = true;
+                  continue top;
             }
                
-            for (var j = 0; j < this.results[i].length && !breakLoop; j ++) {
+            for (var j = 0; j < this.results[i].length; j ++) {
                indices.push([i,j]);
                var returnValue = this.matchingStats(returnBool, indices);
                if (returnValue == [] || !returnValue) {
@@ -271,7 +278,6 @@ ASBM.Extractor = class {
                if (indices[i].length == 1) {
                   indices.splice(i, 1);
                   i --;
-                  continue;
                }
             }
 
