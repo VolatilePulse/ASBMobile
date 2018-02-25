@@ -212,7 +212,7 @@ ASBM.Extractor = class {
             else if (this.results[i].length > 1) {
                for (var j = 0; j < this.results[i].length; j ++) {
                   // Simple stat removal followed by a recursive stat removal
-                  if (this.results[i][j].Lw > this.wildFreeMax || this.results[i][j].Ld > this.domFreeMax || !this.matchingStats(true, [i, j])) {
+                  if (this.results[i][j].Lw > this.wildFreeMax || this.results[i][j].Ld > this.domFreeMax || !this.matchingStats(true, [[i, j]])) {
                      this.results[i].splice(j, 1);
                      j --;
                      removed = true;
@@ -234,6 +234,7 @@ ASBM.Extractor = class {
       // We've reached the end of our loop
       if (indices.length == 7) {
          // Do some maths
+         console.log(indices);
          var wildLevels = 0, domLevels = 0, unusedStat = false;
          for (var i = 0; i < 7; i ++) {
             if (this.results[indices[i][0]][indices[i][1]].notUsed)
@@ -267,8 +268,15 @@ ASBM.Extractor = class {
                if (i == indices[index][0])
                   continue;
                else
-                  for (var j = 0; j < this.results[i].length; j ++)
-                     return this.matchingStats(bool, indices.push([i,j]));
+                  for (var j = 0; j < this.results[i].length; j ++) {
+                     indices.push([i,j]);
+                     var returnValue = this.matchingStats(bool, indices);
+                     if (returnValue == [] || !returnValue) {
+                        indices.pop();
+                        continue;
+                     }
+                     return returnValue;
+                  }
 
       // If we made it this far, we have failed something
       if (bool)
