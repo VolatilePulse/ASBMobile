@@ -46,7 +46,7 @@
                <span v-if="extractor.results[i-1].length > 0">
                   <label>{{extractor.results[i-1][0].Lw}}</label>
                   <label>{{extractor.results[i-1][0].Ld}}</label>
-                  <label>{{debugStatValue(i-1, extractor.results, extractor.extractorObject)}}</label>
+                  <label>{{formatFloat(debugStatValue(i-1, extractor.results, extractor.extractorObject))}}</label>
                </span>
                <span v-if="extractor.results[i-1].length > 1">
                   <label>{{debugShowOptions(extractor.results[i-1])}}</label>

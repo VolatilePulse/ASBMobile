@@ -80,6 +80,8 @@ function Init() {
          extract: ASBM.UI.Extract,
          testData: Testing,
          insertDummyData: InsertDummyData,
+         formatFloat: (n,decimalPlaces=2) => new Intl.NumberFormat({maximumFractionDigits:decimalPlaces, useGrouping:false}).format(n),
+         formatRound: n => new Intl.NumberFormat({maximumFractionDigits:0, useGrouping:false}).format(n),
          debugShowOptions: options => options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(','),
          debugStatValue: (i, results, extractor) => results[i][0].calculateValue(extractor.m[i], !extractor.isWild, extractor.TE, extractor.IB),
       },
