@@ -81,7 +81,7 @@ function Init() {
          testData: Testing,
          insertDummyData: InsertDummyData,
          debugShowOptions: options => options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(','),
-         debugStatValue: (stat, extractor) => stat.calculateValue(extractor.m, !extractor.isWild, extractor.TE, extractor.IB),
+         debugStatValue: (i, results, extractor) => results[i][0].calculateValue(extractor.m[i], !extractor.isWild, extractor.TE, extractor.IB),
       },
    });
 
