@@ -18,22 +18,22 @@ var app = {
    myMultipliers: {},
    multipliersDB: new Dexie("Multipliers"),
     
-   Init() {
-      // Proposed future syntax
-      // Utils.AsyncFileRead("values.json")
-      //    .then(text => Data.ObjectCreation(text))
-      //    .then(creatures => app.VueInit(creatures))
-      //    .catch(error => app.CriticalError);
-      Utils.AsyncFileRead("values.json")
-         .then(json => Data.LoadValues(json))
-         .then(() => {
-            for (var species in app.myMultipliers) {
-               var temp = document.createElement("option");
-               temp.text = species;
-               document.getElementById("inputSpecies").add(temp);
-            }})
-         .catch(error => console.log(error));
-      document.getElementById("extractButton").addEventListener("click", ASBM.UI.Extract);
+   async Init() {
+      try {
+         let json = await Utils.AsyncFileRead("values.json");
+         await Data.LoadValues(json);
+         
+         for (var species in app.myMultipliers) {
+            var temp = document.createElement("option");
+            temp.text = species;
+            document.getElementById("inputSpecies").add(temp);
+         }
+
+         console.log("Loaded!");
+         document.getElementById("extractButton").addEventListener("click", ASBM.UI.Extract);
+      } catch (error) {
+         console.log("Error: "+error);
+      }
    }
 }
 
