@@ -12,32 +12,31 @@ const SERVER_TAM = 0, SERVER_TMM = 1, SERVER_IDM = 2, SERVER_IWM = 3;
 
 const DB_VER_M = 1, DB_VER_L = 1;
 
-// Some dummy data, including your own... (click to insert into the form)
-// I haven't included the expected results in here, but they could be moved here easily
+// Some test data
 var dummyData = [
    {
       tag: "Level Tamed 1 Rex 100% TE",
-      species: "Rex", level: 1, imprint: 0, exactly: false, mode: "Tamed",
+      species: "Rex", level: 1, imprint: 0, exactly: false, mode: "Tamed", singlePlayer: false,
       stats: [1100.1, 420, 150, 3000, 500, 125.8, 100, 1550.5],
    },
    {
       tag: "Level Tamed 8 Rex TE 0% exactly",
-      species: "Rex", level: 8, imprint: 0, exactly: true, mode: "Tamed",
+      species: "Rex", level: 8, imprint: 0, exactly: true, mode: "Tamed", singlePlayer: false,
       stats: [1320.1, 462, 165, 3300, 510, 112, 100, 2201.5],
    },
    {
       tag: "Level Tamed 8 Rex TE 100% (99.94%)",
-      species: "Rex", level: 8, imprint: 0, exactly: false, mode: "Tamed",
+      species: "Rex", level: 8, imprint: 0, exactly: false, mode: "Tamed", singlePlayer: false,
       stats: [1320.1, 462, 165, 3300, 510, 131.7, 100, 2201.5],
    },
    {
       tag: "Level 152 Rex 39% imprint",
-      species: "Rex", level: 152, imprint: 39, exactly: false, mode: "Tamed",
+      species: "Rex", level: 152, imprint: 39, exactly: false, mode: "Tamed", singlePlayer: false,
       stats: [5280.1, 1386.0, 315, 11100, 650, 270.4, 100, 15593.5],
    },
    {
       tag: "...a Baryonx",
-      species: "Baryonyx", level: 130, imprint: 81, exactly: false, mode: "Tamed",
+      species: "Baryonyx", level: 130, imprint: 81, exactly: false, mode: "Tamed", singlePlayer: true,
       stats: [2129.6, 1072.5, 0, 6300, 416, 223.1, 120, 3424.5],
    },
 ]
@@ -46,7 +45,8 @@ var dummyData = [
  * @description Initializes all variables that require the page to finish loading
  */
 function Init() {
-   extractor = ASBM.UI.CreateExtractor();
+   extractor = ASBM.UI.Extractor.Create();
+   tester = ASBM.UI.Tester.Create();
    app = ASBM.UI.CreateApp();
 
    Utils.AsyncFileRead("values.json")
@@ -131,6 +131,7 @@ function Testing() {
 // The app state and components
 var app = null;
 var extractor = null;
+var tester = null;
 
 // Register Service Worker
 if (false && "serviceWorker" in navigator) { // FIXME: Disabled service worker entirely for now
@@ -153,6 +154,8 @@ document.write(
    '<script type="application/javascript" src="src/ASBM/Library.js"></script>' +
    '<script type="application/javascript" src="src/ASBM/Multipliers.js"></script>' +
    '<script type="application/javascript" src="src/ASBM/UI.js"></script>' +
+   '<script type="application/javascript" src="src/ASBM/UI/extractor.js"></script>' +
+   '<script type="application/javascript" src="src/ASBM/UI/tester.js"></script>' +
    '<script type="application/javascript" src="src/Data.js"></script>' +
    '<script type="application/javascript" src="src/Utils.js"></script>' +
    '<script type="application/javascript" src="src/Ark.js"></script>'
