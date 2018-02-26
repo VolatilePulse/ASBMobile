@@ -9,8 +9,42 @@ var Ark = {
     * @see RoundTo
     */
    Precision(index) {
+      // Displays Damage and Speed as 153.5(%)
       if (index == DAMAGE || index == SPEED)
          return 3;
+      // Displays TE as 98.34(%)
+      if (index == PRE_TE)
+         return 4;
+      // Displays IB as 38.8810(%)
+      if (index == PRE_IB)
+         return 6;
+      // Displays other stats as 18362.4
       return 1;
+   },
+
+   // Returns a value (from ASBM) for comparison or displying in the UI
+   DisplayValue(value, index) {
+      let returnValue = value;
+
+      if (index == DAMAGE || index == SPEED || index == PRE_TE || index == PRE_IB)
+         returnValue *= 100;
+
+      // We want to convert it to Display in ASBM
+      returnValue = Utils.RoundTo(returnValue, Ark.Precision(index));
+      
+      return returnValue;
+   },
+
+   // Converts a value (from the UI) to a working value for ASBM
+   ConvertValue(value, index) {
+      let returnValue = value;
+
+      if (index == DAMAGE || index == SPEED || index == PRE_TE || index == PRE_IB)
+         returnValue /= 100;
+
+      // We want to convert it to Use in ASBM
+      returnValue = Utils.RoundTo(returnValue, Ark.Precision(index));
+      
+      return returnValue;
    }
 }

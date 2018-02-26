@@ -3,13 +3,12 @@
  */
 
 "use strict";
-
+/** @namespace */
 var Utils = {
    /**
     * @description Async JSON file read
     * @param {string} file Path to the file
     * @param {function} callback On success, function to call with returned data
-    * @namespace Utils
     */
    AsyncFileRead(filePath) {
       return new Promise((resolve, reject) => {
@@ -23,20 +22,17 @@ var Utils = {
    },
    
    /**
-    * @description Rounds a number to a set decimal place for comparison
+    * Rounds a number to a set decimal place for comparison
     * @param {number} num Value that needs rounded
-    * @param {number} n Number of decimals to be rounded to
+    * @param {number} [n] Number of decimals to be rounded to
     * @returns {float} Decimal rounded to the specified precision
-    * @name RoundTo
-    * @see Precision
     */
    RoundTo(num, n = 0) {
       return +Number(num + 1E-10).toFixed(n);
    },
 
    /**
-    * @description Simple object check.
-    * @namespace Utils
+    * Simple object check.
     * @param item
     * @returns {boolean}
     */
@@ -45,8 +41,7 @@ var Utils = {
    },
 
    /**
-    * @description Deep merge two objects.
-    * @namespace Utils
+    * Deep merge two objects.
     * @param target
     * @param ...sources
     */

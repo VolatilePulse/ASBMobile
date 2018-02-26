@@ -115,6 +115,7 @@ ASBM.Extractor = class {
          }
 
          // Otherwise, we need to do some extra work
+         // TODO introduce code separation, if possible
          else {
             // Calculate the highest Lw could be
             var maxLw = tempStat.calculateWildLevel(this.m[i], this.values[i], !this.wild, 0, this.IB);
@@ -192,13 +193,19 @@ ASBM.Extractor = class {
             }
          }
       }
+      // Only filter results if we have a result for every stat
+      for (var i = 0; i < 7; i ++)
+         if (this.results[i].length == 0)
+            return;
+      
       this.filterResults();
    }
 
    filterResults() {
       do {
          var removed = false;
-         for (var i = 0; i < 7; i++) {
+         for (var i = 0; i < 7; i ++) {
+            // TODO Find an effective way to do this in the extract method
             // Until Ark handles unused stats better, this is the best we can do
             if (!this.results[i].checked && this.m[i].notUsed) {
                this.unusedStat = true;
@@ -221,7 +228,7 @@ ASBM.Extractor = class {
                removed = true;
             }
             else if (this.results[i].length > 1) {
-               for (var j = 0; j < this.results[i].length; j++) {
+               for (var j = 0; j < this.results[i].length; j ++) {
                   // Simple stat removal followed by a recursive stat removal
                   if (this.results[i][j].Lw > this.wildFreeMax || this.results[i][j].Ld > this.domFreeMax) {
                      this.results[i].splice(j, 1);
@@ -262,9 +269,21 @@ ASBM.Extractor = class {
          newArray.push(indices);
          indices = newArray;
       }
+
+      var TE = -1;
+
+      // If the TE of the stats we have don't match, they aren't valid
+      for (var i = 0; i < indices.length; i ++) {
+         if (TE == -1 && this.results[indices[i][0]][indices[i][1]].hasOwnProperty("TE"))
+            TE = this.results[indices[i][0]][indices[i][1]].TE;
+         else if (this.results[indices[i][0]][indices[i][1]].hasOwnProperty("TE"))
+            if (Ark.DisplayValue(TE, PRE_TE) != Ark.DisplayValue(this.results[indices[i][0]][indices[i][1]].TE, PRE_TE))
+               return returnBool ? false : [];
+      }
+
       top:
       // We only want to add a stat that has more than one possibility
-      for (var i = 0; i < 7; i++) {
+      for (var i = 0; i < 7; i ++) {
          for (var index = indices.length - 1; index >= 0; index--) {
             // We have already checked this stat
             if (this.results[i].checked || i == indices[index][0])
@@ -273,7 +292,7 @@ ASBM.Extractor = class {
 
          // We only made it this far if we don't have a possibility for this stat in our indices array
          // and there is more than one possibility for this stat
-         for (var j = 0; j < this.results[i].length; j++) {
+         for (var j = 0; j < this.results[i].length; j ++) {
             // add that stat to the indices
             indices.push([i, j]);
             var returnValue = this.matchingStats(indices, returnBool);
@@ -298,18 +317,14 @@ ASBM.Extractor = class {
                if (indices[j][0] == i)
                   break;
                // We missed a stat!
-               if (j == indices.length - 1) {
-                  if (returnBool)
-                     return false;
-                  else
-                     return [];
-               }
+               if (j == indices.length - 1)
+                  return returnBool ? false : [];
             }
 
       // We've run out of stats to add to our indices so lets test them for valid results
       var wildLevels = 0, domLevels = 0;
       // Loop through our possibilities
-      for (var i = 0; i < indices.length; i++) {
+      for (var i = 0; i < indices.length; i ++) {
          if (this.results[indices[i][0]][indices[i][1]].Lw > 0)
             wildLevels += this.results[indices[i][0]][indices[i][1]].Lw;
          domLevels += this.results[indices[i][0]][indices[i][1]].Ld;
@@ -318,16 +333,10 @@ ASBM.Extractor = class {
       // check to see if the stat possibilities add up to the missing dom levels
       // and wild levels as long as we don't have an unused stat
       if ((this.unusedStat || wildLevels == this.wildFreeMax) && domLevels == this.domFreeMax) {
-         if (returnBool)
-            return true;
-
-         // Return the indices to the caller
-         return indices;
+         return returnBool ? true : indices;
       }
 
       // If we made it this far, we have failed something
-      if (returnBool)
-         return false;
-      return [];
+      return returnBool ? false : [];
    }
 }
