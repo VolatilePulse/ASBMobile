@@ -235,7 +235,7 @@ ASBM.Extractor = class {
          for (var i = 0; i < 7; i ++) {
             if (!this.results[i].checked && this.results[i].length > 1)
                for (var j = 0; j < this.results[i].length; j ++) {
-                  if (!this.matchingStats(true, [[i, j]])) {
+                  if (!this.matchingStats([i, j], true)) {
                      this.results[i].splice(j, 1);
                      j--;
                      removed = true;
@@ -245,10 +245,24 @@ ASBM.Extractor = class {
       } while (removed);
    }
 
-   // Params:
-   //    returnBool want a boolean?
-   //    indices an array of indexs: [[1,2], [5,2], [3,10]]
-   matchingStats(returnBool, indices) { top:
+   /**
+    * Recursively checks our results for only valid ones. If the results are valid, returns either an array or true
+    * @example extractorObj.matchingstats([statIndex, resultIndex], true);
+    * // Returns false if extractorObj.results[statIndex][resultIndex] is not a valid result
+    * 
+    * @param {[number, number]} indices - An array of index arrays to use on the results object
+    * @param {boolean} [returnBool = false] - If set to true, will return a boolean value instead of an array 
+    * 
+    * @returns {([]|boolean)} - All matching stats that are required to keep the levels "true"
+    */
+   matchingStats(indices, returnBool = false) {
+      // Make sure we got an array of arrays
+      if (!Array.isArray(indices[0])) {
+         var newArray = [];
+         newArray.push(indices);
+         indices = newArray;
+      }
+      top:
       // We only want to add a stat that has more than one possibility
       for (var i = 0; i < 7; i++) {
          for (var index = indices.length - 1; index >= 0; index--) {
@@ -262,7 +276,7 @@ ASBM.Extractor = class {
          for (var j = 0; j < this.results[i].length; j++) {
             // add that stat to the indices
             indices.push([i, j]);
-            var returnValue = this.matchingStats(returnBool, indices);
+            var returnValue = this.matchingStats(indices, returnBool);
             // On the event of a failure, remove that index, and try the next stat
             if (returnValue == [] || !returnValue) {
                indices.pop();
