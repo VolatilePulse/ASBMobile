@@ -20,7 +20,19 @@ var Utils = {
          xhr.send();
       });
    },
-   
+
+   /**
+    * @description Return a promise that will be resolved after 'duration' milliseconds, passing received arguments through.
+    * @param {number} duration Number of milliseconds to delay for. 
+    */
+   Delay(duration) {
+      return function (...args) {
+         return new Promise(function (resolve, reject) {
+            setTimeout(() => resolve(...args), duration);
+         });
+      };
+   },
+
    /**
     * Rounds a number to a set decimal place for comparison
     * @param {number} num Value that needs rounded

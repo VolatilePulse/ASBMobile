@@ -14,15 +14,42 @@
 
 <body>
    <div id="app">
-      <p v-if="!dataLoaded">Loading...</p>
       <template>
-         <extractor ref="extractor" :data-loaded="dataLoaded"/>
+         <div class="w3-sidebar w3-bar-block w3-collapse w3-animate-left w3-card w3-teal" :style="{ display: showSidebar ? 'block':'none' }">
+            <button class="w3-bar-item w3-button w3-hide-large" @click="showSidebar=false">x</button>
+            <button class="w3-bar-item w3-button" :class="{'w3-red':tab=='tab1'}" @click="tab='tab1'">Tab 1</button>
+            <button class="w3-bar-item w3-button" :class="{'w3-red':tab=='tab2'}" @click="tab='tab2'">Tab 2</button>
+            <button class="w3-bar-item w3-button" :class="{'w3-red':tab=='extractor'}" @click="tab='extractor'">Extractor</button>
+            <button class="w3-bar-item w3-button" :class="{'w3-red':tab=='tab3'}" @click="tab='tab3'">Tab 3</button>
+         </div>
+         <div class="w3-main w3-animate-opacity" style="margin-left:200px">
+            <header class="w3-teal w3-container">
+               <button class="w3-button w3-teal w3-xlarge w3-hide-large" @click.prevent="showSidebar=true">&#9776;</button>
+               <h1 class="w3-right">ASBMobile</h1>
+            </header>
+            <div v-if="tab=='welcome'" class="w3-container w3-animate-opacity">
+               <p>Welcome!</p>
+            </div>
+            <div v-if="tab=='tab1'" class="w3-container w3-animate-opacity">
+               <p>Example content for tab 1</p>
+            </div>
+            <div v-else-if="tab=='tab2'" class="w3-container w3-animate-opacity">
+               <p>Example content for tab 2</p>
+            </div>
+            <div v-else-if="tab=='extractor'" class="w3-container">
+               <p v-if="!dataLoaded">Loading... (artificially delay by a few seconds for demo)</p>
+               <extractor v-else ref="extractor" class="w3-animate-opacity" />
+            </div>
+            <div v-else-if="tab=='tab3'" class="w3-container">
+               <p>Example content for tab 3</p>
+            </div>
+         </div>
       </template>
    </div>
 
    <script type="text/x-template" id="extractor-template">
       <div>
-         <form name="Extractor" v-if="dataLoaded">
+         <form name="Extractor">
             <fieldset>
                <select v-model="species">
                   <option v-for="name in speciesNames" v-bind:value="name">{{name}}</option>

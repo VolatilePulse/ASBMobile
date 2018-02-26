@@ -81,6 +81,9 @@ function Init() {
       data: {
          dataLoaded: false,
 
+         showSidebar: true,
+         tab: 'welcome',
+
          statImages: [
             "Health.png", "Stamina.png", "Oxygen.png", "Food.png",
             "Weight.png", "Melee.png", "Speed.png", "Torpor.png",
@@ -104,12 +107,16 @@ function Init() {
             exactly: false,
             stats: new Array(8),
          },
+
+      },
+      methods: {
       },
    });
 
    Utils.AsyncFileRead("values.json")
       .then(json => Data.LoadValues(json))
       .then(() => ASBM.UI.DropDownInit())
+      .then(Utils.Delay(5000)) // demo delayed loading
       .then(() => app.dataLoaded = true) // Reveal the main form once loading is complete
       .catch(error => console.log("Load error: " + error));
 };
