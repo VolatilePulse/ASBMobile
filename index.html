@@ -15,57 +15,67 @@
 <body>
    <div id="app">
       <p v-if="!dataLoaded">Loading...</p>
-      <form name="Extractor" v-if="dataLoaded">
-         <fieldset>
-            <select v-model="extractor.species">
-               <option v-for="name in speciesNames" v-bind:value="name">{{name}}</option>
-            </select>
-            <label>Level</label>
-            <input type="number" v-model.number="extractor.level">
-         </fieldset>
-         <fieldset>
-            <input type="radio" value="Wild" checked v-model="extractor.mode">
-            <label style="margin-right: 12px">Wild</label>
-            <input type="radio" value="Tamed" v-model="extractor.mode">
-            <label style="margin-right: 12px">Tamed</label>
-            <input type="radio" value="Bred" v-model="extractor.mode">
-            <label style="margin-right: 12px">Bred</label>
-            <span v-show="extractor.mode=='Bred'">
-               <label>Imprint:</label>
-               <input type="number" v-model.number="extractor.imprint">
-               <label>Exactly:</label>
-               <input type="checkbox" v-model="extractor.exactly">
-            </span>
-         </fieldset>
-         <fieldset>
-            <legend>Stats</legend>
-            Current stat-value Wild-lvl Dom-lvl Breeding Value
-            <div v-for="i in 8" class="w3-container w3-round-large w3-border-black w3-leftbar">
-               <img v-bind:src="'img/'+statImages[i-1]" style="height:25px; width:25px; object-fit: contain">
-               <input type="number" class="w3-round-large w3-border-large" v-model.number="extractor.stats[i-1]">
-               <span v-if="extractor.results[i-1].length > 0">
-                  <label>{{extractor.results[i-1][0].Lw}}</label>
-                  <label>{{extractor.results[i-1][0].Ld}}</label>
-                  <label>{{formatFloat(debugStatValue(i-1, extractor.results, extractor.extractorObject))}}</label>
-               </span>
-               <span v-if="extractor.results[i-1].length > 1">
-                  <label>{{debugShowOptions(extractor.results[i-1])}}</label>
-               </span>
-            </div>
-         </fieldset>
-         Sum Should be
-         <input type="button" value="Extract" id="extractButton" v-on:click="extract">
-      </form>
-      <br/>
-      <input type="button" value="Test Cases" id="TestCases" v-on:click="testData">
-      <br/>
-      <p>Insert dummy data:</p>
-      <span v-for="data in dummyData">
-         <a v-on:click.prevent="insertDummyData(data)" href="#dummyData">{{data.tag}}</a>
-         <br/>
-      </span>
-      <br/>
+      <template>
+         <extractor :data-loaded="dataLoaded"/>
+      </template>
    </div>
+
+   <script type="text/x-template" id="extractor-template">
+      <div>
+         <form name="Extractor" v-if="dataLoaded">
+            <fieldset>
+               <select v-model="species">
+                  <option v-for="name in speciesNames" v-bind:value="name">{{name}}</option>
+               </select>
+               <label>Level</label>
+               <input type="number" v-model.number="level">
+            </fieldset>
+            <fieldset>
+               <input type="radio" value="Wild" checked v-model="mode">
+               <label style="margin-right: 12px">Wild</label>
+               <input type="radio" value="Tamed" v-model="mode">
+               <label style="margin-right: 12px">Tamed</label>
+               <input type="radio" value="Bred" v-model="mode">
+               <label style="margin-right: 12px">Bred</label>
+               <span v-show="mode=='Bred'">
+                  <label>Imprint:</label>
+                  <input type="number" v-model.number="imprint">
+                  <label>Exactly:</label>
+                  <input type="checkbox" v-model="exactly">
+               </span>
+            </fieldset>
+            <fieldset>
+               <legend>Stats</legend>
+               Current stat-value Wild-lvl Dom-lvl Breeding Value
+               <div v-for="i in 8" class="w3-container w3-round-large w3-border-black w3-leftbar">
+                  <img v-bind:src="'img/'+statImages[i-1]" style="height:25px; width:25px; object-fit: contain">
+                  <input type="number" class="w3-round-large w3-border-large" v-model.number="stats[i-1]">
+                  <span v-if="extractor['results']">
+                     <span v-if="extractor.results[i-1].length > 0">
+                        <label>{{extractor.results[i-1][0].Lw}}</label>
+                        <label>{{extractor.results[i-1][0].Ld}}</label>
+                        <label>={{formatFloat(debugStatValue(i-1, extractor))}}</label>
+                     </span>
+                     <span v-if="extractor.results[i-1].length > 1">
+                        <label>{{debugShowOptions(extractor.results[i-1])}}</label>
+                     </span>
+                  </span>
+               </div>
+            </fieldset>
+            Sum Should be
+            <input type="button" value="Extract" id="extractButton" v-on:click="extract">
+         </form>
+         <br/>
+         <!-- <input type="button" value="Test Cases" id="TestCases" v-on:click="testData"> -->
+         <br/>
+         <p>Insert dummy data:</p>
+         <span v-for="data in dummyData">
+            <a v-on:click.prevent="insertDummyData(data)" href="#dummyData">{{data.tag}}</a>
+            <br/>
+         </span>
+         <br/>
+      </div>
+   </script>
 </body>
 
 </html>

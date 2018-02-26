@@ -39,6 +39,6 @@ ASBM.UI = {
 
       // Copy into `app` so they will be displayed
       app.extractor.results = extractObject.results;
-      app.extractor.extractorObject = extractObject;
+      app.extractObject = extractObject;
    }
 }
