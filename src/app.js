@@ -46,72 +46,8 @@ var dummyData = [
  * @description Initializes all variables that require the page to finish loading
  */
 function Init() {
-   extractor = Vue.component("extractor", {
-      props: ['dataLoaded'],
-      template: "#extractor-template",
-      data: () => ({
-         dummyData: dummyData,
-
-         species: "Rex",
-         mode: "Tamed",
-         imprint: 0,
-         level: "",
-         exactly: false,
-         stats: new Array(8),
-
-         extractor: {},
-      }),
-      computed: {
-         speciesNames: () => app.speciesNames,
-         statImages: () => app.statImages,
-      },
-      methods: {
-         extract: () => ASBM.UI.Extract(app.$refs.extractor),
-         testData: Testing,
-         insertDummyData: InsertDummyData,
-         formatFloat: (n, decimalPlaces = 2) => new Intl.NumberFormat({ maximumFractionDigits: decimalPlaces, useGrouping: false }).format(n),
-         formatRound: n => new Intl.NumberFormat({ maximumFractionDigits: 0, useGrouping: false }).format(n),
-         debugShowOptions: options => options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(','),
-         debugStatValue: (i, extractor) => extractor.results[i][0].calculateValue(extractor.m[i], !extractor.isWild, extractor.TE, extractor.IB),
-      },
-   });
-
-   app = new Vue({
-      el: '#app',
-      data: {
-         dataLoaded: false,
-
-         showSidebar: true,
-         tab: 'welcome',
-
-         statImages: [
-            "Health.png", "Stamina.png", "Oxygen.png", "Food.png",
-            "Weight.png", "Melee.png", "Speed.png", "Torpor.png",
-         ],
-
-         speciesDB: {},
-         officialServerSettings: {},
-         officialSPSettings: {},
-         extractObject: {},
-         myMultipliers: {},
-         multipliersDB: new Dexie("Multipliers"),
-
-         dummyData: dummyData,
-
-         speciesNames: [],
-
-         extractor: {
-            species: "Rex",
-            mode: "Tamed",
-            imprint: 0,
-            exactly: false,
-            stats: new Array(8),
-         },
-
-      },
-      methods: {
-      },
-   });
+   extractor = ASBM.UI.CreateExtractor();
+   app = ASBM.UI.CreateApp();
 
    Utils.AsyncFileRead("values.json")
       .then(json => Data.LoadValues(json))
