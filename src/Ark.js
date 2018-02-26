@@ -9,7 +9,7 @@ var Ark = {
     * @see RoundTo
     */
    Precision(index) {
-      if (index == TORPOR || index == SPEED)
+      if (index == DAMAGE || index == SPEED)
          return 3;
       return 1;
    }

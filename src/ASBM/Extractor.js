@@ -165,7 +165,13 @@ ASBM.Extractor = class {
                   for (tempStat.Ld = 0; tempStat.Ld <= maxLd; tempStat.Ld++) {
 
                      // Attempts to calculate the TE
-                     var tamingEffectiveness = tempStat.calculateTE(this.m[i], this.values[i]);
+                     if (Utils.RoundTo(this.values[i], Ark.Precision(i)) == Utils.RoundTo(tempStat.calculateValue(this.m[i], !this.wild, 0, this.IB), Ark.Precision(i)))
+                        var tamingEffectiveness = 0;
+                     else if (Utils.RoundTo(this.values[i], Ark.Precision(i)) == Utils.RoundTo(tempStat.calculateValue(this.m[i], !this.wild, 1, this.IB), Ark.Precision(i)))
+                        var tamingEffectiveness = 1;
+                     else
+                        var tamingEffectiveness = tempStat.calculateTE(this.m[i], this.values[i]);
+
                      if (tamingEffectiveness >= 0 && tamingEffectiveness <= 1) {
 
                         // If the TE allows the stat to calculate properly, add it as a possible result
@@ -226,14 +232,15 @@ ASBM.Extractor = class {
             }
          }
 
-         for (var i = 0; i < 7; i++) {
-            for (var j = 0; j < this.results[i].length; j++) {
-               if (!this.matchingStats(true, [[i, j]])) {
+         for (var i = 0; i < 7; i ++) {
+            if (!this.results[i].checked && this.results[i].length > 1)
+               for (var j = 0; j < this.results[i].length; j ++) {
+                  if (!this.matchingStats(true, [[i, j]])) {
                      this.results[i].splice(j, 1);
                      j--;
                      removed = true;
+                  }
                }
-            }
          }
       } while (removed);
    }
