@@ -13,7 +13,7 @@ const SERVER_TAM = 0, SERVER_TMM = 1, SERVER_IDM = 2, SERVER_IWM = 3;
 const DB_VER_M = 1, DB_VER_L = 1;
 
 // Some test data
-var dummyData = [
+var testData = [
    {
       tag: "Level Tamed 1 Rex 100% TE",
       species: "Rex", level: 1, imprint: 0, exactly: false, mode: "Tamed", singlePlayer: false,
@@ -52,12 +52,12 @@ function Init() {
    Utils.AsyncFileRead("values.json")
       .then(json => Data.LoadValues(json))
       .then(() => ASBM.UI.DropDownInit())
-      .then(Utils.Delay(5000)) // demo delayed loading
+      //.then(Utils.DelayFunction(5000)) // demo delayed loading
       .then(() => app.dataLoaded = true) // Reveal the main form once loading is complete
       .catch(error => console.log("Load error: " + error));
 };
 
-function InsertDummyData(data) {
+function InsertTestData(data) {
    Object.assign(app.$refs.extractor, data);
 }
 

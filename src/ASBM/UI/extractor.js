@@ -8,8 +8,9 @@ ASBM.UI.Extractor = {
       return Vue.component("extractor", {
          props: [],
          template: "#extractor-template",
+
          data: () => ({
-            dummyData: dummyData,
+            testData: testData,
 
             species: "Rex",
             mode: "Tamed",
@@ -20,14 +21,15 @@ ASBM.UI.Extractor = {
 
             extractor: {},
          }),
+
          computed: {
             speciesNames: () => app.speciesNames,
             statImages: () => app.statImages,
          },
+         
          methods: {
             extract: () => ASBM.UI.Extractor.PerformExtraction(app.$refs.extractor),
-            testData: Testing,
-            insertDummyData: InsertDummyData,
+            insertTestData: InsertTestData,
             formatFloat: (n, decimalPlaces = 2) => new Intl.NumberFormat({ maximumFractionDigits: decimalPlaces, useGrouping: false }).format(n),
             formatRound: n => new Intl.NumberFormat({ maximumFractionDigits: 0, useGrouping: false }).format(n),
             debugShowOptions: options => options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(','),

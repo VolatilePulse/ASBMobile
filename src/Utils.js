@@ -26,6 +26,16 @@ var Utils = {
     * @param {number} duration Number of milliseconds to delay for. 
     */
    Delay(duration) {
+         return new Promise(function (resolve, reject) {
+            setTimeout(() => resolve(), duration);
+         });
+   },
+
+   /**
+    * @description Return a function that can be used directly in a .then which delays 'duration' milliseconds, passing received arguments through.
+    * @param {number} duration Number of milliseconds to delay for. 
+    */
+   DelayFunction(duration) {
       return function (...args) {
          return new Promise(function (resolve, reject) {
             setTimeout(() => resolve(...args), duration);

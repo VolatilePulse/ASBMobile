@@ -22,6 +22,7 @@ ASBM.UI.CreateApp = function () {
 
          showSidebar: true,
          tab: 'welcome',
+         devMode: true,
 
          statImages: [
             "Health.png", "Stamina.png", "Oxygen.png", "Food.png",
@@ -35,7 +36,7 @@ ASBM.UI.CreateApp = function () {
          myMultipliers: {},
          multipliersDB: new Dexie("Multipliers"),
 
-         dummyData: dummyData,
+         testData: testData,
 
          speciesNames: [],
 
@@ -48,6 +49,7 @@ ASBM.UI.CreateApp = function () {
          },
 
       },
+      
       methods: {
       },
    });

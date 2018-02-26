@@ -16,11 +16,11 @@
    <div id="app">
       <template>
          <div class="w3-sidebar w3-bar-block w3-collapse w3-animate-left w3-card w3-teal" :style="{ display: showSidebar ? 'block':'none' }">
-            <button class="w3-bar-item w3-button w3-hide-large" @click="showSidebar=false">x</button>
+            <button class="w3-bar-item w3-button w3-hide-large" @click="showSidebar=false">&times;</button>
             <button class="w3-bar-item w3-button" :class="{'w3-red':tab=='tab1'}" @click="tab='tab1'">Tab 1</button>
             <button class="w3-bar-item w3-button" :class="{'w3-red':tab=='tab2'}" @click="tab='tab2'">Tab 2</button>
             <button class="w3-bar-item w3-button" :class="{'w3-red':tab=='extractor'}" @click="tab='extractor'">Extractor</button>
-            <button class="w3-bar-item w3-button" :class="{'w3-red':tab=='tab3'}" @click="tab='tab3'">Tab 3</button>
+            <button class="w3-bar-item w3-button" :class="{'w3-red':tab=='tester'}" v-if="devMode" @click="tab='tester'">Tester (dev-only)</button>
          </div>
          <div class="w3-main w3-animate-opacity" style="margin-left:200px">
             <header class="w3-teal w3-container">
@@ -30,18 +30,19 @@
             <div v-if="tab=='welcome'" class="w3-container w3-animate-opacity">
                <p>Welcome!</p>
             </div>
-            <div v-if="tab=='tab1'" class="w3-container w3-animate-opacity">
+            <div v-else-if="tab=='tab1'" class="w3-container w3-animate-opacity">
                <p>Example content for tab 1</p>
             </div>
             <div v-else-if="tab=='tab2'" class="w3-container w3-animate-opacity">
                <p>Example content for tab 2</p>
             </div>
             <div v-else-if="tab=='extractor'" class="w3-container">
-               <p v-if="!dataLoaded">Loading... (artificially delay by a few seconds for demo)</p>
-               <extractor v-else ref="extractor" class="w3-animate-opacity" />
+               <p v-if="!dataLoaded">Loading...</p>
+               <extractor v-else ref="extractor" class="w3-animate-opacity"/>
             </div>
-            <div v-else-if="tab=='tab3'" class="w3-container">
-               <p>Example content for tab 3</p>
+            <div v-else-if="tab=='tester'" class="w3-container">
+               <p v-if="!dataLoaded">Loading...</p>
+               <tester v-else ref="tester" class="w3-animate-opacity"/>
             </div>
          </div>
       </template>
@@ -96,11 +97,42 @@
          <!-- <input type="button" value="Test Cases" id="TestCases" v-on:click="testData"> -->
          <br/>
          <p>Insert dummy data:</p>
-         <span v-for="data in dummyData">
-            <a v-on:click.prevent="insertDummyData(data)" href="#dummyData">{{data.tag}}</a>
+         <span v-for="data in testData">
+            <a v-on:click.prevent="insertTestData(data)" href="#testData">{{data.tag}}</a>
             <br/>
          </span>
          <br/>
+      </div>
+   </script>
+
+   <script type="text/x-template" id="tester-template">
+      <div class="w3-container">
+         <div class="w3-container">
+            <a href="#runAllTests" @click.prevent="runAllTests" class="w3-right">Run All</a>
+         </div>
+         <ul class="w3-ul">
+            <li v-for="(data,index) in testData" class="w3-hoverable">
+               <span class="w3-button w3-right w3-xlarge" @click="runTest(index)">&#x25B8;</span>
+               <div class="" @click="openResults(index)">
+                  <div>
+                     <span v-if="isPass(index)" class="w3-tag w3-green">pass</span>
+                     <span v-if="isFail(index)" class="w3-tag w3-red">fail</span>
+                     <span class="w3-large">{{data.tag}}</span>
+                  </div>
+                  <span>{{data.stats.join(', ')}}</span>
+               </div>
+               <div v-if="index in testResults && openTestIndex==index">
+                     <div>
+                        <span>Got:</span><br/>
+                        <code>{{JSON.stringify(testResults[index])}}</code>
+                     </div>
+                     <div>
+                        <span>Expected:</span><br/>
+                        <code>{{JSON.stringify(testData[index].results)}}</code>
+                     </div>
+               </div>
+            </li>
+         </ul>
       </div>
    </script>
 </body>
