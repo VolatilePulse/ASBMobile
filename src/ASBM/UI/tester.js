@@ -43,7 +43,7 @@ ASBM.UI.Tester = {
       let data;
       let failFound = false;
       for (let index = 0; index < ui.testData.length; index++) {
-         let results = ASBM.UI.Tester.PerformTest(data);
+         let results = ASBM.UI.Tester.PerformTest(ui.testData[index]);
          Vue.set(ui.testResults, index, results);
 
          if (!failFound && results.pass == false) {
