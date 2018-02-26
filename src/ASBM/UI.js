@@ -15,21 +15,18 @@ ASBM.UI = {
    },
 
    // TODO: Prevent user from crashing the app by entering bad data
-   Extract() {
+   Extract(ui) {
       // Read values from the UI
-      var species = app.extractor.species;
-      var level = app.extractor.level;
-      var isWild = (app.extractor.mode == "Wild");
-      var isTamed = (app.extractor.mode == "Tamed");
-      var isBred = (app.extractor.mode == "Bred");
-      var imprintBonus = app.extractor.imprint / 100;
-      var exactly = !!app.extractor.exactly;
+      var species = ui.species;
+      var level = ui.level;
+      var isWild = (ui.mode == "Wild");
+      var isTamed = (ui.mode == "Tamed");
+      var isBred = (ui.mode == "Bred");
+      var imprintBonus = ui.imprint / 100;
+      var exactly = !!ui.exactly;
 
-      var values = app.extractor.stats.slice(); // take a copy so we can modify it
-
-      // Convert melee and speed to decimals
-      values[DAMAGE] /= 100; values[DAMAGE] = Utils.RoundTo(values[DAMAGE], Ark.Precision(DAMAGE));
-      values[SPEED] /= 100; values[SPEED] = Utils.RoundTo(values[SPEED], Ark.Precision(SPEED));
+      // Prepare the input values for use with the extractor
+      var values = ui.stats.map(Ark.ConvertValue);
 
       // Create other important variables
       var multipliers = Utils.DeepMerge({}, app.officialServerSettings, app.myMultipliers[species]);
@@ -38,7 +35,7 @@ ASBM.UI = {
       extractObject.extract();
 
       // Copy into `app` so they will be displayed
-      app.extractor.results = extractObject.results;
-      app.extractObject = extractObject;
+      ui.results = extractObject.results;
+      ui.extractor = extractObject;
    }
 }

@@ -66,7 +66,7 @@ function Init() {
          statImages: () => app.statImages,
       },
       methods: {
-         extract: ASBM.UI.Extract,
+         extract: () => ASBM.UI.Extract(app.$refs.extractor),
          testData: Testing,
          insertDummyData: InsertDummyData,
          formatFloat: (n, decimalPlaces = 2) => new Intl.NumberFormat({ maximumFractionDigits: decimalPlaces, useGrouping: false }).format(n),
@@ -115,7 +115,7 @@ function Init() {
 };
 
 function InsertDummyData(data) {
-   Object.assign(app.extractor, data);
+   Object.assign(app.$refs.extractor, data);
 }
 
 // Testing purposes

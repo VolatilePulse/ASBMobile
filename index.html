@@ -16,7 +16,7 @@
    <div id="app">
       <p v-if="!dataLoaded">Loading...</p>
       <template>
-         <extractor :data-loaded="dataLoaded"/>
+         <extractor ref="extractor" :data-loaded="dataLoaded"/>
       </template>
    </div>
 
