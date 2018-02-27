@@ -53,7 +53,7 @@ ASBM.UI.Extractor = {
       var values = ui.stats.map(Ark.ConvertValue);
 
       // Create other important variables
-      var multipliers = Utils.DeepMerge({}, app.officialServerSettings, app.myMultipliers[species]);
+      var multipliers = Ark.GetMultipliers(app.officialServerSettings, species);
 
       let extractObject = new ASBM.Extractor(multipliers, values, level, isWild, isTamed, isBred, imprintBonus, exactly);
       extractObject.extract();

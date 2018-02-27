@@ -9,7 +9,7 @@ ASBM.UI = ASBM.UI || {};
 
 // Populates the Drop Down Element with the Species
 ASBM.UI.DropDownInit = function () {
-   for (var species in app.myMultipliers) {
+   for (var species in app.creatures) {
       app.speciesNames.push(species);
    }
 }
