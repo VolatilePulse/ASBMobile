@@ -30,10 +30,10 @@ var Data = {
 
             for(var i in jsonObject.species) {
                app.myMultipliers[jsonObject.species[i].name] =
-                  new ASBM.CreatureStats(jsonObject.species[i].statsRaw,
-                                         jsonObject.species[i].TBHM,
-                                         jsonObject.species[i].doesNotUseOxygen,
-                                         jsonObject.species[i].NoImprintingForSpeed);
+                  new ASBM.StatMultipliers(jsonObject.species[i].statsRaw,
+                                           jsonObject.species[i].TBHM,
+                                           jsonObject.species[i].doesNotUseOxygen,
+                                           jsonObject.species[i].NoImprintingForSpeed);
 
                for (var index = 0; index < 8; index ++)
                   linearArray.push(Object.assign({}, app.myMultipliers[jsonObject.species[i].name][index], {species: jsonObject.species[i].name, statIndex: index}));
@@ -44,7 +44,21 @@ var Data = {
             promises.push(putPromise);
 
             app.officialServerSettings = new ASBM.Server(jsonObject.statMultipliers, null, false, jsonObject.imprintingMultiplier);
-            app.officialSPSettings = new ASBM.Server(jsonObject.statMultipliersSP)
+            // Single Player settings Multiply official settings, not override them
+            for(var i = 0; i < 8; i ++) {
+               if (!jsonObject.statMultipliersSP[i])
+                  continue;
+                  
+               if (jsonObject.statMultipliersSP[i][0]) //TaM
+                  jsonObject.statMultipliersSP[i][0] = Utils.RoundTo(jsonObject.statMultipliersSP[i][0] * app.officialServerSettings[i].TaM, 6);
+               if (jsonObject.statMultipliersSP[i][1]) //TmM
+                  jsonObject.statMultipliersSP[i][1] = Utils.RoundTo(jsonObject.statMultipliersSP[i][1] * app.officialServerSettings[i].TmM, 6);
+               if (jsonObject.statMultipliersSP[i][2]) //IdM
+                  jsonObject.statMultipliersSP[i][2] = Utils.RoundTo(jsonObject.statMultipliersSP[i][2] * app.officialServerSettings[i].IdM, 6);
+               if (jsonObject.statMultipliersSP[i][3]) //IwM
+                  jsonObject.statMultipliersSP[i][3] = Utils.RoundTo(jsonObject.statMultipliersSP[i][3] * app.officialServerSettings[i].IwM, 6);
+            }
+            app.officialSPSettings = new ASBM.Server(jsonObject.statMultipliersSP, app.officialServerSettings, true, jsonObject.imprintingMultiplier);
          }
 
          // Otherwise the DB already exists

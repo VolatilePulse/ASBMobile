@@ -74,7 +74,10 @@ function Testing() {
       imprint: 0.39,
       stats: [5280.1, 1386.0, 315, 11100, 650, 2.704, 1, 15593.5],
       exactly: false,
-      server: new ASBM.Server([null, null, null, null, null, null, null, null]),
+      server: new ASBM.Server(
+         [null, null, null, null, null, null, null, null],
+         Utils.DeepMerge({}, app.officialServerSettings, app.officialSPSettings)
+      ),
       results: [[{ "Lw": 19, "Ld": 0 }], [{ "Lw": 23, "Ld": 0 }], [{ "Lw": 11, "Ld": 0 }], [{ "Lw": 27, "Ld": 0 }], [{ "Lw": 15, "Ld": 0 }], [{ "Lw": 25, "Ld": 0, "wildLevel": 103, "TE": 0.9404388714733548 }, { "Lw": 26, "Ld": 0, "wildLevel": 108, "TE": 0.8007288070579223 }, { "Lw": 27, "Ld": 0, "wildLevel": 113, "TE": 0.6667918858001503 }, { "Lw": 28, "Ld": 0, "wildLevel": 119, "TE": 0.5382775119617228 }, { "Lw": 29, "Ld": 0, "wildLevel": 125, "TE": 0.4148629148629146 }, { "Lw": 30, "Ld": 0, "wildLevel": 132, "TE": 0.29625044216483926 }, { "Lw": 31, "Ld": 0, "wildLevel": 138, "TE": 0.1821651630811943 }, { "Lw": 32, "Ld": 0, "wildLevel": 146, "TE": 0.07235274089206765 }], [{ "Lw": 24, "Ld": 0 }, { "Lw": 25, "Ld": 0 }, { "Lw": 26, "Ld": 0 }, { "Lw": 27, "Ld": 0 }, { "Lw": 28, "Ld": 0 }, { "Lw": 29, "Ld": 0 }, { "Lw": 30, "Ld": 0 }, { "Lw": 31, "Ld": 0 }], [{ "Lw": 151, "Ld": 0 }]]
    };
 
@@ -89,7 +92,12 @@ function Testing() {
       imprint: 0.81,
       stats: [2129.6, 1072.5, 0, 6300, 416, 2.231, 1.2, 3424.5],
       exactly: false,
-      server: new ASBM.Server([null, null, null, null, null, null, null, null], 1, true),
+      server: new ASBM.Server(
+         [null, null, null, null, null, null, null, null],
+         Utils.DeepMerge({}, app.officialServerSettings, app.officialSPSettings),
+         true,
+         1
+      ),
       results: [[{ "Lw": 13, "Ld": 3 }], [{ "Lw": 23, "Ld": 0 }], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 18, "Ld": 0 }], [{ "Lw": 14, "Ld": 0 }], [], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 126, "Ld": 0 }]]
    };
 
