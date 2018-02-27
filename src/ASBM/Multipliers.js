@@ -58,13 +58,13 @@ ASBM.ServerMultiplier = class {
       this.IBM = IBM; // Imprint Bonus Multiplier
       
       if (!settingObj || (settingArray[SERVER_TAM] != settingObj.TaM && settingArray[0]))
-         this.TaM = settingArray[SERVER_TAM]; // Tame-Add Multiplier
+         this[SERVER_TAM] = this.TaM = settingArray[SERVER_TAM]; // Tame-Add Multiplier
       if (!settingObj || (settingArray[SERVER_TMM] != settingObj.TmM && settingArray[1]))
-         this.TmM = settingArray[SERVER_TMM]; // Tame-Aff Multiplier
+         this[SERVER_TMM] = this.TmM = settingArray[SERVER_TMM]; // Tame-Aff Multiplier
       if (!settingObj || (settingArray[SERVER_IDM] != settingObj.IdM && settingArray[2]))
-         this.IdM = settingArray[SERVER_IDM]; // Increase Dom Multiplier
+         this[SERVER_IDM] = this.IdM = settingArray[SERVER_IDM]; // Increase Dom Multiplier
       if (!settingObj || (settingArray[SERVER_IWM] != settingObj.IwM && settingArray[3]))
-         this.IwM = settingArray[SERVER_IWM]; // Increase Wild Multiplier
+         this[SERVER_IWM] = this.IwM = settingArray[SERVER_IWM]; // Increase Wild Multiplier
    }
 }
 

@@ -22,6 +22,23 @@ var Utils = {
    },
 
    /**
+    * Create an array containing numbers from zero to 'number'-1.
+    * @param {number} length Length of the array
+    */
+   Range(length) {
+      return Utils.FilledArray(length, (_,i) => i);
+   },
+
+   /**
+    * Create an array pre-filled with data supplied by the given function. Example FilledArray(4, () => []) creates [[],[],[],[]].
+    * @param {number} length The length of the array
+    * @param {function} fn A function to call to get the contents of an element, passed (undefined, index)
+    */
+   FilledArray(length, fn) {
+      return Array.apply(null, Array(length)).map(fn);
+   },
+
+   /**
     * @description Return a promise that will be resolved after 'duration' milliseconds, passing received arguments through.
     * @param {number} duration Number of milliseconds to delay for. 
     */

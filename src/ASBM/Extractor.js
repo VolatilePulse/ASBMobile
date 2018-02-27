@@ -4,6 +4,7 @@
 
 "use strict";
 
+/** @namespace */
 var ASBM = ASBM || {};
 
 ASBM.Extractor = class {

@@ -45,8 +45,9 @@ var testData = [
  * @description Initializes all variables that require the page to finish loading
  */
 function Init() {
-   extractor = ASBM.UI.Extractor.Create();
-   tester = ASBM.UI.Tester.Create();
+   ASBM.UI.Servers.Create();
+   ASBM.UI.Extractor.Create();
+   ASBM.UI.Tester.Create();
    app = ASBM.UI.CreateApp();
 
    Utils.AsyncFileRead("values.json")
@@ -128,10 +129,8 @@ function Testing() {
    }
 }
 
-// The app state and components
+// The app state
 var app = null;
-var extractor = null;
-var tester = null;
 
 // Register Service Worker
 if (false && "serviceWorker" in navigator) { // FIXME: Disabled service worker entirely for now
@@ -156,6 +155,7 @@ document.write(
    '<script type="application/javascript" src="src/ASBM/UI.js"></script>' +
    '<script type="application/javascript" src="src/ASBM/UI/extractor.js"></script>' +
    '<script type="application/javascript" src="src/ASBM/UI/tester.js"></script>' +
+   '<script type="application/javascript" src="src/ASBM/UI/servers.js"></script>' +
    '<script type="application/javascript" src="src/Data.js"></script>' +
    '<script type="application/javascript" src="src/Utils.js"></script>' +
    '<script type="application/javascript" src="src/Ark.js"></script>'
