@@ -2,7 +2,7 @@
 
 var ASBM = ASBM || {};
 
-
+/** @namespace */
 // TODO Better layout of the constructors for the entire file to handle Copies and Empty
 ASBM.StatMultiplier = class {
    constructor(stat) {
@@ -34,7 +34,8 @@ ASBM.StatMultiplier = class {
    }
 }
 
-ASBM.StatMultipliers = class {
+/** @namespace */
+ASBM.CreatureStats = class {
    constructor(stats, TBHM = 1, oxygenNotUsed = false, speedImprintIgnored = false) {
       for (var i = 0; i < 8; i ++)
          this[i] = new ASBM.StatMultiplier(stats ? stats[i] : null);
@@ -44,7 +45,8 @@ ASBM.StatMultipliers = class {
       if (oxygenNotUsed) {
          this[OXYGEN].notUsed = oxygenNotUsed;
          this[OXYGEN].Iw = 0;
-      }      
+      }
+      
       // These values are not imprint increased
       this[STAMINA].IBM = 0;
       this[OXYGEN].IBM = 0;
@@ -53,28 +55,30 @@ ASBM.StatMultipliers = class {
    }
 }
 
+/** @namespace */
 ASBM.ServerMultiplier = class {
-   constructor(settingArray, settingObj, IBM) {
+   constructor(settingArray, IBM) {
       this.IBM = IBM; // Imprint Bonus Multiplier
       
-      if (!settingObj || (settingArray[SERVER_TAM] != settingObj.TaM && settingArray[0]))
+      if (settingArray[SERVER_TAM])
          this.TaM = settingArray[SERVER_TAM]; // Tame-Add Multiplier
-      if (!settingObj || (settingArray[SERVER_TMM] != settingObj.TmM && settingArray[1]))
+      if (settingArray[SERVER_TMM])
          this.TmM = settingArray[SERVER_TMM]; // Tame-Aff Multiplier
-      if (!settingObj || (settingArray[SERVER_IDM] != settingObj.IdM && settingArray[2]))
+      if (settingArray[SERVER_IDM])
          this.IdM = settingArray[SERVER_IDM]; // Increase Dom Multiplier
-      if (!settingObj || (settingArray[SERVER_IWM] != settingObj.IwM && settingArray[3]))
+      if (settingArray[SERVER_IWM])
          this.IwM = settingArray[SERVER_IWM]; // Increase Wild Multiplier
    }
 }
 
+/** @namespace */
 // TODO Handle any cases where the user chose to override official, even if it is the same
 ASBM.Server = class {
-   constructor(settingsArray, settingsObj, singlePlayer = false, IBM = 1) {
+   constructor(settingsArray, IBM = 1, singlePlayer = false) {
       this.singlePlayer = singlePlayer; // singlePlayer Setting
       
       for (var i = 0; i < 8; i ++)
          if (settingsArray[i])
-            this[i] = new ASBM.ServerMultiplier(settingsArray[i], (settingsObj ? settingsObj[i] : null), IBM);
+            this[i] = new ASBM.ServerMultiplier(settingsArray[i], IBM);
    }
 }
