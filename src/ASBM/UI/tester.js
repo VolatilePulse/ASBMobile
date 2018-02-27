@@ -3,6 +3,7 @@
 var ASBM = ASBM || {};
 ASBM.UI = ASBM.UI || {};
 
+/** @namespace ASBM.UI */
 ASBM.UI.Tester = {
    Create() {
       return Vue.component("tester", {

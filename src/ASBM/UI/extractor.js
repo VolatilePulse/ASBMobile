@@ -57,7 +57,7 @@ ASBM.UI.Extractor = {
       // FIXME: Without a permanent server structure, either one or all fail
       app.currentServer = new ASBM.Server([null,null,null,null,null,null,null,null], 1, singlePlayer);
 
-      let multipliers = Ark.GetMultipliers(app.currentServer, data.species);
+      let multipliers = Ark.GetMultipliers(app.currentServer, ui.species);
 
       let extractObject = new ASBM.Extractor(multipliers, values, level, isWild, isTamed, isBred, imprintBonus, exactly);
       extractObject.extract();

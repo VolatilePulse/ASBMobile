@@ -3,9 +3,12 @@
  */
 
 "use strict";
-
-/** @namespace */
 var ASBM = ASBM || {};
+
+/**
+ * @namespace ASBM
+ * @class Extractor
+ * */
 
 ASBM.Extractor = class {
    constructor(multipliers, values, level, isWild = true, isTamed = false, isBred = false, imprintBonus = 0, exactly = false) {
@@ -265,11 +268,8 @@ ASBM.Extractor = class {
     */
    matchingStats(indices, returnBool = false) {
       // Make sure we got an array of arrays
-      if (!Array.isArray(indices[0])) {
-         var newArray = [];
-         newArray.push(indices);
-         indices = newArray;
-      }
+      if (!Array.isArray(indices[0]))
+         indices = [indices];
 
       var TE = -1;
 

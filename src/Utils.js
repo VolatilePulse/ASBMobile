@@ -3,12 +3,15 @@
  */
 
 "use strict";
-/** @namespace */
+
+/** @namespace Utils */
 var Utils = {
    /**
-    * @description Async JSON file read
-    * @param {string} file Path to the file
-    * @param {function} callback On success, function to call with returned data
+    * Async JSON file read
+    * @async
+    * @function AsyncFileRead
+    * @param {string} filePath to the file
+    * @return {Promise<string>} The content of the file as JSON text
     */
    AsyncFileRead(filePath) {
       return new Promise((resolve, reject) => {
@@ -39,7 +42,7 @@ var Utils = {
    },
 
    /**
-    * @description Return a promise that will be resolved after 'duration' milliseconds, passing received arguments through.
+    * Return a promise that will be resolved after 'duration' milliseconds, passing received arguments through.
     * @param {number} duration Number of milliseconds to delay for. 
     */
    Delay(duration) {
@@ -49,7 +52,7 @@ var Utils = {
    },
 
    /**
-    * @description Return a function that can be used directly in a .then which delays 'duration' milliseconds, passing received arguments through.
+    * Return a function that can be used directly in a .then which delays 'duration' milliseconds, passing received arguments through.
     * @param {number} duration Number of milliseconds to delay for. 
     */
    DelayFunction(duration) {

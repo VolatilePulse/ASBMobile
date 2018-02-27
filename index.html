@@ -94,6 +94,14 @@
                <label style="margin-right: 12px">Tamed</label>
                <input type="radio" value="Bred" v-model="mode">
                <label style="margin-right: 12px">Bred</label>
+               <span v-show="mode=='Wild'">
+                  <label>Auto-Extract Levels:</label>
+                  <input type="checkbox" v-model.number="AutoExtract">
+               </span>
+               <span v-show="mode=='Tamed'">
+                  <label>Taming Effectiveness:</label>
+                  <input type="number" v-model.number="TE">
+               </span>
                <span v-show="mode=='Bred'">
                   <label>Imprint:</label>
                   <input type="number" v-model.number="imprint">

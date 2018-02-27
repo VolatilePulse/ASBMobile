@@ -1,11 +1,9 @@
 "use strict";
 
-/** @namespace */
 var ASBM = ASBM || {};
-
-/** @namespace */
 ASBM.UI = ASBM.UI || {};
 
+/** @namespace ASBM.UI */
 ASBM.UI.Servers = {
    Create() {
       return Vue.component("servers", {
@@ -25,6 +23,11 @@ ASBM.UI.Servers = {
 
          computed: {
             statImages: () => app.statImages,
+            // Correct: app.officialServerSettings[HEALTH].TdM
+            // Incorrect: app.officialServerSettings[HEALTH][TDM]
+            // I understand where the concern for DeepMerge came from now
+            // I recommended using the constant variables instead of numeric constants, not instead of the properties
+            // To create a server: new ASBM.Server(array[0-7][0-3], IBM, singlePlayer)
             officialValues: () => app.officialServerSettings,
          },
 

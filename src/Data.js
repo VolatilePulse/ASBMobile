@@ -4,12 +4,14 @@
 
 "use strict";
 
+/** @namespace Data */
 var Data = {
 
    /**
-    * @description Creates ASBM ready objects from a JSON String and populates the DB
-    * @param {JSON String} text 
-    * @namespace Data
+    * Creates ASBM ready objects from a JSON String and populates the DB
+    * @async
+    * @param {JSON String} json  
+    * @returns {Promise}
     */
 
    // This function is only called either when the values.json file needs update (and is passed the text from the file)

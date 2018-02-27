@@ -7,6 +7,7 @@
 var ASBM = ASBM || {};
 ASBM.UI = ASBM.UI || {};
 
+/** @namespace ASBM.UI */
 // Populates the Drop Down Element with the Species
 ASBM.UI.DropDownInit = function () {
    for (var species in app.creatures) {

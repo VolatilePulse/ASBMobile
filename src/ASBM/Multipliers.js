@@ -2,8 +2,7 @@
 
 var ASBM = ASBM || {};
 
-/** @namespace */
-// TODO Better layout of the constructors for the entire file to handle Copies and Empty
+/** @namespace ASBM */
 ASBM.StatMultiplier = class {
    constructor(stat) {
       // Copy Constructor
@@ -34,7 +33,10 @@ ASBM.StatMultiplier = class {
    }
 }
 
-/** @namespace */
+/**
+ * Creates an array of Creature StatMultipliers
+ * @param {[[]]} stats An array of the statmultipliers
+ */
 ASBM.CreatureStats = class {
    constructor(stats, TBHM = 1, oxygenNotUsed = false, speedImprintIgnored = false) {
       for (var i = 0; i < 8; i ++)
@@ -55,7 +57,6 @@ ASBM.CreatureStats = class {
    }
 }
 
-/** @namespace */
 ASBM.ServerMultiplier = class {
    constructor(settingArray, IBM) {
       this.IBM = IBM; // Imprint Bonus Multiplier
@@ -71,8 +72,6 @@ ASBM.ServerMultiplier = class {
    }
 }
 
-/** @namespace */
-// TODO Handle any cases where the user chose to override official, even if it is the same
 ASBM.Server = class {
    constructor(settingsArray, IBM = 1, singlePlayer = false) {
       this.singlePlayer = singlePlayer; // singlePlayer Setting

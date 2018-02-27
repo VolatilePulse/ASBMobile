@@ -1,12 +1,11 @@
 "use strict";
 
+/** @namespace Ark */
 var Ark = {
    /**
-    * @description Returns the precision to match the displayed in game values.
+    * Returns the precision to match the displayed in game values.
     * @param {number} index Number corresponding with the index of a stat
     * @returns {number} The number of decimal places the stat must meet
-    * @name Precision
-    * @see RoundTo
     */
    Precision(index) {
       // Displays Damage and Speed as 153.5(%)
@@ -22,7 +21,12 @@ var Ark = {
       return 1;
    },
 
-   // Returns a value (from ASBM) for comparison or displying in the UI
+   /**
+    * Will convert decimal values to a percentage and round to the correct Display precision
+    * @param {number} value The value that is to be rounded
+    * @param {number} index Number corresponding with the index of a stat
+    * @returns {number} The rounded, converted value
+    */
    DisplayValue(value, index) {
       let returnValue = value;
 
