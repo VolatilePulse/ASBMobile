@@ -57,7 +57,7 @@ var Ark = {
       if (server.singlePlayer)
          for (var stat in app.officialSPSettings)
             for (var multiplier in app.officialSPSettings[stat])
-               multipliers[stat][multiplier] = Utils.RoundTo(multipliers[stat][multiplier] * app.officialSPSettings, 3);
+               multipliers[stat][multiplier] = Utils.RoundTo(multipliers[stat][multiplier] * app.officialSPSettings[stat][multiplier], 3);
       
       multipliers = Utils.DeepMerge({}, multipliers, app.creatures[creature]);
       

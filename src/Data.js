@@ -30,7 +30,7 @@ var Data = {
 
             for(var i in jsonObject.species) {
                app.creatures[jsonObject.species[i].name] =
-                  new ASBM.StatMultipliers(jsonObject.species[i].statsRaw,
+                  new ASBM.CreatureStats(jsonObject.species[i].statsRaw,
                                            jsonObject.species[i].TBHM,
                                            jsonObject.species[i].doesNotUseOxygen,
                                            jsonObject.species[i].NoImprintingForSpeed);

@@ -48,12 +48,16 @@ ASBM.UI.Extractor = {
       var isBred = (ui.mode == "Bred");
       var imprintBonus = ui.imprint / 100;
       var exactly = !!ui.exactly;
+      var singlePlayer = !!ui.singlePlayer;
 
       // Prepare the input values for use with the extractor
       var values = ui.stats.map(Ark.ConvertValue);
 
-      // Create other important variables
-      var multipliers = Ark.GetMultipliers(app.officialServerSettings, species);
+      // TODO: This is only temporary until integrated into the Server UI
+      // FIXME: Without a permanent server structure, either one or all fail
+      app.currentServer = new ASBM.Server([null,null,null,null,null,null,null,null], 1, singlePlayer);
+
+      let multipliers = Ark.GetMultipliers(app.currentServer, data.species);
 
       let extractObject = new ASBM.Extractor(multipliers, values, level, isWild, isTamed, isBred, imprintBonus, exactly);
       extractObject.extract();

@@ -33,7 +33,8 @@ ASBM.UI.CreateApp = function () {
          officialServerSettings: {},
          officialSPSettings: {},
          extractObject: {},
-         myMultipliers: {},
+         creatures: {},
+         currentServer: {},
          multipliersDB: new Dexie("Multipliers"),
 
          testData: testData,

@@ -66,7 +66,10 @@ ASBM.UI.Tester = {
       // Prepare the input values for use with the extractor
       let values = data.stats.map(Ark.ConvertValue);
 
-      let multipliers = Ark.GetMultipliers(app.officialServerSettings, data.species);
+      // TODO: This is only temporary until integrated into the Server UI
+      app.currentServer = new ASBM.Server([null,null,null,null,null,null,null,null], 1, singlePlayer);
+
+      let multipliers = Ark.GetMultipliers(app.currentServer, data.species);
 
       let extractObject = new ASBM.Extractor(multipliers, values, data.level, isWild, isTamed, isBred, imprintBonus, exactly);
       extractObject.extract();
