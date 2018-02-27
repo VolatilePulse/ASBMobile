@@ -46,19 +46,76 @@ var dummyData = [
  * @description Initializes all variables that require the page to finish loading
  */
 function Init() {
-   extractor = ASBM.UI.CreateExtractor();
-   app = ASBM.UI.CreateApp();
+   extractor = Vue.component("extractor", {
+      props: ['dataLoaded'],
+      template: "#extractor-template",
+      data: () => ({
+         dummyData: dummyData,
+
+         species: "Rex",
+         mode: "Tamed",
+         imprint: 0,
+         level: "",
+         exactly: false,
+         stats: new Array(8),
+
+         extractor: {},
+      }),
+      computed: {
+         speciesNames: () => app.speciesNames,
+         statImages: () => app.statImages,
+      },
+      methods: {
+         extract: ASBM.UI.Extract,
+         testData: Testing,
+         insertDummyData: InsertDummyData,
+         formatFloat: (n, decimalPlaces = 2) => new Intl.NumberFormat({ maximumFractionDigits: decimalPlaces, useGrouping: false }).format(n),
+         formatRound: n => new Intl.NumberFormat({ maximumFractionDigits: 0, useGrouping: false }).format(n),
+         debugShowOptions: options => options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(','),
+         debugStatValue: (i, extractor) => extractor.results[i][0].calculateValue(extractor.m[i], !extractor.isWild, extractor.TE, extractor.IB),
+      },
+   });
+
+   app = new Vue({
+      el: '#app',
+      data: {
+         dataLoaded: false,
+
+         statImages: [
+            "Health.png", "Stamina.png", "Oxygen.png", "Food.png",
+            "Weight.png", "Melee.png", "Speed.png", "Torpor.png",
+         ],
+
+         speciesDB: {},
+         officialServerSettings: {},
+         officialSPSettings: {},
+         extractObject: {},
+         myMultipliers: {},
+         multipliersDB: new Dexie("Multipliers"),
+
+         dummyData: dummyData,
+
+         speciesNames: [],
+
+         extractor: {
+            species: "Rex",
+            mode: "Tamed",
+            imprint: 0,
+            exactly: false,
+            stats: new Array(8),
+         },
+      },
+   });
 
    Utils.AsyncFileRead("values.json")
       .then(json => Data.LoadValues(json))
       .then(() => ASBM.UI.DropDownInit())
-      .then(Utils.Delay(5000)) // demo delayed loading
       .then(() => app.dataLoaded = true) // Reveal the main form once loading is complete
       .catch(error => console.log("Load error: " + error));
 };
 
 function InsertDummyData(data) {
-   Object.assign(app.$refs.extractor, data);
+   Object.assign(app.extractor, data);
 }
 
 // Testing purposes

@@ -4,6 +4,7 @@
 
 "use strict";
 
+/** @namespace */
 var ASBM = ASBM || {};
 
 ASBM.Extractor = class {
@@ -45,7 +46,6 @@ ASBM.Extractor = class {
    }
 
    // FIXME: Creatures that don't use Oxygen aren't extracted properly
-   // TODO: They extract properly now, need to reduce their performance footprint though
    extract() {
       // If tame isn't bred (ignore wild level steps) and setting is enabled, consider wild steps (as set in settings)
       // TODO: Add consider wild levels
