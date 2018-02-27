@@ -46,5 +46,21 @@ var Ark = {
       returnValue = Utils.RoundTo(returnValue, Ark.Precision(index));
       
       return returnValue;
+   },
+
+   // Generate a multipliers object for the Extractor
+   GetMultipliers(server, creature) {
+      // The Server object tells us everything we need to know about the multipliers
+      let multipliers = Utils.DeepMerge({}, app.officialServerSettings, server);
+
+      // Single Player multiplies the official/override multipliers
+      if (server.singlePlayer)
+         for (var stat in app.officialSPSettings)
+            for (var multiplier in app.officialSPSettings[stat])
+               multipliers[stat][multiplier] *= app.officialSPSettings;
+      
+      multipliers = Utils.DeepMerge({}, app.)
+      
+      return returnValue;
    }
 }
