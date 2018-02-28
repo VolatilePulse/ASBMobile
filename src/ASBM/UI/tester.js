@@ -72,11 +72,23 @@ ASBM.UI.Tester = {
 
       let multipliers = Ark.GetMultipliers(app.currentServer, data.species);
 
-      let extractObject = new ASBM.Extractor(multipliers, values, data.level, isWild, isTamed, isBred, imprintBonus, exactly);
+      // Set the vueCreature properties to prepare for extraction
+      app.vueCreature = new ASBM.VueCreature;
+      app.vueCreature.wild = (data.mode == "Wild");
+      app.vueCreature.tamed = (data.mode == "Tamed");
+      app.vueCreature.bred = (data.mode == "Bred");
+      app.vueCreature.IB = data.imprint / 100;
+      app.vueCreature.exactly = !!data.exactly;
+      app.vueCreature.values = data.stats.map(Ark.ConvertValue);
+      app.vueCreature.server = new ASBM.Server(null, 1, !!data.singlePlayer);
+      app.vueCreature.level = data.level;
+      app.vueCreature.species = data.species;
+
+      let extractObject = new ASBM.Extractor(app.vueCreature);
       extractObject.extract();
 
-      let pass = JSON.stringify(data['results']) == JSON.stringify(extractObject.results);
+      let pass = JSON.stringify(data['results']) == JSON.stringify(app.vueCreature.stats);
 
-      return { pass: pass, results: extractObject.results };
+      return { pass: pass, results: app.vueCreature.stats };
    },
 };

@@ -33,7 +33,7 @@ ASBM.UI.Extractor = {
             formatFloat: (n, decimalPlaces = 2) => new Intl.NumberFormat({ maximumFractionDigits: decimalPlaces, useGrouping: false }).format(n),
             formatRound: n => new Intl.NumberFormat({ maximumFractionDigits: 0, useGrouping: false }).format(n),
             debugShowOptions: options => options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(','),
-            debugStatValue: (i, extractor) => extractor.results[i][0].calculateValue(extractor.m[i], !extractor.isWild, extractor.TE, extractor.IB),
+            debugStatValue: (i, extractor) => extractor.stats[i][0].calculateValue(Ark.GetMultipliers(extractor.server, extractor.species)[i], !extractor.wild, extractor.TE, extractor.IB),
          },
       });
    },
@@ -53,17 +53,24 @@ ASBM.UI.Extractor = {
       // Prepare the input values for use with the extractor
       var values = ui.stats.map(Ark.ConvertValue);
 
-      // TODO: This is only temporary until integrated into the Server UI
-      // FIXME: Without a permanent server structure, either one or all fail
-      app.currentServer = new ASBM.Server([null,null,null,null,null,null,null,null], 1, singlePlayer);
-
       let multipliers = Ark.GetMultipliers(app.currentServer, ui.species);
 
-      let extractObject = new ASBM.Extractor(multipliers, values, level, isWild, isTamed, isBred, imprintBonus, exactly);
+      // Set the vueCreature properties to prepare for extraction
+      app.vueCreature.wild = (ui.mode == "Wild");
+      app.vueCreature.tamed = (ui.mode == "Tamed");
+      app.vueCreature.bred = (ui.mode == "Bred");
+      app.vueCreature.IB = ui.imprint / 100;
+      app.vueCreature.exactly = !!ui.exactly;
+      app.vueCreature.values = ui.stats.map(Ark.ConvertValue);
+      app.vueCreature.server = new ASBM.Server(null, 1, !!ui.singlePlayer);
+      app.vueCreature.level = ui.level;
+      app.vueCreature.species = ui.species;
+
+      let extractObject = new ASBM.Extractor(app.vueCreature);
       extractObject.extract();
 
       // Copy into `app` so they will be displayed
-      ui.results = extractObject.results;
-      ui.extractor = extractObject;
+      ui.results = app.vueCreature.stats;
+      ui.extractor = app.vueCreature;
    },
 };

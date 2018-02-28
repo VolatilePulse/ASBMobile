@@ -126,6 +126,7 @@ ASBM.Creature = class {
       this.IB = c ? c.IB : 0;
       this.level = c ? c.level : 0;
       this.stats = [];
+      this.values = [];
 
       // Strips extractor data from TE based stats
       for (let i = 0; i < 8; i ++)
@@ -140,10 +141,11 @@ ASBM.VueCreature = class extends ASBM.Creature {
       // Initializes the Creature Constructor and gives this class those properties
       super();
       this.stats = [[],[],[],[],[],[],[],[]];
+      this.exactly = false;
       
       for (let i = 0; i < 8; i ++) {
          this.stats[i][0] = new ASBM.Stat;
-         this.stats[i].value = 0;
+         this.values.push(0);
       }
    }
 
@@ -152,7 +154,7 @@ ASBM.VueCreature = class extends ASBM.Creature {
 
       for (let i = 0; i < 8; i ++) {
          this.stats[i] = [c.stats[i]];
-         this.stats[i].value = this.stats[i][0].calculateValue(Ark.GetMultipliers(this.server, this.species), !this.wild, this.TE, this.IB);
+         this.values[i] = this.stats[i][0].calculateValue(Ark.GetMultipliers(this.server, this.species), !this.wild, this.TE, this.IB);
       }
    }
 

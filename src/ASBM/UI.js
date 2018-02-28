@@ -37,6 +37,7 @@ ASBM.UI.CreateApp = function () {
          creatures: {},
          currentServer: {},
          multipliersDB: new Dexie("Multipliers"),
+         vueCreature: new ASBM.VueCreature,
 
          testData: testData,
 
