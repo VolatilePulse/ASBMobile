@@ -22,17 +22,22 @@ ASBM.UI.Tester = {
          },
 
          methods: {
-            runTest: data => ASBM.UI.Tester.RunTest(data),
             runAllTests: ASBM.UI.Tester.RunAllTests,
-            openResults: function (index) { this.openTestIndex = (this.openTestIndex != index) ? index : null; },
-            isPass: function (index) { return this.testResults[index] && this.testResults[index].pass; },
-            isFail: function (index) { return this.testResults[index] && !this.testResults[index].pass; },
+            runTest: ASBM.UI.Tester.RunTest,
+            openResults(index) { this.openTestIndex = (this.openTestIndex != index) ? index : null; },
+            isPass(index) { return this.testResults[index] && this.testResults[index].pass; },
+            isFail(index) { return this.testResults[index] && !this.testResults[index].pass; },
          },
       });
    },
 
-   RunTest(index) {
+   async RunTest(index) {
       let ui = app.$refs.tester;
+
+      // Clear out existing pass/fail
+      Vue.set(ui.testResults, index, undefined);
+      await Utils.Delay(100); // allow the UI to update
+
       let results = ASBM.UI.Tester.PerformTest(ui.testData[index]);
       Vue.set(ui.testResults, index, results);
       ui.openTestIndex = index;
@@ -41,12 +46,20 @@ ASBM.UI.Tester = {
    async RunAllTests() {
       let ui = app.$refs.tester;
 
+      // Clear out existing pass/fail
+      for (let index = 0; index < ui.testData.length; index++) {
+         Vue.set(ui.testResults, index, undefined);
+      }
+
+      await Utils.Delay(100); // allow the UI to update
+
       let data;
       let failFound = false;
       for (let index = 0; index < ui.testData.length; index++) {
          let results = ASBM.UI.Tester.PerformTest(ui.testData[index]);
          Vue.set(ui.testResults, index, results);
 
+         // Open up the first failure found
          if (!failFound && results.pass == false) {
             ui.openTestIndex = index;
             failFound = true;
@@ -67,20 +80,21 @@ ASBM.UI.Tester = {
       // Prepare the input values for use with the extractor
       let values = data.stats.map(Ark.ConvertValue);
 
-      // TODO: This is only temporary until integrated into the Server UI
-      app.currentServer = new ASBM.Server([null,null,null,null,null,null,null,null], 1, singlePlayer);
+      // TODO: Allow tests to specify overridden multipliers
+      // Tests should always use a custom server, not the user's current server
+      let tempServer = new ASBM.Server([null,null,null,null,null,null,null,null], 1, singlePlayer);
 
       let multipliers = Ark.GetMultipliers(app.currentServer, data.species);
 
       // Set the vueCreature properties to prepare for extraction
-      app.vueCreature = new ASBM.VueCreature;
-      app.vueCreature.wild = (data.mode == "Wild");
-      app.vueCreature.tamed = (data.mode == "Tamed");
-      app.vueCreature.bred = (data.mode == "Bred");
-      app.vueCreature.IB = data.imprint / 100;
-      app.vueCreature.exactly = !!data.exactly;
-      app.vueCreature.values = data.stats.map(Ark.ConvertValue);
-      app.vueCreature.server = new ASBM.Server(null, 1, !!data.singlePlayer);
+      app.vueCreature = new ASBM.VueCreature();
+      app.vueCreature.wild = isWild;
+      app.vueCreature.tamed = isTamed;
+      app.vueCreature.bred = isBred;
+      app.vueCreature.IB = imprintBonus;
+      app.vueCreature.exactly = exactly;
+      app.vueCreature.values = values;
+      app.vueCreature.server = tempServer;
       app.vueCreature.level = data.level;
       app.vueCreature.species = data.species;
 

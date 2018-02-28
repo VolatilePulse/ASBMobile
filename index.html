@@ -161,11 +161,12 @@
                <div v-if="index in testResults && openTestIndex==index">
                      <div>
                         <span>Got:</span><br/>
-                        <code>{{JSON.stringify(testResults[index])}}</code>
+                        <code v-if="testResults[index]">{{JSON.stringify(testResults[index]['results'])}}</code>
+                        <code v-else>-blank-</code>
                      </div>
                      <div>
                         <span>Expected:</span><br/>
-                        <code>{{JSON.stringify(testData[index].results)}}</code>
+                        <code>{{JSON.stringify(testData[index]['results'])}}</code>
                      </div>
                </div>
             </li>
