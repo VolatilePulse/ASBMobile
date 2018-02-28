@@ -1,0 +1,31 @@
+<div>
+   <div class="w3-sidebar w3-bar-block w3-collapse w3-animate-left w3-card w3-teal" :style="{ display: showSidebar ? 'block':'none' }">
+      <button class="w3-bar-item w3-button w3-hide-large" @click="showSidebar=false">&times;</button>
+      <button class="w3-bar-item w3-button" :class="{'w3-red':tab=='welcome'}" @click="tab='welcome'">About</button>
+      <button class="w3-bar-item w3-button" :class="{'w3-red':tab=='servers'}" @click="tab='servers'">Servers</button>
+      <button class="w3-bar-item w3-button" :class="{'w3-red':tab=='extractor'}" @click="tab='extractor'">Extractor</button>
+      <button class="w3-bar-item w3-button" :class="{'w3-red':tab=='tester'}" v-if="devMode" @click="tab='tester'">Tester (dev-only)</button>
+   </div>
+   <div class="w3-main w3-animate-opacity" style="margin-left:200px">
+      <header class="w3-teal w3-container">
+         <button class="w3-button w3-teal w3-xlarge w3-hide-large" @click.prevent="showSidebar=true">&#9776;</button>
+         <h1 class="w3-right">ASBMobile</h1>
+      </header>
+
+      <div v-if="tab=='welcome'" class="w3-container w3-animate-opacity">
+         <about/>
+      </div>
+      <div v-else-if="dataLoaded && tab=='servers'" class="w3-container w3-animate-opacity">
+         <servers class="w3-animate-opacity"/>
+      </div>
+      <div v-else-if="dataLoaded && tab=='extractor'" class="w3-container">
+         <extractor class="w3-animate-opacity"/>
+      </div>
+      <div v-else-if="dataLoaded && tab=='tester'" class="w3-container w3-animate-opacity">
+         <tester />
+      </div>
+      <div v-else-if="!dataLoaded">
+         <p>...loading...</p>
+      </div>
+   </div>
+</div>

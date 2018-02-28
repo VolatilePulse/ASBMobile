@@ -1,0 +1,29 @@
+<div class="w3-container">
+   <div class="w3-container">
+      <a href="#runAllTests" @click.prevent="runAllTests" class="w3-right">Run All</a>
+   </div>
+   <ul class="w3-ul">
+      <li v-for="(data,index) in testData" class="w3-hoverable">
+         <span class="w3-button w3-right w3-xlarge" @click="runTest(index)">&#x25B8;</span>
+         <div class="" @click="openResults(index)">
+            <div>
+               <span v-if="isPass(index)" class="w3-tag w3-green">pass</span>
+               <span v-if="isFail(index)" class="w3-tag w3-red">fail</span>
+               <span class="w3-large">{{data.tag}}</span>
+            </div>
+            <span>{{data.stats.join(', ')}}</span>
+         </div>
+         <div v-if="index in results && openTestIndex==index">
+               <div>
+                  <span>Got:</span><br/>
+                  <code v-if="results[index]">{{JSON.stringify(results[index]['results'])}}</code>
+                  <code v-else>-blank-</code>
+               </div>
+               <div>
+                  <span>Expected:</span><br/>
+                  <code>{{JSON.stringify(testData[index]['results'])}}</code>
+               </div>
+         </div>
+      </li>
+   </ul>
+</div>

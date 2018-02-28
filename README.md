@@ -6,7 +6,7 @@ https://volatilepulse.github.io/ASBMobile/
 ## TODO
 - Add extra test cases
 - Server copy constructor
-- Add IBM value to server settings 
+- Add IBM value to server settings
 - Add Server name property for storage
 - Write servers to the DB
 - Store values.json version number to DB
@@ -33,3 +33,6 @@ https://volatilepulse.github.io/ASBMobile/
 - Library must render well on mobile. Side scrolling is not acceptable
 - Implement footer to display relevant data to user, I.E. loading values, syncing to cloud, offline mode, etc.
 - Add quick access to Server window/Settings
+
+
+Template from https://github.com/LabhanshAgrawal/vue-pwa-template.

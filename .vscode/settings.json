@@ -1,4 +1,5 @@
 {
-    "editor.detectIndentation": false,
-    "editor.tabSize": 3
+   "liveServer.settings.root": "/docs",
+   "editor.detectIndentation": false,
+   "editor.tabSize": 3
 }

@@ -1,8 +1,0 @@
-{
-   "compilerOptions": {
-       "target": "ES6"
-   },
-   "exclude": [
-      "css/w3.css"
-   ]
-}
