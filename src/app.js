@@ -61,6 +61,19 @@ function Init() {
       //.then(Utils.DelayFunction(5000)) // demo delayed loading
       .then(() => app.dataLoaded = true) // Reveal the main form once loading is complete
       .catch(error => console.log("Load error: " + error));
+   
+   // Testing out the new (Vue)Creature class and copy assignment
+   // Can be removed (Demonstration purposes only)
+   var stuff1 = new ASBM.VueCreature();
+   var stuff2 = new ASBM.Creature();
+   console.log(JSON.stringify(stuff1));
+   console.log(JSON.stringify(stuff2));
+   stuff2.stats[2] = new ASBM.Stat(2,10);
+   stuff2.species = "Rex";
+   stuff1.copyCreature(stuff2);
+   console.log(JSON.stringify(stuff1));
+   stuff1.clear();
+   console.log(JSON.stringify(stuff1));
 };
 
 function InsertTestData(data) {

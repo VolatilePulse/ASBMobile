@@ -2,6 +2,7 @@
 
 var ASBM = ASBM || {};
 
+/** @namespace ASBM */
 ASBM.Stat = class {
    constructor(Lw = 0, Ld = 0) {
       // Copy Constructor
@@ -111,18 +112,51 @@ ASBM.Stat = class {
 }
 
 ASBM.Creature = class {
+   constructor(c) {
+      this.name = c ? c.name : "";
+      this.tribe = c ? c.tribe : "";
+      this.owner = c ? c.owner : "";
+      this.server = c ? c.server : new ASBM.Server;
+      this.species = c ? c.species : "";
+      this.UUID = c ? c.UUID : "";
+      this.wild = true;
+      this.tamed = false;
+      this.bred = false;
+      this.TE = c ? c.TE : 0;
+      this.IB = c ? c.IB : 0;
+      this.level = c ? c.level : 0;
+      this.stats = [];
+
+      // Strips extractor data from TE based stats
+      for (let i = 0; i < 8; i ++)
+         // The frontmost stat is the one that is considered "chosen" and is to be used for the creature
+         this.stats.push(c ? c.stats[i][0] : new ASBM.Stat);
+   }
+}
+
+// This gives Vue a wrapper to interact with and use in the Extractor/Tester/Calculator
+ASBM.VueCreature = class extends ASBM.Creature {
    constructor() {
-      name: "";
-      tribe: "";
-      owner: "";
-      server: "";
-      species: "";
-      UUID: "";
-      TE: 0;
-      IB: 0;
-      level: 0;
+      // Initializes the Creature Constructor and gives this class those properties
+      super();
+      this.stats = [[],[],[],[],[],[],[],[]];
       
-      for (var i = 0; i < 8; i ++)
-         this.stats.push(new ASBM.Stat());
+      for (let i = 0; i < 8; i ++) {
+         this.stats[i][0] = new ASBM.Stat;
+         this.stats[i].value = 0;
+      }
+   }
+
+   copyCreature(c) {
+      Utils.DeepMerge(this, c);
+
+      for (let i = 0; i < 8; i ++) {
+         this.stats[i] = [c.stats[i]];
+         this.stats[i].value = this.stats[i][0].calculateValue(Ark.GetMultipliers(this.server, this.species), !this.wild, this.TE, this.IB);
+      }
+   }
+
+   clear() {
+      Utils.DeepMerge(this, new ASBM.VueCreature);
    }
 }

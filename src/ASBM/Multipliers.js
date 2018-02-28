@@ -57,6 +57,7 @@ ASBM.CreatureStats = class {
    }
 }
 
+/** @namespace ASBM */
 ASBM.ServerMultiplier = class {
    constructor(settingArray, IBM) {
       this.IBM = IBM; // Imprint Bonus Multiplier
@@ -72,12 +73,14 @@ ASBM.ServerMultiplier = class {
    }
 }
 
+/** @namespace ASBM */
 ASBM.Server = class {
    constructor(settingsArray, IBM = 1, singlePlayer = false) {
       this.singlePlayer = singlePlayer; // singlePlayer Setting
       
-      for (var i = 0; i < 8; i ++)
-         if (settingsArray[i])
-            this[i] = new ASBM.ServerMultiplier(settingsArray[i], IBM);
+      if (settingsArray)
+         for (var i = 0; i < 8; i ++)
+            if (settingsArray[i])
+               this[i] = new ASBM.ServerMultiplier(settingsArray[i], IBM);
    }
 }
