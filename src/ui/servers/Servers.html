@@ -1,7 +1,7 @@
 <div class="w3-container">
-   <!-- <select>
-      <option v-for="server in servers" v-bind:key="sever.id">{{server.name}}</option>
-   </select> -->
+   <select>
+      <option v-for="(server, name) in servers" :key="name">{{name}}</option>
+   </select>
    <input type="checkbox" id="cbSinglePlayer" v-model="server.singlePlayer" class="w3-check">
    <label for="cbSinglePlayer">Single Player</label>
    <table class="w3-table w3-striped w3-border w3-centered w3-responsive">

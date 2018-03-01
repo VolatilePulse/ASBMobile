@@ -14,7 +14,7 @@ export default withRender({
    template: "#servers-template",
 
    data: () => ({
-      servers: [],
+      servers: app.data.servers,
       server: {
          singlePlayer: false,
          multipliers: Utils.FilledArray(8, () => Utils.FilledArray(4, () => 0)),
