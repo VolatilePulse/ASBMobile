@@ -5,21 +5,25 @@ import withRender from './Extractor.html?style=./Extractor.css';
 
 import * as app from "../../app";
 import * as Ark from '../../ark';
-import { Server } from '../../ark/multipliers';
 import { Extractor } from '../../ark/extractor';
 
+import testData from '../../test_data';
 
 export default withRender({
    props: [],
    template: "#extractor-template",
 
    data: () => ({
+      testData: testData,
+
       species: "Rex",
       mode: "Tamed",
       imprint: 0,
       level: "",
       exactly: false,
       stats: new Array(8),
+
+      extractor: {},
    }),
 
    computed: {
@@ -29,38 +33,34 @@ export default withRender({
 
    methods: {
       extract: PerformExtraction,
+      insertTestData: (data) => {Object.assign(this.extractor, data);},
       formatFloat: (n, decimalPlaces = 2) => new Intl.NumberFormat({ maximumFractionDigits: decimalPlaces, useGrouping: false }).format(n),
       formatRound: n => new Intl.NumberFormat({ maximumFractionDigits: 0, useGrouping: false }).format(n),
       debugShowOptions: options => options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(','),
-      debugStatValue: (i, extractor) => extractor.results[i][0].calculateValue(extractor.m[i], !extractor.isWild, extractor.TE, extractor.IB),
+      debugStatValue: (i, extractor) => extractor.results[i][0].calculateValue(Ark.GetMultipliers(extractor.server, extractor.species)[i], !extractor.wild, extractor.TE, extractor.IB),
    },
 });
 
 // TODO: Prevent user from crashing the app by entering bad data
 function PerformExtraction(ui) {
-   // Read values from the UI
-   var species = ui.species;
-   var level = ui.level;
-   var isWild = (ui.mode == "Wild");
-   var isTamed = (ui.mode == "Tamed");
-   var isBred = (ui.mode == "Bred");
-   var imprintBonus = ui.imprint / 100;
-   var exactly = !!ui.exactly;
-   var singlePlayer = !!ui.singlePlayer;
+   // Change the currentServer to the Test Data's server
+   app.data.currentServer = ui.server;
 
-   // Prepare the input values for use with the extractor
-   var values = ui.stats.map(Ark.ConvertValue);
+   // Set the vueCreature properties to prepare for extraction
+   app.data.vueCreature.wild = (ui.mode == "Wild");
+   app.data.vueCreature.tamed = (ui.mode == "Tamed");
+   app.data.vueCreature.bred = (ui.mode == "Bred");
+   app.data.vueCreature.IB = ui.imprint / 100;
+   app.data.vueCreature.exactly = !!ui.exactly;
+   app.data.vueCreature.values = ui.stats.map(Ark.ConvertValue);
+   app.data.vueCreature.server = ui.server;
+   app.data.vueCreature.level = ui.level;
+   app.data.vueCreature.species = ui.species;
 
-   // TODO: This is only temporary until integrated into the Server UI
-   // FIXME: Without a permanent server structure, either one or all fail
-   app.data.currentServer = new Server([null, null, null, null, null, null, null, null], 1, singlePlayer);
-
-   let multipliers = Ark.GetMultipliers(app.data.currentServer, species);
-
-   let extractObject = new Extractor(multipliers, values, level, isWild, isTamed, isBred, imprintBonus, exactly);
+   let extractObject = new Extractor(app.data.vueCreature);
    extractObject.extract();
 
    // Copy into `app` so they will be displayed
-   ui.results = extractObject.results;
-   ui.extractor = extractObject;
+   ui.results = app.data.vueCreature.stats;
+   ui.extractor = app.data.vueCreature;
 }

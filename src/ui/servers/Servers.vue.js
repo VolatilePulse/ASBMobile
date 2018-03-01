@@ -31,7 +31,7 @@ export default withRender({
       // I understand where the concern for DeepMerge came from now
       // I recommended using the constant variables instead of numeric constants, not instead of the properties
       // To create a server: new ASBM.Server(array[0-7][0-3], IBM, singlePlayer)
-      officialValues: () => app.data.officialServerSettings,
+      officialValues: () => app.data.officialServer,
    },
 
    methods: {

@@ -1,16 +1,14 @@
 "use strict";
 
 import * as Utils from '../utils';
+import * as Ark from '../ark';
 
 export class Stat {
    /**
     * @param {number|{Lw:number,Ld:number}} Lw Wild levels
     * @param {number?} Ld Domesticated levels
     */
-   constructor(Lw=0, Ld=0) {
-      this.wildLevel = undefined;
-      this.TE = undefined;
-
+   constructor(Lw = 0, Ld = 0) {
       if (Utils.IsObject(Lw)) {
          // @ts-ignore
          this.Lw = Lw.Lw;
@@ -117,20 +115,52 @@ export class Stat {
 }
 
 export class Creature {
-   constructor() {
-      this.name= "";
-      this.tribe= "";
-      this.owner= "";
-      this.server= "";
-      this.species= "";
-      this.UUID= "";
-      this.TE= 0;
-      this.IB= 0;
-      this.level= 0;
-
+   constructor(c) {
+      this.name = c ? c.name : "";
+      this.tribe = c ? c.tribe : "";
+      this.owner = c ? c.owner : "";
+      this.server = c ? c.server : "";
+      this.species = c ? c.species : "";
+      this.UUID = c ? c.UUID : "";
+      this.wild = true;
+      this.tamed = false;
+      this.bred = false;
+      this.TE = c ? c.TE : 0;
+      this.IB = c ? c.IB : 0;
+      this.level = c ? c.level : 0;
       this.stats = [];
+      this.values = [];
 
-      for (var i = 0; i < 8; i ++)
-         this.stats.push(new Stat());
+      // Strips extractor data from TE based stats
+      for (let i = 0; i < 8; i ++)
+         // The frontmost stat is the one that is considered "chosen" and is to be used for the creature
+         this.stats.push(c ? c.stats[i][0] : new Stat);
+   }
+}
+
+export class VueCreature extends Creature {
+   constructor() {
+      // Initializes the Creature Constructor and gives this class those properties
+      super();
+      this.stats = [[], [], [], [], [], [], [], []];
+      this.exactly = false;
+
+      for (let i = 0; i < 8; i ++) {
+         this.stats[i][0] = new Stat;
+         this.stats[i].push(0);
+      }
+   }
+
+   copyCreature(c) {
+      Utils.DeepMerge(this, c);
+
+      for (let i = 0; i < 8; i ++) {
+         this.stats[i] = [c.stats[i]];
+         this.values[i] = this.stats[i][0].calculateValue(Ark.GetMultipliers(this.server, this.species), !this.wild, this.TE, this.IB);
+      }
+   }
+
+   clear() {
+      Utils.DeepMerge(this, new VueCreature);
    }
 }

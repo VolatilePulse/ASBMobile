@@ -76,8 +76,9 @@ export class Server {
    constructor(settingsArray, IBM = 1, singlePlayer = false) {
       this.singlePlayer = singlePlayer; // singlePlayer Setting
 
-      for (var i = 0; i < 8; i++)
-         if (settingsArray[i])
-            this[i] = new ServerMultiplier(settingsArray[i], IBM);
+      if (settingsArray)
+         for (var i = 0; i < 8; i++)
+            if (settingsArray[i])
+               this[i] = new ServerMultiplier(settingsArray[i], IBM);
    }
 }

@@ -8,8 +8,8 @@ import Vue from 'vue';
 import * as app from "../../app";
 import * as Ark from '../../ark';
 import * as Utils from '../../utils';
-import { Server } from '../../ark/multipliers';
 import { Extractor } from '../../ark/extractor';
+import { VueCreature } from '../../ark/creature';
 
 import testData from '../../test_data';
 
@@ -60,25 +60,25 @@ async function RunAllTests(ui) {
 }
 
 function PerformTest(data) {
-   var isWild = (data.mode == "Wild");
-   var isTamed = (data.mode == "Tamed");
-   var isBred = (data.mode == "Bred");
-   var imprintBonus = data.imprint / 100;
-   var exactly = !!data.exactly;
-   var singlePlayer = !!data.singlePlayer;
-
-   // Prepare the input values for use with the extractor
-   let values = data.stats.map(Ark.ConvertValue);
-
    // TODO: This is only temporary until integrated into the Server UI
-   app.data.currentServer = new Server([null, null, null, null, null, null, null, null], 1, singlePlayer);
+   app.data.currentServer = data.server;
 
-   let multipliers = Ark.GetMultipliers(app.data.currentServer, data.species);
+   // Set the vueCreature properties to prepare for extraction
+   app.data.vueCreature = new VueCreature;
+   app.data.vueCreature.wild = (data.mode == "Wild");
+   app.data.vueCreature.tamed = (data.mode == "Tamed");
+   app.data.vueCreature.bred = (data.mode == "Bred");
+   app.data.vueCreature.IB = data.imprint / 100;
+   app.data.vueCreature.exactly = !!data.exactly;
+   app.data.vueCreature.values = data.stats.map(Ark.ConvertValue);
+   app.data.vueCreature.server = data.server;
+   app.data.vueCreature.level = data.level;
+   app.data.vueCreature.species = data.species;
 
-   let extractObject = new Extractor(multipliers, values, data.level, isWild, isTamed, isBred, imprintBonus, exactly);
+   let extractObject = new Extractor(app.data.vueCreature);
    extractObject.extract();
 
-   let pass = JSON.stringify(data['results']) == JSON.stringify(extractObject.results);
+   let pass = JSON.stringify(data['results']) == JSON.stringify(app.data.vueCreature.stats);
 
-   return { pass: pass, results: extractObject.results };
+   return { pass: pass, results: app.data.vueCreature.stats };
 }

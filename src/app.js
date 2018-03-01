@@ -1,4 +1,5 @@
 import Vue from "vue";
+import { VueCreature } from "./ark/creature";
 
 import Shell from "./ui/shell/Shell.vue";
 
@@ -24,8 +25,10 @@ export const vueApp = new Vue({
       valuesJson: {},
       speciesNames: [],
       speciesMultipliers: {},
-      officialServerSettings: {},
-      officialSPSettings: {},
+      servers: {},
+      officialServer: {},
+      officialSPMultiplier: {},
+      vueCreature: new VueCreature,
 
       currentServer: {},
 

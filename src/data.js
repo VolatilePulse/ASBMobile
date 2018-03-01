@@ -8,6 +8,7 @@ import Dexie from "dexie";
 
 import * as app from './app';
 import { CreatureStats } from './ark/multipliers';
+import { Server } from './ark/multipliers';
 
 
 export const multipliers = new Dexie("Multipliers");
@@ -54,11 +55,6 @@ export async function LoadValues(json) {
    // Parse the received JSON file
    let jsonObject = JSON.parse(json);
 
-   // app.data.valuesJson = jsonObject;
-   // app.data.speciesNames = app.data.valuesJson.species.map(species => species.name);
-   // app.data.officialServerSettings = new Server(jsonObject.statMultipliers, jsonObject.imprintingMultiplier);
-   // app.data.officialSPSettings = new Server(jsonObject.statMultipliersSP, jsonObject.imprintingMultiplier, true);
-
    // Array to pass the multipliers using .bulkPut
    let linearArray = [];
 
@@ -76,6 +72,15 @@ export async function LoadValues(json) {
             app.data.speciesMultipliers[speciesData.name][index]));
       }
    }
+
+   // Define the constant servers and populate the list if empty
+   app.data.officialServer = new Server(jsonObject.statMultipliers, jsonObject.imprintingMultiplier);
+   app.data.officialSPMultiplier = new Server(jsonObject.statMultipliersSP, jsonObject.imprintingMultiplier, true);
+   app.data.servers["Official Server"] = new Server(null, 1, false);
+   app.data.servers["Official Single Player"] = new Server(null, 1, true);
+   // Generate some test servers
+   app.data.servers["kohonac HP.IDM: 2.0"] = new Server([[,, 2, ],,,,,,, ], 1, true);
+   app.data.servers["eldoco87"] = new Server([,,,,,, [2,,, ], ], 1, false);
 
    await multipliers.statMultipliers.bulkPut(linearArray);
 
