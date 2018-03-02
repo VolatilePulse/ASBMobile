@@ -50,18 +50,22 @@ export function ConvertValue(value, index) {
    return returnValue;
 }
 
-// Generate a multipliers object for the Extractor
-export function GetMultipliers(server, creature) {
+/**
+ * Generate a multipliers object for the Extractor
+ * @param {string} serverName
+ * @param {string} speciesName
+ */
+export function GetMultipliers(serverName, speciesName) {
    // The Server object tells us everything we need to know about the multipliers
-   let multipliers = Utils.DeepMerge({}, app.data.officialServer, app.data.servers[server]);
+   let multipliers = Utils.DeepMerge({}, app.data.officialServer, app.data.servers[serverName]);
 
    // Single Player multiplies the official/override multipliers
-   if (app.data.servers[server].singlePlayer)
+   if (app.data.servers[serverName].singlePlayer)
       for (var stat in app.data.officialSPMultiplier)
          for (var multiplier in app.data.officialSPMultiplier[stat])
             multipliers[stat][multiplier] = Utils.RoundTo(multipliers[stat][multiplier] * app.data.officialSPMultiplier[stat][multiplier], 3);
 
-   Utils.DeepMerge(multipliers, app.data.speciesMultipliers[creature]);
+   Utils.DeepMerge(multipliers, app.data.speciesMultipliers[speciesName]);
 
    return multipliers;
 }

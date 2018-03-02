@@ -13,7 +13,7 @@ export class Extractor {
    //constructor(multipliers, values, level, isWild = true, isTamed = false, isBred = false, imprintBonus = 0, exactly = false) {
    constructor(vueCreature) {
       this.c = vueCreature;
-      this.c.m = Ark.GetMultipliers(this.c.server, this.c.species);
+      this.c.m = Ark.GetMultipliers(this.c.serverName, this.c.species);
 
       // Clear the checked property for future extractions
       for (let i = 0; i < 8; i ++) {

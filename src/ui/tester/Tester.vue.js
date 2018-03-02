@@ -61,7 +61,7 @@ async function RunAllTests(ui) {
 
 function PerformTest(data) {
    // TODO: This is only temporary until integrated into the Server UI
-   app.data.currentServer = data.server;
+   app.data.currentServerName = data.serverName;
 
    // Set the vueCreature properties to prepare for extraction
    app.data.vueCreature = new VueCreature;
@@ -71,7 +71,7 @@ function PerformTest(data) {
    app.data.vueCreature.IB = data.imprint / 100;
    app.data.vueCreature.exactly = !!data.exactly;
    app.data.vueCreature.values = data.stats.map(Ark.ConvertValue);
-   app.data.vueCreature.server = data.server;
+   app.data.vueCreature.serverName = data.serverName;
    app.data.vueCreature.level = data.level;
    app.data.vueCreature.species = data.species;
 

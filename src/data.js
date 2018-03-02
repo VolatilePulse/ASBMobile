@@ -32,14 +32,6 @@ settings.version(1).stores({
 settings.open();
 
 /**
- * @returns {string[]} Array of sorted species names
-*/
-export function GetSpeciesNames() {
-   return multipliers.statMultipliers.orderBy("species").keys()
-      .then(allKeys => allKeys.map(row => row.species));
-}
-
-/**
  * Creates ASBM ready objects from a JSON String and populates the DB
  * @async
  * @param {string} json Json-encoded stirng
@@ -58,8 +50,12 @@ export async function LoadValues(json) {
    // Array to pass the multipliers using .bulkPut
    let linearArray = [];
 
+   // Clear species list, ready to be populated
+   app.data.speciesNames = [];
+
    for (var i in jsonObject.species) {
       let speciesData = jsonObject.species[i];
+      app.data.speciesNames.push(speciesData.name);
       app.data.speciesMultipliers[speciesData.name] =
          new CreatureStats(speciesData.statsRaw,
             speciesData.TBHM,
@@ -73,16 +69,14 @@ export async function LoadValues(json) {
       }
    }
 
+   await multipliers.statMultipliers.bulkPut(linearArray);
+
+   // Sorted species names, please
+   app.data.speciesNames.sort();
+
    // Define the constant servers and populate the list if empty
    app.data.officialServer = new Server(jsonObject.statMultipliers, jsonObject.imprintingMultiplier);
    app.data.officialSPMultiplier = new Server(jsonObject.statMultipliersSP, jsonObject.imprintingMultiplier, true);
-   app.data.servers["Official Server"] = new Server(null, 1, false);
-   app.data.servers["Official Single Player"] = new Server(null, 1, true);
-   // Generate some test servers
-   app.data.servers["kohonac HP.IDM: 2.0"] = new Server([[,, 2, ],,,,,,, ], 1, true);
-   app.data.servers["eldoco87"] = new Server([,,,,,, [2,,, ], ], 1, false);
-
-   await multipliers.statMultipliers.bulkPut(linearArray);
 
    // var testObj = {};
    // await multipliers.statMultiplier.toCollection().each(obj => {

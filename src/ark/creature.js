@@ -119,7 +119,7 @@ export class Creature {
       this.name = c ? c.name : "";
       this.tribe = c ? c.tribe : "";
       this.owner = c ? c.owner : "";
-      this.server = c ? c.server : "";
+      this.serverName = c ? c.serverName : "";
       this.species = c ? c.species : "";
       this.UUID = c ? c.UUID : "";
       this.wild = true;
@@ -156,7 +156,7 @@ export class VueCreature extends Creature {
 
       for (let i = 0; i < 8; i ++) {
          this.stats[i] = [c.stats[i]];
-         this.values[i] = this.stats[i][0].calculateValue(Ark.GetMultipliers(this.server, this.species), !this.wild, this.TE, this.IB);
+         this.values[i] = this.stats[i][0].calculateValue(Ark.GetMultipliers(this.serverName, this.species), !this.wild, this.TE, this.IB);
       }
    }
 

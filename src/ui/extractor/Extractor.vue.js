@@ -8,6 +8,8 @@ import * as Ark from '../../ark';
 import { Extractor } from '../../ark/extractor';
 
 import testData from '../../test_data';
+import { FilledArray } from '../../utils';
+
 
 export default withRender({
    props: [],
@@ -16,14 +18,15 @@ export default withRender({
    data: () => ({
       testData: testData,
 
-      species: "Rex",
+      autoExtract: false,
+
       mode: "Tamed",
       imprint: 0,
-      level: "",
       exactly: false,
-      stats: new Array(8),
+      values: [],
 
       extractor: {},
+      creature: {},
    }),
 
    computed: {
@@ -33,34 +36,44 @@ export default withRender({
 
    methods: {
       extract: PerformExtraction,
-      insertTestData: (data) => {Object.assign(this.extractor, data);},
+      insertTestData: InsertTestData,
       formatFloat: (n, decimalPlaces = 2) => new Intl.NumberFormat({ maximumFractionDigits: decimalPlaces, useGrouping: false }).format(n),
       formatRound: n => new Intl.NumberFormat({ maximumFractionDigits: 0, useGrouping: false }).format(n),
-      debugShowOptions: options => options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(','),
-      debugStatValue: (i, extractor) => extractor.results[i][0].calculateValue(Ark.GetMultipliers(extractor.server, extractor.species)[i], !extractor.wild, extractor.TE, extractor.IB),
+      debugShowOptions: options => (options && options['length']) ? options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(',') : "-none-",
+      debugStatValue(i) {
+         var multipliers = Ark.GetMultipliers(app.data.currentServerName, this.extractor.species);
+         return this.creature.stats[i][0].calculateValue(multipliers[i], !this.extractor.wild, this.extractor.TE, this.extractor.IB);
+      }
    },
+
+   created() {
+      this.extractor = new Extractor(app.data.tempCreature);
+      this.creature = this.extractor.c;
+   }
 });
 
-// TODO: Prevent user from crashing the app by entering bad data
-function PerformExtraction(ui) {
-   // Change the currentServer to the Test Data's server
-   app.data.currentServer = ui.server;
+function InsertTestData(test) {
+   // Copy some fields from the test into the extractor
+   for (let field of ['species', 'level', 'imprint', 'exactly', 'mode'])
+      this.creature[field] = test[field];
 
-   // Set the vueCreature properties to prepare for extraction
-   app.data.vueCreature.wild = (ui.mode == "Wild");
-   app.data.vueCreature.tamed = (ui.mode == "Tamed");
-   app.data.vueCreature.bred = (ui.mode == "Bred");
-   app.data.vueCreature.IB = ui.imprint / 100;
-   app.data.vueCreature.exactly = !!ui.exactly;
-   app.data.vueCreature.values = ui.stats.map(Ark.ConvertValue);
-   app.data.vueCreature.server = ui.server;
-   app.data.vueCreature.level = ui.level;
-   app.data.vueCreature.species = ui.species;
+   this.values = Array.from(test.values);
 
-   let extractObject = new Extractor(app.data.vueCreature);
-   extractObject.extract();
+   // Set the current server to the one specified by the test
+   this.creature.serverName = test.serverName;
+}
 
-   // Copy into `app` so they will be displayed
-   ui.results = app.data.vueCreature.stats;
-   ui.extractor = app.data.vueCreature;
+function PerformExtraction() {
+   // Convert properties that couldn't be bound directly to creature
+   this.creature.wild = (this.mode == "Wild");
+   this.creature.tamed = (this.mode == "Tamed");
+   this.creature.bred = (this.mode == "Bred");
+   this.creature.IB = this.imprint / 100;
+   this.creature.exactly = !!this.exactly;
+   this.creature.values = this.values.map(Ark.ConvertValue);
+
+   this.creature.stats = FilledArray(8, () => []); // FIXME: Exctractor should do this
+   this.extractor.extract();
+
+   console.log(JSON.stringify(this.extractor.c.stats));
 }

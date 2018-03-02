@@ -12,10 +12,13 @@ import * as app from "../../app";
 import * as Utils from "../../utils";
 import * as Data from "../../data";
 
+
+
 Vue.component("About", About);
 Vue.component("Servers", Servers);
 Vue.component("Extractor", Extractor);
 Vue.component("Tester", Tester);
+
 
 export default withRender({
    name: 'Shell',
@@ -37,6 +40,5 @@ export default withRender({
 async function Init() {
    let json = await Utils.AsyncFileRead("static/values.json");
    Data.LoadValues(json);
-   Data.GetSpeciesNames();
    app.data.status.dataLoaded = true; // Reveal the main form once loading is complete
 };

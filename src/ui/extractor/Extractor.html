@@ -1,11 +1,11 @@
 <div class="w3-container">
    <form name="Extractor">
       <fieldset>
-         <select v-model="species">
+         <select v-model="creature.species">
             <option v-for="name in speciesNames" v-bind:value="name">{{name}}</option>
          </select>
          <label>Level</label>
-         <input type="number" v-model.number="level">
+         <input type="number" v-model.number="creature.level">
       </fieldset>
       <fieldset>
          <input type="radio" value="Wild" checked v-model="mode">
@@ -16,11 +16,11 @@
          <label style="margin-right: 12px">Bred</label>
          <span v-show="mode=='Wild'">
             <label>Auto-Extract Levels:</label>
-            <input type="checkbox" v-model.number="AutoExtract">
+            <input type="checkbox" v-model="AutoExtract">
          </span>
          <span v-show="mode=='Tamed'">
             <label>Taming Effectiveness:</label>
-            <input type="number" v-model.number="TE">
+            <input type="number" v-model.number="creature.TE">
          </span>
          <span v-show="mode=='Bred'">
             <label>Imprint:</label>
@@ -33,16 +33,16 @@
          <legend>Stats</legend>
          Current stat-value Wild-lvl Dom-lvl Breeding Value
          <div v-for="i in 8" class="w3-container w3-round-large w3-border-black w3-leftbar">
-            <img v-bind:src="'img/'+statImages[i-1]" style="height:25px; width:25px; object-fit: contain">
-            <input type="number" class="w3-round-large w3-border-large" v-model.number="stats[i-1]">
-            <span v-if="extractor['stats']">
-               <span v-if="extractor.stats[i-1].length > 0">
-                  <label>{{extractor.stats[i-1][0].Lw}}</label>
-                  <label>{{extractor.stats[i-1][0].Ld}}</label>
-                  <label>={{formatFloat(debugStatValue(i-1, extractor))}}</label>
+            <img v-bind:src="statImages[i-1]" style="height:25px; width:25px; object-fit: contain">
+            <input type="number" class="w3-round-large w3-border-large" v-model.number="values[i-1]">
+            <span v-if="creature.stats.length">
+               <span v-if="creature.stats[i-1] && creature.stats[i-1].length > 0">
+                  <label>{{creature.stats[i-1][0].Lw}}</label>
+                  <label>{{creature.stats[i-1][0].Ld}}</label>
+                  <label>={{formatFloat(debugStatValue(i-1))}}</label>
                </span>
-               <span v-if="extractor.stats[i-1].length > 1">
-                  <label>{{debugShowOptions(extractor.stats[i-1])}}</label>
+               <span v-if="creature.stats[i-1]">
+                  <label>{{debugShowOptions(creature.stats[i-1])}}</label>
                </span>
             </span>
          </div>
