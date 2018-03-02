@@ -78,10 +78,27 @@ export class ServerMultiplier {
 export class Server {
    constructor(settingsArray = [], IBM = 1, singlePlayer = false) {
       this.singlePlayer = singlePlayer; // singlePlayer Setting
+      this.IBM = IBM;
 
       if (settingsArray)
          for (var i = 0; i < 8; i++)
             if (settingsArray[i])
                this[i] = new ServerMultiplier(settingsArray[i], IBM);
+   }
+
+   // Quick hack to create easier access to properties by converting it to an array
+   toArray() {
+      let returnArray = [[], [], [], [], [], [], [], []];
+      returnArray.singlePlayer = this.singlePlayer;
+      returnArray.IBM = this.IBM;
+
+      for (let stat = 0; stat < 8; stat ++) {
+         returnArray[stat][consts.SERVER_IDM] = this[stat] ? this[stat].IdM ? this[stat].IdM : null : null;
+         returnArray[stat][consts.SERVER_IWM] = this[stat] ? this[stat].IwM ? this[stat].IwM : null : null;
+         returnArray[stat][consts.SERVER_TAM] = this[stat] ? this[stat].TaM ? this[stat].TaM : null : null;
+         returnArray[stat][consts.SERVER_TMM] = this[stat] ? this[stat].TmM ? this[stat].TmM : null : null;
+      }
+
+      return returnArray;
    }
 }
