@@ -15,6 +15,12 @@ export class Extractor {
       this.c = vueCreature;
       this.c.m = Ark.GetMultipliers(this.c.serverName, this.c.species);
 
+      // determines how many levels are missing to equal creature level
+      this.wildFreeMax = 0;
+      this.domFreeMax = 0;
+      this.levelBeforeDom = 0;
+      this.unusedStat = false;
+
       // Clear the checked property for future extractions
       for (let i = 0; i < 8; i ++) {
          if (this.c.stats[i].hasOwnProperty("checked"))
@@ -23,12 +29,6 @@ export class Extractor {
          // Reset the stats so we can get a fresh start
          this.c.stats[i] = [];
       }
-
-      // determines how many levels are missing to equal creature level
-      this.wildFreeMax = 0;
-      this.domFreeMax = 0; // unassigned levels
-      this.levelBeforeDom = 0;
-      this.unusedStat = false;
 
       // Change variables based on wild, tamed, bred
       if (this.c.wild)

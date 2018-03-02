@@ -70,7 +70,7 @@ function PerformTest(data) {
    app.data.vueCreature.bred = (data.mode == "Bred");
    app.data.vueCreature.IB = data.imprint / 100;
    app.data.vueCreature.exactly = !!data.exactly;
-   app.data.vueCreature.values = data.stats.map(Ark.ConvertValue);
+   app.data.vueCreature.values = data.values.map(Ark.ConvertValue);
    app.data.vueCreature.serverName = data.serverName;
    app.data.vueCreature.level = data.level;
    app.data.vueCreature.species = data.species;

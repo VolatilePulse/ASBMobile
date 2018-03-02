@@ -145,10 +145,8 @@ export class VueCreature extends Creature {
       this.stats = [[], [], [], [], [], [], [], []];
       this.exactly = false;
 
-      for (let i = 0; i < 8; i ++) {
+      for (let i = 0; i < 8; i ++)
          this.stats[i][0] = new Stat;
-         this.stats[i].push(0);
-      }
    }
 
    copyCreature(c) {

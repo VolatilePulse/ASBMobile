@@ -11,7 +11,7 @@
                <span v-if="isFail(index)" class="w3-tag w3-red">fail</span>
                <span class="w3-large">{{data.tag}}</span>
             </div>
-            <span>{{data.stats.join(', ')}}</span>
+            <span>{{data.values.join(', ')}}</span>
          </div>
          <div v-if="index in results && openTestIndex==index">
                <div>

@@ -64,11 +64,14 @@ export class ServerMultiplier {
       // Provide easy defaults
       if (!settingArray || settingArray.length == 0)
          settingArray = Utils.FilledArray(4, () => 0);
-
-      this[consts.SERVER_TAM] = this.TaM = settingArray[consts.SERVER_TAM]; // Tame-Add Multiplier
-      this[consts.SERVER_TMM] = this.TmM = settingArray[consts.SERVER_TMM]; // Tame-Aff Multiplier
-      this[consts.SERVER_IDM] = this.IdM = settingArray[consts.SERVER_IDM]; // Increase Dom Multiplier
-      this[consts.SERVER_IWM] = this.IwM = settingArray[consts.SERVER_IWM]; // Increase Wild Multiplier
+      if (settingArray[consts.SERVER_TAM])
+         this.TaM = settingArray[consts.SERVER_TAM]; // Tame-Add Multiplier
+      if (settingArray[consts.SERVER_TMM])
+         this.TmM = settingArray[consts.SERVER_TMM]; // Tame-Aff Multiplier
+      if (settingArray[consts.SERVER_IDM])
+         this.IdM = settingArray[consts.SERVER_IDM]; // Increase Dom Multiplier
+      if (settingArray[consts.SERVER_IWM])
+         this.IwM = settingArray[consts.SERVER_IWM]; // Increase Wild Multiplier
    }
 }
 
@@ -76,11 +79,9 @@ export class Server {
    constructor(settingsArray = [], IBM = 1, singlePlayer = false) {
       this.singlePlayer = singlePlayer; // singlePlayer Setting
 
-      // Provide easy defaults
-      if (!settingsArray || settingsArray.length == 0)
-         settingsArray = Utils.FilledArray(8, () => Utils.FilledArray(4, () => 0));
-
-      for (var i = 0; i < 8; i++)
-         this[i] = new ServerMultiplier(settingsArray[i], IBM);
+      if (settingsArray)
+         for (var i = 0; i < 8; i++)
+            if (settingsArray[i])
+               this[i] = new ServerMultiplier(settingsArray[i], IBM);
    }
 }

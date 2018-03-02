@@ -8,7 +8,7 @@ import * as Ark from '../../ark';
 import { Extractor } from '../../ark/extractor';
 
 import testData from '../../test_data';
-import { FilledArray } from '../../utils';
+import { PRE_IB } from '../../consts';
 
 
 export default withRender({
@@ -20,10 +20,12 @@ export default withRender({
 
       autoExtract: false,
 
-      mode: "Tamed",
-      imprint: 0,
-      exactly: false,
-      values: [],
+      species: app.data.tempCreature.species,
+      mode: app.data.tempCreature.wild ? "Wild" : app.data.tempCreature.tamed ? "Tamed" : "Bred",
+      level: app.data.tempCreature.level,
+      imprint: Ark.DisplayValue(app.data.tempCreature.IB, PRE_IB),
+      exactly: app.data.tempCreature.exactly,
+      values: app.data.tempCreature.values.map(Ark.DisplayValue),
 
       extractor: {},
       creature: {},
@@ -41,21 +43,25 @@ export default withRender({
       formatRound: n => new Intl.NumberFormat({ maximumFractionDigits: 0, useGrouping: false }).format(n),
       debugShowOptions: options => (options && options['length']) ? options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(',') : "-none-",
       debugStatValue(i) {
-         var multipliers = Ark.GetMultipliers(app.data.currentServerName, this.extractor.species);
-         return this.creature.stats[i][0].calculateValue(multipliers[i], !this.extractor.wild, this.extractor.TE, this.extractor.IB);
+         var multipliers = Ark.GetMultipliers(this.creature.serverName, this.creature.species);
+         return (this.values[i]) ? this.creature.stats[i][0].calculateValue(multipliers[i], !this.extractor.wild, this.extractor.TE, this.extractor.IB) : 0;
       }
    },
 
+   // Not sure what this is used for, but would only update after choosing another test case
+   // Also, it clears the entire creature everytime I switch views.
    created() {
-      this.extractor = new Extractor(app.data.tempCreature);
-      this.creature = this.extractor.c;
+      //this.extractor = new Extractor(app.data.tempCreature);
+      this.creature = app.data.tempCreature;
    }
 });
 
 function InsertTestData(test) {
    // Copy some fields from the test into the extractor
-   for (let field of ['species', 'level', 'imprint', 'exactly', 'mode'])
+   for (let field of ['species', 'level', 'exactly'])
       this.creature[field] = test[field];
+   for (let field of ['imprint', 'mode'])
+      this[field] = test[field];
 
    this.values = Array.from(test.values);
 
@@ -64,16 +70,15 @@ function InsertTestData(test) {
 }
 
 function PerformExtraction() {
+
    // Convert properties that couldn't be bound directly to creature
    this.creature.wild = (this.mode == "Wild");
    this.creature.tamed = (this.mode == "Tamed");
    this.creature.bred = (this.mode == "Bred");
-   this.creature.IB = this.imprint / 100;
+   this.creature.IB = Ark.ConvertValue(this.imprint, PRE_IB);
    this.creature.exactly = !!this.exactly;
    this.creature.values = this.values.map(Ark.ConvertValue);
 
-   this.creature.stats = FilledArray(8, () => []); // FIXME: Exctractor should do this
+   this.extractor = new Extractor(this.creature);
    this.extractor.extract();
-
-   console.log(JSON.stringify(this.extractor.c.stats));
 }
