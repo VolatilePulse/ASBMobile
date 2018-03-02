@@ -58,5 +58,5 @@ export const vueApp = new Vue({
 
 
 
-export const data = vueApp.$data;
+export const data = vueApp;
 export const shell = vueApp.$refs.shell;
