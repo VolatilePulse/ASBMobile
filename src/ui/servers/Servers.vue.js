@@ -26,16 +26,12 @@ export default withRender({
 
    computed: {
       statImages: () => app.data.statImages,
-      // Correct: app.officialServerSettings[HEALTH].TdM
-      // Incorrect: app.officialServerSettings[HEALTH][TDM]
-      // I understand where the concern for DeepMerge came from now
-      // I recommended using the constant variables instead of numeric constants, not instead of the properties
-      // To create a server: new ASBM.Server(array[0-7][0-3], IBM, singlePlayer)
-      officialValues: () => app.data.officialServer,
+      officialValues: () => app.data.officialServer.toArray(),
+      currentWorkingServer: () => app.data.servers[app.data.tempCreature.serverName].toArray(),
    },
 
    methods: {
-      valueFor: function (s, p) { return this.server.multipliers[s][p] || this.officialValues[s][p]; },
-      toggleStat: function (s, p) { Vue.set(this.server.multipliers[s], p, (!this.server.multipliers[p][s]) ? this.officialValues[s][p] : null); },
+      valueFor: function (s, p) { return this.currentWorkingServer[s][p] || this.officialValues[s][p]; },
+      toggleStat: function (s, p) { Vue.set(this.server.multipliers[s], p, (!this.server.multipliers[s][p]) ? this.officialValues[s][p] : null); },
    },
 });
