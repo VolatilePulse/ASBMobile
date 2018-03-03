@@ -64,7 +64,7 @@ export function GetMultipliers(serverName, speciesName) {
    if (app.data.servers[serverName].singlePlayer)
       for (var stat in app.data.officialSPMultiplier)
          for (var multiplier in app.data.officialSPMultiplier[stat])
-            multipliers[stat][multiplier] = Utils.RoundTo(multipliers[stat][multiplier] * app.data.officialSPMultiplier[stat][multiplier], 3);
+            multipliers[stat][multiplier] = Utils.RoundTo(multipliers[stat][multiplier] * (app.data.officialSPMultiplier[stat][multiplier] || 1), 3);
 
    Utils.DeepMerge(multipliers, app.data.speciesMultipliers[speciesName]);
 
