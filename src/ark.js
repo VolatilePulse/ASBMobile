@@ -3,6 +3,7 @@
 import { DAMAGE, SPEED, PRE_IB, PRE_TE } from './consts';
 import * as Utils from './utils';
 import * as app from './app';
+import { Server } from './ark/multipliers';
 
 
 export function Precision(index) {
@@ -57,7 +58,7 @@ export function ConvertValue(value, index) {
  */
 export function GetMultipliers(serverName, speciesName) {
    // The Server object tells us everything we need to know about the multipliers
-   let multipliers = Utils.DeepMergeSoft({}, app.data.officialServer, app.data.servers[serverName]);
+   let multipliers = Utils.DeepMergeSoft(new Server(), app.data.officialServer, app.data.servers[serverName]);
 
    // Single Player multiplies the official/override multipliers
    if (app.data.servers[serverName].singlePlayer)
