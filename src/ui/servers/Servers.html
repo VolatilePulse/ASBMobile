@@ -1,31 +1,55 @@
-<div class="w3-container">
+<div>
    <form class="w3-form">
-      <select v-model="name">
-         <option v-for="(server, name) in servers" :key="name">{{name}}</option>
-      </select>
-      <input type="checkbox" id="cbSinglePlayer" v-model="server.singlePlayer" class="w3-check">
-      <label for="cbSinglePlayer">Single Player</label>
-      <table class="w3-table w3-striped w3-border w3-responsive w3-centered">
-         <thead>
-            <tr class="w3-dark-gray">
-               <th></th>
-               <th>TAM</th>
-               <th>TMM</th>
-               <th>IDM</th>
-               <th>IWM</th>
+      <div class="w3-cell-row">
+         <select v-model="name" class="w3-select">
+            <option v-for="(server, name) in servers" :key="name">{{name}}</option>
+         </select>
+      </div>
+      <div class="w3-padding"></div>
+      <div class="w3-threequarter">
+         <table class="w3-table w3-responsive">
+            <tr>
+               <td>
+               </td>
+               <td class="w3-dark-gray w3-center">TaM
+               </td>
+               <td class="w3-dark-gray w3-center">TmM
+               </td>
+               <td class="w3-dark-gray w3-center">IdM
+               </td>
+               <td class="w3-dark-gray w3-center">IwM
+               </td>
             </tr>
-         </thead>
-         <tr v-for="stat in statIndices">
-            <td>
-               <img :src="statImages[stat]" style="height:36px">
-            </td>
-            <td v-for="param in paramIndices">
-               <input type="number" class="w3-center w3-input" :placeholder="official[stat][param]" @change="setValue(stat,param,$event.target.value)"
-                  :value="server[stat][param]">
-            </td>
-         </tr>
-      </table>
-      <label class="w3-label" for="numIBM">IBM</label>
-      <input type="number" id="numIBM" class="w3-input" v-model="server.IBM">
+            <tr v-for="stat in statIndices" class="w3-center">
+               <td>
+                  <img :src="statImages[stat]" class="w3-image w3-responsive">
+               </td>
+               <td v-for="param in paramIndices" class="w3-responsive">
+                  <input type="number" class="w3-input w3-center" style="padding-top:0; padding-bottom:3" :placeholder="official[stat][param]" @change="setValue(stat,param,$event.target.value)"
+                     :value="server[stat][param]">
+               </td>
+            </tr>
+         </table>
+      </div>
+      <div class="w3-quarter">
+         <table class="w3-table w3-responsive">
+            <tr>
+               <td class="w3-dark-gray w3-left-align">IBM</td>
+            </tr>
+            <tr>
+               <td class="w3-center">
+                  <input type="number" id="numIBM" class="w3-input w3-right-align" style="padding-top:0; padding-bottom:3" v-model="server.IBM">
+               </td>
+            </tr>
+            <tr>
+               <td class="w3-dark-gray w3-left-align">Single Player</td>
+            </tr>
+            <tr>
+               <td class="w3-right-align">
+                  <input type="checkbox" id="cbSinglePlayer" v-model="server.singlePlayer" class="w3-check">
+               </td>
+            </tr>
+         </table>
+      </div>
    </form>
 </div>
