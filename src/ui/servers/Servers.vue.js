@@ -14,24 +14,29 @@ export default withRender({
    template: "#servers-template",
 
    data: () => ({
-      servers: app.data.servers,
-      server: {
-         singlePlayer: false,
-         multipliers: Utils.FilledArray(8, () => Utils.FilledArray(4, () => 0)),
-      },
-
       statIndices: Utils.Range(8),
       paramIndices: Utils.Range(4),
    }),
 
    computed: {
+      servers: () => app.data.servers,
       statImages: () => app.data.statImages,
-      officialValues: () => app.data.officialServer.toArray(),
-      currentWorkingServer: () => app.data.servers[app.data.tempCreature.serverName].toArray(),
+      official: () => app.data.officialServer,
+
+      server: () => app.data.servers[app.data.tempCreature.serverName],
+      name: {
+         get() { return app.data.tempCreature.serverName; },
+         set(value) { app.data.tempCreature.serverName = value; },
+      },
    },
 
    methods: {
-      valueFor: function (s, p) { return this.currentWorkingServer[s][p] || this.officialValues[s][p]; },
-      toggleStat: function (s, p) { Vue.set(this.server.multipliers[s], p, (!this.server.multipliers[s][p]) ? this.officialValues[s][p] : null); },
+      valueFor: function (s, p) { return this.server[s][p] || this.official[s][p]; },
+      toggleStat: function (s, p) { Vue.set(this.server.multipliers[s], p, (!this.server.multipliers[s][p]) ? this.officialValues[s][p] : undefined); },
+      setValue: function (s, p, v) {
+         let num = v ? parseFloat(v) : undefined;
+         if (num <= 0) num = undefined;
+         this.server[s][p] = num;
+      }
    },
 });

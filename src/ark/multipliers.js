@@ -58,47 +58,23 @@ export class CreatureStats {
 }
 
 export class ServerMultiplier {
-   constructor(settingArray, IBM) {
+   constructor(settingArray = [], IBM) {
       this.IBM = IBM; // Imprint Bonus Multiplier
 
-      // Provide easy defaults
-      if (!settingArray || settingArray.length == 0)
-         settingArray = Utils.FilledArray(4, () => 0);
-      if (settingArray[consts.SERVER_TAM])
-         this.TaM = settingArray[consts.SERVER_TAM]; // Tame-Add Multiplier
-      if (settingArray[consts.SERVER_TMM])
-         this.TmM = settingArray[consts.SERVER_TMM]; // Tame-Aff Multiplier
-      if (settingArray[consts.SERVER_IDM])
-         this.IdM = settingArray[consts.SERVER_IDM]; // Increase Dom Multiplier
-      if (settingArray[consts.SERVER_IWM])
-         this.IwM = settingArray[consts.SERVER_IWM]; // Increase Wild Multiplier
+      for (var i = 0; i < 4; i++)
+         this[i] = settingArray[i]; // will use undefined if not set, which is fine
    }
 }
+
+// SERVER_TAM = 0, SERVER_TMM = 1, SERVER_IDM = 2, SERVER_IWM = 3;
+Utils.AddNamedIndicesToClass(ServerMultiplier, ['TaM', 'TmM', 'IdM', 'IwM']);
 
 export class Server {
    constructor(settingsArray = [], IBM = 1, singlePlayer = false) {
       this.singlePlayer = singlePlayer; // singlePlayer Setting
       this.IBM = IBM;
 
-      if (settingsArray)
-         for (var i = 0; i < 8; i++)
-            if (settingsArray[i])
-               this[i] = new ServerMultiplier(settingsArray[i], IBM);
-   }
-
-   // Quick hack to create easier access to properties by converting it to an array
-   toArray() {
-      let returnArray = [[], [], [], [], [], [], [], []];
-      returnArray.singlePlayer = this.singlePlayer;
-      returnArray.IBM = this.IBM;
-
-      for (let stat = 0; stat < 8; stat ++) {
-         returnArray[stat][consts.SERVER_IDM] = this[stat] ? this[stat].IdM ? this[stat].IdM : null : null;
-         returnArray[stat][consts.SERVER_IWM] = this[stat] ? this[stat].IwM ? this[stat].IwM : null : null;
-         returnArray[stat][consts.SERVER_TAM] = this[stat] ? this[stat].TaM ? this[stat].TaM : null : null;
-         returnArray[stat][consts.SERVER_TMM] = this[stat] ? this[stat].TmM ? this[stat].TmM : null : null;
-      }
-
-      return returnArray;
+      for (var i = 0; i < 8; i++)
+         this[i] = new ServerMultiplier(settingsArray[i] || new Array(4), IBM);
    }
 }

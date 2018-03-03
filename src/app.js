@@ -41,15 +41,15 @@ export const vueApp = new Vue({
 
    async created() {
       // Calcualte the paths for each of the stat images
-      for (let i = 0; i < statNames.length; i ++) {
+      for (let i = 0; i < statNames.length; i++) {
          let name = statNames[i];
          import("assets/" + name + ".png").then(url => Vue.set(vueApp.statImages, i, url));
       }
 
-      this.servers["Official Server"] = new Server(null, 1, false);
-      this.servers["Official Single Player"] = new Server(null, 1, true);
-      this.servers["kohonac HP.IDM: 2.0"] = new Server([[,, 2, ],,,,,,, ], 1, true);
-      this.servers["eldoco87"] = new Server([,,,,,, [2,,, ], ], 1, false);
+      this.servers["Official Server"] = new Server([], 1, false);
+      this.servers["Official Single Player"] = new Server([], 1, true);
+      this.servers["kohonac HP.IDM: 2.0"] = new Server([[, , 2]], 1, true);
+      this.servers["eldoco87"] = new Server([, , , , , , [2]], 1, false);
 
       this.tempCreature = new VueCreature();
       this.currentServerName = "Official Server";

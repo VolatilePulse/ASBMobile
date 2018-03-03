@@ -22,6 +22,42 @@ export function AsyncFileRead(filePath) {
 }
 
 /**
+ * Add named accessors to an array-like class.
+ * @param {class} cls The class to be modified
+ * @param {string[]} names An array of names for the properties
+ */
+export function AddNamedIndicesToClass(cls, names) {
+   for (let i = 0; i < names.length; i++) {
+      let name = names[i];
+      if (cls[name]) throw "Named index already defined!";
+      Object.defineProperty(cls.prototype, name, {
+         get() { return this[i]; },
+         enumerable: false,
+      });
+   }
+}
+
+const formattersCache = new Map();
+
+/**
+ * Format a number neatly for presentation to the user.
+ * @param {number} value The value to format
+ * @param {number} places Number of decimal places, at most, to show
+ * @param {boolean} fixed True to always show digits after the decimal place when they are zero
+ */
+export function FormatNumber(value, places = 1, fixed = false) {
+   let formatter = formattersCache.get({ places, fixed });
+   if (!formatter) {
+      if (fixed)
+         formatter = new Intl.NumberFormat({ maximumFractionDigits: places, minimumFractionDigits: places, useGrouping: false });
+      else
+         formatter = new Intl.NumberFormat({ maximumFractionDigits: places, useGrouping: false });
+      formattersCache.set({ places, fixed }, formatter);
+   }
+   return formatter.format(value);
+}
+
+/**
  * Create an array containing numbers from zero to 'number'-1.
  * @param {number} length Length of the array
  */
@@ -103,4 +139,30 @@ export function DeepMerge(target, ...sources) {
    }
 
    return DeepMerge(target, ...sources);
+}
+
+/**
+ * Deep merge two objects, except don't overwrite a value with 'undefined'.
+ * @param {object} target
+ * @param {object[]} sources
+ */
+export function DeepMergeSoft(target, ...sources) {
+   if (!sources.length)
+      return target;
+
+   const source = sources.shift();
+
+   if (IsObject(target) && IsObject(source)) {
+      for (const key in source) {
+         if (IsObject(source[key])) {
+            if (!target[key])
+               Object.assign(target, { [key]: {} });
+            DeepMergeSoft(target[key], source[key]);
+         }
+         else if (source[key] !== undefined)
+            Object.assign(target, { [key]: source[key] });
+      }
+   }
+
+   return DeepMergeSoft(target, ...sources);
 }

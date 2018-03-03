@@ -1,5 +1,7 @@
 {
    "liveServer.settings.root": "/docs",
    "editor.detectIndentation": false,
-   "editor.tabSize": 3
+   "editor.tabSize": 3,
+   "editor.formatOnSave": true,
+   "html.format.wrapLineLength": 90,
 }

@@ -51,8 +51,6 @@
       <input type="button" value="Extract" id="extractButton" v-on:click="extract">
    </form>
    <br/>
-   <!-- <input type="button" value="Test Cases" id="TestCases" v-on:click="testData"> -->
-   <br/>
    <p>Insert test data:</p>
    <span v-for="data in testData">
       <a v-on:click.prevent="insertTestData(data)" href="#testData">{{data.tag}}</a>

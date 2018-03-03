@@ -1,6 +1,6 @@
 <div class="w3-container">
-   <select>
-      <option v-for="(server, name) in servers" :key="name" @selected="app.data.tempCreature.serverName=name">{{name}}</option>
+   <select v-model="name">
+      <option v-for="(server, name) in servers" :key="name">{{name}}</option>
    </select>
    <input type="checkbox" id="cbSinglePlayer" v-model="server['singlePlayer']" class="w3-check">
    <label for="cbSinglePlayer">Single Player</label>
@@ -15,9 +15,8 @@
       </thead>
       <tr v-for="stat in statIndices">
          <td v-for="param in paramIndices">
-            <input type="number" :value="valueFor(stat,param)" class="w3-center" style="width:92px" @input="server.multipliers[stat][param] = parseFloat($event.target.value)"
-               :disabled="!server.multipliers[stat][param]">
-            <input type="checkbox" class="w3-check" title="Use official" :checked="!server.multipliers[stat][param]" @change="toggleStat(stat,param)">
+            <input type="number" class="w3-center" style="width:92px" :placeholder="official[stat][param]"
+               @change="setValue(stat,param,$event.target.value)" :value="server[stat][param]">
          </td>
       </tr>
    </table>
