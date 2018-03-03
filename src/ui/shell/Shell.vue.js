@@ -1,12 +1,14 @@
-import 'w3-css/w3.css';
-import withRender from './Shell.html?style=./Shell.css';
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap-vue/dist/bootstrap-vue.min.css";
 
-import Vue from "vue";
+import withRender from './Shell.html?style=./Shell.css';
 
 import About from "../about/About.vue";
 import Servers from "../servers/Servers.vue";
 import Extractor from "../extractor/Extractor.vue";
 import Tester from "../tester/Tester.vue";
+
+import Vue from "vue";
 
 import * as app from "../../app";
 import * as Utils from "../../utils";
@@ -27,7 +29,7 @@ export default withRender({
 
    data: () => ({
       showSidebar: true,
-      tab: 'welcome',
+      tab: 'about',
    }),
 
    computed: {

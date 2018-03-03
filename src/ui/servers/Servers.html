@@ -1,23 +1,24 @@
-<div class="w3-container">
-   <select v-model="name">
-      <option v-for="(server, name) in servers" :key="name">{{name}}</option>
-   </select>
-   <input type="checkbox" id="cbSinglePlayer" v-model="server['singlePlayer']" class="w3-check">
-   <label for="cbSinglePlayer">Single Player</label>
-   <table class="w3-table w3-striped w3-border w3-centered w3-responsive">
-      <thead>
-         <tr class="w3-dark-gray">
-            <th>TAM</th>
-            <th>TMM</th>
-            <th>IDM</th>
-            <th>IWM</th>
-         </tr>
-      </thead>
-      <tr v-for="stat in statIndices">
-         <td v-for="param in paramIndices">
-            <input type="number" class="w3-center" style="width:92px" :placeholder="official[stat][param]"
-               @change="setValue(stat,param,$event.target.value)" :value="server[stat][param]">
-         </td>
-      </tr>
-   </table>
-</div>
+<b-container>
+   <b-form-group label="Server:" label-for="speciesInput">
+      <b-form-select id="speciesInput" v-model="name">
+         <template slot="first">
+            <option value="___NEW___SERVER___">--new server--</option>
+         </template>
+         <option v-for="(server, name) in servers" :key="name">{{name}}</option>
+      </b-form-select>
+   </b-form-group>
+
+   <b-form-group>
+      <b-form-checkbox type="checkbox" v-model="server['singlePlayer']" class="w3-check">Single Player</b-form-checkbox>
+   </b-form-group>
+
+   <b-form-group label="Multipliers:">
+      <div v-for="stat in statIndices" class="row">
+         <div v-for="param in paramIndices" class="col">
+            <b-form-input type="number" :placeholder="official[stat][param]" @change="setValue(stat,param,$event.target.value)"
+               :value="server[stat][param]">
+            </b-form-input>
+         </div>
+      </div>
+   </b-form-group>
+</b-container>
