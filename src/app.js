@@ -1,4 +1,8 @@
 import Vue from "vue";
+import BootstrapVue from 'bootstrap-vue';
+
+Vue.use(BootstrapVue);
+
 import { VueCreature } from "./ark/creature";
 import { statNames } from "./consts";
 

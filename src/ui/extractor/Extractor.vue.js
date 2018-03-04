@@ -1,11 +1,10 @@
 "use strict";
 
-import 'w3-css/w3.css';
 import withRender from './Extractor.html?style=./Extractor.css';
 
 import * as app from "../../app";
 import * as Ark from '../../ark';
-import { PRE_IB } from '../../consts';
+import { PRE_IB, statNames } from '../../consts';
 import { FormatNumber } from '../../utils';
 import { Extractor } from '../../ark/extractor';
 
@@ -28,14 +27,18 @@ export default withRender({
 
       extractor: {},
       creature: {},
+
+      statNames: statNames,
    }),
 
    computed: {
       speciesNames: () => app.data.speciesNames,
       statImages: () => app.data.statImages,
+      devMode: () => app.data.status.devMode,
    },
 
    methods: {
+      range(n) { return Array.from({ length: n }, (x, i) => i); },
       extract: PerformExtraction,
       insertTestData: InsertTestData,
       formatFloat(n) { return FormatNumber(n, 2); },

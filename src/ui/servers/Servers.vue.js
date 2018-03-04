@@ -1,6 +1,5 @@
 "use strict";
 
-import 'w3-css/w3.css';
 import withRender from './Servers.html?style=./Servers.css';
 
 import Vue from 'vue';

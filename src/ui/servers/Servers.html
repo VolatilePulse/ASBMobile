@@ -1,55 +1,30 @@
-<div>
-   <form class="w3-form">
-      <div class="w3-cell-row">
-         <select v-model="name" class="w3-select">
-            <option v-for="(server, name) in servers" :key="name">{{name}}</option>
-         </select>
-      </div>
-      <div class="w3-padding"></div>
-      <div class="w3-threequarter">
-         <table class="w3-table w3-responsive">
-            <tr>
-               <td>
-               </td>
-               <td class="w3-dark-gray w3-center">TaM
-               </td>
-               <td class="w3-dark-gray w3-center">TmM
-               </td>
-               <td class="w3-dark-gray w3-center">IdM
-               </td>
-               <td class="w3-dark-gray w3-center">IwM
-               </td>
-            </tr>
-            <tr v-for="stat in statIndices" class="w3-center">
-               <td>
-                  <img :src="statImages[stat]" class="w3-image w3-responsive">
-               </td>
-               <td v-for="param in paramIndices" class="w3-responsive">
-                  <input type="number" class="w3-input w3-center" style="padding-top:0; padding-bottom:3" :placeholder="official[stat][param]" @change="setValue(stat,param,$event.target.value)"
-                     :value="server[stat][param]">
-               </td>
-            </tr>
-         </table>
-      </div>
-      <div class="w3-quarter">
-         <table class="w3-table w3-responsive">
-            <tr>
-               <td class="w3-dark-gray w3-left-align">IBM</td>
-            </tr>
-            <tr>
-               <td class="w3-center">
-                  <input type="number" id="numIBM" class="w3-input w3-right-align" style="padding-top:0; padding-bottom:3" v-model="server.IBM">
-               </td>
-            </tr>
-            <tr>
-               <td class="w3-dark-gray w3-left-align">Single Player</td>
-            </tr>
-            <tr>
-               <td class="w3-right-align">
-                  <input type="checkbox" id="cbSinglePlayer" v-model="server.singlePlayer" class="w3-check">
-               </td>
-            </tr>
-         </table>
-      </div>
-   </form>
-</div>
+<b-container>
+   <b-form-group label="Server:" label-for="speciesInput">
+      <b-form-select id="speciesInput" v-model="name">
+         <template slot="first">
+            <option value="___NEW___SERVER___">--new server--</option>
+         </template>
+         <option v-for="(server, name) in servers" :key="name">{{name}}</option>
+      </b-form-select>
+   </b-form-group>
+
+   <b-form-group>
+      <b-form-checkbox type="checkbox" v-model="server['singlePlayer']" class="w3-check">Single Player</b-form-checkbox>
+   </b-form-group>
+
+   <b-form-group label="Multipliers:">
+      <b-row>
+         <b-col>TaM</b-col>
+         <b-col>TmM</b-col>
+         <b-col>IdM</b-col>
+         <b-col>IwM</b-col>
+      </b-row>
+      <b-row v-for="stat in statIndices">
+         <div v-for="param in paramIndices" class="col">
+            <b-form-input type="number" :placeholder="official[stat][param]" @change="setValue(stat,param,$event.target.value)"
+               :value="server[stat][param]">
+            </b-form-input>
+         </div>
+      </b-row>
+   </b-form-group>
+</b-container>

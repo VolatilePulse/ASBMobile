@@ -1,60 +1,50 @@
-<div class="w3-container">
-   <form name="Extractor">
-      <fieldset>
-         <select v-model="creature.species">
-            <option v-for="name in speciesNames" v-bind:value="name">{{name}}</option>
-         </select>
-         <label>Level</label>
-         <input type="number" v-model.number="creature.level">
-      </fieldset>
-      <fieldset>
-         <input type="radio" value="Wild" checked v-model="mode">
-         <label style="margin-right: 12px">Wild</label>
-         <input type="radio" value="Tamed" v-model="mode">
-         <label style="margin-right: 12px">Tamed</label>
-         <input type="radio" value="Bred" v-model="mode">
-         <label style="margin-right: 12px">Bred</label>
-         <span v-show="mode=='Wild'">
-            <label>Auto-Extract Levels:</label>
-            <input type="checkbox" v-model="AutoExtract">
-         </span>
-         <span v-show="mode=='Tamed'">
-            <label>Taming Effectiveness:</label>
-            <input type="number" v-model.number="creature.TE">
-         </span>
-         <span v-show="mode=='Bred'">
-            <label>Imprint:</label>
-            <input type="number" v-model.number="imprint">
-            <label>Exactly:</label>
-            <input type="checkbox" v-model="creature.exactly">
-         </span>
-      </fieldset>
-      <fieldset>
-         <legend>Stats</legend>
-         Current stat-value Wild-lvl Dom-lvl Breeding Value
-         <div v-for="i in 8" class="w3-container w3-round-large w3-border-black w3-leftbar">
-            <img v-bind:src="statImages[i-1]" style="height:25px; width:25px; object-fit: contain">
-            <input type="number" class="w3-round-large w3-border-large" v-model.number="values[i-1]">
-            <span v-if="creature.stats.length">
-               <span v-if="creature.stats[i-1] && creature.stats[i-1].length > 0">
-                  <label>{{creature.stats[i-1][0].Lw}}</label>
-                  <label>{{creature.stats[i-1][0].Ld}}</label>
-                  <label>={{formatFloat(debugStatValue(i-1))}}</label>
-               </span>
-               <span v-if="creature.stats[i-1]">
-                  <label>{{debugShowOptions(creature.stats[i-1])}}</label>
-               </span>
+<b-container>
+   <b-form-group label="Species:">
+      <b-form-select v-model="creature.species" :options="speciesNames"></b-form-select>
+   </b-form-group>
+   <b-form-group label="Level:">
+      <b-form-input type="number" v-model.number="creature.level"></b-form-input>
+   </b-form-group>
+   <b-form inline>
+      <b-form-radio-group v-model="mode">
+         <b-form-radio value="Wild">Wild</b-form-radio>
+         <b-form-radio value="Tamed" checked>Tamed</b-form-radio>
+         <b-form-radio value="Bred">Bred</b-form-radio>
+      </b-form-radio-group>
+   </b-form>
+   <b-form-group v-show="mode=='Wild'" label="Auto-Extract Levels:">
+      <b-form-checkbox v-model="AutoExtract"></b-form-checkbox>
+   </b-form-group>
+   <b-form-group v-show="mode=='Tamed'" label="Taming Effectiveness:">
+      <b-form-input type="number" v-model.number="creature.TE"></b-form-input>
+   </b-form-group>
+   <b-form-group v-show="mode=='Bred'" label="Imprint:">
+      <b-form-input type="number" v-model.number="imprint"></b-form-input>
+      <b-form-checkbox v-model="creature.exactly">Exactly</b-form-checkbox>
+   </b-form-group>
+
+   <b-form-group label="Stats">
+      <b-row v-for="i in range(8)" class="mb-1">
+         <div class="col-2">
+            <b-img :src="statImages[i]" fluid-grow></b-img>
+         </div>
+         <b-form-input type="number" v-model.number="values[i]" :placeholder="statNames[i]" class="col-3"></b-form-input>
+         <div v-if="creature.stats.length" class="col-2">
+            <span v-if="creature.stats[i] && creature.stats[i].length > 0">
+               <span>{{creature.stats[i][0].Lw}}</span>
+               <span>{{creature.stats[i][0].Ld}}</span>
+               <span>={{formatFloat(debugStatValue(i))}}</span>
             </span>
          </div>
-      </fieldset>
-      Sum Should be
-      <input type="button" value="Extract" id="extractButton" v-on:click="extract">
-   </form>
-   <br/>
-   <p>Insert test data:</p>
-   <span v-for="data in testData">
-      <a v-on:click.prevent="insertTestData(data)" href="#testData">{{data.tag}}</a>
-      <br/>
-   </span>
-   <br/>
-</div>
+         <div v-if="creature.stats[i]" class="col-5">
+            <label>{{debugShowOptions(creature.stats[i])}}</label>
+         </div>
+         </span>
+      </b-row>
+      <b-button @click="extract">Extract</b-button>
+   </b-form-group>
+
+   <b-form-group v-if="devMode" label="Test Data:">
+      <b-button v-for="data in testData" variant="link" @click.prevent="insertTestData(data)">{{data.tag}}</b-button>
+   </b-form-group>
+</b-container>
