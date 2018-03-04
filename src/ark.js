@@ -12,10 +12,10 @@ export function Precision(index) {
       return 3;
    // Displays TE as 98.34(%)
    if (index == PRE_TE)
-      return 4;
+      return 2;
    // Displays IB as 38.8810(%)
    if (index == PRE_IB)
-      return 6;
+      return 4;
    // Displays other stats as 18362.4
    return 1;
 }
