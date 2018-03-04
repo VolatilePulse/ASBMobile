@@ -25,14 +25,13 @@ export class Stat {
       // V = (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) * (1 + TE * Tm * TmM) * (1 + Ld * Id * IdM)
 
       var v = m.B * m.TBHM;
+
       if (this.Lw > 0)
          v *= (1 + this.Lw * m.Iw * m.IwM);
+
       v *= (1 + IB * 0.2 * m.IBM);
-
-      if (tamed)
-         v += m.Ta * m.TaM;
-
-      v *= this.calculateTmM(tamed, m.Tm, m.TmM, TE);
+      v += this.calculateTa(tamed, m.Ta, m.TaM);
+      v *= (1 + this.calculateTm(tamed, m.Tm, m.TmM, TE));
       v *= (1 + this.Ld * m.Id * m.IdM);
       return v;
    }
@@ -46,10 +45,10 @@ export class Stat {
 
       var wildLevel = v;
       wildLevel /= (1 + this.Ld * m.Id * m.IdM);
-      wildLevel /= this.calculateTmM(tamed, m.Tm, m.TmM, TE);
+      wildLevel /= (1 + this.calculateTm(tamed, m.Tm, m.TmM, TE));
 
       if (tamed)
-         wildLevel -= m.Ta * m.TaM;
+         wildLevel -= this.calculateTa(tamed, m.Ta, m.TaM);
 
       wildLevel /= (m.B * m.TBHM);
       wildLevel /= (1 + IB * 0.2 * m.IBM);
@@ -67,8 +66,8 @@ export class Stat {
       var domLevel = m.B * m.TBHM;
       domLevel *= (1 + this.Lw * m.Iw * m.IwM);
       domLevel *= (1 + IB * 0.2 * m.IBM);
-      domLevel = v / (domLevel + m.Ta * m.TaM);
-      domLevel /= this.calculateTmM(tamed, m.Tm, m.TmM, TE);
+      domLevel = v / (domLevel + this.calculateTa(tamed, m.Ta, m.TaM));
+      domLevel /= (1 + this.calculateTm(tamed, m.Tm, m.TmM, TE));
       this.Ld = Math.max(Utils.RoundTo((domLevel - 1) / (m.Id * m.IdM), 0), 0);
       return this.Ld;
    }
@@ -82,9 +81,9 @@ export class Stat {
       var TE = m.B * m.TBHM;
       TE *= (1 + this.Lw * m.Iw * m.IwM);
       TE *= (1 + IB * 0.2 * m.IBM);
-      TE = v / (TE + m.Ta * m.TaM);
+      TE = v / (TE + this.calculateTa(tamed, m.Ta, m.TaM));
       TE /= (1 + this.Ld * m.Id * m.IdM);
-      return ((TE - 1)/ (m.Tm * m.TmM));
+      return ((TE - 1) / this.calculateTm(tamed, m.Tm, m.TmM));
    }
 
    calculateIB(m, v, tamed = true, TE = 1) {
@@ -94,23 +93,35 @@ export class Stat {
          return 0;
 
       var IB = v;
-      IB /= this.calculateTmM(tamed, m.Tm, m.TmM, TE);
+      IB /= (1 + this.calculateTm(tamed, m.Tm, m.TmM, TE));
       IB /= (1 + this.Ld * m.Id * m.IdM);
-      IB = (IB - m.Ta * m.TaM) / (m.B * m.TBHM);
+      IB = (IB - this.calculateTa(tamed, m.Ta, m.TaM)) / (m.B * m.TBHM);
       IB /= (1 + this.Lw * m.Iw * m.IwM);
       return ((IB - 1) / (0.2 * m.IBM));
    }
 
-   calculateTmM(tamed, Tm, TmM, TE = 1) {
+   calculateTm(tamed, Tm, TmM, TE = 1) {
       // If not tamed, the Tame Multiplier doesn't apply to the value
       if (!tamed)
          return 1;
 
       // If Tm is a negative value, TE doesn't change the value of the multiplier
       if (Tm < 0)
-         return (1 + Tm * TmM);
+         return (Tm);
       else
-         return (1 + TE * Tm * TmM);
+         return (TE * Tm * TmM);
+   }
+
+   calculateTa(tamed, Ta, TaM) {
+      // If not tamed, the Tame Additive doesn't apply to the value
+      if (!tamed)
+         return 1;
+
+      // If Ta is a negative value, TaM doesn't change the value of the multiplier
+      if (Ta < 0)
+         return Ta;
+      else
+         return (Ta * TaM);
    }
 }
 
@@ -132,7 +143,7 @@ export class Creature {
       this.values = [];
 
       // Strips extractor data from TE based stats
-      for (let i = 0; i < 8; i ++)
+      for (let i = 0; i < 8; i++)
          // The frontmost stat is the one that is considered "chosen" and is to be used for the creature
          this.stats.push(c ? c.stats[i][0] : new Stat);
    }
@@ -145,14 +156,14 @@ export class VueCreature extends Creature {
       this.stats = [[], [], [], [], [], [], [], []];
       this.exactly = false;
 
-      for (let i = 0; i < 8; i ++)
+      for (let i = 0; i < 8; i++)
          this.stats[i][0] = new Stat;
    }
 
    copyCreature(c) {
       Utils.DeepMerge(this, c);
 
-      for (let i = 0; i < 8; i ++) {
+      for (let i = 0; i < 8; i++) {
          this.stats[i] = [c.stats[i]];
          this.values[i] = this.stats[i][0].calculateValue(Ark.GetMultipliers(this.serverName, this.species), !this.wild, this.TE, this.IB);
       }

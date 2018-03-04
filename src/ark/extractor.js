@@ -20,9 +20,11 @@ export class Extractor {
       this.domFreeMax = 0;
       this.levelBeforeDom = 0;
       this.unusedStat = false;
+   }
 
+   init() {
       // Clear the checked property for future extractions
-      for (let i = 0; i < 8; i ++) {
+      for (let i = 0; i < 8; i++) {
          if (this.c.stats[i].hasOwnProperty("checked"))
             delete this.c.stats[i].checked;
 
@@ -41,8 +43,10 @@ export class Extractor {
          this.c.TE = 1;
    }
 
-   // FIXME: Creatures that don't use Oxygen aren't extracted properly
    extract() {
+      // Make sure we initialize specific variables before extraction
+      this.init();
+
       // If tame isn't bred (ignore wild level steps) and setting is enabled, consider wild steps (as set in settings)
       // TODO: Add consider wild levels
       // considerWildLevelSteps = considerWildLevelSteps && !bred;
@@ -60,7 +64,7 @@ export class Extractor {
 
       // If it's bred, we need to do some magic with the IB
       if (this.c.bred && !this.c.exactly &&
-            this.c.values[TORPOR] != Utils.RoundTo(tempStat.calculateValue(this.c.m[TORPOR], !this.c.wild, this.c.TE, this.c.IB), Ark.Precision(TORPOR))) {
+         this.c.values[TORPOR] != Utils.RoundTo(tempStat.calculateValue(this.c.m[TORPOR], !this.c.wild, this.c.TE, this.c.IB), Ark.Precision(TORPOR))) {
          // One of the most precise ways to get the exact torpor
          this.c.IB = torporStat.calculateIB(this.c.m[TORPOR], this.c.values[TORPOR]);
          // IB *must* be lower than this
@@ -88,7 +92,7 @@ export class Extractor {
 
       // A lot quicker if wild
       if (this.c.wild) {
-         for (let i = 0; i < 7; i ++) {
+         for (let i = 0; i < 7; i++) {
             tempStat.calculateWildLevel(this.c.m[i], this.c.values[i]);
             // Make sure it is valid
             if (this.c.values[i] == Utils.RoundTo(tempStat.calculateValue(this.c.m[i]), Ark.Precision(i)))
@@ -98,7 +102,7 @@ export class Extractor {
       }
 
       // Loop all stats except for torpor
-      for (let i = 0; i < 7; i ++) {
+      for (let i = 0; i < 7; i++) {
          tempStat = new Stat;
 
          // IF a stat isn't used, set it to -1 and continue
@@ -126,18 +130,15 @@ export class Extractor {
             if (maxLw > this.levelBeforeDom || (maxLw == 0 && this.c.m[i].Iw == 0))
                maxLw = this.levelBeforeDom;
 
-            // Reset Lw to find max possible Ld
-            tempStat.Lw = 0;
-
-            // Calculate the highest Ld could be
-            var maxLd = tempStat.calculateDomLevel(this.c.m[i], this.c.values[i], !this.c.wild, 0, this.c.IB);
-
-            // Adjust Ld to max/min
-            if (maxLd > this.domFreeMax)
-               maxLd = this.domFreeMax;
-
             // Loop all possible Lws
-            for (tempStat.Lw = 0; tempStat.Lw <= maxLw; tempStat.Lw ++) {
+            for (tempStat.Lw = maxLw; tempStat.Lw >= 0; tempStat.Lw--) {
+               // Calculate the highest Ld could be
+               var maxLd = tempStat.calculateDomLevel(this.c.m[i], this.c.values[i], !this.c.wild, 0, this.c.IB);
+
+               // If Ld is greater than the highest dom possible, quit the loop
+               if (maxLd > this.domFreeMax && !this.c.m[i].Tm)
+                  break;
+
                // We don't need to calculate TE to extract the levels
                if (this.c.bred || this.c.m[i].Tm == 0) {
                   if (tempStat.calculateDomLevel(this.c.m[i], this.c.values[i], !this.c.wild, this.c.TE, this.c.IB) > maxLd)
@@ -166,7 +167,7 @@ export class Extractor {
 
                // If this stat has a Tm and is tamed, we need to manually loop through the Ld
                else {
-                  for (tempStat.Ld = 0; tempStat.Ld <= maxLd; tempStat.Ld ++) {
+                  for (tempStat.Ld = 0; tempStat.Ld <= maxLd; tempStat.Ld++) {
 
                      // Attempts to calculate the TE
                      if (Utils.RoundTo(this.c.values[i], Ark.Precision(i)) == Utils.RoundTo(tempStat.calculateValue(this.c.m[i], !this.c.wild, 0, this.c.IB), Ark.Precision(i)))
@@ -197,7 +198,7 @@ export class Extractor {
          }
       }
       // Only filter results if we have a result for every stat
-      for (let i = 0; i < 7; i ++)
+      for (let i = 0; i < 7; i++)
          if (this.c.stats[i].length == 0)
             return;
 
@@ -206,7 +207,7 @@ export class Extractor {
          return;
 
       // Only need to filter results if there is more than 1 possibility
-      for (let i = 0; i < 7; i ++)
+      for (let i = 0; i < 7; i++)
          if (this.c.stats[i].length > 1) {
             this.filterResults();
             return;
@@ -216,7 +217,7 @@ export class Extractor {
    filterResults() {
       do {
          var removed = false;
-         for (var i = 0; i < 7; i ++) {
+         for (var i = 0; i < 7; i++) {
 
             // One stat possibility is good
             if (!this.c.stats[i].checked && this.c.stats[i].length == 1) {
@@ -228,7 +229,7 @@ export class Extractor {
 
             // Simple stat removal
             else if (this.c.stats[i].length > 1) {
-               for (var j = 0; j < this.c.stats[i].length; j ++) {
+               for (var j = 0; j < this.c.stats[i].length; j++) {
                   if (this.c.stats[i][j].Lw > this.wildFreeMax || this.c.stats[i][j].Ld > this.domFreeMax) {
                      this.c.stats[i].splice(j, 1);
                      j--;
@@ -239,9 +240,9 @@ export class Extractor {
          }
 
          // Only remove recursively if we couldn't remove any possibilities the other 2 ways
-         for (var i = 0; !removed && i < 7; i ++) {
+         for (var i = 0; !removed && i < 7; i++) {
             if (!this.c.stats[i].checked && this.c.stats[i].length > 1)
-               for (var j = 0; j < this.c.stats[i].length; j ++) {
+               for (var j = 0; j < this.c.stats[i].length; j++) {
                   if (!this.matchingStats([i, j], true)) {
                      this.c.stats[i].splice(j, 1);
                      j--;
@@ -257,10 +258,10 @@ export class Extractor {
     * @example extractorObj.matchingstats([statIndex, resultIndex], true);
     * // Returns false if extractorObj.results[statIndex][resultIndex] is not a valid result
     *
-    * @param {[number, number]} indices - An array of index arrays to use on the results object
-    * @param {boolean} [returnBool = false] - If set to true, will return a boolean value instead of an array
+    * @param {[number, number]} indices An array of index arrays to use on the results object
+    * @param {boolean} [returnBool = false] If set to true, will return a boolean value instead of an array
     *
-    * @returns {([]|boolean)} - All matching stats that are required to keep the levels "true"
+    * @returns {(boolean|[])} All matching stats that are required to keep the levels "true"
     */
    matchingStats(indices, returnBool = false) {
       // Make sure we got an array of arrays
@@ -269,8 +270,23 @@ export class Extractor {
 
       var TE = -1;
 
+      // We need to make sure we haven't already exceeded our max levels
+      var wildLevels = 0, domLevels = 0;
+      // Loop through our possibilities
+      for (var i = 0; i < indices.length; i++) {
+         if (this.c.stats[indices[i][0]][indices[i][1]].Lw > 0)
+            wildLevels += this.c.stats[indices[i][0]][indices[i][1]].Lw;
+         domLevels += this.c.stats[indices[i][0]][indices[i][1]].Ld;
+      }
+
+      // check to see if the stat possibilities add up to the missing dom levels
+      // and wild levels as long as we don't have an unused stat
+      if ((!this.unusedStat && wildLevels > this.wildFreeMax) || domLevels > this.domFreeMax) {
+         return returnBool ? false : [];
+      }
+
       // If the TE of the stats we have don't match, they aren't valid
-      for (var i = 0; i < indices.length; i ++) {
+      for (var i = 0; i < indices.length; i++) {
          if (TE == -1 && this.c.stats[indices[i][0]][indices[i][1]].hasOwnProperty("TE"))
             TE = this.c.stats[indices[i][0]][indices[i][1]].TE;
          else if (this.c.stats[indices[i][0]][indices[i][1]].hasOwnProperty("TE"))
@@ -280,7 +296,7 @@ export class Extractor {
 
       top:
       // We only want to add a stat that has more than one possibility
-      for (var i = 0; i < 7; i ++) {
+      for (var i = 0; i < 7; i++) {
          for (var index = indices.length - 1; index >= 0; index--) {
             // We have already checked this stat
             if (this.c.stats[i].checked || i == indices[index][0])
@@ -289,7 +305,7 @@ export class Extractor {
 
          // We only made it this far if we don't have a possibility for this stat in our indices array
          // and there is more than one possibility for this stat
-         for (var j = 0; j < this.c.stats[i].length; j ++) {
+         for (var j = 0; j < this.c.stats[i].length; j++) {
             // add that stat to the indices
             indices.push([i, j]);
             var returnValue = this.matchingStats(indices, returnBool);
@@ -305,11 +321,11 @@ export class Extractor {
       }
 
       // We have to make sure we haven't missed out on a stat
-      for (var i = 0; i < 7; i ++)
+      for (var i = 0; i < 7; i++)
          // The stat hasn't been checked yet
          if (!this.c.stats[i].checked)
             // Check our indices to make sure it exists
-            for (var j = 0; j < indices.length; j ++) {
+            for (var j = 0; j < indices.length; j++) {
                // We have the stat in our indices
                if (indices[j][0] == i)
                   break;
@@ -321,7 +337,7 @@ export class Extractor {
       // We've run out of stats to add to our indices so lets test them for valid results
       var wildLevels = 0, domLevels = 0;
       // Loop through our possibilities
-      for (var i = 0; i < indices.length; i ++) {
+      for (var i = 0; i < indices.length; i++) {
          if (this.c.stats[indices[i][0]][indices[i][1]].Lw > 0)
             wildLevels += this.c.stats[indices[i][0]][indices[i][1]].Lw;
          domLevels += this.c.stats[indices[i][0]][indices[i][1]].Ld;
