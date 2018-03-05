@@ -69,7 +69,14 @@ export default [
       tag: "Griffin - Level 219 (Official)",
       species: "Griffin", level: 219, imprint: 0, exactly: false, mode: "Tamed",
       values: [6450.5, 882.0, 585.0, 8809.9, 470.4, 263.8, 136.5, 19500.5],
-      serverName: "Official Server",
+      serverName: "[BLPP] Jane",
+      results: [[{ "Lw": 35, "Ld": 8 }], [{ "Lw": 29, "Ld": 10 }], [{ "Lw": 29, "Ld": 0 }], [{ "Lw": 38, "Ld": 0, "wildLevel": 134, "TE": 0.9808159722222214 }], [{ "Lw": 34, "Ld": 0 }], [{ "Lw": 35, "Ld": 0, "wildLevel": 134, "TE": 0.9797979797979794 }], [{ "Lw": 0, "Ld": 0 }], [{ "Lw": 200, "Ld": 0 }]]
+   },
+   {
+      tag: "Bronto - Level 66 (Official)",
+      species: "Brontosaurus", level: 66, imprint: 0, exactly: false, mode: "Tamed",
+      values: [3726.1, 468.0, 225.0, 14000.0, 2089.0, 180.9, 134.0, 5360.5],
+      serverName: "Zerkxy Gremory",
       results: [[{ "Lw": 35, "Ld": 8 }], [{ "Lw": 29, "Ld": 10 }], [{ "Lw": 29, "Ld": 0 }], [{ "Lw": 38, "Ld": 0, "wildLevel": 134, "TE": 0.9808159722222214 }], [{ "Lw": 34, "Ld": 0 }], [{ "Lw": 35, "Ld": 0, "wildLevel": 134, "TE": 0.9797979797979794 }], [{ "Lw": 0, "Ld": 0 }], [{ "Lw": 200, "Ld": 0 }]]
    },
 ];

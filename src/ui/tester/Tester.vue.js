@@ -77,6 +77,29 @@ function PerformTest(data) {
    let extractObject = new Extractor(app.data.vueCreature);
    extractObject.extract();
 
+   for (let i = 0; i < 7; i++) {
+      if (app.data.vueCreature.stats[i].length == 1) {
+         console.log("Stat at index " + i + " has only one option");
+         continue;
+      }
+      for (let j = 0; j < app.data.vueCreature.stats[i].length; j++) {
+         let exactStatMatch = extractObject.matchingStats(false, [[i, j]]);
+         let displayString = "";
+
+         top:
+         for (let k = 0; k < 7; k++) {
+            for (let l = 0; l < exactStatMatch.length; l++) {
+               if (k == exactStatMatch[l][0] && !app.data.vueCreature.stats[exactStatMatch[l][0]].checked) {
+                  displayString += JSON.stringify(app.data.vueCreature.stats[exactStatMatch[l][0]][exactStatMatch[l][1]]) + " ";
+                  continue top;
+               }
+               displayString += "\nStat at index " + k + " has only one option";
+            }
+         }
+         console.log(displayString);
+      }
+   }
+
    let pass = JSON.stringify(data['results']) == JSON.stringify(app.data.vueCreature.stats);
 
    return { pass: pass, results: app.data.vueCreature.stats };

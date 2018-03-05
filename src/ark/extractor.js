@@ -293,7 +293,7 @@ export class Extractor {
          for (var i = 0; !removed && i < 7; i++) {
             if (!this.c.stats[i].checked && this.c.stats[i].length > 1)
                for (var j = 0; j < this.c.stats[i].length; j++) {
-                  if (!this.matchingStats([i, j], true)) {
+                  if (!this.matchingStats(true, [i, j])) {
                      this.c.stats[i].splice(j, 1);
                      j--;
                      removed = true;
@@ -303,7 +303,7 @@ export class Extractor {
       } while (removed);
    }
 
-   // We will pass wild level so we don't need to calculate TE everytime
+   // Remove all stats that don't have a matching TE pair
    filterByTE(index, TE) {
       for (let i = 0; i < 7; i++) {
          if ((this.c.m[i].Tm) && (i != index)) {
@@ -326,7 +326,7 @@ export class Extractor {
     *
     * @returns {(boolean|[])} All matching stats that are required to keep the levels "true"
     */
-   matchingStats(indices, returnBool = false, wildLevels = 0, domLevels = 0) {
+   matchingStats(returnBool = false, indices, wildLevels = 0, domLevels = 0) {
       // Make sure we got an array of arrays
       if (!Array.isArray(indices[0]))
          indices = [indices];
@@ -362,15 +362,16 @@ export class Extractor {
          for (var j = 0; j < this.c.stats[i].length; j++) {
             // add that stat to the indices
             indices.push([i, j]);
-            var returnValue = this.matchingStats(indices, returnBool, wildLevels, domLevels);
+            var returnValue = this.matchingStats(returnBool, indices, wildLevels, domLevels);
             // On the event of a failure, remove that index, and try the next stat
-            if (returnValue == [] || !returnValue) {
+            if ((returnValue == []) || !returnValue) {
                indices.pop();
                continue;
             }
             // We only made it here on a successful match
             // returnValue will either be true or an array of stat index pairs
-            return returnValue;
+            else
+               return returnValue;
          }
       }
 
