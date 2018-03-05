@@ -371,7 +371,7 @@ export class Extractor {
             indices.push([i, j]);
             var returnValue = this.matchingStats(returnBool, indices, wildLevels, domLevels);
             // On the event of a failure, remove that index, and try the next stat
-            if ((returnValue == []) || !returnValue) {
+            if (!returnValue || returnValue.length == 0) {
                indices.pop();
                continue;
             }
@@ -383,9 +383,9 @@ export class Extractor {
       }
 
       // We have to make sure we haven't missed out on a stat
-      for (var i = 0; i < 7; i++)
+      for (var i = 0; i < 7; i++) {
          // The stat hasn't been checked yet
-         if (!this.c.stats[i].checked)
+         if (!this.c.stats[i].checked) {
             // Check our indices to make sure it exists
             for (var j = 0; j < indices.length; j++) {
                // We have the stat in our indices
@@ -395,6 +395,8 @@ export class Extractor {
                if (j == indices.length - 1)
                   return returnBool ? false : [];
             }
+         }
+      }
 
       // We've run out of stats to add to our indices so lets test them for valid results
       var wildLevels = 0, domLevels = 0;
