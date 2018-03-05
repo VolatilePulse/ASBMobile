@@ -6,6 +6,21 @@ import * as app from './app';
 import { Server } from './ark/multipliers';
 
 
+export function FormatAllOptions(stats) {
+   return stats.map(options => FormatOptions(options)).join('\n');
+}
+
+export function FormatOptions(options) {
+   return options.map(option => FormatOption(option)).join(',') || "-";
+}
+
+export function FormatOption(option) {
+   const { Lw, Ld, wildLevel, TE } = option;
+   if (wildLevel || TE)
+      return `(${Lw}+${Ld} LW${wildLevel} ${Utils.FormatNumber(TE * 100, 2)}%)`;
+   return `(${Lw}+${Ld})`;
+}
+
 export function Precision(index) {
    // Displays Damage and Speed as 153.5(%)
    if (index == DAMAGE || index == SPEED)

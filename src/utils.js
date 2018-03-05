@@ -2,6 +2,10 @@
  * @fileOverview Miscellaneous functions used throughout the app
  */
 
+import cloneDeep from 'lodash.clonedeep';
+import isEqual from 'lodash.isequal';
+import isEqualWith from 'lodash.isequalwith';
+
 /**
  * Async JSON file read
  * @async
@@ -97,6 +101,21 @@ export function DelayFunction(duration) {
 }
 
 /**
+ * Returns true if two numbers are closer then the given difference.
+ * Return false otherwise.
+ * Return undefined if either argument is not a number or not finite.
+ * @param {number} a A
+ * @param {number} b B
+ * @param {number} epsilon Difference limit
+ */
+export function CompareFloat(a, b, epsilon = 1E-10) {
+   if (!Number.isFinite(a) || !Number.isFinite(b)) return undefined;
+
+   var diff = Math.abs(a - b);
+   return diff < epsilon;
+}
+
+/**
  * Rounds a number to a set decimal place for comparison
  * @param {number} num Value that needs rounded
  * @param {number} [n] Number of decimals to be rounded to
@@ -113,6 +132,19 @@ export function RoundTo(num, n = 0) {
  */
 export function IsObject(item) {
    return (item && typeof item === 'object' && !Array.isArray(item));
+}
+
+export function IsFunction(item) {
+   return (item && typeof item === 'function');
+}
+
+export function DeepCompare(a, b, fn) {
+   if (fn) return isEqualWith(a, b, fn);
+   return isEqual(a, b);
+}
+
+export function DeepCopy(obj) {
+   return cloneDeep(obj);
 }
 
 /**

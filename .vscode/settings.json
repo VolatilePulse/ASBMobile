@@ -1,5 +1,10 @@
 {
-   "liveServer.settings.root": "/docs",
+   "liveServer.settings.mount": [
+      [
+         "/ASBMobile",
+         "/docs"
+      ],
+   ],
    "editor.detectIndentation": false,
    "editor.tabSize": 3,
    "editor.formatOnSave": true,

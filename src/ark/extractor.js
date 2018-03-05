@@ -43,7 +43,7 @@ export class Extractor {
          this.c.TE = 1;
    }
 
-   extract() {
+   extract(dbg) {
       // Make sure we initialize specific variables before extraction
       this.init();
 
@@ -57,6 +57,7 @@ export class Extractor {
       // Calculate the torpor stat since it doesn't accept dom levels
       torporStat.calculateWildLevel(this.c.m[TORPOR], this.c.values[TORPOR], (!this.c.wild), this.c.TE, this.c.IB);
       this.c.stats[TORPOR].push(torporStat);
+      if (dbg) dbg.levelFromTorpor = torporStat.Lw;
 
       // Calculate the max number of levels based on level and torpor
       this.wildFreeMax = this.levelBeforeDom = torporStat.Lw;
@@ -206,21 +207,27 @@ export class Extractor {
             }
          }
       }
+
       // Only filter results if we have a result for every stat
-      for (let i = 0; i < 7; i++)
-         if (this.c.stats[i].length == 0)
+      for (let i = 0; i < 7; i++) {
+         if (this.c.stats[i].length == 0) {
+            if (dbg) dbg.failReason = "No options found for stat " + i;
             return;
+         }
+      }
 
       // Don't need to filter results if wild
       if (this.c.wild)
          return;
 
       // Only need to filter results if there is more than 1 possibility
-      for (let i = 0; i < 7; i++)
+      for (let i = 0; i < 7; i++) {
          if (this.c.stats[i].length > 1) {
-            this.filterResults();
+            if (dbg) dbg.preFilterStats = Utils.DeepCopy(this.c.stats);
+            this.filterResults(dbg);
             return;
          }
+      }
    }
 
    filterResults() {
