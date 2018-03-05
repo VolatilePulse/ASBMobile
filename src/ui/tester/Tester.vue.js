@@ -8,13 +8,14 @@ import * as app from "../../app";
 import * as Utils from '../../utils';
 import { PerformTest } from '../../testing';
 import testData from '../../test_data';
+import { FormatAllOptions } from '../../ark';
 
 
 export default withRender({
    name: "Tester",
 
    data: () => ({
-      openTestIndex: null,
+      openTestIndex: 0,
       testData: testData,
       results: [],
    }),
@@ -25,32 +26,37 @@ export default withRender({
    },
 
    methods: {
-      runTest(data) { RunTest(this, data); },
-      async runAllTests() { await RunAllTests(this); },
-      openResults: function (index) { this.openTestIndex = (this.openTestIndex != index) ? index : null; },
-      isPass: function (index) { return this.results[index] && this.results[index].pass; },
-      isFail: function (index) { return this.results[index] && !this.results[index].pass; },
+      openResults(index) { this.openTestIndex = (this.openTestIndex != index) ? index : null; },
+      isPass(index) { return this.results[index] && this.results[index].pass; },
+      isFail(index) { return this.results[index] && !this.results[index].pass; },
+      formatNumber(n, places = 0) { return Utils.FormatNumber(n, places); },
+      formattedStats(stats) { return FormatAllOptions(stats); },
+
+      runTest(index) {
+         let results = PerformTest(testData[index]);
+         Vue.set(this.results, index, results);
+         this.openTestIndex = index;
+      },
+
+      async runAllTests() {
+         let failFound = false;
+         for (let index = 0; index < testData.length; index++) {
+            Vue.set(this.results, index, undefined);
+         }
+
+         await Utils.Delay(100); // unblock the browser for a moment
+
+         for (let index = 0; index < testData.length; index++) {
+            let results = PerformTest(testData[index]);
+            Vue.set(this.results, index, results);
+
+            if (!failFound && results.pass == false) {
+               this.openTestIndex = index;
+               failFound = true;
+            }
+
+            await Utils.Delay(100); // unblock the browser for a moment
+         }
+      },
    },
 });
-
-
-function RunTest(ui, index) {
-   let results = PerformTest(testData[index]);
-   Vue.set(ui.results, index, results);
-   ui.openTestIndex = index;
-}
-
-async function RunAllTests(ui) {
-   let failFound = false;
-   for (let index = 0; index < testData.length; index++) {
-      let results = PerformTest(testData[index]);
-      Vue.set(ui.results, index, results);
-
-      if (!failFound && results.pass == false) {
-         ui.openTestIndex = index;
-         failFound = true;
-      }
-
-      await Utils.Delay(100); // unblock the browser for a moment
-   }
-}

@@ -1,29 +1,50 @@
-<div class="w3-container">
-   <div class="w3-container">
-      <a href="#runAllTests" @click.prevent="runAllTests" class="w3-right">Run All</a>
-   </div>
-   <ul class="w3-ul">
-      <li v-for="(data,index) in testData" class="w3-hoverable">
-         <span class="w3-button w3-right w3-xlarge" @click="runTest(index)">&#x25B8;</span>
-         <div class="" @click="openResults(index)">
-            <div>
-               <span v-if="isPass(index)" class="w3-tag w3-green">pass</span>
-               <span v-if="isFail(index)" class="w3-tag w3-red">fail</span>
-               <span class="w3-large">{{data.tag}}</span>
+<div>
+   <b-container class="clearfix">
+      <b-button-group class="float-right m-2">
+         <b-button @click="runAllTests" variant="dark">Run All</b-button>
+      </b-button-group>
+   </b-container>
+
+   <b-container>
+      <b-list-group>
+         <b-list-group-item v-for="(data,index) in testData" class="p-2">
+            <div class="float-right m-0 p-0">
+               <!-- pass/fail -->
+               <span v-if="isPass(index)" class="badge badge-success badge-pill w-100 m-0">PASS</span>
+               <span v-if="isFail(index)" class="badge badge-danger badge-pill w-100 m-0">FAIL</span>
+
+               <br/>
+
+               <!-- timing -->
+               <span v-if="results[index] && results[index]['duration'] != undefined" class="badge badge-info badge-pill">
+                  {{formatNumber(results[index]['duration'], 1)}}ms
+               </span>
             </div>
-            <span>{{data.values.join(', ')}}</span>
-         </div>
-         <div v-if="index in results && openTestIndex==index">
+
+            <!-- header / info -->
+            <div @click.prevent="openResults(index)">
+               <h6 class="mb-0">
+                  <b-img @click.prevent="runTest(index)" :src="require('assets/play.svg')" class="" style="height:20px"></b-img>
+                  {{data.tag}}</h6>
+               <small>
+                  Level {{data.level}} {{data.species}} from
+                  <em>{{data.serverName}}</em>
+               </small>
+            </div>
+
+            <!-- expandable results -->
+            <div v-if="index in results" v-show="openTestIndex==index">
                <div>
-                  <span>Got:</span><br/>
-                  <code v-if="results[index]">{{JSON.stringify(results[index]['results'])}}</code>
-                  <code v-else>-blank-</code>
+                  <span>Got:</span>
+                  <pre v-if="results[index]">{{formattedStats(results[index]['results'])}}</pre>
+                  <pre v-else>-blank-</pre>
                </div>
                <div>
-                  <span>Expected:</span><br/>
-                  <code>{{JSON.stringify(testData[index]['results'])}}</code>
+                  <span>Expected:</span>
+                  <pre>{{formattedStats(testData[index]['results'])}}</pre>
                </div>
-         </div>
-      </li>
-   </ul>
+            </div>
+         </b-list-group-item>
+      </b-list-group>
+   </b-container>
 </div>
