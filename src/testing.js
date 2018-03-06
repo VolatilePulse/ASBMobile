@@ -87,6 +87,9 @@ function IsPass(result, expected) {
    if (isFunction(result))
       return false;
 
+   if (isArray(result) && isArray(expected) && result.length != expected.length)
+      return false;
+
    if (isObject(result) || isArray(result)) {
       for (let key in result) {
          if (key.startsWith("_")) continue;

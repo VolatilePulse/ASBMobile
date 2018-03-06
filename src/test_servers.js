@@ -48,6 +48,6 @@ export default [
       testOnly: true,
       IBM: 1,
       singlePlayer: true,
-      multipliers: [, [2, , , 2], , , [10, , , 10], [0.2, , , 0.22], [3, , , 3]],
+      multipliers: [, [2, , 2], , , [10, , 10], [0.2, , 0.22], [3, , 3]],
    },
 ];
