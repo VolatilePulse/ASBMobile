@@ -81,9 +81,9 @@ export default [
    },
    {
       tag: "Allo, poor extract in ASB",
-      species: "Rex", level: 149, imprint: 0, exactly: false, mode: "Tamed",
+      species: "Allosaurus", level: 149, imprint: 0, exactly: false, mode: "Tamed",
       values: [3276.3, 925.0, 555.0, 10009.0, 776.7, 299.7, 90, 9820.5],
       serverName: "Coldino SP",
-      results: [],
+      results: [[{ "Lw": 21, "Ld": 0 }], [{ "Lw": 27, "Ld": 0 }], [{ "Lw": 27, "Ld": 0 }], [{ "Lw": 20, "Ld": 0, "wildLevel": 107, "TE": 0.7474074074074071 }], [{ "Lw": 23, "Ld": 1 }], [{ "Lw": 19, "Ld": 0, "wildLevel": 107, "TE": 0.7477243172951881 }], [{ "Lw": 10, "Ld": 0 }], [{ "Lw": 147, "Ld": 0 }]],
    }
 ];
