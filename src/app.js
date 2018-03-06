@@ -48,7 +48,7 @@ export const vueApp = new Vue({
       // Calcualte the paths for each of the stat images
       for (let i = 0; i < statNames.length; i++) {
          let name = statNames[i];
-         import("assets/" + name + ".png").then(url => Vue.set(vueApp.statImages, i, url));
+         import("assets/" + name.toLowerCase() + ".svg").then(url => Vue.set(vueApp.statImages, i, url));
       }
 
       // Generate test servers
