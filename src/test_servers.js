@@ -43,4 +43,11 @@ export default [
       singlePlayer: false,
       multipliers: [],
    },
+   {
+      serverName: "Coldino SP",
+      testOnly: true,
+      IBM: 1,
+      singlePlayer: true,
+      multipliers: [, [2, , , 2], , , [10, , , 10], [0.2, , , 0.22], [3, , , 3]],
+   },
 ];

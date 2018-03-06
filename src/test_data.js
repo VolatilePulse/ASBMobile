@@ -79,4 +79,11 @@ export default [
       serverName: "Zerkxy Gremory",
       results: [[{ "Lw": 35, "Ld": 8 }], [{ "Lw": 29, "Ld": 10 }], [{ "Lw": 29, "Ld": 0 }], [{ "Lw": 38, "Ld": 0, "wildLevel": 134, "TE": 0.9808159722222214 }], [{ "Lw": 34, "Ld": 0 }], [{ "Lw": 35, "Ld": 0, "wildLevel": 134, "TE": 0.9797979797979794 }], [{ "Lw": 0, "Ld": 0 }], [{ "Lw": 200, "Ld": 0 }]]
    },
+   {
+      tag: "Allo, poor extract in ASB",
+      species: "Rex", level: 149, imprint: 0, exactly: false, mode: "Tamed",
+      values: [3276.3, 925.0, 555.0, 10009.0, 776.7, 299.7, 90, 9820.5],
+      serverName: "Coldino SP",
+      results: [],
+   }
 ];
