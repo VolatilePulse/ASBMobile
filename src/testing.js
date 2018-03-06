@@ -28,31 +28,6 @@ export function PerformTest(data) {
    extractObject.extract(dbg);
    let t2 = performance.now();
 
-   /*
-   for (let srcStatId = 0; srcStatId < 7; srcStatId++) {
-      if (testCreature.stats[srcStatId].length == 1) {
-         console.log("Stat at index " + srcStatId + " has only one option");
-         continue;
-      }
-      for (let srcOptId = 0; srcOptId < testCreature.stats[srcStatId].length; srcOptId++) {
-         let exactStatMatch = extractObject.matchingStats(false, [[srcStatId, srcOptId]]);
-         let displayString = "";
-
-         top:
-         for (let tgtStatId = 0; tgtStatId < 7; tgtStatId++) {
-            for (let tgtOptionId = 0; tgtOptionId < exactStatMatch.length; tgtOptionId++) {
-               if (tgtStatId == exactStatMatch[tgtOptionId][0] && !testCreature.stats[exactStatMatch[tgtOptionId][0]].checked) {
-                  displayString += JSON.stringify(testCreature.stats[exactStatMatch[tgtOptionId][0]][exactStatMatch[tgtOptionId][1]]) + " ";
-                  continue top;
-               }
-               displayString += "\nStat at index " + tgtStatId + " has only one option";
-            }
-         }
-         console.log(displayString);
-      }
-   }
-   */
-
    let pass = IsPass(data['results'], testCreature.stats);
 
    console.log("\n" + (pass ? "PASS: " : "FAIL: ") + data['tag']);

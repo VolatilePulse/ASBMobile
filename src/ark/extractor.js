@@ -20,6 +20,7 @@ export class Extractor {
       this.domFreeMax = 0;
       this.levelBeforeDom = 0;
       this.unusedStat = false;
+      this.options = [];
    }
 
    init() {
@@ -41,6 +42,8 @@ export class Extractor {
 
       else
          this.c.TE = 1;
+
+      this.options = [];
    }
 
    extract(dbg) {
@@ -225,9 +228,18 @@ export class Extractor {
          if (this.c.stats[i].length > 1) {
             if (dbg) dbg.preFilterStats = Utils.DeepCopy(this.c.stats);
             this.filterResults(dbg);
-            return;
+            break;
          }
       }
+
+      for (let i = 0; i < 7; i++)
+         if (this.c.stats[i].length > 1) {
+            this.generateOptions();
+            console.log(this.options);
+            break;
+         }
+
+      return;
    }
 
    filterResults() {
@@ -300,7 +312,7 @@ export class Extractor {
          for (var i = 0; !removed && i < 7; i++) {
             if (!this.c.stats[i].checked && this.c.stats[i].length > 1)
                for (var j = 0; j < this.c.stats[i].length; j++) {
-                  if (!this.matchingStats(true, [i, j])) {
+                  if (!this.matchingStats([i, j], true)) {
                      this.c.stats[i].splice(j, 1);
                      j--;
                      removed = true;
@@ -333,7 +345,7 @@ export class Extractor {
     *
     * @returns {(boolean|[])} All matching stats that are required to keep the levels "true"
     */
-   matchingStats(returnBool = false, indices, wildLevels = 0, domLevels = 0) {
+   matchingStats(indices, returnBool = false, wildLevels = 0, domLevels = 0) {
       // Make sure we got an array of arrays
       if (!Array.isArray(indices[0]))
          indices = [indices];
@@ -369,7 +381,7 @@ export class Extractor {
          for (var j = 0; j < this.c.stats[i].length; j++) {
             // add that stat to the indices
             indices.push([i, j]);
-            var returnValue = this.matchingStats(returnBool, indices, wildLevels, domLevels);
+            var returnValue = this.matchingStats(indices, returnBool, wildLevels, domLevels);
             // On the event of a failure, remove that index, and try the next stat
             if (!returnValue || returnValue.length == 0) {
                indices.pop();
@@ -415,5 +427,43 @@ export class Extractor {
 
       // If we made it this far, we have failed something
       return returnBool ? false : [];
+   }
+
+   generateOptions() {
+      let tempOptions = [];
+
+      // The initial array for matchingStats
+      for (let stat = 0; stat < 7; stat++)
+         if (!this.c.stats[stat].checked)
+            tempOptions.push([stat, 0]);
+
+      let indexMax = tempOptions.length - 1;
+      let selector = indexMax;
+
+      do {
+         let actualOption = [], copyOption = tempOptions.slice();
+
+         if (this.matchingStats(tempOptions, true)) {
+            for (let stat = 0; stat < 8; stat++) {
+               if (this.c.stats[stat].length == 1)
+                  actualOption.push([stat, 0]);
+               else
+                  actualOption.push(copyOption.shift().slice());
+            }
+            this.options.push(actualOption.slice());
+         }
+
+         tempOptions[selector][1]++;
+
+         while (selector != -1 && tempOptions[selector][1] == tempOptions[selector].length) {
+            tempOptions[selector][1] = 0;
+            selector--;
+            if (selector != -1)
+               tempOptions[selector][1]++;
+         }
+
+         if (selector != -1)
+            selector = indexMax;
+      } while (selector != -1);
    }
 }
