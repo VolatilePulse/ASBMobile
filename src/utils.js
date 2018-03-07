@@ -52,10 +52,11 @@ const formattersCache = new Map();
 export function FormatNumber(value, places = 1, fixed = false) {
    let formatter = formattersCache.get({ places, fixed });
    if (!formatter) {
+      var locale = navigator['language'] || (navigator['languages'] && navigator.languages[0]) || navigator['browserLanguage'] || 'en';
       if (fixed)
-         formatter = new Intl.NumberFormat({ maximumFractionDigits: places, minimumFractionDigits: places, useGrouping: false });
+         formatter = new Intl.NumberFormat(locale, { maximumFractionDigits: places, minimumFractionDigits: places, useGrouping: false });
       else
-         formatter = new Intl.NumberFormat({ maximumFractionDigits: places, useGrouping: false });
+         formatter = new Intl.NumberFormat(locale, { maximumFractionDigits: places, useGrouping: false });
       formattersCache.set({ places, fixed }, formatter);
    }
    return formatter.format(value);
