@@ -37,15 +37,15 @@ export class Stat {
    }
 
    calculateWildLevel(m, v, tamed = false, TE = 0, IB = 0) {
-      // Lw = ((V / (1 + Ld * Id * IdM) / (1 + TE * Tm * TmM) - Ta * TaM) / (B * TBHM * (1 + IB * 0.2 * IBM)) - 1) / (Iw * IwM)
+      // Lw = ((V / ((1 + Ld * Id * IdM) * (1 + TE * Tm * TmM)) - Ta * TaM) / (B * TBHM * (1 + IB * 0.2 * IBM)) - 1) / (Iw * IwM)
 
       // Prevents division by 0
       if (m.Iw == 0)
          return this.Lw = 0;
 
-      var wildLevel = v;
-      wildLevel /= (1 + this.Ld * m.Id * m.IdM);
-      wildLevel /= (1 + this.calculateTm(tamed, m.Tm, m.TmM, TE));
+      var wildLevel = (1 + this.Ld * m.Id * m.IdM);
+      wildLevel *= (1 + this.calculateTm(tamed, m.Tm, m.TmM, TE));
+      wildLevel = v / wildLevel;
 
       if (tamed)
          wildLevel -= this.calculateTa(tamed, m.Ta, m.TaM);

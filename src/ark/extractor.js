@@ -63,7 +63,8 @@ export class Extractor {
       if (dbg) dbg.levelFromTorpor = torporStat.Lw;
 
       // Calculate the max number of levels based on level and torpor
-      this.wildFreeMax = this.levelBeforeDom = torporStat.Lw;
+      this.wildFreeMax = torporStat.Lw;
+      this.levelBeforeDom = torporStat.Lw + 1;
       this.domFreeMax = Math.max(0, this.c.level - this.wildFreeMax - 1);
 
       // If it's bred, we need to do some magic with the IB
@@ -127,6 +128,7 @@ export class Extractor {
          }
 
          // Creatures that don't increase Speed on imprint also don't level the stat
+         // FIXME: It's true for all flyers, including CF flyers that allow IB of Speed
          else if (!this.c.m[i].IBM && i == SPEED) {
             // Calculate DOM for speed
             this.c.stats[SPEED] = [new Stat(0, tempStat.calculateDomLevel(this.c.m[i], this.c.values[i], !this.c.wild, 0, this.c.IB))];
@@ -182,13 +184,20 @@ export class Extractor {
                else {
                   for (tempStat.Ld = 0; tempStat.Ld <= maxLd; tempStat.Ld++) {
 
+                     let tamingEffectiveness = 0, minTE = 0, maxTE = 0;
                      // Attempts to calculate the TE
                      if (Utils.RoundTo(this.c.values[i], Ark.Precision(i)) == Utils.RoundTo(tempStat.calculateValue(this.c.m[i], !this.c.wild, 0, this.c.IB), Ark.Precision(i)))
-                        var tamingEffectiveness = 0;
+                        tamingEffectiveness = 0;
                      else if (Utils.RoundTo(this.c.values[i], Ark.Precision(i)) == Utils.RoundTo(tempStat.calculateValue(this.c.m[i], !this.c.wild, 1, this.c.IB), Ark.Precision(i)))
-                        var tamingEffectiveness = 1;
-                     else
-                        var tamingEffectiveness = tempStat.calculateTE(this.c.m[i], this.c.values[i]);
+                        tamingEffectiveness = 1;
+                     else {
+                        // One of the most precise ways to get the exact Taming Effectiveness
+                        tamingEffectiveness = tempStat.calculateTE(this.c.m[i], this.c.values[i]);
+                        // TE *must* be lower than this
+                        maxTE = tempStat.calculateTE(this.c.m[i], this.c.values[i] + (0.5 / Math.pow(10, Ark.Precision(i))));
+                        // TE can be equal to or greater than this
+                        minTE = tempStat.calculateIB(this.c.m[i], this.c.values[i] - (0.5 / Math.pow(10, Ark.Precision(i))));
+                     }
 
                      if (tamingEffectiveness >= 0 && tamingEffectiveness <= 1) {
 
@@ -198,6 +207,8 @@ export class Extractor {
                            var TEStat = new Stat(tempStat);
                            TEStat.wildLevel = Utils.RoundTo(this.levelBeforeDom / (1 + 0.5 * tamingEffectiveness), 0);
                            TEStat.TE = tamingEffectiveness;
+                           TEStat.maxTE = maxTE;
+                           TEStat.minTE = minTE;
                            this.c.stats[i].push(TEStat);
                         }
                      }
