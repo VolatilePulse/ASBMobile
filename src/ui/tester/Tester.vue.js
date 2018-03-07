@@ -35,7 +35,7 @@ export default withRender({
       runTest(index) {
          let results = PerformTest(testData[index]);
          Vue.set(this.results, index, results);
-         this.openTestIndex = index;
+         this.openTestIndex = null;
       },
 
       async runAllTests() {
