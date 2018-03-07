@@ -58,7 +58,7 @@ export async function LoadValues(json) {
       app.data.speciesNames.push(speciesData.name);
       app.data.speciesMultipliers[speciesData.name] =
          new CreatureStats(speciesData.statsRaw,
-            speciesData.TBHM,
+            speciesData.TamedBaseHealthMultiplier,
             speciesData.doesNotUseOxygen,
             speciesData.NoImprintingForSpeed);
 
