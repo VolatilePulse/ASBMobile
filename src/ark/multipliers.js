@@ -50,10 +50,12 @@ export class CreatureStats {
       }
 
       // These values are not imprint increased
-      this[consts.STAMINA].IBM = 0;
-      this[consts.OXYGEN].IBM = 0;
+      this[consts.STAMINA].noImprint = true;
+      this[consts.OXYGEN].noImprint = true;
       if (speedImprintIgnored)
-         this[consts.SPEED].IBM = 0;
+         this[consts.SPEED].noImprint = true;
+      else
+         this[consts.SPEED].noImprint = false;
    }
 }
 

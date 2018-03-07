@@ -77,11 +77,17 @@ export function GetMultipliers(serverName, speciesName) {
 
    // Single Player multiplies the official/override multipliers
    if (app.data.servers[serverName].singlePlayer)
-      for (var stat in app.data.officialSPMultiplier)
-         for (var multiplier in app.data.officialSPMultiplier[stat])
+      for (let stat in app.data.officialSPMultiplier)
+         for (let multiplier in app.data.officialSPMultiplier[stat])
             multipliers[stat][multiplier] = Utils.RoundTo(multipliers[stat][multiplier] * (app.data.officialSPMultiplier[stat][multiplier] || 1), 3);
 
    Utils.DeepMerge(multipliers, app.data.speciesMultipliers[speciesName]);
+
+   for (let stat = 0; stat < 8; stat++)
+      if (multipliers[stat].noImprint)
+         multipliers[stat].IBM = 0;
+      else
+         multipliers[stat].IBM = app.data.servers[serverName].IBM;
 
    return multipliers;
 }
