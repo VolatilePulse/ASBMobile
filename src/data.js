@@ -69,6 +69,23 @@ export async function LoadValues(json) {
       }
    }
 
+   /* Preparation for the new data.json file
+   for (var creature in jsonObject.species) {
+      let speciesData = jsonObject.species[creature];
+      app.data.speciesNames.push(creature);
+      app.data.speciesMultipliers[creature] =
+         new CreatureStats(speciesData.stats,
+            speciesData.TBHM,
+            speciesData.noOxygen,
+            speciesData.noImprint);
+
+      for (var index = 0; index < 8; index++) {
+         linearArray.push(Object.assign(
+            { species: creature, statIndex: index },
+            app.data.speciesMultipliers[creature][index]));
+      }
+   } */
+
    await multipliers.statMultipliers.bulkPut(linearArray);
 
    // Sorted species names, please

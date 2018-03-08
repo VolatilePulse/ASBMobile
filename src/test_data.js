@@ -70,7 +70,7 @@ export default [
       species: "Griffin", level: 219, imprint: 0, exactly: false, mode: "Tamed",
       values: [6450.5, 882.0, 585.0, 8809.9, 470.4, 263.8, 136.5, 19500.5],
       serverName: "[BLPP] Jane",
-      results: [[{ "Lw": 35, "Ld": 8 }], [{ "Lw": 29, "Ld": 10 }], [{ "Lw": 29, "Ld": 0 }], [{ "Lw": 38, "Ld": 0, "wildLevel": 135, "TE": 0.9808159722222214 }], [{ "Lw": 34, "Ld": 0 }], [{ "Lw": 35, "Ld": 0, "wildLevel": 135, "TE": 0.9797979797979794 }], [{ "Lw": 0, "Ld": 0 }], [{ "Lw": 200, "Ld": 0 }]]
+      results: [[{ "Lw": 35, "Ld": 8 }], [{ "Lw": 29, "Ld": 10 }], [{ "Lw": 29, "Ld": 0 }], [{ "Lw": 38, "Ld": 0, "wildLevel": 135, "TE": 0.9808159722222214 }], [{ "Lw": 34, "Ld": 0 }], [{ "Lw": 35, "Ld": 0, "wildLevel": 135, "TE": 0.9808159722222214 }], [{ "Lw": 0, "Ld": 0 }], [{ "Lw": 200, "Ld": 0 }]]
    },
    {
       tag: "Bronto - Level 66 (Official)",
@@ -84,13 +84,13 @@ export default [
       species: "Allosaurus", level: 149, imprint: 0, exactly: false, mode: "Tamed",
       values: [3276.3, 925.0, 555.0, 10009.0, 776.7, 299.7, 90, 9820.5],
       serverName: "Coldino SP",
-      results: [[{ "Lw": 21, "Ld": 0 }], [{ "Lw": 27, "Ld": 0 }], [{ "Lw": 27, "Ld": 0 }], [{ "Lw": 20, "Ld": 0, "wildLevel": 108, "TE": 0.7474074074074071 }], [{ "Lw": 23, "Ld": 1 }], [{ "Lw": 19, "Ld": 0, "wildLevel": 108, "TE": 0.7477243172951881 }], [{ "Lw": 10, "Ld": 0 }], [{ "Lw": 147, "Ld": 0 }]],
+      results: [[{ "Lw": 21, "Ld": 0 }], [{ "Lw": 27, "Ld": 0 }], [{ "Lw": 27, "Ld": 0 }], [{ "Lw": 20, "Ld": 0, "wildLevel": 108, "TE": 0.7474074074074071 }], [{ "Lw": 23, "Ld": 1 }], [{ "Lw": 19, "Ld": 0, "wildLevel": 108, "TE": 0.7474074074074071 }], [{ "Lw": 10, "Ld": 0 }], [{ "Lw": 147, "Ld": 0 }]],
    },
    {
       tag: "Pteranodon - Level 261 (WTF Server)",
       species: "Pteranodon", level: 261, imprint: 0, exactly: false, mode: "Tamed",
       values: [2105.7, 480.0, 855.0, 6496.0, 753.6, 438.0, 156, 1992.7],
       serverName: "Tp",
-      results: [[{ "Lw": 39, "Ld": 0 }], [{ "Lw": 44, "Ld": 0 }], [{ "Lw": 47, "Ld": 0 }], [{ "Lw": 36, "Ld": 0, "wildLevel": 180, "TE": 0.9067 }], [{ "Lw": 44, "Ld": 0 }], [{ "Lw": 50, "Ld": 0, "wildLevel": 180, "TE": 0.9067 }], [{ "Lw": 0, "Ld": 0 }], [{ "Lw": 260, "Ld": 0 }]],
+      results: [[{ "Lw": 39, "Ld": 0 }], [{ "Lw": 44, "Ld": 0 }], [{ "Lw": 47, "Ld": 0 }], [{ "Lw": 36, "Ld": 0, "wildLevel": 180, "TE": 0.9067261241174281 }], [{ "Lw": 44, "Ld": 0 }], [{ "Lw": 50, "Ld": 0, "wildLevel": 180, "TE": 0.9067261241174281 }], [{ "Lw": 0, "Ld": 0 }], [{ "Lw": 260, "Ld": 0 }]],
    },
 ];

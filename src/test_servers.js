@@ -57,4 +57,11 @@ export default [
       singlePlayer: false,
       multipliers: [[0.5, 0.5, 0.5, 1.3], [2.5, 2.5, 0.5], [1.3, 1.3], [1.3, 1.3, 1.3], [6, 6, 6, 6], [0.5, 0.4, 0.4], [1.6, 1.6, 1.6, 1.3], [1.3, 1.3, 1.3]],
    },
+   {
+      serverName: "ARK PVE Community Server",
+      testOnly: true,
+      IBM: 1,
+      singlePlayer: false,
+      multipliers: [, , , , [, , 1.5, 3]],
+   },
 ];

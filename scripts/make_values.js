@@ -9,6 +9,7 @@ const OUTPUT = "static/data.json";
 const SPECIES_FIELDS = {
    'statsRaw': 'stats',
    'NoImprintingForSpeed': 'noImprint',
+   'TamedBaseHealthMultiplier': 'TBHM',
    'doesNotUseOxygen': 'noOxygen',
 };
 

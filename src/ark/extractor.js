@@ -190,14 +190,14 @@ export class Extractor {
                         tamingEffectiveness = 0;
                      else if (Utils.RoundTo(this.c.values[i], Ark.Precision(i)) == Utils.RoundTo(tempStat.calculateValue(this.c.m[i], !this.c.wild, 1, this.c.IB), Ark.Precision(i)))
                         tamingEffectiveness = 1;
-                     else {
+                     else
                         // One of the most precise ways to get the exact Taming Effectiveness
                         tamingEffectiveness = tempStat.calculateTE(this.c.m[i], this.c.values[i]);
-                        // TE *must* be lower than this
-                        maxTE = tempStat.calculateTE(this.c.m[i], this.c.values[i] + (0.5 / Math.pow(10, Ark.Precision(i))));
-                        // TE can be equal to or greater than this
-                        minTE = tempStat.calculateIB(this.c.m[i], this.c.values[i] - (0.5 / Math.pow(10, Ark.Precision(i))));
-                     }
+
+                     // TE *must* be lower than this
+                     maxTE = Math.min(tempStat.calculateTE(this.c.m[i], this.c.values[i] + (0.5 / Math.pow(10, Ark.Precision(i)))), 1);
+                     // TE can be equal to or greater than this
+                     minTE = Math.max(tempStat.calculateTE(this.c.m[i], this.c.values[i] - (0.5 / Math.pow(10, Ark.Precision(i)))), 0);
 
                      if (tamingEffectiveness >= 0 && tamingEffectiveness <= 1) {
 
@@ -311,9 +311,10 @@ export class Extractor {
                      removed = true;
                   }
 
+            // TODO: Only call filterByTE if there is another stat with Tm
             for (let i = 0; i < 7; i++)
                for (let j = 0; this.c.m[i].Tm && j < this.c.stats[i].length; j++) {
-                  if (!this.filterByTE(i, this.c.stats[i][j].TE)) {
+                  if (!this.filterByTE(i, this.c.stats[i][j])) {
                      this.c.stats[i].splice(j, 1);
                      j--;
                      removed = true;
@@ -322,9 +323,9 @@ export class Extractor {
          }
 
          // Only remove recursively if we couldn't remove any possibilities the other 2 ways
-         for (var i = 0; !removed && i < 7; i++) {
+         for (let i = 0; !removed && i < 7; i++) {
             if (!this.c.stats[i].checked && this.c.stats[i].length > 1)
-               for (var j = 0; j < this.c.stats[i].length; j++) {
+               for (let j = 0; j < this.c.stats[i].length; j++) {
                   if (!this.matchingStats([i, j], true)) {
                      this.c.stats[i].splice(j, 1);
                      j--;
@@ -336,12 +337,20 @@ export class Extractor {
    }
 
    // Remove all stats that don't have a matching TE pair
-   filterByTE(index, TE) {
+   filterByTE(index, TEstat) {
       for (let i = 0; i < 7; i++) {
          if ((this.c.m[i].Tm) && (i != index)) {
             for (let j = 0; j < this.c.stats[i].length; j++)
-               if (Utils.RoundTo(TE, 2) == Utils.RoundTo(this.c.stats[i][j].TE, 2))
+               if (this.c.stats[i][j].TE == TEstat.TE)
                   return true;
+               else if (this.c.stats[i][j].maxTE > TEstat.TE && TEstat.TE >= this.c.stats[i][j].minTE) {
+                  this.c.stats[i][j].TE = TEstat.TE;
+                  return true;
+               }
+               else if (TEstat.maxTE > this.c.stats[i][j].TE && this.c.stats[i][j].TE >= TEstat.minTE) {
+                  TEstat.TE = this.c.stats[i][j].TE;
+                  return true;
+               }
             return false;
          }
       }
