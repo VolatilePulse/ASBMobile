@@ -26,7 +26,6 @@ export class StatMultiplier {
          this.B = stat[consts.STAT_B]; // Base Value
          this.Id = stat[consts.STAT_ID]; // Increase/Dom Level as %
          this.Iw = stat[consts.STAT_IW]; // Increase/Wild Level as %
-         this.TBHM = 1; // Tame multiply as %
          this.Ta = stat[consts.STAT_TA]; // Tame add
          this.Tm = stat[consts.STAT_TM]; // Tame multiply as %
       }

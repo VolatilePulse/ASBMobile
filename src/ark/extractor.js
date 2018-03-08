@@ -73,9 +73,9 @@ export class Extractor {
          // One of the most precise ways to get the exact torpor
          this.c.IB = torporStat.calculateIB(this.c.m[TORPOR], this.c.values[TORPOR]);
          // IB *must* be lower than this
-         var maxIB = Math.min(torporStat.calculateIB(this.c.m[7], this.c.values[7] + (0.5 / Math.pow(10, Ark.Precision(TORPOR)))), this.c.IB + (5 / 10E3));
+         var maxIB = Math.min(torporStat.calculateIB(this.c.m[TORPOR], this.c.values[TORPOR] + (0.5 / Math.pow(10, Ark.Precision(TORPOR)))), this.c.IB + (5 / 10E3));
          // IB can be equal or greater than this
-         var minIB = Math.max(torporStat.calculateIB(this.c.m[7], this.c.values[7] - (0.5 / Math.pow(10, Ark.Precision(TORPOR)))), this.c.IB - (5 / 10E3));
+         var minIB = Math.max(torporStat.calculateIB(this.c.m[TORPOR], this.c.values[TORPOR] - (0.5 / Math.pow(10, Ark.Precision(TORPOR)))), this.c.IB - (5 / 10E3));
 
          // Check the food stat for the IB as well (Only works if food is unleveled)
          var tempHealthStat = new Stat();
@@ -168,11 +168,11 @@ export class Extractor {
                         var maxTempIB = tempStat.calculateIB(this.c.m[i], this.c.values[i] + (0.5 / Math.pow(10, Ark.Precision(i))));
                         var minTempIB = tempStat.calculateIB(this.c.m[i], this.c.values[i] - (0.5 / Math.pow(10, Ark.Precision(i))));
 
-                        if (maxTempIB < maxIB && maxTempIB >= minIB) {
+                        if (maxIB > maxTempIB && maxTempIB >= minIB) {
                            this.c.IB = maxIB = maxTempIB;
                            this.c.stats[i].push(new Stat(tempStat));
                         }
-                        else if (minIB < minTempIB && minTempIB < maxIB) {
+                        else if (minIB <= minTempIB && minTempIB < maxIB) {
                            this.c.IB = minIB = minTempIB;
                            this.c.stats[i].push(new Stat(tempStat));
                         }
@@ -246,7 +246,9 @@ export class Extractor {
       for (let i = 0; i < 7; i++)
          if (this.c.stats[i].length > 1) {
             this.generateOptions();
-            console.log(this.options);
+
+            for (let option in this.options)
+               console.log(JSON.stringify(this.options[option]));
             break;
          }
 
@@ -466,7 +468,7 @@ export class Extractor {
 
          tempOptions[selector][1]++;
 
-         while (selector != -1 && tempOptions[selector][1] == tempOptions[selector].length) {
+         while (selector != -1 && tempOptions[selector][1] == this.c.stats[tempOptions[selector][0]].length) {
             tempOptions[selector][1] = 0;
             selector--;
             if (selector != -1)
