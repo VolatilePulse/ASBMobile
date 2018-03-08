@@ -2,7 +2,7 @@
  * @fileOverview Miscellaneous functions used throughout the app
  */
 
-import cloneDeep from 'lodash.clonedeep';
+import cloneDeepWith from 'lodash.clonedeepwith';
 import isEqual from 'lodash.isequal';
 import isEqualWith from 'lodash.isequalwith';
 
@@ -145,7 +145,11 @@ export function DeepCompare(a, b, fn) {
 }
 
 export function DeepCopy(obj) {
-   return cloneDeep(obj);
+   return cloneDeepWith(obj, CloneCustomizer);
+}
+
+function CloneCustomizer(value, key) {
+   if (key == '__ob__') return null;
 }
 
 /**

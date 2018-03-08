@@ -26,14 +26,16 @@ export const vueApp = new Vue({
 
       // Reference stuff that shouldn't change
       statImages: [],
-      valuesJson: {},
       speciesNames: [],
       speciesMultipliers: {},
+
       officialServer: {},
       officialSPMultiplier: {},
 
+      valuesJson: {},
+      preDefinedServers: {},
+
       // Things that change
-      servers: {},
       tempCreature: {},
    },
 
@@ -48,15 +50,22 @@ export const vueApp = new Vue({
       // Calcualte the paths for each of the stat images
       for (let i = 0; i < statNames.length; i++) {
          let name = statNames[i];
-         import("assets/" + name.toLowerCase() + ".svg").then(url => Vue.set(vueApp.statImages, i, url));
+         import("assets/" + name.toLowerCase() + ".svg").then(url => Vue.set(this.statImages, i, url));
       }
 
-      // Generate test servers
-      for (let server of testServers) {
-         if (this.status.devMode || !server.testOnly)
-            this.servers[server.serverName] = new Server(server.multipliers, server.IBM, server.singlePlayer);
+      // Generate pre-defined servers
+      for (let testServer of testServers) {
+         if (this.status.devMode || !testServer.testOnly) {
+            let server = new Server(testServer.multipliers, testServer.IBM, !!testServer['singlePlayer']);
+            server.singlePlayer = !!testServer['singlePlayer'];
+            server.serverName = testServer.serverName;
+            server.testOnly = testServer['testOnly'];
+            server.isPreDefined = true;
+            this.preDefinedServers[server.serverName] = server;
+         }
       }
 
+      // Create a creature to use for extraction, etc
       this.tempCreature = new VueCreature();
       this.currentServerName = "Official Server";
    }

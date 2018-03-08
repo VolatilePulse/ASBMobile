@@ -1,30 +1,51 @@
-<b-container>
-   <b-form-group label="Server:" label-for="speciesInput">
-      <b-form-select id="speciesInput" v-model="name">
-         <template slot="first">
-            <option value="___NEW___SERVER___">--new server--</option>
-         </template>
-         <option v-for="(server, name) in servers" :key="name">{{name}}</option>
-      </b-form-select>
+<b-container class="my-2 px-2">
+   <b-form-group label="Server:">
+      <b-input-group>
+         <b-form-select id="speciesInput" v-model="name" @change="onServerChange">
+            <template slot="first">
+               <option :value="newServerId">--new server--</option>
+            </template>
+            <option v-for="(server, name) in userServers" :key="name">{{name}}</option>
+            <optgroup label="Pre-Defined">
+               <option v-for="(server, name) in preDefinedServers" :key="name">{{nameFromServer(server)}} </option>
+            </optgroup>
+         </b-form-select>
+         <b-button class="ml-2" v-if="canDelete" variant="link" @click="deleteServer">
+            <b-img :src="require('assets/delete.svg')"></b-img>
+         </b-button>
+      </b-input-group>
+
+      <div :slot="description" v-if="!isEditable">
+         <small>Pre-defined server.
+            <b-link variant="link" @click="copyServer">Make a copy</b-link>
+            to modify it.
+         </small>
+      </div>
    </b-form-group>
 
-   <b-form-group>
-      <b-form-checkbox type="checkbox" v-model="server['singlePlayer']" class="w3-check">Single Player</b-form-checkbox>
+   <b-form-group label="Options:">
+      <b-form-checkbox type="checkbox" v-model="server['singlePlayer']" :disabled="!isEditable">Single Player</b-form-checkbox>
+      <b-form-checkbox type="checkbox" v-model="server['classicFlyers']" disabled>Classic Flyers</b-form-checkbox>
    </b-form-group>
 
    <b-form-group label="Multipliers:">
-      <b-row>
-         <b-col>TaM</b-col>
-         <b-col>TmM</b-col>
-         <b-col>IdM</b-col>
-         <b-col>IwM</b-col>
-      </b-row>
-      <b-row v-for="stat in statIndices">
-         <div v-for="param in paramIndices" class="col">
-            <b-form-input type="number" :placeholder="official[stat][param]" @change="setValue(stat,param,$event.target.value)"
-               :value="server[stat][param]">
-            </b-form-input>
+      <div class="d-flex">
+         <div class="d-flex-row">
+            <b-row>
+               <b-col class="text-center pb-2" v-b-tooltip title="...describe me...">TaM</b-col>
+               <b-col class="text-center pb-2" v-b-tooltip title="...describe me...">TmM</b-col>
+               <b-col class="text-center pb-2" v-b-tooltip title="...describe me...">IdM</b-col>
+               <b-col class="text-center pb-2" v-b-tooltip title="...describe me...">IwM</b-col>
+            </b-row>
+            <b-row v-for="stat in statIndices">
+               <b-col v-for="param in paramIndices" class="px-1">
+                  <b-form-input type="number" class="text-center px-1 mx-0 text-primary" :placeholder="formatMult(official[stat][param])"
+                     @change="setMult(stat,param,event.target.value)" :value="server[stat][param]"
+                     :disabled="!isEditable">
+                  </b-form-input>
+               </b-col>
+            </b-row>
          </div>
-      </b-row>
+      </div>
    </b-form-group>
 </b-container>

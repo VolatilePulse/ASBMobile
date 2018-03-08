@@ -72,11 +72,14 @@ export function ConvertValue(value, index) {
  * @param {string} speciesName
  */
 export function GetMultipliers(serverName, speciesName) {
+   // FIXME: Ask the app for the current server
+   let server = app.data.preDefinedServers[serverName];
+
    // The Server object tells us everything we need to know about the multipliers
-   let multipliers = Utils.DeepMergeSoft(new Server(), app.data.officialServer, app.data.servers[serverName]);
+   let multipliers = Utils.DeepMergeSoft(new Server(), app.data.officialServer, server);
 
    // Single Player multiplies the official/override multipliers
-   if (app.data.servers[serverName].singlePlayer)
+   if (server.singlePlayer)
       for (let stat in app.data.officialSPMultiplier)
          for (let multiplier in app.data.officialSPMultiplier[stat])
             multipliers[stat][multiplier] = Utils.RoundTo(multipliers[stat][multiplier] * (app.data.officialSPMultiplier[stat][multiplier] || 1), 3);
@@ -87,7 +90,7 @@ export function GetMultipliers(serverName, speciesName) {
       if (multipliers[stat].noImprint)
          multipliers[stat].IBM = 0;
       else
-         multipliers[stat].IBM = app.data.servers[serverName].IBM;
+         multipliers[stat].IBM = server.IBM;
 
    return multipliers;
 }
