@@ -17,11 +17,6 @@ const SETTINGS_FIELDS = {
    'imprintingMultiplier': 'imprintingMultiplier',
    'statMultipliers': 'officialMultipliers',
    'statMultipliersSP': 'officialMultipliersSP',
-   'matingIntervalMultiplierSP': 'matingIntervalMultiplierSP',
-   'eggHatchSpeedMultiplierSP': 'eggHatchSpeedMultiplierSP',
-   'babyMatureSpeedMultiplierSP': 'babyMatureSpeedMultiplierSP',
-   'babyCuddleIntervalMultiplierSP': 'babyCuddleIntervalMultiplierSP',
-   'tamingSpeedMultiplierSP': 'tamingSpeedMultiplierSP',
 };
 
 
@@ -35,6 +30,7 @@ https.get(URL, res => {
    res.on("end", () => {
       let json = JSON.parse(body);
       let valuesSize = body.length;
+      console.log("Loaded version: " + json.ver);
 
       console.log("Converting...");
       var output = {
@@ -49,6 +45,7 @@ https.get(URL, res => {
 
          let result = output.species[speciesData.name] = {};
 
+         // Copy over mapped fields
          for (let field in SPECIES_FIELDS) {
             // Falsey values don't need to be present
             if (!speciesData[field]) continue;
@@ -56,10 +53,14 @@ https.get(URL, res => {
             let newName = SPECIES_FIELDS[field];
             result[newName] = cloneDeep(speciesData[field]);
          }
+
+         // TODO: Alter the stats in any way you want here...
+         // ...use `result.stats`
       }
+
       console.log("Species: " + speciesCount);
 
-      // Convert settings
+      // Copy over mapped settings fields
       for (let field in SETTINGS_FIELDS) {
          // Falsey values don't need to be present
          if (!json[field]) continue;
