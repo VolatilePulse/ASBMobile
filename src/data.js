@@ -53,7 +53,7 @@ export async function LoadValues(json) {
    // Clear species list, ready to be populated
    app.data.speciesNames = [];
 
-   for (var i in jsonObject.species) {
+   /*    for (var i in jsonObject.species) {
       let speciesData = jsonObject.species[i];
       app.data.speciesNames.push(speciesData.name);
       app.data.speciesMultipliers[speciesData.name] =
@@ -67,9 +67,8 @@ export async function LoadValues(json) {
             { species: speciesData.name, statIndex: index },
             app.data.speciesMultipliers[speciesData.name][index]));
       }
-   }
+   } */
 
-   /* Preparation for the new data.json file
    for (var creature in jsonObject.species) {
       let speciesData = jsonObject.species[creature];
       app.data.speciesNames.push(creature);
@@ -84,7 +83,7 @@ export async function LoadValues(json) {
             { species: creature, statIndex: index },
             app.data.speciesMultipliers[creature][index]));
       }
-   } */
+   }
 
    await multipliers.statMultipliers.bulkPut(linearArray);
 
@@ -92,8 +91,8 @@ export async function LoadValues(json) {
    app.data.speciesNames.sort();
 
    // Define the constant servers and populate the list if empty
-   app.data.officialServer = new Server(jsonObject.statMultipliers, jsonObject.imprintingMultiplier);
-   app.data.officialSPMultiplier = new Server(jsonObject.statMultipliersSP, jsonObject.imprintingMultiplier, true);
+   app.data.officialServer = new Server(jsonObject.settings.officialMultipliers, jsonObject.settings.imprintingMultiplier);
+   app.data.officialSPMultiplier = new Server(jsonObject.settings.officialMultipliersSP, jsonObject.settings.imprintingMultiplier, true);
 
    // var testObj = {};
    // await multipliers.statMultiplier.toCollection().each(obj => {

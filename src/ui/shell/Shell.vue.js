@@ -40,7 +40,7 @@ export default withRender({
 
 
 async function Init() {
-   let json = await Utils.AsyncFileRead("static/values.json");
+   let json = await Utils.AsyncFileRead("static/data.json");
    Data.LoadValues(json);
    app.data.status.dataLoaded = true; // Reveal the main form once loading is complete
 };

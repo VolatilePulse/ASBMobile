@@ -185,14 +185,8 @@ export class Extractor {
                   for (tempStat.Ld = 0; tempStat.Ld <= maxLd; tempStat.Ld++) {
 
                      let tamingEffectiveness = 0, minTE = 0, maxTE = 0;
-                     // Attempts to calculate the TE
-                     if (Utils.RoundTo(this.c.values[i], Ark.Precision(i)) == Utils.RoundTo(tempStat.calculateValue(this.c.m[i], !this.c.wild, 0, this.c.IB), Ark.Precision(i)))
-                        tamingEffectiveness = 0;
-                     else if (Utils.RoundTo(this.c.values[i], Ark.Precision(i)) == Utils.RoundTo(tempStat.calculateValue(this.c.m[i], !this.c.wild, 1, this.c.IB), Ark.Precision(i)))
-                        tamingEffectiveness = 1;
-                     else
-                        // One of the most precise ways to get the exact Taming Effectiveness
-                        tamingEffectiveness = tempStat.calculateTE(this.c.m[i], this.c.values[i]);
+                     // One of the most precise ways to get the exact Taming Effectiveness
+                     tamingEffectiveness = tempStat.calculateTE(this.c.m[i], this.c.values[i]);
 
                      // TE *must* be lower than this
                      maxTE = Math.min(tempStat.calculateTE(this.c.m[i], this.c.values[i] + (0.5 / Math.pow(10, Ark.Precision(i)))), 1);
@@ -205,11 +199,13 @@ export class Extractor {
                         if (Utils.RoundTo(this.c.values[i], Ark.Precision(i)) == Utils.RoundTo(tempStat.calculateValue(this.c.m[i], !this.c.wild, tamingEffectiveness, this.c.IB), Ark.Precision(i))) {
                            // Create a new Stat to hold all of the information
                            var TEStat = new Stat(tempStat);
-                           TEStat.wildLevel = Utils.RoundTo(this.levelBeforeDom / (1 + 0.5 * tamingEffectiveness), 0);
-                           TEStat.TE = tamingEffectiveness;
-                           TEStat.maxTE = maxTE;
-                           TEStat.minTE = minTE;
-                           this.c.stats[i].push(TEStat);
+                           TEStat.wildLevel = Math.ceil(this.levelBeforeDom / (1 + 0.5 * tamingEffectiveness));
+                           if (this.levelBeforeDom == Math.floor(TEStat.wildLevel * (1 + 0.5 * tamingEffectiveness))) {
+                              TEStat.TE = tamingEffectiveness;
+                              TEStat.maxTE = maxTE;
+                              TEStat.minTE = minTE;
+                              this.c.stats[i].push(TEStat);
+                           }
                         }
                      }
 
@@ -243,14 +239,20 @@ export class Extractor {
          }
       }
 
-      for (let i = 0; i < 7; i++)
-         if (this.c.stats[i].length > 1) {
+      for (let i = 0; i < 7; i++) {
+         if (this.c.m[i].Tm) {
+            for (let j = 0; j < this.c.stats[i].length; j++) {
+               delete this.c.stats[i][j].minTE;
+               delete this.c.stats[i][j].maxTE;
+            }
+         }
+         if (!this.options.length && this.c.stats[i].length > 1) {
             this.generateOptions();
 
             for (let option in this.options)
                console.log(JSON.stringify(this.options[option]));
-            break;
          }
+      }
 
       return;
    }
