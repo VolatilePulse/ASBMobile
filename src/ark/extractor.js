@@ -8,7 +8,6 @@ import { TORPOR, FOOD, SPEED } from '../consts';
 import { Stat } from './creature';
 import * as Ark from '../ark';
 import * as Utils from '../utils';
-import { isArray } from 'util';
 
 export class Extractor {
    //constructor(multipliers, values, level, isWild = true, isTamed = false, isBred = false, imprintBonus = 0, exactly = false) {
@@ -307,17 +306,19 @@ export class Extractor {
                }
             }
 
-            for (let i = 0; i < 7; i++)
-               for (let j = 0; !this.c.stats[i].checked && j < this.c.stats[i].length; j++)
+            for (let i = 0; i < 7; i++) {
+               for (let j = 0; !this.c.stats[i].checked && j < this.c.stats[i].length; j++) {
                   // Bad Stat
                   if (this.c.stats[i][j].Lw + wildMin - this.c.stats[i].minW > this.wildFreeMax || this.c.stats[i][j].Ld + domMin - this.c.stats[i].minD > this.domFreeMax) {
                      this.c.stats[i].splice(j, 1);
                      j--;
                      removed = true;
                   }
+               }
+            }
 
             // TODO: Only call filterByTE if there is another stat with Tm
-            for (let i = 0; i < 7; i++)
+            for (let i = 0; i < 7; i++) {
                for (let j = 0; this.c.m[i].Tm && j < this.c.stats[i].length; j++) {
                   if (!this.filterByTE(i, this.c.stats[i][j])) {
                      this.c.stats[i].splice(j, 1);
@@ -325,18 +326,20 @@ export class Extractor {
                      removed = true;
                   }
                }
-         }
+            }
 
-         // Only remove recursively if we couldn't remove any possibilities the other 2 ways
-         for (let i = 0; !removed && i < 7; i++) {
-            if (!this.c.stats[i].checked && this.c.stats[i].length > 1)
-               for (let j = 0; j < this.c.stats[i].length; j++) {
-                  if (!this.matchingStats([[i, j]], true)) {
-                     this.c.stats[i].splice(j, 1);
-                     j--;
-                     removed = true;
+            // Only remove recursively if we couldn't remove any possibilities the other 2 ways
+            for (let i = 0; !removed && i < 7; i++) {
+               if (!this.c.stats[i].checked && this.c.stats[i].length > 1) {
+                  for (let j = 0; j < this.c.stats[i].length; j++) {
+                     if (!this.matchingStats([i, j], true)) {
+                        this.c.stats[i].splice(j, 1);
+                        j--;
+                        removed = true;
+                     }
                   }
                }
+            }
          }
 
          if (dbg) dbg.filterLoops += 1;
@@ -369,7 +372,7 @@ export class Extractor {
     * @example extractorObj.matchingstats([statIndex, resultIndex], true);
     * // Returns false if extractorObj.results[statIndex][resultIndex] is not a valid result
     *
-    * @param {number[][]} indices An array of index arrays to use on the results object
+    * @param {number[][]|number[]} indices An array of index arrays to use on the results object
     * @param {boolean} [returnBool = false] If set to true, will return a boolean value instead of an array
     *
     * @returns {boolean|*[]} All matching stats that are required to keep the levels "true"
@@ -391,9 +394,9 @@ export class Extractor {
 
       // If the TE of the stats we have don't match, they aren't valid
       for (var i = 0; i < indices.length; i++) {
-         if (TE == -1 && this.c.stats[indices[i][0]][indices[i][1]].hasOwnProperty("TE"))
+         if (TE == -1 && this.c.stats[indices[i][0]][indices[i][1]]["TE"] != undefined)
             TE = this.c.stats[indices[i][0]][indices[i][1]].TE;
-         else if (this.c.stats[indices[i][0]][indices[i][1]].hasOwnProperty("TE"))
+         else if (this.c.stats[indices[i][0]][indices[i][1]]["TE"] != undefined)
             if (Utils.RoundTo(TE, 2) != Utils.RoundTo(this.c.stats[indices[i][0]][indices[i][1]].TE, 2))
                return returnBool ? false : [];
       }
@@ -411,10 +414,12 @@ export class Extractor {
          // and there is more than one possibility for this stat
          for (var j = 0; j < this.c.stats[i].length; j++) {
             // add that stat to the indices
+            // @ts-ignore
             indices.push([i, j]);
             var returnValue = this.matchingStats(indices, returnBool, wildLevels, domLevels);
             // On the event of a failure, remove that index, and try the next stat
-            if (!returnValue || (isArray(returnValue) && returnValue.length == 0)) {
+            // @ts-ignore
+            if (!returnValue || returnValue.length == 0) {
                indices.pop();
                continue;
             }
