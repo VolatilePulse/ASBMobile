@@ -34,6 +34,8 @@ export default withRender({
       speciesNames: () => app.data.speciesNames,
       statImages: () => app.data.statImages,
       devMode: () => app.data.status.devMode,
+
+      currentMultipliers() { return Ark.GetMultipliers(this.creature.serverName, this.creature.species); },
    },
 
    methods: {
@@ -46,7 +48,7 @@ export default withRender({
       // Nasty debug-only methods to show stats and their options
       debugShowOptions: options => (options && options['length']) ? options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(',') : "-none-",
       debugStatValue(i) {
-         var multipliers = Ark.GetMultipliers(this.creature.serverName, this.creature.species);
+         var multipliers = this.currentMultipliers;
          return this.creature.stats[i][0].calculateValue(multipliers[i], !this.extractor.wild, this.extractor.TE, this.extractor.IB);
       }
    },

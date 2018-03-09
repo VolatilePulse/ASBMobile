@@ -1,8 +1,9 @@
 "use strict";
 
 import { DAMAGE, SPEED, PRE_IB, PRE_TE } from './consts';
-import * as Utils from './utils';
 import * as app from './app';
+import * as Utils from './utils';
+import * as Servers from './servers';
 import { Server } from './ark/multipliers';
 
 
@@ -70,27 +71,33 @@ export function ConvertValue(value, index) {
  * Generate a multipliers object for the Extractor
  * @param {string} serverName
  * @param {string} speciesName
+ * @return {*}
  */
 export function GetMultipliers(serverName, speciesName) {
-   // FIXME: Ask the app for the current server
-   let server = app.data.preDefinedServers[serverName];
+   let server = Servers.getServerByName(serverName);
 
    // The Server object tells us everything we need to know about the multipliers
    let multipliers = Utils.DeepMergeSoft(new Server(), app.data.officialServer, server);
 
    // Single Player multiplies the official/override multipliers
-   if (server.singlePlayer)
-      for (let stat in app.data.officialSPMultiplier)
-         for (let multiplier in app.data.officialSPMultiplier[stat])
+   if (server.singlePlayer) {
+      for (let stat in app.data.officialSPMultiplier) {
+         for (let multiplier in app.data.officialSPMultiplier[stat]) {
             multipliers[stat][multiplier] = Utils.RoundTo(multipliers[stat][multiplier] * (app.data.officialSPMultiplier[stat][multiplier] || 1), 3);
+         }
+      }
+   }
 
+   // Copy in species-related data
    Utils.DeepMerge(multipliers, app.data.speciesMultipliers[speciesName]);
 
-   for (let stat = 0; stat < 8; stat++)
+   // Set IBM for each stat
+   for (let stat = 0; stat < 8; stat++) {
       if (multipliers[stat].noImprint)
          multipliers[stat].IBM = 0;
       else
          multipliers[stat].IBM = server.IBM;
+   }
 
    return multipliers;
 }
