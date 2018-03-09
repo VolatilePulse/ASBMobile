@@ -3,12 +3,11 @@ import BootstrapVue from 'bootstrap-vue';
 
 Vue.use(BootstrapVue);
 
+import * as Servers from "./servers";
 import { VueCreature } from "./ark/creature";
 import { statNames } from "./consts";
 
 import Shell from "./ui/shell/Shell.vue";
-import { Server } from "./ark/multipliers";
-import testServers from "./test_servers";
 
 
 Vue.config.productionTip = false;
@@ -32,8 +31,10 @@ export const vueApp = new Vue({
       officialServer: {},
       officialSPMultiplier: {},
 
-      valuesJson: {},
+      userServers: {},
       preDefinedServers: {},
+
+      valuesJson: {},
 
       // Things that change
       tempCreature: {},
@@ -46,24 +47,17 @@ export const vueApp = new Vue({
       }
    },
 
-   created() {
+   async created() {
       // Calcualte the paths for each of the stat images
       for (let i = 0; i < statNames.length; i++) {
          let name = statNames[i];
          import("assets/" + name.toLowerCase() + ".svg").then(url => Vue.set(this.statImages, i, url));
       }
 
-      // Generate pre-defined servers
-      for (let testServer of testServers) {
-         if (this.status.devMode || !testServer.testOnly) {
-            let server = new Server(testServer.multipliers, testServer.IBM, !!testServer['singlePlayer']);
-            server.singlePlayer = !!testServer['singlePlayer'];
-            server.serverName = testServer.serverName;
-            server.testOnly = testServer['testOnly'];
-            server.isPreDefined = true;
-            this.preDefinedServers[server.serverName] = server;
-         }
-      }
+      // Load pre-defined and user servers
+      await Servers.initialise(this.status.devMode);
+      this.userServers = Servers.userServers;
+      this.preDefinedServers = Servers.preDefinedServers;
 
       // Create a creature to use for extraction, etc
       this.tempCreature = new VueCreature();

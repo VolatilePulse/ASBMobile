@@ -1,48 +1,29 @@
-import Vue from 'vue';
+import { Server } from '../../ark/multipliers';  // eslint-disable-line no-unused-vars
 
-import * as app from '../../app';
-//import { DeepCopy } from '../../utils';
-import { Server } from '../../ark/multipliers';
+/**
+ * @fileOverview Holds behaviour code for the UI Servers tab.
+ */
 
+export const NEW_SERVER_ID = "___NEW___SERVER___";
 
-export function copyServer() {
-   this.isEditable = true;
-   let newServer = new Server(this.server, this.server.IBM, !!this.server['singlePlayer']);
-   newServer.serverName = this.server.serverName;
-   newServer.testOnly = false;
-   newServer.isPreDefined = false;
-   do
-      newServer.serverName = "Copy of " + newServer.serverName;
-   while (newServer.serverName in this.userServers);
-
-   this.server = newServer;
-   this.name = newServer.name;
-
-   // TODO: The DB system should do this bit
-   Vue.set(this.userServers, newServer.serverName, newServer);
+/**
+ * @param {number} s
+ * @param {number} p
+ * @param {string} v
+ * @param {Server} server
+ */
+export function setMult(s, p, v, server) {
+   let num = v ? parseFloat(v) : undefined;
+   if (num <= 0) num = undefined;
+   server[s][p] = num;
 }
 
-export function deleteServer(name) {
-   // TODO: The DB system should do this bit
-   delete this.userServers[name];
-}
-
-export function setServerByName(name) {
-   console.log("setServerByName(" + JSON.stringify(arguments) + ")");
-   app.data.currentServerName = name;
-   this.server = this.userServers[name] || app.data.preDefinedServers[name];
-   if (!this.server) {
-      app.data.currentServerName = "Official Server";
-      this.server = app.data.preDefinedServers[name];
-   }
-}
-
-export function onServerChange(newName) {
-   if (newName == this.newServerId) {
-      this.setServerByName("Official Server");
-      this.copyServer();
+export function onServerChange(newName, ui) {
+   if (newName == NEW_SERVER_ID) {
+      ui.setServerByName("Official Server");
+      ui.copyServer();
    }
    else {
-      this.setServerByName(newName);
+      ui.setServerByName(newName);
    }
 }

@@ -71,7 +71,14 @@ export class ServerMultiplier {
 Utils.AddNamedIndicesToClass(ServerMultiplier, ['TaM', 'TmM', 'IdM', 'IwM']);
 
 export class Server {
-   constructor(settingsArray = [], IBM = 1, singlePlayer = false, name) {
+   /**
+    * Create a server or copy an existing one.
+    * @param {number[][]|Server} settingsArray
+    * @param {number} IBM
+    * @param {boolean} singlePlayer
+    * @param {string} name
+    */
+   constructor(settingsArray = [], IBM = 1, singlePlayer = false, name = "") {
       this.singlePlayer = singlePlayer; // singlePlayer Setting
       this.IBM = IBM;
       this.serverName = name;

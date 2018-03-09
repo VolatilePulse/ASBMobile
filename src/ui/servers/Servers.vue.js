@@ -1,10 +1,12 @@
-"use strict";
-
+// @ts-ignore
 import withRender from './Servers.html?style=./Servers.css';
 
 import * as app from "../../app";
 import * as Utils from "../../utils";
-import { copyServer, setServerByName, onServerChange, deleteServer } from './behaviour';
+import * as Servers from "../../servers";
+
+import { Server } from '../../ark/multipliers';  // eslint-disable-line no-unused-vars
+import { setMult, onServerChange, NEW_SERVER_ID } from './behaviour';
 
 
 export default withRender({
@@ -13,47 +15,67 @@ export default withRender({
 
    data: () => ({
       // Constant things
-      newServerId: "___NEW___SERVER___",
+      newServerId: NEW_SERVER_ID,
       statIndices: Utils.Range(8),
       paramIndices: Utils.Range(4),
 
-      // Reference
-      userServers: {},
-
       // Current state
-      isEditable: false,
-      server: {},
+      /** @type {Server}} */
+      server: new Server(),
+
+      editName: "", // temp copy of the server name for editing
    }),
 
    computed: {
+      devMode() { return app.data.status.devMode; },
+      isEditable() { return !this.server.isPreDefined; },
       canDelete() { return this.isEditable; },
 
       statImages() { return app.data.statImages; },
-      preDefinedServers() { return app.data.preDefinedServers; },
       official() { return app.data.officialServer; },
       officialSP() { return app.data.officialSPMultiplier; },
+
+      userServers() { return Servers.userServers; },
+      preDefinedServers() { return Servers.preDefinedServers; },
+      testServers() { return Servers.testServers; },
 
       name: {
          get() { return app.data.tempCreature.serverName; },
          set(value) { app.data.tempCreature.serverName = value; },
       },
+
+      editNameValidity() { return this.editName ? null : false; },
    },
 
    methods: {
-      formatMult(n) { return Utils.FormatNumber(n, 2, true); },
-      valueFor(s, p) { return this.server[s][p] || (this.server['singlePlayer'] && this.officialSP[s][p]) || this.official[s][p]; },
-      nameFromServer(server) { return server.serverName + (server.testOnly ? " [TEST]" : ""); },
-
-      setMulti: function (s, p, v) {
-         let num = v ? parseFloat(v) : undefined;
-         if (num <= 0) num = undefined;
-         this.server[s][p] = num;
+      editNameShown() { this.editName = this.name; },
+      editNameOkay() { this.editNameSubmit(); },
+      editNameSubmit() {
+         if (this.editNameValidity != false) {
+            Servers.renameServer(this.name, this.editName); this.$refs.editNameModal.hide();
+            this.setServerByName(this.editName);
+         }
       },
 
-      copyServer: copyServer,
-      deleteServer: deleteServer,
-      setServerByName: setServerByName,
-      onServerChange: onServerChange,
+      formatMult(n) { return Utils.FormatNumber(n, 2, true); },
+      valueFor(s, p) { return this.server[s][p] || (this.server['singlePlayer'] && this.officialSP[s][p]) || this.official[s][p]; },
+      setMult(s, p, v) { setMult(s, p, v, this.server); },
+      onServerChange(name) { onServerChange(name, this); },
+
+      deleteServer() {
+         Servers.deleteUserServer(this.name);
+         this.setServerByName("Official Server");
+      },
+
+      setServerByName(name) {
+         this.server = Servers.getServerByName(name);
+         app.data.currentServerName = this.server.serverName;
+      },
+
+      copyServer() {
+         this.server = Servers.copyServer(this.server);
+         this.name = this.server.serverName;
+      },
    },
 
    created() {
