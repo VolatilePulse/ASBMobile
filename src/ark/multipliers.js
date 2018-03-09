@@ -71,9 +71,12 @@ export class ServerMultiplier {
 Utils.AddNamedIndicesToClass(ServerMultiplier, ['TaM', 'TmM', 'IdM', 'IwM']);
 
 export class Server {
-   constructor(settingsArray = [], IBM = 1, singlePlayer = false) {
+   constructor(settingsArray = [], IBM = 1, singlePlayer = false, name) {
       this.singlePlayer = singlePlayer; // singlePlayer Setting
       this.IBM = IBM;
+      this.serverName = name;
+      this.isTestOnly = false;
+      this.isPreDefined = false;
 
       for (var i = 0; i < 8; i++)
          this[i] = new ServerMultiplier(settingsArray[i] || new Array(4), IBM);

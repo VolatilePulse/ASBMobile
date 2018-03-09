@@ -9,6 +9,11 @@ export class Stat {
     * @param {number?} Ld Domesticated levels
     */
    constructor(Lw = 0, Ld = 0) {
+      this.wildLevel = undefined;
+      this.TE = undefined;
+      this.maxTE = undefined;
+      this.minTE = undefined;
+
       if (Utils.IsObject(Lw)) {
          // @ts-ignore
          this.Lw = Lw.Lw;

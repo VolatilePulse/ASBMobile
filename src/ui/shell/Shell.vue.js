@@ -1,6 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-vue/dist/bootstrap-vue.min.css";
 
+// @ts-ignore
 import withRender from './Shell.html?style=./Shell.css';
 
 import About from "../about/About.vue";

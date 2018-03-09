@@ -1,3 +1,4 @@
+// @ts-ignore
 import withRender from './About.html?style=./About.css';
 
 import * as app from '../../app';

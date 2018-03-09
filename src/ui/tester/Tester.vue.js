@@ -1,5 +1,4 @@
-"use strict";
-
+// @ts-ignore
 import withRender from './Tester.html?style=./Tester.css';
 
 import Vue from 'vue';

@@ -1,5 +1,4 @@
-"use strict";
-
+// @ts-ignore
 import withRender from './Extractor.html?style=./Extractor.css';
 
 import * as app from "../../app";

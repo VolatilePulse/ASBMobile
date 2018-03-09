@@ -9,4 +9,5 @@
    "editor.tabSize": 3,
    "editor.formatOnSave": true,
    "html.format.wrapLineLength": 90,
+   "javascript.implicitProjectConfig.checkJs": true,
 }

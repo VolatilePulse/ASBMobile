@@ -8,6 +8,7 @@ import { TORPOR, FOOD, SPEED, PRE_TE } from '../consts';
 import { Stat } from './creature';
 import * as Ark from '../ark';
 import * as Utils from '../utils';
+import { isArray } from 'util';
 
 export class Extractor {
    //constructor(multipliers, values, level, isWild = true, isTamed = false, isBred = false, imprintBonus = 0, exactly = false) {
@@ -257,7 +258,9 @@ export class Extractor {
       return;
    }
 
-   filterResults() {
+   filterResults(dbg) {
+      if (!dbg['filterLoops']) dbg.filterLoops = 0;
+
       do {
          var removed = false;
          for (let i = 0; i < 7; i++) {
@@ -328,13 +331,15 @@ export class Extractor {
          for (let i = 0; !removed && i < 7; i++) {
             if (!this.c.stats[i].checked && this.c.stats[i].length > 1)
                for (let j = 0; j < this.c.stats[i].length; j++) {
-                  if (!this.matchingStats([i, j], true)) {
+                  if (!this.matchingStats([[i, j]], true)) {
                      this.c.stats[i].splice(j, 1);
                      j--;
                      removed = true;
                   }
                }
          }
+
+         dbg.filterLoops += 1;
       } while (removed);
    }
 
@@ -364,15 +369,17 @@ export class Extractor {
     * @example extractorObj.matchingstats([statIndex, resultIndex], true);
     * // Returns false if extractorObj.results[statIndex][resultIndex] is not a valid result
     *
-    * @param {[number, number]} indices An array of index arrays to use on the results object
+    * @param {number[][]} indices An array of index arrays to use on the results object
     * @param {boolean} [returnBool = false] If set to true, will return a boolean value instead of an array
     *
-    * @returns {(boolean|[])} All matching stats that are required to keep the levels "true"
+    * @returns {boolean|*[]} All matching stats that are required to keep the levels "true"
     */
    matchingStats(indices, returnBool = false, wildLevels = 0, domLevels = 0) {
       // Make sure we got an array of arrays
-      if (!Array.isArray(indices[0]))
+      if (!Array.isArray(indices[0])) {
+         // @ts-ignore
          indices = [indices];
+      }
 
       var TE = -1;
 
@@ -407,7 +414,7 @@ export class Extractor {
             indices.push([i, j]);
             var returnValue = this.matchingStats(indices, returnBool, wildLevels, domLevels);
             // On the event of a failure, remove that index, and try the next stat
-            if (!returnValue || returnValue.length == 0) {
+            if (!returnValue || (isArray(returnValue) && returnValue.length == 0)) {
                indices.pop();
                continue;
             }

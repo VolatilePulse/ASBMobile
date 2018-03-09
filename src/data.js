@@ -42,7 +42,7 @@ settings.open();
 // Or in order to populate the app objects
 export async function LoadValues(json) {
    // Clear existing multipliers from DB
-   await multipliers.statMultipliers.clear();
+   await multipliers.table('statMultipliers').clear(); // Cleaned up for type checking, but a nearer solution would be better in the long run
 
    // Parse the received JSON file
    let jsonObject = JSON.parse(json);
@@ -56,6 +56,7 @@ export async function LoadValues(json) {
    /*    for (var i in jsonObject.species) {
       let speciesData = jsonObject.species[i];
       app.data.speciesNames.push(speciesData.name);
+
       app.data.speciesMultipliers[speciesData.name] =
          new CreatureStats(speciesData.statsRaw,
             speciesData.TamedBaseHealthMultiplier,
@@ -85,7 +86,7 @@ export async function LoadValues(json) {
       }
    }
 
-   await multipliers.statMultipliers.bulkPut(linearArray);
+   //await multipliers.statMultipliers.bulkPut(linearArray);
 
    // Sorted species names, please
    app.data.speciesNames.sort();
@@ -93,6 +94,8 @@ export async function LoadValues(json) {
    // Define the constant servers and populate the list if empty
    app.data.officialServer = new Server(jsonObject.settings.officialMultipliers, jsonObject.settings.imprintingMultiplier);
    app.data.officialSPMultiplier = new Server(jsonObject.settings.officialMultipliersSP, jsonObject.settings.imprintingMultiplier, true);
+
+   // TODO: Put official and official SP servers into the pre-defined servers list using these values
 
    // var testObj = {};
    // await multipliers.statMultiplier.toCollection().each(obj => {

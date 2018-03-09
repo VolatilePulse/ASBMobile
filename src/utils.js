@@ -27,7 +27,7 @@ export function AsyncFileRead(filePath) {
 
 /**
  * Add named accessors to an array-like class.
- * @param {class} cls The class to be modified
+ * @param {object} cls The class to be modified
  * @param {string[]} names An array of names for the properties
  */
 export function AddNamedIndicesToClass(cls, names) {
