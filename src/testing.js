@@ -37,11 +37,14 @@ export function PerformTest(data) {
       if (dbg.preFilterStats) {
          console.log("\nPre-filter stats:");
          console.log(Ark.FormatAllOptions(dbg.preFilterStats));
+         delete dbg.preFilterStats;
       }
       console.log("\nExpected:");
       console.log(Ark.FormatAllOptions(data['results']));
       console.log("\nResults:");
       console.log(Ark.FormatAllOptions(testCreature.stats));
+      console.log("\DBG:");
+      console.log(JSON.stringify(dbg, null, 2));
    }
 
    return { pass: pass, duration: (t2 - t1), results: testCreature.stats };
