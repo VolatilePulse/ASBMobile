@@ -4,7 +4,7 @@
  * @fileOverview Contains the ASBM.Extraction Object
  */
 
-import { TORPOR, FOOD, SPEED, PRE_TE } from '../consts';
+import { TORPOR, FOOD, SPEED } from '../consts';
 import { Stat } from './creature';
 import * as Ark from '../ark';
 import * as Utils from '../utils';
