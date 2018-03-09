@@ -1,23 +1,23 @@
-"use strict";
-
 import * as Utils from '../utils';
 import * as Ark from '../ark';
 
 export class Stat {
    /**
-    * @param {number|{Lw:number,Ld:number}} Lw Wild levels
+    * @param {number|{Lw:number,Ld:number}} Lw Wild levels, or another Stat-like object
     * @param {number?} Ld Domesticated levels
     */
    constructor(Lw = 0, Ld = 0) {
-      this.wildLevel = undefined;
+      /** @type {number?} */
       this.TE = undefined;
+      /** @type {number?} */
       this.maxTE = undefined;
+      /** @type {number?} */
       this.minTE = undefined;
+      /** @type {number?} */
+      this.wildLevel = undefined;
 
-      if (Utils.IsObject(Lw)) {
-         // @ts-ignore
+      if (typeof (Lw) == "object") {
          this.Lw = Lw.Lw;
-         // @ts-ignore
          this.Ld = Lw.Ld;
       }
       else {
@@ -135,26 +135,41 @@ export class Stat {
 }
 
 export class Creature {
-   constructor(c) {
+   /**
+    * Copy constructor
+    * @param {Creature?} c
+    */
+   constructor(c = undefined) {
+      /** @type {string} */
       this.name = c ? c.name : "";
+      /** @type {string} */
       this.tribe = c ? c.tribe : "";
+      /** @type {string} */
       this.owner = c ? c.owner : "";
+      /** @type {string} */
       this.serverName = c ? c.serverName : "";
+      /** @type {string} */
       this.species = c ? c.species : "";
+      /** @type {string} */
       this.UUID = c ? c.UUID : "";
       this.wild = true;
       this.tamed = false;
       this.bred = false;
+      /** @type {number} */
       this.TE = c ? c.TE : 0;
+      /** @type {number} */
       this.IB = c ? c.IB : 0;
+      /** @type {number} */
       this.level = c ? c.level : 0;
-      this.stats = [];
+      /** @type {Stat[][]} */
+      this.stats = [[], [], [], [], [], [], [], []];
+      /** @type {number[]} */
       this.values = [];
 
       // Strips extractor data from TE based stats
       for (let i = 0; i < 8; i++)
          // The frontmost stat is the one that is considered "chosen" and is to be used for the creature
-         this.stats.push(c ? c.stats[i][0] : new Stat);
+         this.stats.push([c ? c.stats[i][0] : new Stat]);
    }
 }
 
@@ -162,6 +177,8 @@ export class VueCreature extends Creature {
    constructor() {
       // Initializes the Creature Constructor and gives this class those properties
       super();
+
+      /** @type {Stat[][]} */
       this.stats = [[], [], [], [], [], [], [], []];
       this.exactly = false;
 

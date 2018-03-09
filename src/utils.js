@@ -179,7 +179,7 @@ export function DeepMerge(target, ...sources) {
 }
 
 /**
- * Deep merge two objects, except don't overwrite a value with 'undefined'.
+ * Deep merge two objects, except don't overwrite a value with 'undefined' and don't touch anything starting with '_'.
  * @param {object} target
  * @param {object[]} sources
  */
@@ -191,6 +191,7 @@ export function DeepMergeSoft(target, ...sources) {
 
    if (IsObject(target) && IsObject(source)) {
       for (const key in source) {
+         if (key.startsWith('_')) continue;
          if (IsObject(source[key])) {
             if (!target[key])
                Object.assign(target, { [key]: {} });
