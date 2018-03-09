@@ -259,7 +259,7 @@ export class Extractor {
    }
 
    filterResults(dbg) {
-      if (!dbg['filterLoops']) dbg.filterLoops = 0;
+      if (dbg && !dbg['filterLoops']) dbg.filterLoops = 0;
 
       do {
          var removed = false;
@@ -339,7 +339,7 @@ export class Extractor {
                }
          }
 
-         dbg.filterLoops += 1;
+         if (dbg) dbg.filterLoops += 1;
       } while (removed);
    }
 
