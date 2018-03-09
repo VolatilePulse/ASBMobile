@@ -37,7 +37,7 @@ module.exports = {
       "no-use-before-define": ["error", "nofunc"],
       "no-unused-expressions": 2,
       "no-unneeded-ternary": 1,
-      "no-unused-vars": [2, { "varsIgnorePattern": '_', "args": "none" }],
+      "no-unused-vars": [2, { "argsIgnorePattern": '_', }],
       "no-undef": 2,
 
       // allow paren-less arrow functions
