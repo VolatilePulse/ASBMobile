@@ -402,82 +402,24 @@ export class Extractor {
 
    /**
     * Recursively checks our results for only valid ones. If the results are valid, returns either an array or true
-    * @example extractorObj.matchingstats([statIndex, resultIndex], true);
-    * // Returns false if extractorObj.results[statIndex][resultIndex] is not a valid result
     *
-    * @param {number[][]|number[]} indices An array of index arrays to use on the results object
-    * @param {boolean} [returnBool = false] If set to true, will return a boolean value instead of an array
+    * @param {number[][]} indices An array of index arrays to use on the results object
+    * @param {*} [dbg = undefined] Debugger object
     *
-    * @returns {boolean|*[]} All matching stats that are required to keep the levels "true"
+    * @returns {boolean} Returns true if it's a valid options set, false otherwise
     */
-   matchingStats(indices, returnBool = false, dbg = undefined, wildLevels = 0, domLevels = 0) {
+   matchingStats(indices, dbg = undefined) {
       if (dbg) dbg.totalRecursion++;
-      // Make sure we got an array of arrays
-      if (!Array.isArray(indices[0])) {
-         // @ts-ignore
-         indices = [indices];
-      }
 
-      var TE = -1;
-
-      wildLevels += this.c.stats[indices[indices.length - 1][0]][indices[indices.length - 1][1]].Lw;
-      domLevels += this.c.stats[indices[indices.length - 1][0]][indices[indices.length - 1][1]].Ld;
-
-      if ((!this.unusedStat && wildLevels > this.wildFreeMax) || domLevels > this.domFreeMax)
-         return returnBool ? false : [];
+      let TE = -1;
 
       // If the TE of the stats we have don't match, they aren't valid
       for (var i = 0; i < indices.length; i++) {
          if (TE == -1 && this.c.stats[indices[i][0]][indices[i][1]]["TE"] != undefined)
             TE = this.c.stats[indices[i][0]][indices[i][1]].TE;
          else if (this.c.stats[indices[i][0]][indices[i][1]]["TE"] != undefined)
-            if (Utils.RoundTo(TE, 2) != Utils.RoundTo(this.c.stats[indices[i][0]][indices[i][1]].TE, 2))
-               return returnBool ? false : [];
-      }
-
-      top:
-      // We only want to add a stat that has more than one possibility
-      for (var i = 0; i < 7; i++) {
-         for (var index = indices.length - 1; index >= 0; index--) {
-            // We have already checked this stat
-            if (this.c.stats[i].checked || i == indices[index][0])
-               continue top;
-         }
-
-         // We only made it this far if we don't have a possibility for this stat in our indices array
-         // and there is more than one possibility for this stat
-         for (var j = 0; j < this.c.stats[i].length; j++) {
-            // add that stat to the indices
-            // @ts-ignore
-            indices.push([i, j]);
-            var returnValue = this.matchingStats(indices, returnBool, dbg, wildLevels, domLevels);
-            // On the event of a failure, remove that index, and try the next stat
-            // @ts-ignore
-            if (!returnValue || returnValue.length == 0) {
-               indices.pop();
-               continue;
-            }
-            // We only made it here on a successful match
-            // returnValue will either be true or an array of stat index pairs
-            else
-               return returnValue;
-         }
-      }
-
-      // We have to make sure we haven't missed out on a stat
-      for (var i = 0; i < 7; i++) {
-         // The stat hasn't been checked yet
-         if (!this.c.stats[i].checked) {
-            // Check our indices to make sure it exists
-            for (var j = 0; j < indices.length; j++) {
-               // We have the stat in our indices
-               if (indices[j][0] == i)
-                  break;
-               // We missed a stat!
-               if (j == indices.length - 1)
-                  return returnBool ? false : [];
-            }
-         }
+            if (TE != this.c.stats[indices[i][0]][indices[i][1]].TE)
+               return false;
       }
 
       // We've run out of stats to add to our indices so lets test them for valid results
@@ -491,12 +433,11 @@ export class Extractor {
 
       // check to see if the stat possibilities add up to the missing dom levels
       // and wild levels as long as we don't have an unused stat
-      if ((this.unusedStat || wildLevels == this.wildFreeMax) && domLevels == this.domFreeMax) {
-         return returnBool ? true : indices;
-      }
+      if ((this.unusedStat || wildLevels == this.wildFreeMax) && domLevels == this.domFreeMax)
+         return true;
 
       // If we made it this far, we have failed something
-      return returnBool ? false : [];
+      return false;
    }
 
    matchingStatsGenerator(dbg) {
@@ -516,7 +457,7 @@ export class Extractor {
 
       do {
          // Make sure our stat combination is valid
-         if (this.matchingStats(tempOptions, true, dbg)) {
+         if (this.matchingStats(tempOptions, dbg)) {
             for (let option in tempOptions) {
                // Flags the stat as being good
                this.c.stats[tempOptions[option][0]][tempOptions[option][1]].good = true;
@@ -571,7 +512,7 @@ export class Extractor {
          let actualOption = [];
          let copyOption = tempOptions.slice();
 
-         if (this.matchingStats(tempOptions, true)) {
+         if (this.matchingStats(tempOptions)) {
             for (let stat = 0; stat < 8; stat++) {
                if (this.c.stats[stat].length == 1)
                   actualOption.push([stat, 0]);
