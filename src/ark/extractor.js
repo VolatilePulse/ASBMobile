@@ -515,6 +515,7 @@ export class Extractor {
       let selector = indexMax;
 
       do {
+         // Make sure our stat combination is valid
          if (this.matchingStats(tempOptions, true, dbg)) {
             for (let option in tempOptions) {
                // Flags the stat as being good
@@ -524,6 +525,7 @@ export class Extractor {
 
          tempOptions[selector][1]++;
 
+         // Increment the selector/index (Read as disc combination lock brute force)
          while (selector != -1 && tempOptions[selector][1] == this.c.stats[tempOptions[selector][0]].length) {
             tempOptions[selector][1] = 0;
             selector--;
