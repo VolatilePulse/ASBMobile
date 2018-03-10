@@ -2,8 +2,9 @@
    "name": "asb-mobile",
    "version": "1.0.0",
    "description": "Ark Smart Breeding for Mobile",
-   "author": "",
+   "author": "VolatilePulse",
    "private": true,
+   "repository": "github:VolatilePulse/ASBMobile",
    "scripts": {
       "dev": "node build/dev-server.js",
       "start": "node build/dev-server.js",
@@ -76,8 +77,13 @@
       "npm": ">= 3.0.0"
    },
    "browserslist": [
-      "> 2%",
-      "last 2 versions",
-      "not ie <= 8"
+      "> 7%",
+      "last 1 ChromeAndroid versions",
+      "last 2 iOS versions",
+      "last 1 Samsung versions",
+      "last 1 Firefox version",
+      "last 1 Edge versions",
+      "last 1 Safari versions",
+      "last 2 Chrome versions"
    ]
 }
