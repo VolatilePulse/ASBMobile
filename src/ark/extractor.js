@@ -10,95 +10,41 @@ import * as Ark from '../ark';
 import * as Utils from '../utils';
 
 export class Extractor {
-   //constructor(multipliers, values, level, isWild = true, isTamed = false, isBred = false, imprintBonus = 0, exactly = false) {
    constructor(vueCreature) {
       this.c = vueCreature;
       this.c.m = Ark.GetMultipliers(this.c.serverName, this.c.species);
 
-      // determines how many levels are missing to equal creature level
+      // If tame isn't bred (ignore wild level steps) and setting is enabled, consider wild steps (as set in settings)
+      // TODO: Add consider wild levels
+      // considerWildLevelSteps = considerWildLevelSteps && !bred;
+
+      /** @type {number} */
       this.wildFreeMax = 0;
+      /** @type {number} */
       this.domFreeMax = 0;
+      /** @type {number} */
       this.levelBeforeDom = 0;
+      /** @type {boolean} */
       this.unusedStat = false;
+      /** @type {number [][]} */
       this.options = [];
-   }
-
-   init() {
-      // Clear the checked property for future extractions
-      for (let i = 0; i < 8; i++) {
-         if (this.c.stats[i].hasOwnProperty("checked"))
-            delete this.c.stats[i].checked;
-
-         // Reset the stats so we can get a fresh start
-         this.c.stats[i] = [];
-      }
-
-      // Change variables based on wild, tamed, bred
-      if (this.c.wild)
-         this.c.TE = this.c.IB = 0;
-
-      else if (this.c.tamed)
-         this.c.IB = 0;
-
-      else
-         this.c.TE = 1;
-
-      this.options = [];
+      /** @type {number} */
+      this.minIB = 0;
+      /** @type {number} */
+      this.maxIB = 0;
    }
 
    extract(dbg) {
       // Make sure we initialize specific variables before extraction
       this.init();
 
-      // If tame isn't bred (ignore wild level steps) and setting is enabled, consider wild steps (as set in settings)
-      // TODO: Add consider wild levels
-      // considerWildLevelSteps = considerWildLevelSteps && !bred;
-
       var tempStat = new Stat();
-      var torporStat = new Stat();
-
-      // Calculate the torpor stat since it doesn't accept dom levels
-      torporStat.calculateWildLevel(this.c.m[TORPOR], this.c.values[TORPOR], (!this.c.wild), this.c.TE, this.c.IB);
-      this.c.stats[TORPOR].push(torporStat);
-      if (dbg) dbg.levelFromTorpor = torporStat.Lw;
-
-      // Calculate the max number of levels based on level and torpor
-      this.wildFreeMax = torporStat.Lw;
-      this.levelBeforeDom = torporStat.Lw + 1;
-      this.domFreeMax = Math.max(0, this.c.level - this.wildFreeMax - 1);
-
-      // If it's bred, we need to do some magic with the IB
-      if (this.c.bred && !this.c.exactly &&
-         this.c.values[TORPOR] != Utils.RoundTo(tempStat.calculateValue(this.c.m[TORPOR], !this.c.wild, this.c.TE, this.c.IB), Ark.Precision(TORPOR))) {
-         // One of the most precise ways to get the exact torpor
-         this.c.IB = torporStat.calculateIB(this.c.m[TORPOR], this.c.values[TORPOR]);
-         // IB *must* be lower than this
-         var maxIB = Math.min(torporStat.calculateIB(this.c.m[TORPOR], this.c.values[TORPOR] + (0.5 / Math.pow(10, Ark.Precision(TORPOR)))), this.c.IB + (5 / 10E3));
-         // IB can be equal or greater than this
-         var minIB = Math.max(torporStat.calculateIB(this.c.m[TORPOR], this.c.values[TORPOR] - (0.5 / Math.pow(10, Ark.Precision(TORPOR)))), this.c.IB - (5 / 10E3));
-
-         // Check the food stat for the IB as well (Only works if food is unleveled)
-         var tempHealthStat = new Stat();
-         tempHealthStat.calculateWildLevel(this.c.m[FOOD], this.c.values[FOOD], !this.c.wild, this.c.TE, this.c.IB);
-         var imprintingBonusFromFood = tempHealthStat.calculateIB(this.c.m[FOOD], this.c.values[FOOD]);
-
-         // Check to see if the new IB still allows torpor to extract correctly
-         if (this.c.values[TORPOR] == Utils.RoundTo(tempStat.calculateValue(this.c.m[TORPOR], !this.c.wild, this.c.TE, imprintingBonusFromFood), Ark.Precision(TORPOR)))
-            this.c.IB = imprintingBonusFromFood;
-
-         // If IB > 99.9% it is likely 100% or a whole number higher than 100%
-         if (this.c.IB > 0.999)
-            this.c.IB = Utils.RoundTo(this.c.IB, 2);
-
-         // IB can't be lower than 0
-         if (this.c.IB < 0)
-            this.c.IB = 0;
-      }
 
       // A lot quicker if wild
       if (this.c.wild) {
-         for (let i = 0; i < 7; i++) {
+         for (let i = 0; i < 8; i++) {
             tempStat.calculateWildLevel(this.c.m[i], this.c.values[i]);
+
             // Make sure it is valid
             if (this.c.values[i] == Utils.RoundTo(tempStat.calculateValue(this.c.m[i]), Ark.Precision(i)))
                this.c.stats[i].push(new Stat(tempStat));
@@ -106,38 +52,28 @@ export class Extractor {
          return;
       }
 
+      // Calculate the torpor stat since it doesn't accept dom levels
+      tempStat.calculateWildLevel(this.c.m[TORPOR], this.c.values[TORPOR], (!this.c.wild), this.c.TE, this.c.IB);
+      this.c.stats[TORPOR].push(new Stat(tempStat));
+      if (dbg) dbg.levelFromTorpor = tempStat.Lw;
+
+      // Calculate the max number of levels based on level and torpor
+      this.wildFreeMax = this.c.stats[TORPOR][0].Lw;
+      this.levelBeforeDom = this.c.stats[TORPOR][0].Lw + 1;
+      this.domFreeMax = Math.max(0, this.c.level - this.wildFreeMax - 1);
+
+      // If it's bred, we need to do some magic with the IB
+      if (this.c.bred)
+         this.dynamicIBCalculation();
+
       // Loop all stats except for torpor
       for (let i = 0; i < 7; i++) {
          tempStat = new Stat;
 
-         // IF a stat isn't used, set it to -1 and continue
-         if (this.c.m[i].notUsed) {
-            this.c.values[i] = Utils.RoundTo(tempStat.calculateValue(this.c.m[i], !this.c.wild, this.c.TE, this.c.IB), Ark.Precision(i));
-            this.unusedStat = true;
-            this.c.stats[i] = [new Stat(-1, 0)];
+         // Covers unused stats like oxygen
+         if (this.uniqueStatSituation(tempStat, i))
             continue;
-         }
 
-         // We can't calculate speed if a stat is unused
-         else if (this.unusedStat && i == SPEED) {
-            // Calculate DOM for speed
-            this.c.stats[SPEED] = [new Stat(-1, tempStat.calculateDomLevel(this.c.m[i], this.c.values[i], !this.c.wild, 0, this.c.IB))];
-            this.domFreeMax -= this.c.stats[SPEED][0].Ld;
-            this.c.stats[i].checked = this.c.stats[SPEED].checked = true;
-            continue;
-         }
-
-         // Creatures that don't increase Speed on imprint also don't level the stat
-         // FIXME: It's true for all flyers, including CF flyers that allow IB of Speed
-         else if (!this.c.m[i].IBM && i == SPEED) {
-            // Calculate DOM for speed
-            this.c.stats[SPEED] = [new Stat(0, tempStat.calculateDomLevel(this.c.m[i], this.c.values[i], !this.c.wild, 0, this.c.IB))];
-            this.domFreeMax -= this.c.stats[SPEED][0].Ld;
-            this.c.stats[i].checked = this.c.stats[SPEED].checked = true;
-            continue;
-         }
-
-         // TODO introduce code separation, if possible
          else {
             // Calculate the highest Lw could be
             var maxLw = tempStat.calculateWildLevel(this.c.m[i], this.c.values[i], !this.c.wild, 0, this.c.IB);
@@ -156,64 +92,12 @@ export class Extractor {
 
                // We don't need to calculate TE to extract the levels
                if (this.c.bred || this.c.m[i].Tm == 0) {
-                  if (tempStat.calculateDomLevel(this.c.m[i], this.c.values[i], !this.c.wild, this.c.TE, this.c.IB) > maxLd)
-                     continue;
-
-                  if (Utils.RoundTo(this.c.values[i], Ark.Precision(i)) == Utils.RoundTo(tempStat.calculateValue(this.c.m[i], !this.c.wild, this.c.TE, this.c.IB), Ark.Precision(i)))
-                     this.c.stats[i].push(new Stat(tempStat));
-
-                  // If it doesn't calculate properly, it may have used a different IB
-                  else if (this.c.bred) {
-                     if (Utils.RoundTo(tempStat.calculateIB(this.c.m[i], this.c.values[i]), 2) == this.c.IB) {
-                        var maxTempIB = tempStat.calculateIB(this.c.m[i], this.c.values[i] + (0.5 / Math.pow(10, Ark.Precision(i))));
-                        var minTempIB = tempStat.calculateIB(this.c.m[i], this.c.values[i] - (0.5 / Math.pow(10, Ark.Precision(i))));
-
-                        if (maxIB > maxTempIB && maxTempIB >= minIB) {
-                           this.c.IB = maxIB = maxTempIB;
-                           this.c.stats[i].push(new Stat(tempStat));
-                        }
-                        else if (minIB <= minTempIB && minTempIB < maxIB) {
-                           this.c.IB = minIB = minTempIB;
-                           this.c.stats[i].push(new Stat(tempStat));
-                        }
-                     }
-                  }
+                  this.nonTEStatCalculation(tempStat, i, maxLd);
                }
 
                // If this stat has a Tm and is tamed, we need to manually loop through the Ld
-               else {
-                  for (tempStat.Ld = 0; tempStat.Ld <= maxLd; tempStat.Ld++) {
-
-                     let tamingEffectiveness = 0, minTE = 0, maxTE = 0;
-                     // One of the most precise ways to get the exact Taming Effectiveness
-                     tamingEffectiveness = tempStat.calculateTE(this.c.m[i], this.c.values[i]);
-
-                     // TE *must* be lower than this
-                     maxTE = Math.min(tempStat.calculateTE(this.c.m[i], this.c.values[i] + (0.5 / Math.pow(10, Ark.Precision(i)))), 1);
-                     // TE can be equal to or greater than this
-                     minTE = Math.max(tempStat.calculateTE(this.c.m[i], this.c.values[i] - (0.5 / Math.pow(10, Ark.Precision(i)))), 0);
-
-                     if (tamingEffectiveness >= 0 && tamingEffectiveness <= 1) {
-
-                        // If the TE allows the stat to calculate properly, add it as a possible result
-                        if (Utils.RoundTo(this.c.values[i], Ark.Precision(i)) == Utils.RoundTo(tempStat.calculateValue(this.c.m[i], !this.c.wild, tamingEffectiveness, this.c.IB), Ark.Precision(i))) {
-                           // Create a new Stat to hold all of the information
-                           var TEStat = new Stat(tempStat);
-                           TEStat.wildLevel = Math.ceil(this.levelBeforeDom / (1 + 0.5 * tamingEffectiveness));
-                           if (this.levelBeforeDom == Math.floor(TEStat.wildLevel * (1 + 0.5 * tamingEffectiveness))) {
-                              TEStat.TE = tamingEffectiveness;
-                              TEStat.maxTE = maxTE;
-                              TEStat.minTE = minTE;
-                              this.c.stats[i].push(TEStat);
-                           }
-                        }
-                     }
-
-                     // The TE would only get smaller so break the loop
-                     else if (tamingEffectiveness <= 0)
-                        break;
-                  }
-               }
+               else
+                  this.findTEStats(tempStat, i, maxLd);
             }
          }
       }
@@ -255,6 +139,158 @@ export class Extractor {
       }
 
       return;
+   }
+
+   init() {
+      // Make sure the multipliers haven't changed
+      this.c.m = Ark.GetMultipliers(this.c.serverName, this.c.species);
+
+      // Clear the checked property for future extractions
+      for (let i = 0; i < 8; i++) {
+         if (this.c.stats[i].hasOwnProperty("checked"))
+            delete this.c.stats[i].checked;
+
+         // Reset the stats so we can get a fresh start
+         this.c.stats[i] = [];
+      }
+
+      // Change variables based on wild, tamed, bred
+      if (this.c.wild)
+         this.c.TE = this.c.IB = 0;
+
+      else if (this.c.tamed)
+         this.c.IB = 0;
+
+      else
+         this.c.TE = 1;
+
+      this.wildFreeMax = 0;
+      this.domFreeMax = 0;
+      this.levelBeforeDom = 0;
+      this.unusedStat = false;
+      this.options = [];
+      this.minIB = 0;
+      this.maxIB = 0;
+   }
+
+   dynamicIBCalculation() {
+      // If we have already found the right IB, we don't need to do anything else
+      if (this.c.values[TORPOR] == Utils.RoundTo(this.c.stats[TORPOR][0].calculateValue(this.c.m[TORPOR], !this.c.wild, this.c.TE, this.c.IB), Ark.Precision(TORPOR)))
+         return;
+
+      // One of the most precise ways to get the exact torpor
+      this.c.IB = this.c.stats[TORPOR][0].calculateIB(this.c.m[TORPOR], this.c.values[TORPOR]);
+      // IB *must* be lower than this
+      this.maxIB = Math.min(this.c.stats[TORPOR][0].calculateIB(this.c.m[TORPOR], this.c.values[TORPOR] + (0.5 / Math.pow(10, Ark.Precision(TORPOR)))), this.c.IB + (5 / 10E3));
+      // IB can be equal or greater than this
+      this.minIB = Math.max(this.c.stats[TORPOR][0].calculateIB(this.c.m[TORPOR], this.c.values[TORPOR] - (0.5 / Math.pow(10, Ark.Precision(TORPOR)))), this.c.IB - (5 / 10E3));
+
+      // Check the food stat for the IB as well (Only works if food is unleveled)
+      var tempHealthStat = new Stat();
+      tempHealthStat.calculateWildLevel(this.c.m[FOOD], this.c.values[FOOD], !this.c.wild, this.c.TE, this.c.IB);
+      var imprintingBonusFromFood = tempHealthStat.calculateIB(this.c.m[FOOD], this.c.values[FOOD]);
+
+      // Check to see if the new IB still allows torpor to extract correctly
+      if (this.c.values[TORPOR] == Utils.RoundTo(this.c.stats[TORPOR][0].calculateValue(this.c.m[TORPOR], !this.c.wild, this.c.TE, imprintingBonusFromFood), Ark.Precision(TORPOR)))
+         this.c.IB = imprintingBonusFromFood;
+
+      // If IB > 99.9% it is likely 100% or a whole number higher than 100%
+      if (this.c.IB >= 1)
+         this.c.IB = Utils.RoundTo(this.c.IB, 2);
+
+      // IB can't be lower than 0
+      if (this.c.IB < 0)
+         this.c.IB = 0;
+   }
+
+   uniqueStatSituation(tempStat, statIndex) {
+      // IF a stat isn't used, set it to -1 and continue
+      if (this.c.m[statIndex].notUsed) {
+         this.c.values[statIndex] = Utils.RoundTo(tempStat.calculateValue(this.c.m[statIndex], !this.c.wild, this.c.TE, this.c.IB), Ark.Precision(statIndex));
+         this.unusedStat = true;
+         this.c.stats[statIndex] = [new Stat(-1, 0)];
+         return true;
+      }
+
+      // We can't calculate speed if a stat is unused
+      else if (this.unusedStat && statIndex == SPEED) {
+         // Calculate DOM for speed
+         this.c.stats[SPEED] = [new Stat(-1, tempStat.calculateDomLevel(this.c.m[statIndex], this.c.values[statIndex], !this.c.wild, 0, this.c.IB))];
+         this.domFreeMax -= this.c.stats[SPEED][0].Ld;
+         this.c.stats[statIndex].checked = this.c.stats[SPEED].checked = true;
+         return true;
+      }
+
+      // Creatures that don't increase Speed on imprint also don't level the stat
+      // FIXME: It's true for all flyers, including CF flyers that allow IB of Speed
+      else if (!this.c.m[statIndex].IBM && statIndex == SPEED) {
+         // Calculate DOM for speed
+         this.c.stats[SPEED] = [new Stat(0, tempStat.calculateDomLevel(this.c.m[statIndex], this.c.values[statIndex], !this.c.wild, 0, this.c.IB))];
+         this.domFreeMax -= this.c.stats[SPEED][0].Ld;
+         this.c.stats[statIndex].checked = this.c.stats[SPEED].checked = true;
+         return true;
+      }
+
+      return false;
+   }
+
+   nonTEStatCalculation(tempStat, statIndex, maxLd) {
+      if (tempStat.calculateDomLevel(this.c.m[statIndex], this.c.values[statIndex], !this.c.wild, this.c.TE, this.c.IB) > maxLd)
+         return;
+
+      if (Utils.RoundTo(this.c.values[statIndex], Ark.Precision(statIndex)) == Utils.RoundTo(tempStat.calculateValue(this.c.m[statIndex], !this.c.wild, this.c.TE, this.c.IB), Ark.Precision(statIndex)))
+         this.c.stats[statIndex].push(new Stat(tempStat));
+
+      // If it doesn't calculate properly, it may have used a different IB
+      else if (this.c.bred) {
+         if (Utils.RoundTo(tempStat.calculateIB(this.c.m[statIndex], this.c.values[statIndex]), 2) == this.c.IB) {
+            var maxTempIB = tempStat.calculateIB(this.c.m[statIndex], this.c.values[statIndex] + (0.5 / Math.pow(10, Ark.Precision(statIndex))));
+            var minTempIB = tempStat.calculateIB(this.c.m[statIndex], this.c.values[statIndex] - (0.5 / Math.pow(10, Ark.Precision(statIndex))));
+
+            if (this.maxIB > maxTempIB && maxTempIB >= this.minIB) {
+               this.c.IB = this.maxIB = maxTempIB;
+               this.c.stats[statIndex].push(new Stat(tempStat));
+            }
+            else if (this.minIB <= minTempIB && minTempIB < this.maxIB) {
+               this.c.IB = this.minIB = minTempIB;
+               this.c.stats[statIndex].push(new Stat(tempStat));
+            }
+         }
+      }
+   }
+
+   findTEStats(tempStat, statIndex, maxLd) {
+      for (tempStat.Ld = 0; tempStat.Ld <= maxLd; tempStat.Ld++) {
+
+         let tamingEffectiveness = 0, minTE = 0, maxTE = 0;
+         // One of the most precise ways to get the exact Taming Effectiveness
+         tamingEffectiveness = tempStat.calculateTE(this.c.m[statIndex], this.c.values[statIndex]);
+
+         // TE *must* be lower than this
+         maxTE = Math.min(tempStat.calculateTE(this.c.m[statIndex], this.c.values[statIndex] + (0.5 / Math.pow(10, Ark.Precision(statIndex)))), 1);
+         // TE can be equal to or greater than this
+         minTE = Math.max(tempStat.calculateTE(this.c.m[statIndex], this.c.values[statIndex] - (0.5 / Math.pow(10, Ark.Precision(statIndex)))), 0);
+
+         if (tamingEffectiveness >= 0 && tamingEffectiveness <= 1) {
+
+            // If the TE allows the stat to calculate properly, add it as a possible result
+            if (Utils.RoundTo(this.c.values[statIndex], Ark.Precision(statIndex)) == Utils.RoundTo(tempStat.calculateValue(this.c.m[statIndex], !this.c.wild, tamingEffectiveness, this.c.IB), Ark.Precision(statIndex))) {
+               // Create a new Stat to hold all of the information
+               var TEStat = new Stat(tempStat);
+               TEStat.wildLevel = Math.ceil(this.levelBeforeDom / (1 + 0.5 * tamingEffectiveness));
+               if (this.levelBeforeDom == Math.floor(TEStat.wildLevel * (1 + 0.5 * tamingEffectiveness))) {
+                  TEStat.TE = tamingEffectiveness;
+                  TEStat.maxTE = maxTE;
+                  TEStat.minTE = minTE;
+                  this.c.stats[statIndex].push(TEStat);
+               }
+            }
+         }
+
+         // The TE would only get smaller so break the loop
+         else if (tamingEffectiveness <= 0)
+            break;
+      }
    }
 
    filterResults(dbg) {
@@ -477,7 +513,9 @@ export class Extractor {
       let selector = indexMax;
 
       do {
-         let actualOption = [], copyOption = tempOptions.slice();
+         /** @type {any[]} */
+         let actualOption = [];
+         let copyOption = tempOptions.slice();
 
          if (this.matchingStats(tempOptions, true)) {
             for (let stat = 0; stat < 8; stat++) {

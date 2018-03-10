@@ -94,4 +94,11 @@ export default [
       serverName: "Tp",
       results: [[{ "Lw": 39, "Ld": 0 }], [{ "Lw": 44, "Ld": 0 }], [{ "Lw": 47, "Ld": 0 }], [{ "Lw": 36, "Ld": 0, "wildLevel": 180, "TE": 0.9067261241174281 }], [{ "Lw": 44, "Ld": 0 }], [{ "Lw": 50, "Ld": 0, "wildLevel": 180, "TE": 0.9067261241174281 }], [{ "Lw": 0, "Ld": 0 }], [{ "Lw": 260, "Ld": 0 }]],
    },
+   {
+      tag: "Argentavis - Level 256 (Mr. Plow)",
+      species: "Argentavis", level: 256, imprint: 0, exactly: false, mode: "Tamed",
+      values: [6738.8, 2552.0, 600.0, 7400.0, 1172.1, 455.5, 100, 8376.5],
+      serverName: "ARK PVE Community Server",
+      results: [[{ "Lw": 39, "Ld": 0 }], [{ "Lw": 44, "Ld": 0 }], [{ "Lw": 47, "Ld": 0 }], [{ "Lw": 36, "Ld": 0, "wildLevel": 180, "TE": 0.9067261241174281 }], [{ "Lw": 44, "Ld": 0 }], [{ "Lw": 50, "Ld": 0, "wildLevel": 180, "TE": 0.9067261241174281 }], [{ "Lw": 0, "Ld": 0 }], [{ "Lw": 260, "Ld": 0 }]],
+   },
 ];
