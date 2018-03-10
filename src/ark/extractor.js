@@ -243,7 +243,7 @@ export class Extractor {
 
       // If it doesn't calculate properly, it may have used a different IB
       else if (this.c.bred) {
-         if (Utils.RoundTo(tempStat.calculateIB(this.c.m[statIndex], this.c.values[statIndex]), 2) == this.c.IB) {
+         if (Utils.RoundTo(tempStat.calculateIB(this.c.m[statIndex], this.c.values[statIndex]), 2) == Utils.RoundTo(this.c.IB, 2)) {
             var maxTempIB = tempStat.calculateIB(this.c.m[statIndex], this.c.values[statIndex] + (0.5 / Math.pow(10, Ark.Precision(statIndex))));
             var minTempIB = tempStat.calculateIB(this.c.m[statIndex], this.c.values[statIndex] - (0.5 / Math.pow(10, Ark.Precision(statIndex))));
 

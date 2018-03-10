@@ -43,7 +43,19 @@ let servers = [
       serverName: "ARK PVE Community Server",
       IBM: 1,
       singlePlayer: false,
-      multipliers: [, , , , [, , 1.5, 3]],
+      multipliers: [, , , , [, , 3, 1.5]],
+   },
+   {
+      serverName: "Dusty.P",
+      IBM: 1,
+      singlePlayer: false,
+      multipliers: [, , , , [, , 2], , [, , 1.2]],
+   },
+   {
+      serverName: "enohka",
+      IBM: 1,
+      singlePlayer: false,
+      multipliers: [],
    },
 ];
 
