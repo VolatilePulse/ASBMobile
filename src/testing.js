@@ -22,7 +22,11 @@ export function PerformTest(data) {
 
    let extractObject = new Extractor(testCreature);
 
-   let dbg = {};
+   let dbg = {
+      totalRecursion: 0,
+      numberRemoved: 0,
+      recursionRemoved: 0,
+   };
 
    let t1 = performance.now();
    extractObject.extract(dbg);
@@ -34,10 +38,10 @@ export function PerformTest(data) {
    console.log(Utils.FormatNumber(t2 - t1, 2) + "ms");
    if (dbg.failReason) console.log("Fail reason: " + dbg.failReason);
    if (!pass) {
-      if (dbg.preFilterStats) {
+      if (dbg['preFilterStats']) {
          console.log("\nPre-filter stats:");
          console.log(Ark.FormatAllOptions(dbg.preFilterStats));
-         delete dbg.preFilterStats;
+         delete dbg['preFilterStats'];
       }
       // To copy the results into test_data Results
       // console.log(JSON.stringify(testCreature.stats));
@@ -45,9 +49,10 @@ export function PerformTest(data) {
       console.log(Ark.FormatAllOptions(data['results']));
       console.log("\nResults:");
       console.log(Ark.FormatAllOptions(testCreature.stats));
-      console.log("\DBG:");
-      console.log(JSON.stringify(dbg, null, 2));
    }
+   if (dbg['preFilterStats']) delete dbg['preFilterStats'];
+   console.log("\DBG:");
+   console.log(JSON.stringify(dbg, null, 2));
 
    return { pass: pass, duration: (t2 - t1), results: testCreature.stats };
 }

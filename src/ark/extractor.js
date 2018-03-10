@@ -296,8 +296,10 @@ export class Extractor {
    filterResults(dbg) {
       if (dbg && !dbg['filterLoops']) dbg.filterLoops = 0;
 
+      let removed = false;
+
       do {
-         var removed = false;
+         removed = false;
          for (let i = 0; i < 7; i++) {
 
             // One stat possibility is good
@@ -315,6 +317,7 @@ export class Extractor {
                      this.c.stats[i].splice(j, 1);
                      j--;
                      removed = true;
+                     if (dbg) dbg.numberRemoved++;
                   }
                }
             }
@@ -349,6 +352,7 @@ export class Extractor {
                      this.c.stats[i].splice(j, 1);
                      j--;
                      removed = true;
+                     if (dbg) dbg.numberRemoved++;
                   }
                }
             }
@@ -360,24 +364,17 @@ export class Extractor {
                      this.c.stats[i].splice(j, 1);
                      j--;
                      removed = true;
+                     if (dbg) dbg.numberRemoved++;
                   }
                }
             }
+
+            if (removed)
+               continue;
 
             // Only remove recursively if we couldn't remove any possibilities the other 2 ways
-            for (let i = 0; !removed && i < 7; i++) {
-               if (!this.c.stats[i].checked && this.c.stats[i].length > 1) {
-                  for (let j = 0; j < this.c.stats[i].length; j++) {
-                     if (!this.matchingStats([i, j], true)) {
-                        this.c.stats[i].splice(j, 1);
-                        j--;
-                        removed = true;
-                     }
-                  }
-               }
-            }
+            removed = this.matchingStatsGenerator(dbg);
          }
-
          if (dbg) dbg.filterLoops += 1;
       } while (removed);
    }
@@ -413,7 +410,8 @@ export class Extractor {
     *
     * @returns {boolean|*[]} All matching stats that are required to keep the levels "true"
     */
-   matchingStats(indices, returnBool = false, wildLevels = 0, domLevels = 0) {
+   matchingStats(indices, returnBool = false, dbg = undefined, wildLevels = 0, domLevels = 0) {
+      if (dbg) dbg.totalRecursion++;
       // Make sure we got an array of arrays
       if (!Array.isArray(indices[0])) {
          // @ts-ignore
@@ -452,7 +450,7 @@ export class Extractor {
             // add that stat to the indices
             // @ts-ignore
             indices.push([i, j]);
-            var returnValue = this.matchingStats(indices, returnBool, wildLevels, domLevels);
+            var returnValue = this.matchingStats(indices, returnBool, dbg, wildLevels, domLevels);
             // On the event of a failure, remove that index, and try the next stat
             // @ts-ignore
             if (!returnValue || returnValue.length == 0) {
@@ -499,6 +497,60 @@ export class Extractor {
 
       // If we made it this far, we have failed something
       return returnBool ? false : [];
+   }
+
+   matchingStatsGenerator(dbg) {
+      let tempOptions = [];
+
+      // The initial array for matchingStats
+      for (let stat = 0; stat < 7; stat++)
+         if (!this.c.stats[stat].checked)
+            tempOptions.push([stat, 0]);
+
+      // Useless if we have no options to run
+      if (tempOptions.length < 1)
+         return false;
+
+      let indexMax = tempOptions.length - 1;
+      let selector = indexMax;
+
+      do {
+         if (this.matchingStats(tempOptions, true, dbg)) {
+            for (let option in tempOptions) {
+               // Flags the stat as being good
+               this.c.stats[tempOptions[option][0]][tempOptions[option][1]].good = true;
+            }
+         }
+
+         tempOptions[selector][1]++;
+
+         while (selector != -1 && tempOptions[selector][1] == this.c.stats[tempOptions[selector][0]].length) {
+            tempOptions[selector][1] = 0;
+            selector--;
+            if (selector != -1)
+               tempOptions[selector][1]++;
+         }
+
+         if (selector != -1)
+            selector = indexMax;
+      } while (selector != -1);
+
+      let removed = false;
+      for (let stat = 0; stat < 7; stat++) {
+         for (let poss = 0; poss < this.c.stats[stat].length && !this.c.stats[stat].checked; poss++) {
+            // We have verified that that only bad stats are removed
+            if (!this.c.stats[stat][poss].good) {
+               this.c.stats[stat].splice(poss, 1);
+               poss--;
+               removed = true;
+            }
+            else
+               // Removes the flag for future iterations
+               this.c.stats[stat][poss].good = false;
+         }
+      }
+
+      return removed;
    }
 
    generateOptions() {
