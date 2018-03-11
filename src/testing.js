@@ -6,19 +6,19 @@ import { VueCreature } from './ark/creature';
 import { isNumber, isString, isFunction, isObject, isArray } from 'util';
 
 
-export function PerformTest(data) {
+export function PerformTest(testData) {
    let testCreature = new VueCreature();
 
    // Set the properties to prepare for extraction
-   testCreature.wild = (data.mode == "Wild");
-   testCreature.tamed = (data.mode == "Tamed");
-   testCreature.bred = (data.mode == "Bred");
-   testCreature.IB = data.imprint / 100;
-   testCreature.exactly = !!data.exactly;
-   testCreature.values = data.values.map(Ark.ConvertValue);
-   testCreature.serverName = data.serverName;
-   testCreature.level = data.level;
-   testCreature.species = data.species;
+   testCreature.wild = (testData.mode == "Wild");
+   testCreature.tamed = (testData.mode == "Tamed");
+   testCreature.bred = (testData.mode == "Bred");
+   testCreature.IB = testData.imprint / 100;
+   testCreature.exactly = !!testData.exactly;
+   testCreature.values = testData.values.map(Ark.ConvertValue);
+   testCreature.serverName = testData.serverName;
+   testCreature.level = testData.level;
+   testCreature.species = testData.species;
 
    let extractObject = new Extractor(testCreature);
 
@@ -27,33 +27,39 @@ export function PerformTest(data) {
       numberRemoved: 0,
    };
 
-   let t1 = performance.now();
-   extractObject.extract(dbg);
-   let t2 = performance.now();
+   /** @type {number} */
+   let t1, t2;
+   /** @type {object} */
+   let exception;
 
-   let pass = IsPass(data['results'], testCreature.stats);
-
-   console.log("\n" + (pass ? "PASS: " : "FAIL: ") + data['tag']);
-   console.log(Utils.FormatNumber(t2 - t1, 2) + "ms");
-   if (dbg.failReason) console.log("Fail reason: " + dbg.failReason);
-   if (!pass) {
-      if (dbg['preFilterStats']) {
-         console.log("\nPre-filter stats:");
-         console.log(Ark.FormatAllOptions(dbg.preFilterStats));
-         delete dbg['preFilterStats'];
-      }
-      // To copy the results into test_data Results
-      console.log(JSON.stringify(testCreature.stats));
-      console.log("\nExpected:");
-      console.log(Ark.FormatAllOptions(data['results']));
-      console.log("\nResults:");
-      console.log(Ark.FormatAllOptions(testCreature.stats));
+   try {
+      t1 = performance.now();
+      extractObject.extract(dbg);
+      t2 = performance.now();
    }
-   if (dbg['preFilterStats']) delete dbg['preFilterStats'];
-   console.log("\DBG:");
-   console.log(JSON.stringify(dbg, null, 2));
+   catch (ex) {
+      exception = ex;
+   }
 
-   return { pass: pass, duration: (t2 - t1), results: testCreature.stats };
+   let result = {};
+   result.pass = false;
+   result.stats = testCreature['stats'];
+   result.options = extractObject['options'];
+   result.dbg = dbg;
+
+   if (exception) {
+      result.exception = exception;
+      result.dbg = dbg;
+   }
+   else if (dbg['failReason']) {
+      result.failReason = dbg.failReason;
+   }
+   else {
+      result.pass = IsPass(testData['results'], testCreature.stats);
+      result.duration = t2 - t1;
+   }
+
+   return result;
 }
 
 /**

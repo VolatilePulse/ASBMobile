@@ -1,47 +1,125 @@
 <div>
+   <!-- control buttons -->
    <b-container class="clearfix">
-      <b-button-group class="float-right m-2">
-         <b-button @click="runAllTests" variant="dark">Run All</b-button>
-      </b-button-group>
+      <b-button-toolbar class="float-right m-2">
+         <b-button-group class="mr-2">
+            <b-button v-show="running" variant="link" disabled>...running...</b-button>
+         </b-button-group>
+         <b-button-group class="mr-2">
+            <b-button v-if="passes" variant="success" title="Click to re-run passes" :disabled="running"
+               @click="runPasses">
+               {{passes}} pass{{passes==1?'':'es'}}
+            </b-button>
+            <b-button v-if="fails" variant="danger" title="Click to re-run fails" :disabled="running" @click="runFails">
+               {{fails}} fail{{fails==1?'':'s'}}
+            </b-button>
+         </b-button-group>
+         <b-button @click="runAllTests" variant="dark" :disabled="running">Run All</b-button>
+      </b-button-toolbar>
    </b-container>
 
-   <b-container>
-      <b-list-group>
-         <b-list-group-item v-for="(data,index) in testData" class="p-2">
-            <div class="float-right m-0 p-0">
-               <!-- pass/fail -->
-               <span v-if="isPass(index)" class="badge badge-success badge-pill w-100 m-0">PASS</span>
-               <span v-if="isFail(index)" class="badge badge-danger badge-pill w-100 m-0">FAIL</span>
+   <!-- tests list -->
+   <b-container class="p-2">
+      <b-list-group class="m-0 p-0">
+         <b-list-group-item v-for="(data,index) in testData" class="p-0">
+            <b-container class="px-0 p-0">
+               <b-row class="p-1">
+                  <b-col class="col-9">
+                     <!-- header / info -->
+                     <b-img @click.prevent="runTest(index)" :src="require('assets/play.svg')" class="float-left"
+                        style="height:20px"></b-img>
+                     <div @click.prevent="openResults(index)">
+                        <h6 class="mb-0">
+                           {{data.tag}}</h6>
+                        <small>
+                           Level {{data.level}} {{data.species}} from
+                           <em>{{data.serverName}}</em>
+                        </small>
+                     </div>
+                  </b-col>
 
-               <br/>
+                  <div class="col-3">
+                     <!-- pass/fail -->
+                     <span v-if="isPass(index)" class="badge badge-success badge-pill w-100">PASS</span>
+                     <span v-if="isFail(index)" class="badge badge-danger badge-pill w-100">FAIL</span>
 
-               <!-- timing -->
-               <span v-if="results[index] && results[index]['duration'] != undefined" class="badge badge-info badge-pill">
-                  {{formatNumber(results[index]['duration'], 1)}}ms
-               </span>
-            </div>
+                     <br/>
 
-            <!-- header / info -->
-            <div @click.prevent="openResults(index)">
-               <h6 class="mb-0">
-                  <b-img @click.prevent="runTest(index)" :src="require('assets/play.svg')" class="" style="height:20px"></b-img>
-                  {{data.tag}}</h6>
-               <small>
-                  Level {{data.level}} {{data.species}} from
-                  <em>{{data.serverName}}</em>
-               </small>
-            </div>
+                     <!-- timing -->
+                     <span v-if="results[index] && results[index]['duration'] != undefined" class="badge badge-info badge-pill w-100">
+                        {{formatNumber(results[index]['duration'], 1)}}ms
+                     </span>
+                  </div>
+               </b-row>
+            </b-container>
 
-            <!-- expandable results -->
-            <div v-if="index in results" v-show="openTestIndex==index">
-               <div>
-                  <span>Got:</span>
-                  <pre v-if="results[index]">{{formattedStats(results[index]['results'])}}</pre>
-                  <pre v-else>-blank-</pre>
-               </div>
-               <div>
-                  <span>Expected:</span>
-                  <pre>{{formattedStats(testData[index]['results'])}}</pre>
+            <!-- result detail accordion -->
+            <div v-if="index in results && openTestIndex==index">
+               <div role="tablist">
+                  <!-- results / expected -->
+                  <div v-if="results[index]['stats']" class="mb-0">
+                     <b-card-header header-tag="header" class="p-1" role="tab">
+                        <b-btn block href="#" v-b-toggle.accordion1 variant="secondary" class="p-0">Results / Expected</b-btn>
+                     </b-card-header>
+                     <b-collapse id="accordion1" accordion="result-accordian" role="tabpanel">
+                        <b-card-body class="py-2">
+                           <b-container class="p-0 m-0">
+                              <b-row class="py-0 my-0">
+                                 <h6 class="col-6">Results</h6>
+                                 <h6 class="col-6">Expected</h6>
+                              </b-row>
+                              <b-row class="py-0 my-0">
+                                 <pre class="col-6 py-0 my-0 small">{{formattedStats(results[index].stats)}}</pre>
+                                 <pre class="col-6 py-0 my-0 small">{{formattedStats(testData[index].results)}}</pre>
+                              </b-row>
+                           </b-container>
+                        </b-card-body>
+                     </b-collapse>
+                  </div>
+                  <!-- options -->
+                  <div v-if="results[index]['options']" class="mb-0">
+                     <b-card-header header-tag="header" class="p-1" role="tab">
+                        <b-btn block href="#" v-b-toggle.accordion2 variant="secondary" class="p-0">
+                           Options {{(results[index] && results[index]['options'] && "("+results[index].options.length+")")}}
+                        </b-btn>
+                     </b-card-header>
+                     <b-collapse id="accordion2" accordion="result-accordian" role="tabpanel">
+                        <b-card-body class="py-2">
+                           <div class="d-flex flex-wrap p-0 m-0">
+                              <div v-for="options in results[index].options" class="py-0 my-0">
+                                 {{JSON.stringify(options)}}
+                              </div>
+                           </div>
+                        </b-card-body>
+                     </b-collapse>
+                  </div>
+                  <!-- debug values -->
+                  <div v-if="results[index]['dbg']" class="mb-0">
+                     <b-card-header header-tag="header" class="p-1" role="tab">
+                        <b-btn block href="#" v-b-toggle.accordion3 variant="secondary" class="p-0">Debug Output</b-btn>
+                     </b-card-header>
+                     <b-collapse id="accordion3" accordion="result-accordian" role="tabpanel">
+                        <b-card-body class="py-2">
+                           <b-container class="p-0 m-0">
+                              <b-row v-for="key in dbgKeys(index)" class="py-0 my-0">
+                                 <div class="col-4 m-0 py-0 small">{{key}}</div>
+                                 <pre class="col-8 m-0 py-0">{{JSON.stringify(results[index].dbg[key])}}</pre>
+                              </b-row>
+                           </b-container>
+                        </b-card-body>
+                     </b-collapse>
+                  </div>
+                  <!-- pre-filtered stats -->
+                  <div class="mb-0">
+                     <b-card-header header-tag="header" class="p-1" role="tab">
+                        <b-btn block href="#" v-b-toggle.accordion4 variant="secondary" class="p-0">Pre-Filtered Stats</b-btn>
+                     </b-card-header>
+                     <b-collapse id="accordion4" accordion="result-accordian" role="tabpanel">
+                        <b-card-body class="pt-2 pb-0">
+                           <pre class="py-0 small">{{formattedStats(results[index].dbg['preFilterStats'])}}</pre>
+                        </b-card-body>
+                     </b-collapse>
+                  </div>
                </div>
             </div>
          </b-list-group-item>

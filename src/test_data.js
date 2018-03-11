@@ -1,7 +1,7 @@
 "use strict";
 
 // Some test data
-export default [
+const testData = [
    {
       tag: "Level Tamed 1 Rex 100% TE",
       species: "Rex", level: 1, imprint: 0, exactly: false, mode: "Tamed",
@@ -221,3 +221,5 @@ export default [
       results: [[{ "Lw": 104, "Ld": 3 }], [{ "Lw": 173, "Ld": 12 }, { "Lw": 105, "Ld": 14 }, { "Lw": 11, "Ld": 17 }], [{ "Lw": 140, "Ld": 1 }, { "Lw": 115, "Ld": 3 }, { "Lw": 92, "Ld": 5 }, { "Lw": 52, "Ld": 9 }, { "Lw": 10, "Ld": 14 }], [{ "Lw": 117, "Ld": 3 }, { "Lw": 73, "Ld": 7 }], [{ "Lw": 180, "Ld": 0 }, { "Lw": 100, "Ld": 4 }, { "Lw": 75, "Ld": 6 }, { "Lw": 40, "Ld": 10 }, { "Lw": 12, "Ld": 15 }], [{ "Lw": 121, "Ld": 3 }, { "Lw": 103, "Ld": 10 }], [{ "Lw": 221, "Ld": 2 }, { "Lw": 217, "Ld": 2 }, { "Lw": 208, "Ld": 2 }, { "Lw": 104, "Ld": 2 }, { "Lw": 97, "Ld": 2 }, { "Lw": 74, "Ld": 2 }, { "Lw": 61, "Ld": 2 }, { "Lw": 54, "Ld": 2 }, { "Lw": 52, "Ld": 2 }, { "Lw": 48, "Ld": 2 }, { "Lw": 16, "Ld": 2 }, { "Lw": 12, "Ld": 2 }], [{ "Lw": 741, "Ld": 0 }]],
    },
 ];
+
+export default testData;
