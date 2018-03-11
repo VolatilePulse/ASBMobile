@@ -91,7 +91,7 @@ export class Extractor {
                   break;
 
                // We don't need to calculate TE to extract the levels
-               if (this.c.bred || this.c.m[i].Tm == 0) {
+               if (this.c.bred || this.c.m[i].Tm <= 0) {
                   this.nonTEStatCalculation(tempStat, i, maxLd);
                }
 
@@ -262,9 +262,14 @@ export class Extractor {
    findTEStats(tempStat, statIndex, maxLd) {
       for (tempStat.Ld = 0; tempStat.Ld <= maxLd; tempStat.Ld++) {
 
-         let tamingEffectiveness = 0, minTE = 0, maxTE = 0;
+         let tamingEffectiveness = -1, minTE = 0, maxTE = 0;
          // One of the most precise ways to get the exact Taming Effectiveness
-         tamingEffectiveness = tempStat.calculateTE(this.c.m[statIndex], this.c.values[statIndex]);
+         if (this.c.values[statIndex] == Utils.RoundTo(tempStat.calculateValue(this.c.m[statIndex], !this.c.wild, 1, this.c.IB), Ark.Precision(statIndex)))
+            tamingEffectiveness = 1;
+         else if (this.c.values[statIndex] == Utils.RoundTo(tempStat.calculateValue(this.c.m[statIndex], !this.c.wild, 0, this.c.IB), Ark.Precision(statIndex)))
+            tamingEffectiveness = 0;
+         else
+            tamingEffectiveness = tempStat.calculateTE(this.c.m[statIndex], this.c.values[statIndex]);
 
          // TE *must* be lower than this
          maxTE = Math.min(tempStat.calculateTE(this.c.m[statIndex], this.c.values[statIndex] + (0.5 / Math.pow(10, Ark.Precision(statIndex)))), 1);
@@ -274,7 +279,7 @@ export class Extractor {
          if (tamingEffectiveness >= 0 && tamingEffectiveness <= 1) {
 
             // If the TE allows the stat to calculate properly, add it as a possible result
-            if (Utils.RoundTo(this.c.values[statIndex], Ark.Precision(statIndex)) == Utils.RoundTo(tempStat.calculateValue(this.c.m[statIndex], !this.c.wild, tamingEffectiveness, this.c.IB), Ark.Precision(statIndex))) {
+            if (this.c.values[statIndex] == Utils.RoundTo(tempStat.calculateValue(this.c.m[statIndex], !this.c.wild, tamingEffectiveness, this.c.IB), Ark.Precision(statIndex))) {
                // Create a new Stat to hold all of the information
                var TEStat = new Stat(tempStat);
                TEStat.wildLevel = Math.ceil(this.levelBeforeDom / (1 + 0.5 * tamingEffectiveness));
@@ -296,7 +301,7 @@ export class Extractor {
    filterResults(dbg) {
       if (dbg && !dbg['filterLoops']) dbg.filterLoops = 0;
 
-      let removed = false;
+      let removed = false, deepFilter = false;
 
       do {
          removed = false;
@@ -369,11 +374,14 @@ export class Extractor {
                }
             }
 
-            if (removed)
+            if (removed) {
+               deepFilter = false;
                continue;
+            }
 
             // Only remove recursively if we couldn't remove any possibilities the other 2 ways
-            removed = this.matchingStatsGenerator(dbg);
+            if (!deepFilter)
+               removed = deepFilter = this.matchingStatsGenerator(dbg);
          }
          if (dbg) dbg.filterLoops += 1;
       } while (removed);
@@ -477,9 +485,9 @@ export class Extractor {
 
       let removed = false;
       for (let stat = 0; stat < 7; stat++) {
-         for (let poss = 0; poss < this.c.stats[stat].length && !this.c.stats[stat].checked; poss++) {
+         for (let poss = 0; poss < this.c.stats[stat].length; poss++) {
             // We have verified that that only bad stats are removed
-            if (!this.c.stats[stat][poss].good) {
+            if (!this.c.stats[stat][poss].good && !this.c.stats[stat].checked) {
                this.c.stats[stat].splice(poss, 1);
                poss--;
                removed = true;

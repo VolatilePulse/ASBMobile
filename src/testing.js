@@ -25,7 +25,6 @@ export function PerformTest(data) {
    let dbg = {
       totalRecursion: 0,
       numberRemoved: 0,
-      recursionRemoved: 0,
    };
 
    let t1 = performance.now();

@@ -28,7 +28,7 @@ export class Stat {
 
    calculateValue(m, tamed = false, TE = 0, IB = 0) {
       // V = (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) * (1 + TE * Tm * TmM) * (1 + Ld * Id * IdM)
-      let TBHM = (tamed) ? m.TBHM ? m.TBHM : 1 : 1;
+      let TBHM = (tamed && m.TBHM) || 1;
       let v = m.B * TBHM;
 
       if (this.Lw > 0)
@@ -43,7 +43,7 @@ export class Stat {
 
    calculateWildLevel(m, v, tamed = false, TE = 0, IB = 0) {
       // Lw = ((V / ((1 + Ld * Id * IdM) * (1 + TE * Tm * TmM)) - Ta * TaM) / (B * TBHM * (1 + IB * 0.2 * IBM)) - 1) / (Iw * IwM)
-      let TBHM = (tamed) ? m.TBHM ? m.TBHM : 1 : 1;
+      let TBHM = (tamed && m.TBHM) || 1;
 
       // Prevents division by 0
       if (m.Iw == 0)
@@ -112,7 +112,7 @@ export class Stat {
    calculateTm(tamed, Tm, TmM, TE = 1) {
       // If not tamed, the Tame Multiplier doesn't apply to the value
       if (!tamed)
-         return 1;
+         return 0;
 
       // If Tm is a negative value, TE doesn't change the value of the multiplier
       if (Tm < 0)
@@ -124,7 +124,7 @@ export class Stat {
    calculateTa(tamed, Ta, TaM) {
       // If not tamed, the Tame Additive doesn't apply to the value
       if (!tamed)
-         return 1;
+         return 0;
 
       // If Ta is a negative value, TaM doesn't change the value of the multiplier
       if (Ta < 0)
