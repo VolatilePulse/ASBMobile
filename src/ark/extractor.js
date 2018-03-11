@@ -32,7 +32,7 @@ export class Extractor {
       this.levelBeforeDom = 0;
       /** @type {boolean} */
       this.unusedStat = false;
-      /** @type {number [][]} */
+      /** @type {Stat [][]} */
       this.options = [];
       /** @type {number} */
       this.minIB = 0;
@@ -141,9 +141,10 @@ export class Extractor {
       }
 
       // Proof of Concept for Generating options
-      this.generateOptions();
-      console.log(JSON.stringify(this.options));
-
+      if (!this.options.length) {
+         this.generateOptions();
+         console.log(JSON.stringify(this.options));
+      }
       return;
    }
 
@@ -317,7 +318,9 @@ export class Extractor {
       let removed = false, deepFilter = false;
 
       do {
+         if (dbg) dbg.filterLoops += 1;
          removed = false;
+
          for (let i = 0; i < 7; i++) {
 
             // One stat possibility is good
@@ -386,17 +389,20 @@ export class Extractor {
                   }
                }
             }
-
-            if (removed) {
-               deepFilter = false;
-               continue;
-            }
-
-            // Only remove recursively if we couldn't remove any possibilities the other 2 ways
-            if (!deepFilter)
-               removed = deepFilter = this.matchingStatsGenerator(dbg);
          }
-         if (dbg) dbg.filterLoops += 1;
+         if (removed) {
+            deepFilter = false;
+            continue;
+         }
+
+         if (!this.options.length) {
+            this.generateOptions(dbg);
+         }
+
+         // Only remove recursively if we couldn't remove any possibilities the other 2 ways
+         else if (!deepFilter)
+            removed = deepFilter = this.matchingStatsGenerator(dbg);
+
       } while (removed);
    }
 
@@ -424,33 +430,33 @@ export class Extractor {
    /**
     * Recursively checks our results for only valid ones. If the results are valid, returns either an array or true
     *
-    * @param {number[]} indices An array stat indices to use on the results object
+    * @param {Stat[]} option An Array of Stat objects
     * @param {*} [dbg = undefined] Debugger object
     *
     * @returns {boolean} Returns true if it's a valid options set, false otherwise
     */
-   matchingStats(indices, dbg = undefined) {
+   matchingStats(option, dbg = undefined) {
       if (dbg) dbg.totalRecursion++;
 
       let TE = -1;
 
       // If the TE of the stats we have don't match, they aren't valid
-      for (var i = 0; i < indices.length; i++) {
-         if (TE == -1 && this.c.stats[i][indices[i]]["TE"] != undefined)
-            TE = this.c.stats[i][indices[i]].TE;
-         else if (this.c.stats[i][indices[i]]["TE"] != undefined)
-            if (TE != this.c.stats[i][indices[i]].TE)
+      for (var i = 0; i < option.length; i++) {
+         if (TE == -1 && [option[i]]["TE"] != undefined)
+            TE = option[i].TE;
+         else if (option[i]["TE"] != undefined)
+            if (TE != option[i].TE)
                return false;
       }
 
-      // We've run out of stats to add to our indices so lets test them for valid results
+      // We've run out of stats to add to our option so lets test them for valid results
       var wildLevels = 0, domLevels = 0;
       // Loop through our possibilities
-      for (var i = 0; i < indices.length; i++) {
+      for (var i = 0; i < option.length; i++) {
          if (!this.c.stats[i].checked) {
-            if (this.c.stats[i][indices[i]].Lw > 0)
-               wildLevels += this.c.stats[i][indices[i]].Lw;
-            domLevels += this.c.stats[i][indices[i]].Ld;
+            if (option[i].Lw > 0)
+               wildLevels += option[i].Lw;
+            domLevels += option[i].Ld;
          }
       }
 
@@ -464,61 +470,19 @@ export class Extractor {
    }
 
    matchingStatsGenerator(dbg) {
-      let tempOptions = [];
-
-      // The initial array for matchingStats
-      for (let stat = 0; stat < 7; stat++) {
-         if (this.c.stats[stat].length != 0)
-            tempOptions.push(0);
-         else
-            return false;
-      }
-
-      let indexMax = tempOptions.length - 1;
-      let selector = indexMax;
-
-      do {
-         // Make sure our stat combination is valid
-         if (this.matchingStats(tempOptions, dbg)) {
-            for (let stat in tempOptions) {
-               // Flags the stat as being good
-               this.c.stats[stat][tempOptions[stat]].good = true;
-            }
-         }
-
-         tempOptions[selector]++;
-
-         // Increment the selector/index (Read as disc combination lock brute force)
-         while (selector != -1 && tempOptions[selector] == this.c.stats[selector].length) {
-            tempOptions[selector] = 0;
-            selector--;
-            if (selector != -1)
-               tempOptions[selector]++;
-         }
-
-         if (selector != -1)
-            selector = indexMax;
-      } while (selector != -1);
-
       let removed = false;
-      for (let stat = 0; stat < 7; stat++) {
-         for (let poss = 0; poss < this.c.stats[stat].length; poss++) {
-            // We have verified that that only bad stats are removed
-            if (!this.c.stats[stat][poss].good && !this.c.stats[stat].checked) {
-               this.c.stats[stat].splice(poss, 1);
-               poss--;
-               removed = true;
-            }
-            else if (this.c.stats[stat][poss]['good'] != undefined)
-               // Removes the flag for future iterations
-               delete this.c.stats[stat][poss]['good'];
+      for (let option = 0; option < this.options.length; option++) {
+         if (!this.matchingStats(this.options[option], dbg)) {
+            this.options.splice(option, 1);
+            option--;
+            removed = true;
          }
       }
 
       return removed;
    }
 
-   generateOptions() {
+   generateOptions(dbg) {
       let tempOptions = [];
 
       // The initial array for matchingStats
@@ -533,8 +497,12 @@ export class Extractor {
       let selector = indexMax;
 
       do {
-         if (this.matchingStats(tempOptions))
-            this.options.push(tempOptions.slice());
+         let tempStatOption = [];
+         for (let stat = 0; stat < 7; stat++) {
+            tempStatOption.push(this.c.stats[stat][tempOptions[stat]]);
+         }
+         if (this.matchingStats(tempStatOption, dbg))
+            this.options.push(tempStatOption.slice());
 
          tempOptions[selector]++;
 
