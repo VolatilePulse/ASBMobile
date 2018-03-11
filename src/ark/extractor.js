@@ -14,8 +14,14 @@ export class Extractor {
       this.c = vueCreature;
       this.c.m = Ark.GetMultipliers(this.c.serverName, this.c.species);
 
-      // If tame isn't bred (ignore wild level steps) and setting is enabled, consider wild steps (as set in settings)
       // TODO: Add consider wild levels
+      // Only way to calculate wild levels is with a TE
+      // Creatures like gigas are unaffected, just as if they were bred
+      // The code is already laid out to handle support for considerWildLevelSteps
+      // Will have to implement a WildLevel override for 100% TE, if a creature was tamed that way
+      //    It's likely it was force tamed anyways (possibly spawned + tamed)
+      // Should not rely on wild level steps as, it will speed up extraction, but not everyone may set it :(
+
       // considerWildLevelSteps = considerWildLevelSteps && !bred;
 
       /** @type {number} */
@@ -35,17 +41,20 @@ export class Extractor {
    }
 
    extract(dbg) {
+      // TODO: Add either a way to throw errors w/ codes (for specific reasons like bad multipliers, stats, etc.)
+      //    Or provide an alternative method (returning under bad situations is acceptable for now)
+
       // Make sure we initialize specific variables before extraction
       this.init();
 
-      var tempStat = new Stat();
+      let tempStat = new Stat();
 
       // A lot quicker if wild
       if (this.c.wild) {
          for (let i = 0; i < 8; i++) {
             tempStat.calculateWildLevel(this.c.m[i], this.c.values[i]);
 
-            // Make sure it is valid
+            // Redundant check to make sure our math matches Ark's math
             if (this.c.values[i] == Utils.RoundTo(tempStat.calculateValue(this.c.m[i]), Ark.Precision(i)))
                this.c.stats[i].push(new Stat(tempStat));
          }
@@ -60,7 +69,7 @@ export class Extractor {
       // Calculate the max number of levels based on level and torpor
       this.wildFreeMax = this.c.stats[TORPOR][0].Lw;
       this.levelBeforeDom = this.c.stats[TORPOR][0].Lw + 1;
-      this.domFreeMax = Math.max(0, this.c.level - this.wildFreeMax - 1);
+      this.domFreeMax = Math.max(this.c.level - this.wildFreeMax - 1, 0);
 
       // If it's bred, we need to do some magic with the IB
       if (this.c.bred)
@@ -123,20 +132,17 @@ export class Extractor {
          }
       }
 
+      // Clean up the creature and stats objects (more for better looking objects in console)
       for (let i = 0; i < 7; i++) {
-         if (this.c.m[i].Tm) {
-            for (let j = 0; j < this.c.stats[i].length; j++) {
-               delete this.c.stats[i][j].minTE;
-               delete this.c.stats[i][j].maxTE;
-            }
-         }
-         if (!this.options.length && this.c.stats[i].length > 1) {
-            this.generateOptions();
-
-            for (let option in this.options)
-               console.log(JSON.stringify(this.options[option]));
+         for (let j = 0; this.c.m[i].Tm && j < this.c.stats[i].length; j++) {
+            delete this.c.stats[i][j].minTE;
+            delete this.c.stats[i][j].maxTE;
          }
       }
+
+      // Proof of Concept for Generating options
+      this.generateOptions();
+      console.log(JSON.stringify(this.options));
 
       return;
    }
@@ -173,16 +179,26 @@ export class Extractor {
       this.maxIB = 0;
    }
 
+   /**
+    *  Attempts to calculate a valid Imprint Bonus from the one entered. While it doesn't support the same "Exactly" option that ASB does,
+    *    it does first attempt to look at the entered IB to see if it's valid first. Unfortunately, that also means that the IB must be rounded
+    *    before the Extractor can use it as the assumption is made (to create the min/max IB) that 0.05 in either direction is still valid.
+    *
+    *  @return {undefined} There is no returned value
+    */
    dynamicIBCalculation() {
-      // If we have already found the right IB, we don't need to do anything else
+      // If the entered IB works, we don't need to do anything else (Torpor can't be leveled and typically has a large value to start with)
       if (this.c.values[TORPOR] == Utils.RoundTo(this.c.stats[TORPOR][0].calculateValue(this.c.m[TORPOR], !this.c.wild, this.c.TE, this.c.IB), Ark.Precision(TORPOR)))
          return;
 
-      // One of the most precise ways to get the exact torpor
+      // Extract the IB from Torpor
+      // TODO: Add a redundant check for IBM not being set. IB shouldn't extract to more than 0.05 in either direction if set properly.
+      // May not be necessary as extract should return if the Torpor Lw calculated was too high
       this.c.IB = this.c.stats[TORPOR][0].calculateIB(this.c.m[TORPOR], this.c.values[TORPOR]);
-      // IB *must* be lower than this
+
+      // Generate the min/max values for future edge cases (applicable in all situations)
+      // FIXME: Tries to check min/max of new IB, not the input one. This should also go before the first conditional
       this.maxIB = Math.min(this.c.stats[TORPOR][0].calculateIB(this.c.m[TORPOR], this.c.values[TORPOR] + (0.5 / Math.pow(10, Ark.Precision(TORPOR)))), this.c.IB + (5 / 10E3));
-      // IB can be equal or greater than this
       this.minIB = Math.max(this.c.stats[TORPOR][0].calculateIB(this.c.m[TORPOR], this.c.values[TORPOR] - (0.5 / Math.pow(10, Ark.Precision(TORPOR)))), this.c.IB - (5 / 10E3));
 
       // Check the food stat for the IB as well (Only works if food is unleveled)
@@ -193,10 +209,6 @@ export class Extractor {
       // Check to see if the new IB still allows torpor to extract correctly
       if (this.c.values[TORPOR] == Utils.RoundTo(this.c.stats[TORPOR][0].calculateValue(this.c.m[TORPOR], !this.c.wild, this.c.TE, imprintingBonusFromFood), Ark.Precision(TORPOR)))
          this.c.IB = imprintingBonusFromFood;
-
-      // If IB > 99.9% it is likely 100% or a whole number higher than 100%
-      if (this.c.IB >= 1)
-         this.c.IB = Utils.RoundTo(this.c.IB, 2);
 
       // IB can't be lower than 0
       if (this.c.IB < 0)
@@ -238,11 +250,13 @@ export class Extractor {
       if (tempStat.calculateDomLevel(this.c.m[statIndex], this.c.values[statIndex], !this.c.wild, this.c.TE, this.c.IB) > maxLd)
          return;
 
-      if (Utils.RoundTo(this.c.values[statIndex], Ark.Precision(statIndex)) == Utils.RoundTo(tempStat.calculateValue(this.c.m[statIndex], !this.c.wild, this.c.TE, this.c.IB), Ark.Precision(statIndex)))
+      if (this.c.values[statIndex] == Utils.RoundTo(tempStat.calculateValue(this.c.m[statIndex], !this.c.wild, this.c.TE, this.c.IB), Ark.Precision(statIndex)))
          this.c.stats[statIndex].push(new Stat(tempStat));
 
-      // If it doesn't calculate properly, it may have used a different IB
+      // If it doesn't calculate properly, it may have used a different IB (Mostly relevant for Food)
       else if (this.c.bred) {
+         // TODO: Address this to apply proper logic as it makes mild assumptions
+         // This is making sure that our previously calculated IB, rounded, is at least somewhat close to the IB the stat wants to use
          if (Utils.RoundTo(tempStat.calculateIB(this.c.m[statIndex], this.c.values[statIndex]), 2) == Utils.RoundTo(this.c.IB, 2)) {
             var maxTempIB = tempStat.calculateIB(this.c.m[statIndex], this.c.values[statIndex] + (0.5 / Math.pow(10, Ark.Precision(statIndex))));
             var minTempIB = tempStat.calculateIB(this.c.m[statIndex], this.c.values[statIndex] - (0.5 / Math.pow(10, Ark.Precision(statIndex))));
@@ -277,7 +291,6 @@ export class Extractor {
          minTE = Math.max(tempStat.calculateTE(this.c.m[statIndex], this.c.values[statIndex] - (0.5 / Math.pow(10, Ark.Precision(statIndex)))), 0);
 
          if (tamingEffectiveness >= 0 && tamingEffectiveness <= 1) {
-
             // If the TE allows the stat to calculate properly, add it as a possible result
             if (this.c.values[statIndex] == Utils.RoundTo(tempStat.calculateValue(this.c.m[statIndex], !this.c.wild, tamingEffectiveness, this.c.IB), Ark.Precision(statIndex))) {
                // Create a new Stat to hold all of the information
@@ -454,8 +467,12 @@ export class Extractor {
       let tempOptions = [];
 
       // The initial array for matchingStats
-      for (let stat = 0; stat < 7; stat++)
-         tempOptions.push(0);
+      for (let stat = 0; stat < 7; stat++) {
+         if (this.c.stats[stat].length != 0)
+            tempOptions.push(0);
+         else
+            return false;
+      }
 
       let indexMax = tempOptions.length - 1;
       let selector = indexMax;
@@ -505,8 +522,12 @@ export class Extractor {
       let tempOptions = [];
 
       // The initial array for matchingStats
-      for (let stat = 0; stat < 7; stat++)
-         tempOptions.push(0);
+      for (let stat = 0; stat < 7; stat++) {
+         if (this.c.stats[stat].length != 0)
+            tempOptions.push(0);
+         else
+            return false;
+      }
 
       let indexMax = tempOptions.length - 1;
       let selector = indexMax;
