@@ -199,4 +199,25 @@ export default [
       serverName: "Coldino SP",
       results: [[{ "Lw": 39, "Ld": 2 }], [{ "Lw": 33, "Ld": 0 }], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 40, "Ld": 0 }], [{ "Lw": 31, "Ld": 0 }], [{ "Lw": 27, "Ld": 0 }], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 236, "Ld": 0 }]],
    },
+   {
+      tag: "Gigacoldino - Tamed 773",
+      species: "Giganotosaurus", level: 773, imprint: 0, exactly: false, mode: "Tamed",
+      values: [21196.0, 530.5, 202.8, 5428.5, 1960.0, 631.9, 100.9, 454600.0],
+      serverName: "Coldino SP",
+      results: [],
+   },
+   {
+      tag: "Gigacoldino - Tamed 777",
+      species: "Giganotosaurus", level: 777, imprint: 0, exactly: false, mode: "Tamed",
+      values: [21214.0, 530.5, 202.8, 5557.8, 1960.0, 645.8, 101.9, 454600.0],
+      serverName: "Coldino SP",
+      results: [],
+   },
+   {
+      tag: "Gigacoldino - Tamed 781",
+      species: "Giganotosaurus", level: 781, imprint: 0, exactly: false, mode: "Tamed",
+      values: [21214.0, 538.9, 207.6, 5557.8, 1960.0, 673.5, 101.9, 454600.0],
+      serverName: "Coldino SP",
+      results: [],
+   },
 ];
