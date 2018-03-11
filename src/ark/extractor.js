@@ -403,7 +403,7 @@ export class Extractor {
    /**
     * Recursively checks our results for only valid ones. If the results are valid, returns either an array or true
     *
-    * @param {number[][]} indices An array of index arrays to use on the results object
+    * @param {number[]} indices An array stat indices to use on the results object
     * @param {*} [dbg = undefined] Debugger object
     *
     * @returns {boolean} Returns true if it's a valid options set, false otherwise
@@ -415,10 +415,10 @@ export class Extractor {
 
       // If the TE of the stats we have don't match, they aren't valid
       for (var i = 0; i < indices.length; i++) {
-         if (TE == -1 && this.c.stats[indices[i][0]][indices[i][1]]["TE"] != undefined)
-            TE = this.c.stats[indices[i][0]][indices[i][1]].TE;
-         else if (this.c.stats[indices[i][0]][indices[i][1]]["TE"] != undefined)
-            if (TE != this.c.stats[indices[i][0]][indices[i][1]].TE)
+         if (TE == -1 && this.c.stats[i][indices[i]]["TE"] != undefined)
+            TE = this.c.stats[i][indices[i]].TE;
+         else if (this.c.stats[i][indices[i]]["TE"] != undefined)
+            if (TE != this.c.stats[i][indices[i]].TE)
                return false;
       }
 
@@ -426,9 +426,11 @@ export class Extractor {
       var wildLevels = 0, domLevels = 0;
       // Loop through our possibilities
       for (var i = 0; i < indices.length; i++) {
-         if (this.c.stats[indices[i][0]][indices[i][1]].Lw > 0)
-            wildLevels += this.c.stats[indices[i][0]][indices[i][1]].Lw;
-         domLevels += this.c.stats[indices[i][0]][indices[i][1]].Ld;
+         if (!this.c.stats[i].checked) {
+            if (this.c.stats[i][indices[i]].Lw > 0)
+               wildLevels += this.c.stats[i][indices[i]].Lw;
+            domLevels += this.c.stats[i][indices[i]].Ld;
+         }
       }
 
       // check to see if the stat possibilities add up to the missing dom levels
@@ -445,12 +447,7 @@ export class Extractor {
 
       // The initial array for matchingStats
       for (let stat = 0; stat < 7; stat++)
-         if (!this.c.stats[stat].checked)
-            tempOptions.push([stat, 0]);
-
-      // Useless if we have no options to run
-      if (tempOptions.length < 1)
-         return false;
+         tempOptions.push(0);
 
       let indexMax = tempOptions.length - 1;
       let selector = indexMax;
@@ -458,20 +455,20 @@ export class Extractor {
       do {
          // Make sure our stat combination is valid
          if (this.matchingStats(tempOptions, dbg)) {
-            for (let option in tempOptions) {
+            for (let stat in tempOptions) {
                // Flags the stat as being good
-               this.c.stats[tempOptions[option][0]][tempOptions[option][1]].good = true;
+               this.c.stats[stat][tempOptions[stat]].good = true;
             }
          }
 
-         tempOptions[selector][1]++;
+         tempOptions[selector]++;
 
          // Increment the selector/index (Read as disc combination lock brute force)
-         while (selector != -1 && tempOptions[selector][1] == this.c.stats[tempOptions[selector][0]].length) {
-            tempOptions[selector][1] = 0;
+         while (selector != -1 && tempOptions[selector] == this.c.stats[selector].length) {
+            tempOptions[selector] = 0;
             selector--;
             if (selector != -1)
-               tempOptions[selector][1]++;
+               tempOptions[selector]++;
          }
 
          if (selector != -1)
@@ -487,9 +484,9 @@ export class Extractor {
                poss--;
                removed = true;
             }
-            else
+            else if (this.c.stats[stat][poss]['good'] != undefined)
                // Removes the flag for future iterations
-               this.c.stats[stat][poss].good = false;
+               delete this.c.stats[stat][poss]['good'];
          }
       }
 
@@ -501,34 +498,22 @@ export class Extractor {
 
       // The initial array for matchingStats
       for (let stat = 0; stat < 7; stat++)
-         if (!this.c.stats[stat].checked)
-            tempOptions.push([stat, 0]);
+         tempOptions.push(0);
 
       let indexMax = tempOptions.length - 1;
       let selector = indexMax;
 
       do {
-         /** @type {any[]} */
-         let actualOption = [];
-         let copyOption = tempOptions.slice();
+         if (this.matchingStats(tempOptions))
+            this.options.push(tempOptions.slice());
 
-         if (this.matchingStats(tempOptions)) {
-            for (let stat = 0; stat < 8; stat++) {
-               if (this.c.stats[stat].length == 1)
-                  actualOption.push([stat, 0]);
-               else
-                  actualOption.push(copyOption.shift().slice());
-            }
-            this.options.push(actualOption.slice());
-         }
+         tempOptions[selector]++;
 
-         tempOptions[selector][1]++;
-
-         while (selector != -1 && tempOptions[selector][1] == this.c.stats[tempOptions[selector][0]].length) {
-            tempOptions[selector][1] = 0;
+         while (selector != -1 && tempOptions[selector] == this.c.stats[selector].length) {
+            tempOptions[selector] = 0;
             selector--;
             if (selector != -1)
-               tempOptions[selector][1]++;
+               tempOptions[selector]++;
          }
 
          if (selector != -1)

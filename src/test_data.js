@@ -146,8 +146,36 @@ export default [
    {
       tag: "Dunkleosteus - Level 239 (enohka)",
       species: "Dunkleosteus", level: 239, imprint: 73, exactly: false, mode: "Bred",
-      values: [7929.8, 860, 0, 13172.7, 1688.6, 333.0, 114.5, 19970.4],
+      values: [7929.8, 860.0, 0, 13172.7, 1688.6, 333.0, 114.5, 19970.4],
       serverName: "enohka",
+      results: [[{ "Lw": 39, "Ld": 2 }], [{ "Lw": 33, "Ld": 0 }], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 40, "Ld": 0 }], [{ "Lw": 31, "Ld": 0 }], [{ "Lw": 27, "Ld": 0 }], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 236, "Ld": 0 }]],
+   },
+   {
+      tag: "Giganotosaurus - Level 151 (coldino)",
+      species: "Giganotosaurus", level: 151, imprint: 0, exactly: false, mode: "Tamed",
+      values: [17920.0, 412.3, 159.8, 4190.0, 882.0, 92.3, 100.0, 98800.0],
+      serverName: "Coldino SP",
+      results: [[{ "Lw": 39, "Ld": 2 }], [{ "Lw": 33, "Ld": 0 }], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 40, "Ld": 0 }], [{ "Lw": 31, "Ld": 0 }], [{ "Lw": 27, "Ld": 0 }], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 236, "Ld": 0 }]],
+   },
+   {
+      tag: "Giganotosaurus - Level 153 (coldino)",
+      species: "Giganotosaurus", level: 153, imprint: 0, exactly: false, mode: "Tamed",
+      values: [17935.2, 412.3, 159.8, 4190.0, 882.0, 94.7, 100.0, 98800.0],
+      serverName: "Coldino SP",
+      results: [[{ "Lw": 39, "Ld": 2 }], [{ "Lw": 33, "Ld": 0 }], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 40, "Ld": 0 }], [{ "Lw": 31, "Ld": 0 }], [{ "Lw": 27, "Ld": 0 }], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 236, "Ld": 0 }]],
+   },
+   {
+      tag: "Giganotosaurus - Level 743 (coldino)",
+      species: "Giganotosaurus", level: 743, imprint: 0, exactly: false, mode: "Tamed",
+      values: [21160.0, 429.4, 193.1, 5170.0, 1400.0, 535.0, 100.0, 454600.0],
+      serverName: "Coldino SP",
+      results: [[{ "Lw": 39, "Ld": 2 }], [{ "Lw": 33, "Ld": 0 }], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 40, "Ld": 0 }], [{ "Lw": 31, "Ld": 0 }], [{ "Lw": 27, "Ld": 0 }], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 236, "Ld": 0 }]],
+   },
+   {
+      tag: "Giganotosaurus - Wild (coldino)",
+      species: "Giganotosaurus", level: 743, imprint: 0, exactly: false, mode: "Wild",
+      values: [83040.0, 413.8, 177.0, 4760.0, 1176.0, 460.0, 100.0, 311200.0],
+      serverName: "Coldino SP",
       results: [[{ "Lw": 39, "Ld": 2 }], [{ "Lw": 33, "Ld": 0 }], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 40, "Ld": 0 }], [{ "Lw": 31, "Ld": 0 }], [{ "Lw": 27, "Ld": 0 }], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 236, "Ld": 0 }]],
    },
 ];

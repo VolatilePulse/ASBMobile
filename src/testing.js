@@ -44,7 +44,7 @@ export function PerformTest(data) {
          delete dbg['preFilterStats'];
       }
       // To copy the results into test_data Results
-      // console.log(JSON.stringify(testCreature.stats));
+      console.log(JSON.stringify(testCreature.stats));
       console.log("\nExpected:");
       console.log(Ark.FormatAllOptions(data['results']));
       console.log("\nResults:");
