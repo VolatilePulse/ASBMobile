@@ -172,6 +172,27 @@ export default [
       results: [[{ "Lw": 39, "Ld": 2 }], [{ "Lw": 33, "Ld": 0 }], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 40, "Ld": 0 }], [{ "Lw": 31, "Ld": 0 }], [{ "Lw": 27, "Ld": 0 }], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 236, "Ld": 0 }]],
    },
    {
+      tag: "Giganotosaurus - Level 759 (coldino)",
+      species: "Giganotosaurus", level: 759, imprint: 0, exactly: false, mode: "Tamed",
+      values: [21178.0, 513.6, 193.1, 5170.0, 1820.0, 562.7, 100.0, 454600.0],
+      serverName: "Coldino SP",
+      results: [[{ "Lw": 39, "Ld": 2 }], [{ "Lw": 33, "Ld": 0 }], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 40, "Ld": 0 }], [{ "Lw": 31, "Ld": 0 }], [{ "Lw": 27, "Ld": 0 }], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 236, "Ld": 0 }]],
+   },
+   {
+      tag: "Giganotosaurus - Level 765 (coldino)",
+      species: "Giganotosaurus", level: 765, imprint: 0, exactly: false, mode: "Tamed",
+      values: [21178.0, 522.0, 198.0, 5170.0, 1960.0, 590.4, 100.9, 454600.0],
+      serverName: "Coldino SP",
+      results: [[{ "Lw": 39, "Ld": 2 }], [{ "Lw": 33, "Ld": 0 }], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 40, "Ld": 0 }], [{ "Lw": 31, "Ld": 0 }], [{ "Lw": 27, "Ld": 0 }], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 236, "Ld": 0 }]],
+   },
+   {
+      tag: "Giganotosaurus - Level 768 (coldino)",
+      species: "Giganotosaurus", level: 768, imprint: 0, exactly: false, mode: "Tamed",
+      values: [21178.0, 522.0, 198.0, 5170.0, 1960.0, 631.9, 100.9, 454600.0],
+      serverName: "Coldino SP",
+      results: [[{ "Lw": 39, "Ld": 2 }], [{ "Lw": 33, "Ld": 0 }], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 40, "Ld": 0 }], [{ "Lw": 31, "Ld": 0 }], [{ "Lw": 27, "Ld": 0 }], [{ "Lw": -1, "Ld": 0 }], [{ "Lw": 236, "Ld": 0 }]],
+   },
+   {
       tag: "Giganotosaurus - Wild (coldino)",
       species: "Giganotosaurus", level: 743, imprint: 0, exactly: false, mode: "Wild",
       values: [83040.0, 413.8, 177.0, 4760.0, 1176.0, 460.0, 100.0, 311200.0],
