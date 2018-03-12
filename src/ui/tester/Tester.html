@@ -69,8 +69,8 @@
                         <h6 class="col-6">Expected</h6>
                      </b-row>
                      <b-row class="">
-                        <pre class="col-6 py-0 my-0 small" @scroll.passive="scrollLeft">{{formattedStats(results[index].stats)}}</pre>
-                        <pre class="col-6 py-0 my-0 small" @scroll.passive="scrollRight">{{formattedStats(testData[index].results)}}</pre>
+                        <pre class="col-6 py-0 my-0 small" @scroll.passive="scrollLeft" style="border-right: 1px solid #8ac8; border-top: 1px solid #8ac8">{{formattedStats(results[index].stats)}}</pre>
+                        <pre class="col-6 py-0 my-0 small" @scroll.passive="scrollRight" style="border-top: 1px solid #8ac8">{{formattedStats(testData[index].results)}}</pre>
                      </b-row>
                   </b-container>
                </b-tab>
