@@ -38,6 +38,8 @@ export class Extractor {
       this.minIB = 0;
       /** @type {number} */
       this.maxIB = 0;
+      /** @type {boolean[]} */
+      this.checkedStat = [];
    }
 
    extract(dbg) {
@@ -141,10 +143,8 @@ export class Extractor {
       }
 
       // Proof of Concept for Generating options
-      if (!this.options.length) {
+      if (!this.options.length)
          this.generateOptions();
-         console.log(JSON.stringify(this.options));
-      }
       return;
    }
 
@@ -154,9 +154,6 @@ export class Extractor {
 
       // Clear the checked property for future extractions
       for (let i = 0; i < 8; i++) {
-         if (this.c.stats[i].hasOwnProperty("checked"))
-            delete this.c.stats[i].checked;
-
          // Reset the stats so we can get a fresh start
          this.c.stats[i] = [];
       }
@@ -178,6 +175,7 @@ export class Extractor {
       this.options = [];
       this.minIB = 0;
       this.maxIB = 0;
+      this.checkedStat = [];
    }
 
    /**
@@ -230,7 +228,7 @@ export class Extractor {
          // Calculate DOM for speed
          this.c.stats[SPEED] = [new Stat(-1, tempStat.calculateDomLevel(this.c.m[statIndex], this.c.values[statIndex], !this.c.wild, 0, this.c.IB))];
          this.domFreeMax -= this.c.stats[SPEED][0].Ld;
-         this.c.stats[statIndex].checked = this.c.stats[SPEED].checked = true;
+         this.checkedStat[statIndex] = this.checkedStat[SPEED] = true;
          return true;
       }
 
@@ -240,7 +238,7 @@ export class Extractor {
          // Calculate DOM for speed
          this.c.stats[SPEED] = [new Stat(0, tempStat.calculateDomLevel(this.c.m[statIndex], this.c.values[statIndex], !this.c.wild, 0, this.c.IB))];
          this.domFreeMax -= this.c.stats[SPEED][0].Ld;
-         this.c.stats[statIndex].checked = this.c.stats[SPEED].checked = true;
+         this.checkedStat[statIndex] = this.checkedStat[SPEED] = true;
          return true;
       }
 
@@ -320,36 +318,35 @@ export class Extractor {
       do {
          if (dbg) dbg.filterLoops += 1;
          removed = false;
+         if (this.options.length)
+            this.c.stats.forEach(stat => stat.forEach(poss => { if (!this.options.some(option => option.includes(poss))) poss.removeMe = true; }));
 
          for (let i = 0; i < 7; i++) {
-
             // One stat possibility is good
-            if (!this.c.stats[i].checked && this.c.stats[i].length == 1) {
+            if (!this.checkedStat[i] && this.c.stats[i].length == 1) {
                this.wildFreeMax -= this.c.stats[i][0].Lw;
                this.domFreeMax -= this.c.stats[i][0].Ld;
-               this.c.stats[i].checked = true;
-               removed = true;
+               this.checkedStat[i] = true;
             }
 
             // Simple stat removal
             else if (this.c.stats[i].length > 1) {
                for (let j = 0; j < this.c.stats[i].length; j++) {
                   if (this.c.stats[i][j].Lw > this.wildFreeMax || this.c.stats[i][j].Ld > this.domFreeMax) {
-                     this.c.stats[i].splice(j, 1);
-                     j--;
-                     removed = true;
-                     if (dbg) dbg.numberRemoved++;
+                     this.c.stats[i][j].removeMe = true;
                   }
                }
             }
          }
+
+         removed = this.statRemover();
 
          // Last try to remove additional stats
          if (!removed) {
             let wildMin = 0, domMin = 0;
             for (let i = 0; i < 7; i++) {
                let tempWM = -1, tempDM = -1;
-               if (!this.c.stats[i].checked) {
+               if (!this.checkedStat[i]) {
                   for (let j = 0; j < this.c.stats[i].length; j++) {
                      if (tempWM == -1)
                         tempWM = this.c.stats[i][j].Lw;
@@ -367,41 +364,30 @@ export class Extractor {
             }
 
             for (let i = 0; i < 7; i++) {
-               for (let j = 0; !this.c.stats[i].checked && j < this.c.stats[i].length; j++) {
-                  // Bad Stat
-                  if (this.c.stats[i][j].Lw + wildMin - this.c.stats[i].minW > this.wildFreeMax || this.c.stats[i][j].Ld + domMin - this.c.stats[i].minD > this.domFreeMax) {
-                     this.c.stats[i].splice(j, 1);
-                     j--;
-                     removed = true;
-                     if (dbg) dbg.numberRemoved++;
+               for (let j = 0; !this.checkedStat[i] && j < this.c.stats[i].length; j++) {
+                  if (this.c.stats[i][j].Lw + wildMin - this.c.stats[i].minW > this.wildFreeMax
+                     || this.c.stats[i][j].Ld + domMin - this.c.stats[i].minD > this.domFreeMax
+                     || (this.c.m[i].Tm && !this.filterByTE(i, this.c.stats[i][j]))) {
+                     this.c.stats[i][j].removeMe = true;
                   }
                }
             }
 
-            // TODO: Only call filterByTE if there is another stat with Tm
-            for (let i = 0; i < 7; i++) {
-               for (let j = 0; this.c.m[i].Tm && j < this.c.stats[i].length; j++) {
-                  if (!this.filterByTE(i, this.c.stats[i][j])) {
-                     this.c.stats[i].splice(j, 1);
-                     j--;
-                     removed = true;
-                     if (dbg) dbg.numberRemoved++;
-                  }
-               }
-            }
+            removed = this.statRemover();
          }
+
          if (removed) {
             deepFilter = false;
             continue;
          }
 
-         if (!this.options.length) {
+         if (this.options.length == 0) {
             this.generateOptions(dbg);
+            removed = true;
          }
 
-         // Only remove recursively if we couldn't remove any possibilities the other 2 ways
          else if (!deepFilter)
-            removed = deepFilter = this.matchingStatsGenerator(dbg);
+            removed = deepFilter = this.statRemover();
 
       } while (removed);
    }
@@ -442,7 +428,7 @@ export class Extractor {
 
       // If the TE of the stats we have don't match, they aren't valid
       for (var i = 0; i < option.length; i++) {
-         if (TE == -1 && [option[i]]["TE"] != undefined)
+         if (TE == -1 && option[i]["TE"] != undefined)
             TE = option[i].TE;
          else if (option[i]["TE"] != undefined)
             if (TE != option[i].TE)
@@ -453,7 +439,7 @@ export class Extractor {
       var wildLevels = 0, domLevels = 0;
       // Loop through our possibilities
       for (var i = 0; i < option.length; i++) {
-         if (!this.c.stats[i].checked) {
+         if (!this.checkedStat[i]) {
             if (option[i].Lw > 0)
                wildLevels += option[i].Lw;
             domLevels += option[i].Ld;
@@ -469,17 +455,17 @@ export class Extractor {
       return false;
    }
 
-   matchingStatsGenerator(dbg) {
-      let removed = false;
-      for (let option = 0; option < this.options.length; option++) {
-         if (!this.matchingStats(this.options[option], dbg)) {
-            this.options.splice(option, 1);
-            option--;
-            removed = true;
-         }
+   statRemover() {
+      let removed = false, removed2 = false;
+      for (let i = 0; i < 7; i++) {
+         removed = this.c.stats[i].some(stat => stat['removeMe']);
+         this.c.stats[i] = this.c.stats[i].filter(stat => !stat['removeMe']);
       }
 
-      return removed;
+      removed2 = this.options.some(option => option.some(stat => stat['removeMe']));
+      this.options = this.options.filter(option => !option.some(stat => stat['removeMe']));
+
+      return removed || removed2;
    }
 
    generateOptions(dbg) {
