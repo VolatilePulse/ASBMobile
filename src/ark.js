@@ -16,6 +16,7 @@ export function FormatOptions(options) {
 }
 
 export function FormatOption(option) {
+   if (!option) return "-";
    const { Lw, Ld, wildLevel, TE } = option;
    if (wildLevel || TE)
       return `(${Lw}+${Ld} LW${wildLevel} ${Utils.FormatNumber(TE * 100, 2)}%)`;

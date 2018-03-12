@@ -5,10 +5,11 @@ import Vue from 'vue';
 
 import * as app from "../../app";
 import * as Utils from '../../utils';
-import { FormatAllOptions, FormatOptions } from '../../ark';
+import { FormatAllOptions, FormatOptions, FormatOption } from '../../ark';
 import { PerformTest, PerformPerfTest } from '../../testing';
 
 import testData from '../../test_data';
+import { statNames } from '../../consts';
 
 
 export default withRender({
@@ -24,6 +25,9 @@ export default withRender({
       accordionIndex: null,
 
       statIndices: Utils.Range(8),
+      statNames: statNames,
+
+      optionsTableFields: statNames.map((name, i) => ({ key: i, label: name, formatter: FormatOption })),
    }),
 
    computed: {
@@ -38,10 +42,10 @@ export default withRender({
       formatNumber(n, places = 0) { return Utils.FormatNumber(n, places); },
       formattedOptions(options) { return options ? FormatOptions(options) : '-'; },
       formattedStats(stats) { return FormatAllOptions(stats); },
+      formattedStat(stat) { return FormatOption(stat); },
       dbgKeys(index) { return this.results[index]['dbg'] ? Object.keys(this.results[index].dbg).filter(key => key != "preFilterStats") : []; },
-
-      scrollLeft(event) { event.target.nextElementSibling.scrollLeft = event.target.scrollLeft; },
-      scrollRight(event) { event.target.previousElementSibling.scrollLeft = event.target.scrollLeft; },
+      scrollSync(event) { (event.target.nextElementSibling || event.target.previousElementSibling).scrollLeft = event.target.scrollLeft; },
+      optionsForStat(testIndex, statIndex) { return this.results[testIndex].options.map(options => options[statIndex]); },
 
       /**
        * Run a selection of tests without blocking the browser

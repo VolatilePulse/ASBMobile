@@ -69,18 +69,19 @@
                         <h6 class="col-6">Expected</h6>
                      </b-row>
                      <b-row class="">
-                        <pre class="col-6 py-0 my-0 small" @scroll.passive="scrollLeft" style="border-right: 1px solid #8ac8; border-top: 1px solid #8ac8">{{formattedStats(results[index].stats)}}</pre>
-                        <pre class="col-6 py-0 my-0 small" @scroll.passive="scrollRight" style="border-top: 1px solid #8ac8">{{formattedStats(testData[index].results)}}</pre>
+                        <pre class="col-6 py-0 my-0 small" @scroll.passive="scrollSync" style="border-right: 1px solid #8ac8; border-top: 1px solid #8ac8">{{formattedStats(results[index].stats)}}</pre>
+                        <pre class="col-6 py-0 my-0 small" @scroll.passive="scrollSync" style="border-top: 1px solid #8ac8">{{formattedStats(testData[index].results)}}</pre>
                      </b-row>
                   </b-container>
                </b-tab>
                <!-- options -->
                <b-tab v-if="results[index]['options']" :title="'Options'+(results[index] && results[index]['options'] && ' ('+results[index].options.length+')')">
-                  <div class="d-flex flex-wrap py-1">
-                     <div v-for="options in results[index].options" class="py-0 my-0 px-1">
-                        {{JSON.stringify(options)}}
-                     </div>
-                  </div>
+                  <table class="table table-striped table-sm table-responsive m-0 table-bordered small">
+                     <tr v-for="(statName,statIndex) in statNames.slice(0,7)">
+                        <th scope="row" class="align-middle text-right" style="font-weight: bold">{{statName}}</th>
+                        <td v-for="stat in optionsForStat(index,statIndex)" class="text-center">{{formattedStat(stat)}}</td>
+                     </tr>
+                  </table>
                </b-tab>
                <!-- debug values -->
                <b-tab title="Debug">
