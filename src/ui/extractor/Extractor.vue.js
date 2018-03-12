@@ -87,5 +87,5 @@ function PerformExtraction() {
    this.extractor = new Extractor(this.creature);
    this.extractor.extract();
 
-   console.log(JSON.stringify(this.extractor.c.stats));
+   //console.log(JSON.stringify(this.extractor.c.stats));
 }

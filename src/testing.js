@@ -46,6 +46,8 @@ export function PerformTest(testData) {
    result.stats = testCreature['stats'];
    result.options = extractObject['options'];
    result.dbg = dbg;
+   result.extra = {};
+   if (testCreature.bred) result.extra.IB = testCreature.IB * 100;
 
    if (exception) {
       result.exception = exception;
@@ -60,6 +62,52 @@ export function PerformTest(testData) {
    }
 
    return result;
+}
+
+/**
+ *
+ * @param {*} testData
+ * @param {number} duration Total test duration, in milliseconds
+ * @returns {{duration?:number,runs?:number,error?:string}}
+ */
+export function PerformPerfTest(testData, duration = 5000) {
+   let runs = 0;
+   let t1, t2;
+   let cutoffTime = Date.now() + duration;
+
+   try {
+      t1 = performance.now();
+
+      do {
+         let testCreature = new VueCreature();
+
+         // Set the properties to prepare for extraction
+         testCreature.wild = (testData.mode == "Wild");
+         testCreature.tamed = (testData.mode == "Tamed");
+         testCreature.bred = (testData.mode == "Bred");
+         testCreature.IB = testData.imprint / 100;
+         testCreature.exactly = !!testData.exactly;
+         testCreature.values = testData.values.map(Ark.ConvertValue);
+         testCreature.serverName = testData.serverName;
+         testCreature.level = testData.level;
+         testCreature.species = testData.species;
+
+         let extractObject = new Extractor(testCreature);
+
+         extractObject.extract();
+         runs += 1;
+      }
+      while (Date.now() < cutoffTime);
+
+      t2 = performance.now();
+
+      duration = (t2 - t1) / runs;
+   }
+   catch (_) {
+      return { error: "-" };
+   }
+
+   return { duration, runs };
 }
 
 /**

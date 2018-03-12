@@ -5,9 +5,10 @@ import Vue from 'vue';
 
 import * as app from "../../app";
 import * as Utils from '../../utils';
-import { PerformTest } from '../../testing';
-import testData from '../../test_data';
 import { FormatAllOptions, FormatOptions } from '../../ark';
+import { PerformTest, PerformPerfTest } from '../../testing';
+
+import testData from '../../test_data';
 
 
 export default withRender({
@@ -37,10 +38,13 @@ export default withRender({
       formatNumber(n, places = 0) { return Utils.FormatNumber(n, places); },
       formattedOptions(options) { return options ? FormatOptions(options) : '-'; },
       formattedStats(stats) { return FormatAllOptions(stats); },
-      dbgKeys(index) { return Object.keys(this.results[index].dbg).filter(key => key != "preFilterStats"); },
+      dbgKeys(index) { return this.results[index]['dbg'] ? Object.keys(this.results[index].dbg).filter(key => key != "preFilterStats") : []; },
+
+      scrollLeft(event) { event.target.nextElementSibling.scrollLeft = event.target.scrollLeft; },
+      scrollRight(event) { event.target.previousElementSibling.scrollLeft = event.target.scrollLeft; },
 
       /**
-       * Run a selection of tests
+       * Run a selection of tests without blocking the browser
        * @param {number[]} indices
        */
       async runTestSelection(indices) {
@@ -63,7 +67,6 @@ export default withRender({
             }
 
             let result = PerformTest(testData[index]);
-            if (index == 2) result.pass = false; // FIXME: Remove!
             Vue.set(this.results, index, result);
 
             // Open the first failed case only
@@ -75,6 +78,21 @@ export default withRender({
 
          this.running = false;
          this.updateStatus();
+      },
+
+      /** Run one test repeatedly to measure it's performance, blocking the browser */
+      runPerfTest(index) {
+         let { duration, runs, error } = PerformPerfTest(testData[index]);
+         if (error) {
+            this.results[index].duration = "X";
+         }
+         else {
+            if (this.results[index]) this.results[index].duration = duration;
+            if (this.results[index] && this.results[index]['dbg']) {
+               this.results[index].dbg.timePerRun = duration;
+               this.results[index].dbg.runsCompleted = runs;
+            }
+         }
       },
 
       /** Run just one test */
