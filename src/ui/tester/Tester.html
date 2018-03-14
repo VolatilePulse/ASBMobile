@@ -1,6 +1,6 @@
 <div>
    <!-- control buttons -->
-   <b-container class="clearfix">
+   <div class="clearfix">
       <b-button-toolbar class="float-right m-2">
          <b-button-group class="mr-2">
             <b-button v-show="running" variant="link" disabled>...running...</b-button>
@@ -16,13 +16,13 @@
          </b-button-group>
          <b-button @click="runAllTests" variant="dark" :disabled="running">Run All</b-button>
       </b-button-toolbar>
-   </b-container>
+   </div>
 
    <!-- tests list -->
-   <b-container class="p-2">
-      <b-list-group class="m-0 p-0">
-         <b-list-group-item v-for="(data,index) in testData" class="p-0" :class="{'bg-grey':!results[index]}">
-            <b-container class="px-0 p-0 m-0">
+   <div class="p-2">
+      <b-list-group class="m-0 p-0" dark>
+         <b-list-group-item v-for="(data,index) in testData" class="p-0" :class="{'bg-dark':!results[index]}">
+            <div class="px-0 p-0 m-0">
                <b-row class="p-1">
                   <b-col class="col">
                      <!-- header / info -->
@@ -56,14 +56,14 @@
                      </span>
                   </div>
                </b-row>
-            </b-container>
+            </div>
 
             <!-- result details -->
             <b-tabs v-if="index in results && openTestIndex==index">
 
                <!-- results / expected -->
                <b-tab v-if="results[index]['stats']" title="Results">
-                  <b-container class="py-1">
+                  <b-container fluid class="py-1">
                      <b-row class="">
                         <h6 class="col-6">Results</h6>
                         <h6 class="col-6">Expected</h6>
@@ -85,7 +85,7 @@
                </b-tab>
                <!-- debug values -->
                <b-tab title="Debug">
-                  <b-container class="py-1">
+                  <b-container fluid class="py-1">
                      <b-row v-if="results[index].extra['IB'] != undefined">
                         <div class="col-4 m-0 py-0 small">IB</div>
                         <pre class="col-8 m-0 py-0">{{JSON.stringify(results[index].extra.IB)}} %</pre>
@@ -107,5 +107,5 @@
             </b-tabs>
          </b-list-group-item>
       </b-list-group>
-   </b-container>
+   </div>
 </div>

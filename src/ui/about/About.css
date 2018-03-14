@@ -1,0 +1,15 @@
+.madewith {
+   text-align: center;
+   font-size: 80%;
+}
+
+.madewith>div {
+   margin: 0.5em;
+}
+
+.madewith img {
+   min-width: 48px;
+   max-width: 96px;
+   height: 40px;
+   object-fit: contain;
+}

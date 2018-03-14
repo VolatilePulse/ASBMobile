@@ -1,5 +1,5 @@
 <div>
-   <b-navbar sticky toggleable="md" type="dark" variant="info">
+   <b-navbar sticky toggleable="md" type="dark" variant="primary">
       <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
       <b-navbar-brand href="#">ASB Mobile</b-navbar-brand>
 
@@ -36,7 +36,7 @@
       </b-collapse>
    </b-navbar>
 
-   <b-container>
+   <b-container fluid class="pt-2">
       <about v-if="tab=='about'" class="w3-container w3-animate-opacity"></about>
       <servers v-else-if="dataLoaded && tab=='servers'" class="w3-container w3-animate-opacity"></servers>
       <extractor v-else-if="dataLoaded && tab=='extractor'" class="w3-container w3-animate-opacity"></extractor>

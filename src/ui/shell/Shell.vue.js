@@ -1,4 +1,4 @@
-import "bootstrap/dist/css/bootstrap.min.css";
+import "../../assets/scss/app.scss";
 import "bootstrap-vue/dist/bootstrap-vue.min.css";
 
 // @ts-ignore

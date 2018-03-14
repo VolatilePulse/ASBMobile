@@ -1,7 +1,6 @@
 {
    "recommendations": [
       "EditorConfig.EditorConfig",
-      "christian-kohler.path-intellisense",
       "christian-kohler.npm-intellisense",
       "dariofuzinato.vue-peek",
       "eriklynd.json-tools",

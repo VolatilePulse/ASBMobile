@@ -10,4 +10,25 @@
    "editor.formatOnSave": true,
    "html.format.wrapLineLength": 90,
    "javascript.implicitProjectConfig.checkJs": true,
+   "vue-peek.supportedLanguages": [
+      "vue",
+      "javascript"
+   ],
+   "vue-peek.targetFileExtensions": [
+      ".vue",
+      ".js"
+   ],
+   "todohighlight.exclude": [
+      "**/node_modules/**",
+      "**/bower_components/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/.vscode/**",
+      "**/.github/**",
+      "**/_output/**",
+      "**/*.min.*",
+      "**/*.map",
+      "**/.next/**",
+      "**/docs/**"
+   ],
 }
