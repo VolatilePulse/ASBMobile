@@ -4,17 +4,22 @@
       <b-navbar-brand href="#">ASB Mobile</b-navbar-brand>
 
       <b-collapse is-nav id="nav_collapse">
+         <!-- Left aligned nav items -->
          <b-navbar-nav>
             <b-nav-item @click="tab='welcome'" :class="{'':tab=='welcome'}">Welcome</b-nav-item>
             <b-nav-item @click="tab='servers'" :class="{'':tab=='servers'}">Servers</b-nav-item>
             <b-nav-item @click="tab='extractor'" :class="{'':tab=='extractor'}">Extractor</b-nav-item>
-            <b-nav-item @click="tab='tester'" :class="{'':tab=='tester'}" :disabled="!devMode">Tester (dev-only)</b-nav-item>
-            <b-nav-item @click="tab='db'" :class="{'':tab=='db'}" :disabled="!devMode">DB (dev-only)</b-nav-item>
             <b-nav-item @click="tab='about'" :class="{'':tab=='about'}">About</b-nav-item>
          </b-navbar-nav>
 
          <!-- Right aligned nav items -->
-         <!-- <b-navbar-nav class="ml-auto">
+         <b-navbar-nav v-if="devMode" class="ml-auto">
+            <b-nav-text>Dev:</b-nav-text>
+            <b-nav-item @click="tab='tester'" class="text-dark" :class="{'':tab=='tester'}">Tester</b-nav-item>
+            <b-nav-item @click="tab='db'" variant="info" :class="{'':tab=='db'}">DB</b-nav-item>
+         </b-navbar-nav>
+
+         <!--
             <b-nav-form>
                <b-form-input size="sm" class="mr-sm-2" type="text" placeholder="Search" />
                <b-button size="sm" class="my-2 my-sm-0" type="submit">Search</b-button>
@@ -34,7 +39,7 @@
                <b-dropdown-item href="#">Profile</b-dropdown-item>
                <b-dropdown-item href="#">Signout</b-dropdown-item>
             </b-nav-item-dropdown>
-         </b-navbar-nav> -->
+         -->
       </b-collapse>
    </b-navbar>
 
