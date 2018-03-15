@@ -57,7 +57,7 @@ export class Extractor {
             tempStat.calculateWildLevel(this.c.m[i], this.c.values[i]);
 
             // Redundant check to make sure our math matches Ark's math
-            if (this.c.values[i] == Utils.RoundTo(tempStat.calculateValue(this.c.m[i]), Ark.Precision(i)))
+            if (this.c.values[i] === Utils.RoundTo(tempStat.calculateValue(this.c.m[i]), Ark.Precision(i)))
                this.c.stats[i].push(new Stat(tempStat));
          }
          return;
@@ -89,7 +89,7 @@ export class Extractor {
             // Calculate the highest Lw could be
             var maxLw = tempStat.calculateWildLevel(this.c.m[i], this.c.values[i], !this.c.wild, 0, this.c.IB);
 
-            if (maxLw > this.levelBeforeDom || (maxLw == 0 && this.c.m[i].Iw == 0))
+            if (maxLw > this.levelBeforeDom || (maxLw === 0 && this.c.m[i].Iw === 0))
                maxLw = this.levelBeforeDom;
 
             // Loop all possible Lws
@@ -115,7 +115,7 @@ export class Extractor {
 
       // Only filter results if we have a result for every stat
       for (let i = 0; i < 7; i++) {
-         if (this.c.stats[i].length == 0) {
+         if (this.c.stats[i].length === 0) {
             if (dbg) dbg.failReason = "No options found for stat " + i;
             return;
          }
@@ -187,7 +187,7 @@ export class Extractor {
     */
    dynamicIBCalculation() {
       // If the entered IB works, we don't need to do anything else (Torpor can't be leveled and typically has a large value to start with)
-      if (this.c.values[TORPOR] == Utils.RoundTo(this.c.stats[TORPOR][0].calculateValue(this.c.m[TORPOR], !this.c.wild, this.c.TE, this.c.IB), Ark.Precision(TORPOR)))
+      if (this.c.values[TORPOR] === Utils.RoundTo(this.c.stats[TORPOR][0].calculateValue(this.c.m[TORPOR], !this.c.wild, this.c.TE, this.c.IB), Ark.Precision(TORPOR)))
          return;
 
       // Extract the IB from Torpor
@@ -206,7 +206,7 @@ export class Extractor {
       var imprintingBonusFromFood = tempHealthStat.calculateIB(this.c.m[FOOD], this.c.values[FOOD]);
 
       // Check to see if the new IB still allows torpor to extract correctly
-      if (this.c.values[TORPOR] == Utils.RoundTo(this.c.stats[TORPOR][0].calculateValue(this.c.m[TORPOR], !this.c.wild, this.c.TE, imprintingBonusFromFood), Ark.Precision(TORPOR)))
+      if (this.c.values[TORPOR] === Utils.RoundTo(this.c.stats[TORPOR][0].calculateValue(this.c.m[TORPOR], !this.c.wild, this.c.TE, imprintingBonusFromFood), Ark.Precision(TORPOR)))
          this.c.IB = imprintingBonusFromFood;
 
       // IB can't be lower than 0
@@ -224,7 +224,7 @@ export class Extractor {
       }
 
       // We can't calculate speed if a stat is unused
-      else if (this.unusedStat && statIndex == SPEED) {
+      else if (this.unusedStat && statIndex === SPEED) {
          // Calculate DOM for speed
          this.c.stats[SPEED] = [new Stat(-1, tempStat.calculateDomLevel(this.c.m[statIndex], this.c.values[statIndex], !this.c.wild, 0, this.c.IB))];
          this.domFreeMax -= this.c.stats[SPEED][0].Ld;
@@ -234,7 +234,7 @@ export class Extractor {
 
       // Creatures that don't increase Speed on imprint also don't level the stat
       // FIXME: It's true for all flyers, including CF flyers that allow IB of Speed
-      else if (!this.c.m[statIndex].IBM && statIndex == SPEED) {
+      else if (!this.c.m[statIndex].IBM && statIndex === SPEED) {
          // Calculate DOM for speed
          this.c.stats[SPEED] = [new Stat(0, tempStat.calculateDomLevel(this.c.m[statIndex], this.c.values[statIndex], !this.c.wild, 0, this.c.IB))];
          this.domFreeMax -= this.c.stats[SPEED][0].Ld;
@@ -249,14 +249,14 @@ export class Extractor {
       if (tempStat.calculateDomLevel(this.c.m[statIndex], this.c.values[statIndex], !this.c.wild, this.c.TE, this.c.IB) > maxLd)
          return;
 
-      if (this.c.values[statIndex] == Utils.RoundTo(tempStat.calculateValue(this.c.m[statIndex], !this.c.wild, this.c.TE, this.c.IB), Ark.Precision(statIndex)))
+      if (this.c.values[statIndex] === Utils.RoundTo(tempStat.calculateValue(this.c.m[statIndex], !this.c.wild, this.c.TE, this.c.IB), Ark.Precision(statIndex)))
          this.c.stats[statIndex].push(new Stat(tempStat));
 
       // If it doesn't calculate properly, it may have used a different IB (Mostly relevant for Food)
       else if (this.c.bred) {
          // TODO: Address this to apply proper logic as it makes mild assumptions
          // This is making sure that our previously calculated IB, rounded, is at least somewhat close to the IB the stat wants to use
-         if (Utils.RoundTo(tempStat.calculateIB(this.c.m[statIndex], this.c.values[statIndex]), 2) == Utils.RoundTo(this.c.IB, 2)) {
+         if (Utils.RoundTo(tempStat.calculateIB(this.c.m[statIndex], this.c.values[statIndex]), 2) === Utils.RoundTo(this.c.IB, 2)) {
             var maxTempIB = tempStat.calculateIB(this.c.m[statIndex], this.c.values[statIndex] + (0.5 / Math.pow(10, Ark.Precision(statIndex))));
             var minTempIB = tempStat.calculateIB(this.c.m[statIndex], this.c.values[statIndex] - (0.5 / Math.pow(10, Ark.Precision(statIndex))));
 
@@ -277,9 +277,9 @@ export class Extractor {
 
          let tamingEffectiveness = -1, minTE = 0, maxTE = 0;
          // One of the most precise ways to get the exact Taming Effectiveness
-         if (this.c.values[statIndex] == Utils.RoundTo(tempStat.calculateValue(this.c.m[statIndex], !this.c.wild, 1, this.c.IB), Ark.Precision(statIndex)))
+         if (this.c.values[statIndex] === Utils.RoundTo(tempStat.calculateValue(this.c.m[statIndex], !this.c.wild, 1, this.c.IB), Ark.Precision(statIndex)))
             tamingEffectiveness = 1;
-         else if (this.c.values[statIndex] == Utils.RoundTo(tempStat.calculateValue(this.c.m[statIndex], !this.c.wild, 0, this.c.IB), Ark.Precision(statIndex)))
+         else if (this.c.values[statIndex] === Utils.RoundTo(tempStat.calculateValue(this.c.m[statIndex], !this.c.wild, 0, this.c.IB), Ark.Precision(statIndex)))
             tamingEffectiveness = 0;
          else
             tamingEffectiveness = tempStat.calculateTE(this.c.m[statIndex], this.c.values[statIndex]);
@@ -291,11 +291,11 @@ export class Extractor {
 
          if (tamingEffectiveness >= 0 && tamingEffectiveness <= 1) {
             // If the TE allows the stat to calculate properly, add it as a possible result
-            if (this.c.values[statIndex] == Utils.RoundTo(tempStat.calculateValue(this.c.m[statIndex], !this.c.wild, tamingEffectiveness, this.c.IB), Ark.Precision(statIndex))) {
+            if (this.c.values[statIndex] === Utils.RoundTo(tempStat.calculateValue(this.c.m[statIndex], !this.c.wild, tamingEffectiveness, this.c.IB), Ark.Precision(statIndex))) {
                // Create a new Stat to hold all of the information
                var TEStat = new Stat(tempStat);
                TEStat.wildLevel = Math.ceil(this.levelBeforeDom / (1 + 0.5 * tamingEffectiveness));
-               if (this.levelBeforeDom == Math.floor(TEStat.wildLevel * (1 + 0.5 * tamingEffectiveness))) {
+               if (this.levelBeforeDom === Math.floor(TEStat.wildLevel * (1 + 0.5 * tamingEffectiveness))) {
                   TEStat.TE = tamingEffectiveness;
                   TEStat.maxTE = maxTE;
                   TEStat.minTE = minTE;
@@ -313,27 +313,57 @@ export class Extractor {
    filterResults(dbg) {
       if (dbg && !dbg['filterLoops']) dbg.filterLoops = 0;
 
-      let removed = false, deepFilter = false;
+      let removed = false;
 
       do {
          if (dbg) dbg.filterLoops += 1;
          removed = false;
+         let wildMin = 0, domMin = 0;
+
+         // Find any stats that do not exist as a possible option
          if (this.options.length)
             this.c.stats.forEach(stat => stat.forEach(poss => { if (!this.options.some(option => option.includes(poss))) poss.removeMe = true; }));
 
          for (let i = 0; i < 7; i++) {
+            let tempWM = -1, tempDM = -1;
             // One stat possibility is good
-            if (!this.checkedStat[i] && this.c.stats[i].length == 1) {
+            if (!this.checkedStat[i] && this.c.stats[i].length === 1) {
                this.wildFreeMax -= this.c.stats[i][0].Lw;
                this.domFreeMax -= this.c.stats[i][0].Ld;
                this.checkedStat[i] = true;
             }
-
-            // Simple stat removal
-            else if (this.c.stats[i].length > 1) {
+            else if (!this.checkedStat[i]) {
                for (let j = 0; j < this.c.stats[i].length; j++) {
-                  if (this.c.stats[i][j].Lw > this.wildFreeMax || this.c.stats[i][j].Ld > this.domFreeMax) {
-                     this.c.stats[i][j].removeMe = true;
+                  if (tempWM === -1)
+                     tempWM = this.c.stats[i][j].Lw;
+                  if (tempDM === -1)
+                     tempDM = this.c.stats[i][j].Ld;
+                  if (tempWM > this.c.stats[i][j].Lw)
+                     tempWM = this.c.stats[i][j].Lw;
+                  if (tempDM > this.c.stats[i][j].Ld)
+                     tempDM = this.c.stats[i][j].Ld;
+               }
+               this.c.stats[i].minW = tempWM; this.c.stats[i].minD = tempDM;
+               wildMin += tempWM;
+               domMin += tempDM;
+            }
+         }
+
+         // Last try to remove additional stats
+         if (!removed) {
+            for (let i = 0; i < 7; i++) {
+               // Simple stat removal
+               if (this.c.stats[i].length > 1) {
+                  for (let j = 0; j < this.c.stats[i].length; j++) {
+                     if (this.c.stats[i][j].Lw > this.wildFreeMax || this.c.stats[i][j].Ld > this.domFreeMax) {
+                        this.c.stats[i][j].removeMe = true;
+                     }
+                     if (this.c.stats[i][j].Lw + wildMin - this.c.stats[i].minW > this.wildFreeMax
+                        || this.c.stats[i][j].Ld + domMin - this.c.stats[i].minD > this.domFreeMax
+                        || (this.c.m[i].Tm && !this.filterByTE(i, this.c.stats[i][j]))) {
+                        this.c.stats[i][j].removeMe = true;
+
+                     }
                   }
                }
             }
@@ -341,53 +371,8 @@ export class Extractor {
 
          removed = this.statRemover();
 
-         // Last try to remove additional stats
-         if (!removed) {
-            let wildMin = 0, domMin = 0;
-            for (let i = 0; i < 7; i++) {
-               let tempWM = -1, tempDM = -1;
-               if (!this.checkedStat[i]) {
-                  for (let j = 0; j < this.c.stats[i].length; j++) {
-                     if (tempWM == -1)
-                        tempWM = this.c.stats[i][j].Lw;
-                     if (tempDM == -1)
-                        tempDM = this.c.stats[i][j].Ld;
-                     if (tempWM > this.c.stats[i][j].Lw)
-                        tempWM = this.c.stats[i][j].Lw;
-                     if (tempDM > this.c.stats[i][j].Ld)
-                        tempDM = this.c.stats[i][j].Ld;
-                  }
-                  this.c.stats[i].minW = tempWM; this.c.stats[i].minD = tempDM;
-                  wildMin += tempWM;
-                  domMin += tempDM;
-               }
-            }
-
-            for (let i = 0; i < 7; i++) {
-               for (let j = 0; !this.checkedStat[i] && j < this.c.stats[i].length; j++) {
-                  if (this.c.stats[i][j].Lw + wildMin - this.c.stats[i].minW > this.wildFreeMax
-                     || this.c.stats[i][j].Ld + domMin - this.c.stats[i].minD > this.domFreeMax
-                     || (this.c.m[i].Tm && !this.filterByTE(i, this.c.stats[i][j]))) {
-                     this.c.stats[i][j].removeMe = true;
-                  }
-               }
-            }
-
-            removed = this.statRemover();
-         }
-
-         if (removed) {
-            deepFilter = false;
-            continue;
-         }
-
-         if (this.options.length == 0) {
-            this.generateOptions(dbg);
-            removed = true;
-         }
-
-         else if (!deepFilter)
-            removed = deepFilter = this.statRemover();
+         if (!removed && this.options.length === 0)
+            removed = this.generateOptions(dbg);
 
       } while (removed);
    }
@@ -395,9 +380,9 @@ export class Extractor {
    // Remove all stats that don't have a matching TE pair
    filterByTE(index, TEstat) {
       for (let i = 0; i < 7; i++) {
-         if ((this.c.m[i].Tm) && (i != index)) {
+         if ((this.c.m[i].Tm) && (i !== index)) {
             for (let j = 0; j < this.c.stats[i].length; j++)
-               if (this.c.stats[i][j].TE == TEstat.TE)
+               if (this.c.stats[i][j].TE === TEstat.TE)
                   return true;
                else if (this.c.stats[i][j].maxTE > TEstat.TE && TEstat.TE >= this.c.stats[i][j].minTE) {
                   this.c.stats[i][j].TE = TEstat.TE;
@@ -425,55 +410,59 @@ export class Extractor {
       if (dbg) dbg.totalRecursion++;
 
       let TE = -1;
+      let wildLevels = 0, domLevels = 0;
 
       // If the TE of the stats we have don't match, they aren't valid
       for (var i = 0; i < option.length; i++) {
-         if (TE == -1 && option[i]["TE"] != undefined)
+         if (TE === -1 && option[i]["TE"] !== undefined)
             TE = option[i].TE;
-         else if (option[i]["TE"] != undefined)
-            if (TE != option[i].TE)
+         else if (option[i]["TE"] !== undefined)
+            if (TE !== option[i].TE)
                return false;
-      }
 
-      // We've run out of stats to add to our option so lets test them for valid results
-      var wildLevels = 0, domLevels = 0;
-      // Loop through our possibilities
-      for (var i = 0; i < option.length; i++) {
          if (!this.checkedStat[i]) {
             if (option[i].Lw > 0)
                wildLevels += option[i].Lw;
             domLevels += option[i].Ld;
+
+            if ((!this.unusedStat && wildLevels > this.wildFreeMax) || domLevels > this.domFreeMax)
+               return false;
          }
       }
-
       // check to see if the stat possibilities add up to the missing dom levels
       // and wild levels as long as we don't have an unused stat
-      if ((this.unusedStat || wildLevels == this.wildFreeMax) && domLevels == this.domFreeMax)
+      if ((this.unusedStat || wildLevels === this.wildFreeMax) && domLevels === this.domFreeMax)
          return true;
 
-      // If we made it this far, we have failed something
       return false;
    }
 
-   statRemover() {
-      let removed = false, removed2 = false;
+   statRemover(dbg) {
+      let initialStatsLength = 0, initialOptionsLength = 0;
+      let removed = false;
+
       for (let i = 0; i < 7; i++) {
-         removed = this.c.stats[i].some(stat => stat['removeMe']);
+         initialStatsLength = this.c.stats[i].length;
          this.c.stats[i] = this.c.stats[i].filter(stat => !stat['removeMe']);
+         if (dbg) dbg.numberRemoved += initialStatsLength - this.c.stats[i].length;
+         if (!removed && initialStatsLength > this.c.stats[i].length)
+            removed = true;
       }
 
-      removed2 = this.options.some(option => option.some(stat => stat['removeMe']));
+      initialOptionsLength = this.options.length;
       this.options = this.options.filter(option => !option.some(stat => stat['removeMe']));
+      if (dbg) dbg.numberRemoved += initialOptionsLength - this.options.length;
 
-      return removed || removed2;
+      return removed || initialOptionsLength > this.options.length;
    }
 
    generateOptions(dbg) {
+      /** @type {number[]} */
       let tempOptions = [];
 
       // The initial array for matchingStats
       for (let stat = 0; stat < 7; stat++) {
-         if (this.c.stats[stat].length != 0)
+         if (this.c.stats[stat].length !== 0)
             tempOptions.push(0);
          else
             return false;
@@ -492,15 +481,16 @@ export class Extractor {
 
          tempOptions[selector]++;
 
-         while (selector != -1 && tempOptions[selector] == this.c.stats[selector].length) {
+         while (selector !== -1 && tempOptions[selector] === this.c.stats[selector].length) {
             tempOptions[selector] = 0;
             selector--;
-            if (selector != -1)
+            if (selector !== -1)
                tempOptions[selector]++;
          }
 
-         if (selector != -1)
+         if (selector !== -1)
             selector = indexMax;
-      } while (selector != -1);
+      } while (selector !== -1);
+      return true;
    }
 }
