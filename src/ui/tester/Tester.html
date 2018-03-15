@@ -1,7 +1,7 @@
-<div>
+<b-container fluid>
    <!-- control buttons -->
    <div class="clearfix">
-      <b-button-toolbar class="float-right m-2">
+      <b-button-toolbar class="float-right mb-3">
          <b-button-group class="mr-2">
             <b-button v-show="running" variant="link" disabled>...running...</b-button>
          </b-button-group>
@@ -19,7 +19,7 @@
    </div>
 
    <!-- tests list -->
-   <div class="p-2">
+   <div class="">
       <b-list-group class="m-0 p-0" dark>
          <b-list-group-item v-for="(data,index) in testData" class="p-0" :class="{'bg-dark':!results[index]}">
             <div class="px-0 p-0 m-0">
@@ -108,4 +108,4 @@
          </b-list-group-item>
       </b-list-group>
    </div>
-</div>
+</b-container>

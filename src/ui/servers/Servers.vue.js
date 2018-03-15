@@ -65,6 +65,7 @@ export default withRender({
       deleteServer() {
          Servers.deleteUserServer(this.name);
          this.setServerByName("Official Server");
+         this.$refs.deleteModal.hide();
       },
 
       setServerByName(name) {

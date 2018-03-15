@@ -5,6 +5,7 @@ import "bootstrap-vue/dist/bootstrap-vue.min.css";
 import withRender from './Shell.html?style=./Shell.css';
 
 import About from "../about/About.vue";
+import Welcome from "../welcome/Welcome.vue";
 import Servers from "../servers/Servers.vue";
 import Extractor from "../extractor/Extractor.vue";
 import Tester from "../tester/Tester.vue";
@@ -18,6 +19,7 @@ import * as Data from "../../data";
 
 
 Vue.component("About", About);
+Vue.component("Welcome", Welcome);
 Vue.component("Servers", Servers);
 Vue.component("Extractor", Extractor);
 Vue.component("Tester", Tester);
@@ -30,7 +32,7 @@ export default withRender({
 
    data: () => ({
       showSidebar: true,
-      tab: 'about',
+      tab: 'welcome',
    }),
 
    computed: {
