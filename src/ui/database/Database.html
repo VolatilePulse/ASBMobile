@@ -1,14 +1,18 @@
 <b-container fluid>
+   <!--
    <input v-model.trim="newRow.species" placeholder="Species">
    <input v-model.trim="newRow.name" placeholder="Name">
    <button @click.stop="$pouch.post('creatures', newRow);resetNewRow()">Save</button>
-
    <br/>
-   <b-button-group>
-      <b-select :options="speciesNames" v-model.trim="species"></b-select>
-      <b-button @click.stop="createMany">Create Many</b-button>
+   -->
+
+   <b-button-group class="mb-2">
+      <b-select :options="speciesNames" v-model.trim="species">
+         <option slot="first" :value="null">-all-</option>
+      </b-select>
+      <b-button @click.stop="createMany">Create 100</b-button>
+      <b-button @click.stop="destroyAll" variant="warning">Destroy All</b-button>
    </b-button-group>
-   <b-button @click.stop="destroyAll">Destroy All</b-button>
 
    <b-table :items="creatures" :fields="fields" small responsive>
       <template slot="index" slot-scope="data">

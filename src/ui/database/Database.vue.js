@@ -2,7 +2,7 @@
 import withRender from './Database.html?style=./Database.css';
 
 //import Vue from 'vue';
-import PouchDB from 'pouchdb-browser';
+//import PouchDB from 'pouchdb-browser';
 import YANG from 'yet-another-name-generator';
 
 import * as app from '../../app';
@@ -12,10 +12,12 @@ export default withRender({
 
    pouch: {
       creatures() {
-         if (this.species)
+         if (!!this.species) {
             return { species: this.species };
-         else
-            return;
+         }
+         else {
+            return { species: { $ne: '' } };
+         }
       },
    },
 
@@ -63,8 +65,6 @@ export default withRender({
       },
 
       createMany() {
-         let db = new PouchDB('creatures');
-
          var objs = [];
          for (let i = 100; i >= 0; i--) {
             var obj = {
@@ -81,7 +81,7 @@ export default withRender({
             objs.push(obj);
          }
 
-         db.bulkDocs(objs);
+         this.$pouch.bulkDocs("creatures", objs);
       },
 
       async initDatabase() {
