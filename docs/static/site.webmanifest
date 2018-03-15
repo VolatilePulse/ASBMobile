@@ -1,7 +1,7 @@
 {
    "name": "ASB Mobile",
    "short_name": "ASB Mobile",
-   "description": "A minimalist version of ASB",
+   "description": "A minimalist mobile version of Ark Smart Breeding",
    "icons": [
       {
          "src": "/ASBMobile/static/img/icons/android-chrome-192x192.png",
