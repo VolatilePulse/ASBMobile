@@ -1,0 +1,21 @@
+<b-container fluid>
+   <input v-model.trim="newRow.species" placeholder="Species">
+   <input v-model.trim="newRow.name" placeholder="Name">
+   <button @click.stop="$pouch.post('creatures', newRow);resetNewRow()">Save</button>
+
+   <br/>
+   <b-button-group>
+      <b-select :options="speciesNames" v-model.trim="species"></b-select>
+      <b-button @click.stop="createMany">Create Many</b-button>
+   </b-button-group>
+   <b-button @click.stop="destroyAll">Destroy All</b-button>
+
+   <b-table :items="creatures" :fields="fields" small responsive>
+      <template slot="index" slot-scope="data">
+         {{data.index + 1}}
+      </template>
+      <template slot="controls" slot-scope="data">
+         <b-button @click="remove(data.item)" class="close" aria-label="Close">&times;</b-button>
+      </template>
+   </b-table>
+</b-container>

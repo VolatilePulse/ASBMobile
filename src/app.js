@@ -1,13 +1,26 @@
 import Vue from "vue";
 import BootstrapVue from 'bootstrap-vue';
-
-Vue.use(BootstrapVue);
+import PouchDB from 'pouchdb-browser';
+import PouchFind from 'pouchdb-find';
+import PouchLiveFind from 'pouchdb-live-find';
+import PouchVue from 'pouch-vue';
 
 import * as Servers from "./servers";
 import { VueCreature } from "./ark/creature";
 import { statNames } from "./consts";
 
 import Shell from "./ui/shell/Shell.vue";
+
+Vue.use(BootstrapVue);
+
+PouchDB.plugin(PouchFind);
+// @ts-ignore
+PouchDB.plugin(PouchLiveFind);
+
+Vue.use(PouchVue, {
+   pouch: PouchDB,
+});
+
 
 
 Vue.config.productionTip = false;

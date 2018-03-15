@@ -20,8 +20,11 @@
       "lodash.clonedeepwith": "^4.5.0",
       "lodash.isequal": "^4.5.0",
       "lodash.isequalwith": "^4.4.0",
+      "pouch-vue": "^0.1.35",
+      "pouchdb-browser": "^6.4.3",
+      "pouchdb-find": "^6.4.3",
       "vue": "^2.3.3",
-      "vue-router": "^2.6.0"
+      "yet-another-name-generator": "^1.0.4"
    },
    "devDependencies": {
       "autoprefixer": "^7.1.2",

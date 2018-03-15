@@ -9,6 +9,7 @@ import Welcome from "../welcome/Welcome.vue";
 import Servers from "../servers/Servers.vue";
 import Extractor from "../extractor/Extractor.vue";
 import Tester from "../tester/Tester.vue";
+import Database from "../database/Database.vue";
 
 import Vue from "vue";
 
@@ -23,6 +24,7 @@ Vue.component("Welcome", Welcome);
 Vue.component("Servers", Servers);
 Vue.component("Extractor", Extractor);
 Vue.component("Tester", Tester);
+Vue.component("Database", Database);
 
 
 export default withRender({

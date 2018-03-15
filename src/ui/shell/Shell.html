@@ -9,6 +9,7 @@
             <b-nav-item @click="tab='servers'" :class="{'':tab=='servers'}">Servers</b-nav-item>
             <b-nav-item @click="tab='extractor'" :class="{'':tab=='extractor'}">Extractor</b-nav-item>
             <b-nav-item @click="tab='tester'" :class="{'':tab=='tester'}" :disabled="!devMode">Tester (dev-only)</b-nav-item>
+            <b-nav-item @click="tab='db'" :class="{'':tab=='db'}" :disabled="!devMode">DB (dev-only)</b-nav-item>
             <b-nav-item @click="tab='about'" :class="{'':tab=='about'}">About</b-nav-item>
          </b-navbar-nav>
 
@@ -44,6 +45,7 @@
       <servers v-else-if="dataLoaded && tab=='servers'" class="w3-container w3-animate-opacity"></servers>
       <extractor v-else-if="dataLoaded && tab=='extractor'" class="w3-container w3-animate-opacity"></extractor>
       <tester v-else-if="dataLoaded && tab=='tester'" class="w3-container w3-animate-opacity"></tester>
+      <database v-else-if="dataLoaded && tab=='db'" class="w3-container w3-animate-opacity"></database>
       <about v-else-if="tab=='about'" class="w3-container w3-animate-opacity"></about>
    </b-container>
 </div>
