@@ -31,4 +31,5 @@
       "**/.next/**",
       "**/docs/**"
    ],
+   "cSpell.enabled": false,
 }
