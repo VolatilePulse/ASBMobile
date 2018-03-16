@@ -227,6 +227,13 @@ const testData = [
       serverName: "Official Server",
       results: [],
    },
+   {
+      tag: "Direwolf (ASB rounding)",
+      species: "Direwolf", level: 608, imprint: 1, exactly: true, mode: "Bred",
+      values: [8949.7, 2340.0, 1350.0, 15566.4, 575.3, 705.8, 150, 20207.3],
+      serverName: "DelilahEve",
+      results: [[{ "Lw": 108, "Ld": 0 }], [{ "Lw": 80, "Ld": 0 }], [{ "Lw": 80, "Ld": 0 }], [{ "Lw": 84, "Ld": 0 }], [{ "Lw": 91, "Ld": 0 }], [{ "Lw": 81, "Ld": 0 }], [{ "Lw": 83, "Ld": 0 }], [{ "Lw": 607, "Ld": 0 }]],
+   },
 ];
 
 export default testData;

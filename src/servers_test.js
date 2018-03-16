@@ -57,6 +57,12 @@ let servers = [
       singlePlayer: false,
       multipliers: [],
    },
+   {
+      serverName: "DelilahEve",
+      IBM: 1,
+      singlePlayer: false,
+      multipliers: [],
+   },
 ];
 
 export default servers;
