@@ -24,19 +24,19 @@
    </b-form-group>
 
    <b-form-group label="Stats">
-      <b-row v-for="i in range(8)" class="mb-1">
-         <div class="col-2">
-            <b-img :src="statImages[i]" fluid-grow></b-img>
+      <b-row v-for="i in range(8)" class="mb-1 align-items-center">
+         <div class="col-1 m-0 p-1 h-100">
+            <b-img :src="statImages[i]" fluid-grow class="align-items-center" style="max-height:28px;min-height:22px"></b-img>
          </div>
          <b-form-input type="number" v-model.number="values[i]" :placeholder="statNames[i]" class="col-3"></b-form-input>
-         <div v-if="creature.stats.length" class="col-2">
+         <div v-if="creature.stats[7].length" class="col-2">
             <span v-if="creature.stats[i] && creature.stats[i].length > 0">
                <span>{{creature.stats[i][0].Lw}}</span>
                <span>{{creature.stats[i][0].Ld}}</span>
                <span>={{formatFloat(debugStatValue(i))}}</span>
             </span>
          </div>
-         <div v-if="creature.stats[i]" class="col-5">
+         <div v-if="creature.stats[i]" class="col">
             <label>{{debugShowOptions(creature.stats[i])}}</label>
          </div>
          </span>
