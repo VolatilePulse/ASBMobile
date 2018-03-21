@@ -149,7 +149,8 @@ export function DeepCopy(obj) {
 }
 
 function CloneCustomizer(value, key) {
-   if (key == '__ob__') return null;
+   if (!key) return value;
+   if (key.startsWith('_')) return null;
 }
 
 /**

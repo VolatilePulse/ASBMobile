@@ -1,8 +1,12 @@
 # Database Layout
 
-General information:
+General limitations:
  * IDs cannot be renamed. That makes names a bad option for an ID, but they can still be indexed as a secondary field.
- * Databases cannot be renamed. Names and mappings to/from display names will have to be kept elsewhere.
+ * Databases cannot be renamed. If we want to support multiple libraries then mappings to/from displayable names will have to be kept elsewhere.
+
+Layout:
+ * Settings DB - general application settings, unrelated to a specific library
+ * Library DBs - many separate libraries, each containing creatures, servers and library-specific settings
 
 ## Settings
 
@@ -68,10 +72,10 @@ Fields:
 | levels | `number[][]` | - | Array of `[Lw,Ld]` pairs, one for each stat |
 | tamingEff | `number` | - | Taming efficiency, as a percentage (0-1) |
 | imprint | `number` | - | Imprint level, as a percentage (0-1) |
-| owner | `string` | - | Free-form text field |
-| tribe | `string` | - | Free-form text field |
-| notes | `string` | - | Free-form text field |
 | mutMat | `number` | 0 | Number of mutations on the matriliineal line |
 | mutPat | `number` | 0 | Number of mutations on the patriliineal line |
 | mother_uuid | `string` | - | UUID of mother creature |
 | father_uuid | `string` | - | UUID of father creature |
+| owner | `string` | - | Free-form text field |
+| tribe | `string` | - | Free-form text field |
+| notes | `string` | - | Free-form text field |

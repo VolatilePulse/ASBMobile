@@ -6,17 +6,17 @@
       <b-collapse is-nav id="nav_collapse">
          <!-- Left aligned nav items -->
          <b-navbar-nav>
-            <b-nav-item @click="tab='welcome'" :class="{'':tab=='welcome'}">Welcome</b-nav-item>
-            <b-nav-item @click="tab='servers'" :class="{'':tab=='servers'}">Servers</b-nav-item>
-            <b-nav-item @click="tab='extractor'" :class="{'':tab=='extractor'}">Extractor</b-nav-item>
-            <b-nav-item @click="tab='about'" :class="{'':tab=='about'}">About</b-nav-item>
+            <b-nav-item @click="tab='welcome'">Welcome</b-nav-item>
+            <b-nav-item @click="tab='servers'">Servers</b-nav-item>
+            <b-nav-item @click="tab='extractor'">Extractor</b-nav-item>
+            <b-nav-item @click="tab='about'">About</b-nav-item>
          </b-navbar-nav>
 
          <!-- Right aligned nav items -->
-         <b-navbar-nav v-if="devMode" class="ml-auto">
-            <b-nav-text>Dev:</b-nav-text>
-            <b-nav-item @click="tab='tester'" class="text-dark" :class="{'':tab=='tester'}">Tester</b-nav-item>
-            <b-nav-item @click="tab='db'" variant="info" :class="{'':tab=='db'}">DB</b-nav-item>
+         <b-navbar-nav class="ml-auto">
+            <b-nav-item @click="tab='settings'">Settings</b-nav-item>
+            <b-nav-item @click="tab='tester'">Tester</b-nav-item>
+            <b-nav-item @click="tab='db'">DB</b-nav-item>
          </b-navbar-nav>
 
          <!--
@@ -47,6 +47,7 @@
       <b-progress v-show="!dataLoaded" :value="100" striped :animated="true" variant="secondary" class="fixed-top" style="height: 0.4rem"></b-progress>
 
       <welcome v-if="tab=='welcome'" class="w3-container w3-animate-opacity"></welcome>
+      <settings v-else-if="tab=='settings'" class="w3-container w3-animate-opacity"></settings>
       <servers v-else-if="dataLoaded && tab=='servers'" class="w3-container w3-animate-opacity"></servers>
       <extractor v-else-if="dataLoaded && tab=='extractor'" class="w3-container w3-animate-opacity"></extractor>
       <tester v-else-if="dataLoaded && tab=='tester'" class="w3-container w3-animate-opacity"></tester>

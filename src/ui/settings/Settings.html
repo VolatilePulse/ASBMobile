@@ -1,0 +1,36 @@
+<b-container fluid>
+   <b-card title="Simple example settings">
+      <p class="card-text">Currently only the dummy fields are editable.
+         <br/>Changes are saved to the database after one second of inactivity.</p>
+   </b-card>
+   <hr/>
+   <div>Database format: {{settings.dbVersion}}</div>
+   <b-form>
+      <b-form-group label="Current Library:" label-for="selLib" description="(readonly)">
+         <b-input id="selLib" type="text" v-model.trim="settings.selectedLibrary" readonly @input="markDirty"></b-input>
+      </b-form-group>
+      <b-form-group label="Dummy text field:" label-for="dummyText" description="(editable, saved)">
+         <b-input id="dummyText" type="text" v-model.trim="settings.dummyText" @input="markDirty"></b-input>
+      </b-form-group>
+      <b-form-group label="Dummy number field:" label-for="dummyNumber" description="(editable, saved)">
+         <b-input id="dummyNumber" type="number" v-model.number="settings.dummyNumber" @input="markDirty"></b-input>
+      </b-form-group>
+   </b-form>
+   <b-row>
+      <b-col>Libraries
+         <p>
+            <small>(debug) A list of libraries and their DB names</small>
+         </p>
+      </b-col>
+      <b-col>
+         <b-container fluid style="border: 1px dashed #aaa;min-height: 3rem">
+            <b-row v-for="lib in settings.libraries">
+               <b-col cols="6">{{lib.displayName}}</b-col>
+               <b-col cols="6">
+                  <pre>{{lib.id}}</pre>
+               </b-col>
+            </b-row>
+         </b-container>
+      </b-col>
+   </b-row>
+</b-container>
