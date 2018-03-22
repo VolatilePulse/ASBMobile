@@ -19,7 +19,6 @@ module.exports = {
       'b-card': 'img-src',
       'b-card-img': 'img-src',
       'b-carousel-slide': 'img-src',
-      'b-embed': 'src'
-
+      'b-embed': 'src',
    }
 }

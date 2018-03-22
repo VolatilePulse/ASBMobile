@@ -19,7 +19,7 @@ module.exports = {
       "no-shadow": 2,
       "no-shadow-restricted-names": 2,
       "camelcase": "warn",
-      "indent": ["warn", 3],
+      "indent": ["warn", 3, { "SwitchCase": 1 }],
       "semi": ["warn", "always"],
       "comma-dangle": "off",
       "space-before-function-paren": ["warn", {
