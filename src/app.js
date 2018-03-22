@@ -5,7 +5,7 @@ import PouchFind from 'pouchdb-find';
 import PouchLiveFind from 'pouchdb-live-find';
 import PouchVue from 'pouch-vue';
 
-import SettingsManager from "./data/settings";
+import { SettingsManager, LibraryManager } from './data';
 import * as Servers from "./servers";
 import { VueCreature } from "./ark/creature";
 import { statNames } from "./consts";
@@ -68,11 +68,12 @@ export const vueApp = new Vue({
          import("assets/" + name.toLowerCase() + ".svg").then(url => Vue.set(this.statImages, i, url));
       }
 
-      // Get our settings system up and running
+      // Initialise sub-systems
       await SettingsManager.initialise();
+      await LibraryManager.initialise();
+      await Servers.initialise(this.status.devMode);
 
       // Load pre-defined and user servers
-      await Servers.initialise(this.status.devMode);
       this.userServers = Servers.userServers;
       this.preDefinedServers = Servers.preDefinedServers;
 
@@ -87,3 +88,4 @@ export const vueApp = new Vue({
 export const data = vueApp;
 export const shell = vueApp.$refs.shell;
 export const settings = SettingsManager;
+export const libraries = LibraryManager;

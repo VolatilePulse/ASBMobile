@@ -11,8 +11,8 @@ class Settings {
    /** All user-specific settings with default values. Should not include anything library-specific. */
    constructor() {
       this.dbVersion = 1;
-      /** @type {{displayName:string,id:string}[]} */
-      this.libraries = [];
+      /** @type {{[id:string]:string}} */
+      this.libraryNames = {};
       /** @type {string} */
       this.selectedLibrary = undefined;
       /** @type {string} */
