@@ -1,22 +1,23 @@
+/// <reference path="../types.ts" />
+
 import * as Utils from '../utils';
 import * as Ark from '../ark';
 
-export class Stat {
-   /**
-    * @param {number|{Lw:number,Ld:number}} Lw Wild levels, or another Stat-like object
-    * @param {number?} Ld Domesticated levels
-    */
-   constructor(Lw = 0, Ld = 0) {
-      /** @type {number?} */
-      this.TE = undefined;
-      /** @type {number?} */
-      this.maxTE = undefined;
-      /** @type {number?} */
-      this.minTE = undefined;
-      /** @type {number?} */
-      this.wildLevel = undefined;
+export class Stat implements Stat {
+   Lw: number;
+   Ld: number;
 
-      if (typeof (Lw) == "object") {
+   TE?: number;
+   minTE?: number;
+   maxTE?: number;
+   wildLevel?: number;
+   removeMe?: boolean;
+
+   constructor(stat: Stat);
+   constructor(Lw?: number, Ld?: number);
+   constructor(Lw: number | Stat = 0, Ld: number = 0) {
+
+      if (Lw instanceof Stat) {
          this.Lw = Lw.Lw;
          this.Ld = Lw.Ld;
       }
@@ -135,55 +136,64 @@ export class Stat {
 }
 
 export class Creature {
+   name?: string;
+   tribe?: string;
+   owner?: string;
+   serverName?: string;
+   species?: string;
+   UUID?: string;
+   wild = true;
+   tamed = false;
+   bred = false;
+   TE = 0;
+   IB = 0;
+   level: number = 0;
+   stats: Stat[][] = [[], [], [], [], [], [], [], []];
+   values: number[] = [];
+
    /**
     * Copy constructor
     * @param {Creature?} c
     */
-   constructor(c = undefined) {
-      /** @type {string} */
-      this.name = c ? c.name : "";
-      /** @type {string} */
-      this.tribe = c ? c.tribe : "";
-      /** @type {string} */
-      this.owner = c ? c.owner : "";
-      /** @type {string} */
-      this.serverName = c ? c.serverName : "";
-      /** @type {string} */
-      this.species = c ? c.species : "";
-      /** @type {string} */
-      this.UUID = c ? c.UUID : "";
-      this.wild = true;
-      this.tamed = false;
-      this.bred = false;
-      /** @type {number} */
-      this.TE = c ? c.TE : 0;
-      /** @type {number} */
-      this.IB = c ? c.IB : 0;
-      /** @type {number} */
-      this.level = c ? c.level : 0;
-      /** @type {Stat[][]} */
-      this.stats = [[], [], [], [], [], [], [], []];
-      /** @type {number[]} */
-      this.values = [];
+   constructor(c: Creature);
+   constructor();
+   constructor(c?: Creature) {
+      if (c instanceof Creature) {
+         this.name = c.name;
+         this.tribe = c.tribe;
+         this.owner = c.owner;
+         this.serverName = c.serverName;
+         this.species = c.species;
+         this.UUID = c.UUID;
+         this.wild = c.wild;
+         this.tamed = c.tamed;
+         this.bred = c.bred;
+         this.TE = c.TE;
+         this.IB = c.IB;
+         this.level = c.level;
+         this.stats = Utils.DeepCopy(c.stats);
+         this.values = Utils.DeepCopy(c.values);
+      }
+      else {
+         this.stats = Utils.FilledArray(8, () => [new Stat()])
+      }
 
+      // FIXME: TS-MIGRATION: Have I done the above correctly? Below was how it was before...
+      /*
       // Strips extractor data from TE based stats
       for (let i = 0; i < 8; i++)
          // The frontmost stat is the one that is considered "chosen" and is to be used for the creature
          this.stats.push([c ? c.stats[i][0] : new Stat]);
+      */
    }
 }
 
 export class VueCreature extends Creature {
+   m: any;
+
    constructor() {
       // Initializes the Creature Constructor and gives this class those properties
       super();
-
-      /** @type {Stat[][]} */
-      this.stats = [[], [], [], [], [], [], [], []];
-      this.exactly = false;
-
-      for (let i = 0; i < 8; i++)
-         this.stats[i][0] = new Stat;
    }
 
    copyCreature(c) {

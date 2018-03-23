@@ -9,11 +9,8 @@ import isEqualWith from 'lodash.isequalwith';
 /**
  * Async JSON file read
  * @async
- * @function AsyncFileRead
- * @param {string} filePath to the file
- * @return {Promise<string>} The content of the file as JSON text
  */
-export function AsyncFileRead(filePath) {
+export function AsyncFileRead(filePath: string): Promise<string> {
    return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.overrideMimeType("application/json");
@@ -25,23 +22,7 @@ export function AsyncFileRead(filePath) {
    });
 }
 
-/**
- * Add named accessors to an array-like class.
- * @param {object} cls The class to be modified
- * @param {string[]} names An array of names for the properties
- */
-export function AddNamedIndicesToClass(cls, names) {
-   for (let i = 0; i < names.length; i++) {
-      let name = names[i];
-      if (cls[name]) throw "Named index already defined!";
-      Object.defineProperty(cls.prototype, name, {
-         get() { return this[i]; },
-         enumerable: false,
-      });
-   }
-}
-
-const formattersCache = new Map();
+const formattersCache: Map<{ places: number, fixed: boolean }, Intl.NumberFormat> = new Map();
 
 /**
  * Format a number neatly for presentation to the user.
@@ -49,7 +30,7 @@ const formattersCache = new Map();
  * @param {number} places Number of decimal places, at most, to show
  * @param {boolean} fixed True to always show digits after the decimal place when they are zero
  */
-export function FormatNumber(value, places = 1, fixed = false) {
+export function FormatNumber(value: number, places = 1, fixed = false) {
    let formatter = formattersCache.get({ places, fixed });
    if (!formatter) {
       var locale = navigator['language'] || (navigator['languages'] && navigator.languages[0]) || navigator['browserLanguage'] || 'en';
@@ -66,7 +47,7 @@ export function FormatNumber(value, places = 1, fixed = false) {
  * Create an array containing numbers from zero to 'number'-1.
  * @param {number} length Length of the array
  */
-export function Range(length) {
+export function Range(length: number) {
    return FilledArray(length, (_, i) => i);
 }
 
@@ -75,7 +56,7 @@ export function Range(length) {
  * @param {number} length The length of the array
  * @param {function} fn A function to call to get the contents of an element, passed (undefined, index)
  */
-export function FilledArray(length, fn) {
+export function FilledArray<T>(length: number, fn: (_: null, i: number) => T): T[] {
    return Array.apply(null, Array(length)).map(fn);
 }
 
@@ -83,7 +64,7 @@ export function FilledArray(length, fn) {
  * Return a promise that will be resolved after 'duration' milliseconds, passing received arguments through.
  * @param {number} duration Number of milliseconds to delay for.
  */
-export function Delay(duration) {
+export function Delay(duration: number) {
    return new Promise(function (resolve, _) {
       setTimeout(() => resolve(), duration);
    });
@@ -93,7 +74,7 @@ export function Delay(duration) {
  * Return a function that can be used directly in a .then which delays 'duration' milliseconds, passing received arguments through.
  * @param {number} duration Number of milliseconds to delay for.
  */
-export function DelayFunction(duration) {
+export function DelayFunction(duration: number) {
    return function (...args) {
       return new Promise(function (resolve, _) {
          setTimeout(() => resolve(...args), duration);
@@ -109,7 +90,7 @@ export function DelayFunction(duration) {
  * @param {number} b B
  * @param {number} epsilon Difference limit
  */
-export function CompareFloat(a, b, epsilon = 1E-10) {
+export function CompareFloat(a: number, b: number, epsilon = 1E-10) {
    if (!Number.isFinite(a) || !Number.isFinite(b)) return undefined;
 
    var diff = Math.abs(a - b);
@@ -119,11 +100,11 @@ export function CompareFloat(a, b, epsilon = 1E-10) {
 /**
  * Rounds a number to a set decimal place for comparison
  * @param {number} num Value that needs rounded
- * @param {number} [n] Number of decimals to be rounded to
+ * @param {number} places Number of decimals to be rounded to
  * @returns {number} Decimal rounded to the specified precision
  */
-export function RoundTo(num, n = 0) {
-   return +Number(num + 1E-10).toFixed(n);
+export function RoundTo(num: number, places = 0) {
+   return +Number(num + 1E-10).toFixed(places);
 }
 
 /**
@@ -144,7 +125,7 @@ export function DeepCompare(a, b, fn) {
    return isEqual(a, b);
 }
 
-export function DeepCopy(obj) {
+export function DeepCopy<T>(obj: T): T {
    return cloneDeepWith(obj, CloneCustomizer);
 }
 

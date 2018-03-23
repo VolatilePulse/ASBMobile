@@ -13,6 +13,16 @@
       "values": "node scripts/make_values.js"
    },
    "dependencies": {
+      "@types/lodash.clonedeepwith": "^4.5.3",
+      "@types/lodash.debounce": "^4.0.3",
+      "@types/lodash.isequal": "^4.5.2",
+      "@types/lodash.isequalwith": "^4.4.3",
+      "@types/lodash.mergewith": "^4.6.3",
+      "@types/node": "^9.6.0",
+      "@types/npm": "^2.0.29",
+      "@types/pouchdb-browser": "^6.1.2",
+      "@types/pouchdb-find": "^6.3.2",
+      "@types/vue": "^2.0.0",
       "bootstrap-vue": "^2.0.0-rc.1",
       "lodash.clonedeepwith": "^4.5.0",
       "lodash.debounce": "^4.0.8",

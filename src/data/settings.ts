@@ -8,17 +8,17 @@ const SAVE_TIMEOUT = 1000;
 const SAVE_MAX_TIMEOUT = 5000;
 
 class Settings {
+   dbVersion = 1;
+   libraryNames: { [id: string]: string } = {};
+   selectedLibrary?: string = undefined;
+   dummyText = "Dummy!";
+   dummyNumber = 1234;
+
+   _id?: string;
+   _rev?: string;
+
    /** All user-specific settings with default values. Should not include anything library-specific. */
    constructor() {
-      this.dbVersion = 1;
-      /** @type {{[id:string]:string}} */
-      this.libraryNames = {};
-      /** @type {string} */
-      this.selectedLibrary = undefined;
-      /** @type {string} */
-      this.dummyText = "Dummy!";
-      /** @type {number} */
-      this.dummyNumber = 1234;
    }
 }
 
@@ -27,16 +27,16 @@ class Settings {
 
 
 class SettingsManager {
+   current: Settings;
+
+   private _initialised = false;
+   private _db?: PouchDB.Database = undefined;
+   private _rev?: string;
+   private _debouncedSave: () => void;
+
    /** The SettingsManager manages settings :) */
    constructor() {
-      /** @type {Settings} */
       this.current = new Settings();
-
-      this._initialised = false;
-      /** @type {PouchDB.Database} */
-      this._db = undefined;
-      /** @type {string} */
-      this._rev = undefined;
 
       // lodash.debounce produces a function we can call whenever a setting changes.
       // It will only call this.save() after a timeout, no matter how often it is called before-hand.
@@ -46,11 +46,12 @@ class SettingsManager {
    /** Initialise the settings manager */
    async initialise() {
       if (this._initialised) return;
+      this._initialised = true;
 
       this._db = new PouchDB(DB_SETTINGS);
 
       // Ensure a row exists with the one ID
-      var result = undefined;
+      var result: any = undefined;
       try { result = await this._db.get(ID_SETTINGS); }
       catch (_) { }
 

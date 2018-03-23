@@ -1,12 +1,27 @@
+/// <reference path="../types.ts" />
+
+
 "use strict";
 
 import * as Utils from '../utils';
 import * as consts from '../consts';
 
 export class StatMultiplier {
-   constructor(stat) {
+   B: number;
+   Id: number;
+   Iw: number;
+   TBHM: number = 0; // FIXME: TS-MIGRATION: Had no default before... is 0 right?
+   Ta: number;
+   Tm: number;
+
+   IBM: number = 0; // FIXME: TS-MIGRATION: Had no default before... is 0 right?
+   notUsed: boolean = false;
+
+   constructor(stat: StatMultiplier);
+   constructor(stat: number[]);
+   constructor(stat: StatMultiplier | number[] = [0, 0, 0, 0, 0]) {
       // Copy Constructor
-      if (Utils.IsObject(stat)) {
+      if (stat instanceof StatMultiplier) {
          this.B = stat.B;
          this.Id = stat.Id;
          this.Iw = stat.Iw;
@@ -20,9 +35,6 @@ export class StatMultiplier {
             this.notUsed = stat.notUsed;
       }
       else {
-         if (!stat)
-            stat = [0, 0, 0, 0, 0];
-
          this.B = stat[consts.STAT_B]; // Base Value
          this.Id = stat[consts.STAT_ID]; // Increase/Dom Level as %
          this.Iw = stat[consts.STAT_IW]; // Increase/Wild Level as %
@@ -32,6 +44,7 @@ export class StatMultiplier {
    }
 }
 
+// FIXME: TS-MIGRATION: No strong typing here at all
 export class CreatureStats {
    /**
     * Creates an array of Creature StatMultipliers
@@ -59,26 +72,37 @@ export class CreatureStats {
 }
 
 export class ServerMultiplier {
-   constructor(settingArray = [], IBM) {
+   IBM: number;
+
+   constructor(settingArray: number[][] = [], IBM: number) {
       this.IBM = IBM; // Imprint Bonus Multiplier
 
       for (var i = 0; i < 4; i++)
          this[i] = settingArray[i]; // will use undefined if not set, which is fine
    }
+
+   get TaM() { return this[consts.SERVER_TAM] };
+   get TmM() { return this[consts.SERVER_TMM] };
+   get IdM() { return this[consts.SERVER_IDM] };
+   get IwM() { return this[consts.SERVER_IWM] };
+
+   set TaM(value: number) { this[consts.SERVER_TAM] = value; };
+   set TmM(value: number) { this[consts.SERVER_TMM] = value; };
+   set IdM(value: number) { this[consts.SERVER_IDM] = value; };
+   set IwM(value: number) { this[consts.SERVER_IWM] = value; };
 }
 
-// SERVER_TAM = 0, SERVER_TMM = 1, SERVER_IDM = 2, SERVER_IWM = 3;
-Utils.AddNamedIndicesToClass(ServerMultiplier, ['TaM', 'TmM', 'IdM', 'IwM']);
-
 export class Server {
+   singlePlayer: boolean = false;
+   IBM: number = 1;
+   serverName: string;
+   isTestOnly: boolean = false;
+   isPreDefined: boolean = false;
+
    /**
     * Create a server or copy an existing one.
-    * @param {number[][]|Server} settingsArray
-    * @param {number} IBM
-    * @param {boolean} singlePlayer
-    * @param {string} name
     */
-   constructor(settingsArray = [], IBM = 1, singlePlayer = false, name = "") {
+   constructor(settingsArray: MultipliersArray | Server = [], IBM = 1, singlePlayer = false, name = "") {
       this.singlePlayer = singlePlayer; // singlePlayer Setting
       this.IBM = IBM;
       this.serverName = name;

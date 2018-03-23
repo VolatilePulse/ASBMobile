@@ -65,7 +65,7 @@ export default withRender({
       },
 
       createMany() {
-         var objs = [];
+         var objs: any[] = [];
          for (let i = 100; i >= 0; i--) {
             var obj = {
                name: YANG.generate({ titleize: true }),

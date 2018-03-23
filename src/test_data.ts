@@ -1,7 +1,10 @@
+/// <reference path="types.ts" />
+
 "use strict";
 
+
 // Some test data
-const testData = [
+const testData: TestData[] = [
    {
       tag: "Level Tamed 1 Rex 100% TE",
       species: "Rex", level: 1, imprint: 0, exactly: false, mode: "Tamed",
@@ -78,7 +81,6 @@ const testData = [
       values: [3726.1, 468.0, 225.0, 14000.0, 2089.0, 180.9, 134.0, 5360.5],
       serverName: "Zerkxy Gremory",
       results: [[{ "Lw": 5, "Ld": 0 }], [{ "Lw": 5, "Ld": 3 }, { "Lw": 3, "Ld": 5 }], [{ "Lw": 5, "Ld": 0 }, { "Lw": 0, "Ld": 5 }], [{ "Lw": 4, "Ld": 0 }, { "Lw": 0, "Ld": 4 }], [{ "Lw": 1, "Ld": 7 }], [{ "Lw": 14, "Ld": 1, "wildLevel": 29, "TE": 0.028123593820308428 }, { "Lw": 13, "Ld": 1, "wildLevel": 27, "TE": 0.19411027334468386 }, { "Lw": 13, "Ld": 3, "wildLevel": 29, "TE": 0.0040231492004999024 }, { "Lw": 12, "Ld": 1, "wildLevel": 25, "TE": 0.37003627499626596 }, { "Lw": 12, "Ld": 3, "wildLevel": 27, "TE": 0.1742579195902798 }, { "Lw": 12, "Ld": 4, "wildLevel": 28, "TE": 0.08104322509220531 }, { "Lw": 11, "Ld": 1, "wildLevel": 23, "TE": 0.5568219063794275 }, { "Lw": 11, "Ld": 3, "wildLevel": 25, "TE": 0.3550010091399236 }, { "Lw": 11, "Ld": 4, "wildLevel": 26, "TE": 0.25890931789808064 }, { "Lw": 11, "Ld": 5, "wildLevel": 27, "TE": 0.1658287948610524 }, { "Lw": 11, "Ld": 6, "wildLevel": 28, "TE": 0.07562008469449356 }, { "Lw": 10, "Ld": 3, "wildLevel": 23, "TE": 0.547256397386998 }, { "Lw": 10, "Ld": 4, "wildLevel": 24, "TE": 0.44810446120114633 }, { "Lw": 10, "Ld": 5, "wildLevel": 25, "TE": 0.3520595902966971 }, { "Lw": 10, "Ld": 6, "wildLevel": 26, "TE": 0.25897799127133003 }, { "Lw": 10, "Ld": 8, "wildLevel": 28, "TE": 0.08117247200632725 }, { "Lw": 9, "Ld": 1, "wildLevel": 20, "TE": 0.9672587542871666 }, { "Lw": 9, "Ld": 4, "wildLevel": 22, "TE": 0.64974665340573 }, { "Lw": 9, "Ld": 5, "wildLevel": 23, "TE": 0.5505424117478439 }, { "Lw": 9, "Ld": 6, "wildLevel": 24, "TE": 0.4543989180176957 }, { "Lw": 9, "Ld": 8, "wildLevel": 26, "TE": 0.2707445329873974 }, { "Lw": 8, "Ld": 3, "wildLevel": 20, "TE": 0.9710029674009558 }, { "Lw": 8, "Ld": 5, "wildLevel": 21, "TE": 0.7625274659507705 }, { "Lw": 8, "Ld": 6, "wildLevel": 22, "TE": 0.6631137853590522 }, { "Lw": 8, "Ld": 8, "wildLevel": 24, "TE": 0.47321265253860706 }, { "Lw": 8, "Ld": 10, "wildLevel": 26, "TE": 0.2943485086342229 }, { "Lw": 7, "Ld": 5, "wildLevel": 20, "TE": 0.9894410450975633 }, { "Lw": 7, "Ld": 8, "wildLevel": 22, "TE": 0.6899390903680708 }, { "Lw": 6, "Ld": 8, "wildLevel": 20, "TE": 0.9224849762142847 }, { "Lw": 5, "Ld": 10, "wildLevel": 20, "TE": 0.9734583598219956 }], [{ "Lw": 8, "Ld": 17 }, { "Lw": 7, "Ld": 17 }, { "Lw": 6, "Ld": 17 }, { "Lw": 5, "Ld": 17 }, { "Lw": 4, "Ld": 17 }, { "Lw": 3, "Ld": 17 }, { "Lw": 2, "Ld": 17 }, { "Lw": 1, "Ld": 17 }, { "Lw": 0, "Ld": 17 }], [{ "Lw": 28, "Ld": 0 }]],
-
    },
    {
       tag: "Allo, poor extract in ASB",

@@ -24,6 +24,7 @@ export async function LoadData(json) {
 
    for (var creature in jsonObject.species) {
       let speciesData = jsonObject.species[creature];
+      // @ts-ignore
       app.data.speciesNames.push(creature);
       app.data.speciesMultipliers[creature] =
          new CreatureStats(speciesData.stats,

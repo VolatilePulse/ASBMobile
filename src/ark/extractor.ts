@@ -5,13 +5,25 @@
  */
 
 import { TORPOR, FOOD, SPEED } from '../consts';
-import { Stat } from './creature';
+import { Stat, VueCreature } from './creature';
 import * as Ark from '../ark';
 import * as Utils from '../utils';
 
 export class Extractor {
+   c: VueCreature;
+
+   wildFreeMax = 0;
+   domFreeMax = 0;
+   levelBeforeDom = 0;
+   unusedStat = false;
+   options: Stat[][] = [];
+   minIB = 0;
+   maxIB = 0;
+   checkedStat: boolean[] = [];
+
    constructor(vueCreature) {
       this.c = vueCreature;
+      // FIXME: TS-MIGRATION: Should we be storing `m` inside the VueCreature? I've added m:any to VueCreature to handle this for now.
       this.c.m = Ark.GetMultipliers(this.c.serverName, this.c.species);
 
       // TODO: Add consider wild levels
@@ -23,26 +35,9 @@ export class Extractor {
       // Should not rely on wild level steps as, it will speed up extraction, but not everyone may set it :(
 
       // considerWildLevelSteps = considerWildLevelSteps && !bred;
-
-      /** @type {number} */
-      this.wildFreeMax = 0;
-      /** @type {number} */
-      this.domFreeMax = 0;
-      /** @type {number} */
-      this.levelBeforeDom = 0;
-      /** @type {boolean} */
-      this.unusedStat = false;
-      /** @type {Stat [][]} */
-      this.options = [];
-      /** @type {number} */
-      this.minIB = 0;
-      /** @type {number} */
-      this.maxIB = 0;
-      /** @type {boolean[]} */
-      this.checkedStat = [];
    }
 
-   extract(dbg) {
+   extract(dbg?: any) {
       // TODO: Add either a way to throw errors w/ codes (for specific reasons like bad multipliers, stats, etc.)
       //    Or provide an alternative method (returning under bad situations is acceptable for now)
 
@@ -144,7 +139,7 @@ export class Extractor {
 
       // Proof of Concept for Generating options
       if (!this.options.length)
-         this.generateOptions();
+         this.generateOptions(dbg);
       return;
    }
 
@@ -310,7 +305,7 @@ export class Extractor {
       }
    }
 
-   filterResults(dbg) {
+   filterResults(dbg?: any) {
       if (dbg && !dbg['filterLoops']) dbg.filterLoops = 0;
 
       let removed = false;
@@ -343,6 +338,8 @@ export class Extractor {
                   if (tempDM > this.c.stats[i][j].Ld)
                      tempDM = this.c.stats[i][j].Ld;
                }
+               // FIXME: TS-MIGRATION: Extra properties on the stat rows? Could hold these separately like: this.c.minW[i]
+               // @ts-ignore
                this.c.stats[i].minW = tempWM; this.c.stats[i].minD = tempDM;
                wildMin += tempWM;
                domMin += tempDM;
@@ -358,7 +355,9 @@ export class Extractor {
                      if (this.c.stats[i][j].Lw > this.wildFreeMax || this.c.stats[i][j].Ld > this.domFreeMax) {
                         this.c.stats[i][j].removeMe = true;
                      }
+                     // @ts-ignore
                      if (this.c.stats[i][j].Lw + wildMin - this.c.stats[i].minW > this.wildFreeMax
+                        // @ts-ignore
                         || this.c.stats[i][j].Ld + domMin - this.c.stats[i].minD > this.domFreeMax
                         || (this.c.m[i].Tm && !this.filterByTE(i, this.c.stats[i][j]))) {
                         this.c.stats[i][j].removeMe = true;
@@ -369,7 +368,7 @@ export class Extractor {
             }
          }
 
-         removed = this.statRemover();
+         removed = this.statRemover(dbg);
 
          if (!removed && this.options.length === 0)
             removed = this.generateOptions(dbg);
@@ -384,10 +383,13 @@ export class Extractor {
             for (let j = 0; j < this.c.stats[i].length; j++)
                if (this.c.stats[i][j].TE === TEstat.TE)
                   return true;
+               // FIXME: TS-MIGRATION: TS complains that TE, minTE and maxTE might not be set... is it right?
+               // @ts-ignore
                else if (this.c.stats[i][j].maxTE > TEstat.TE && TEstat.TE >= this.c.stats[i][j].minTE) {
                   this.c.stats[i][j].TE = TEstat.TE;
                   return true;
                }
+               // @ts-ignore
                else if (TEstat.maxTE > this.c.stats[i][j].TE && this.c.stats[i][j].TE >= TEstat.minTE) {
                   TEstat.TE = this.c.stats[i][j].TE;
                   return true;
@@ -406,7 +408,7 @@ export class Extractor {
     *
     * @returns {boolean} Returns true if it's a valid options set, false otherwise
     */
-   matchingStats(option, dbg = undefined) {
+   matchingStats(option, dbg?: any) {
       if (dbg) dbg.totalRecursion++;
 
       let TE = -1;
@@ -437,7 +439,7 @@ export class Extractor {
       return false;
    }
 
-   statRemover(dbg) {
+   statRemover(dbg?: any) {
       let initialStatsLength = 0, initialOptionsLength = 0;
       let removed = false;
 
@@ -450,15 +452,15 @@ export class Extractor {
       }
 
       initialOptionsLength = this.options.length;
-      this.options = this.options.filter(option => !option.some(stat => stat['removeMe']));
+      // FIXME: TS-MIGRATION: Using 'as' is how you cast in TS, although it's only compile-time
+      this.options = this.options.filter(option => !option.some(stat => stat['removeMe'] as boolean));
       if (dbg) dbg.numberRemoved += initialOptionsLength - this.options.length;
 
       return removed || initialOptionsLength > this.options.length;
    }
 
-   generateOptions(dbg) {
-      /** @type {number[]} */
-      let tempOptions = [];
+   generateOptions(dbg?: any) {
+      let tempOptions: number[] = [];
 
       // The initial array for matchingStats
       for (let stat = 0; stat < 7; stat++) {
@@ -472,7 +474,7 @@ export class Extractor {
       let selector = indexMax;
 
       do {
-         let tempStatOption = [];
+         let tempStatOption: Stat[] = [];
          for (let stat = 0; stat < 7; stat++) {
             tempStatOption.push(this.c.stats[stat][tempOptions[stat]]);
          }

@@ -6,6 +6,17 @@ import { VueCreature } from './ark/creature';
 import { isNumber, isString, isFunction, isObject, isArray } from 'util';
 
 
+interface TestResult {
+   pass: boolean | undefined;
+   stats: Stat[][];
+   options: Stat[][];
+   dbg?: any;
+   extra: { [key: string]: any };
+   exception?: any;
+   failReason?: string;
+   duration?: number;
+}
+
 export function PerformTest(testData) {
    let testCreature = new VueCreature();
 
@@ -14,7 +25,6 @@ export function PerformTest(testData) {
    testCreature.tamed = (testData.mode == "Tamed");
    testCreature.bred = (testData.mode == "Bred");
    testCreature.IB = testData.imprint / 100;
-   testCreature.exactly = !!testData.exactly;
    testCreature.values = testData.values.map(Ark.ConvertValue);
    testCreature.serverName = testData.serverName;
    testCreature.level = testData.level;
@@ -22,7 +32,7 @@ export function PerformTest(testData) {
 
    let extractObject = new Extractor(testCreature);
 
-   let dbg = {
+   let dbg: any = {
       totalRecursion: 0,
       numberRemoved: 0,
    };
@@ -41,12 +51,13 @@ export function PerformTest(testData) {
       exception = ex;
    }
 
-   let result = {};
-   result.pass = false;
-   result.stats = testCreature['stats'];
-   result.options = extractObject['options'];
-   result.dbg = dbg;
-   result.extra = {};
+   let result: TestResult = {
+      pass: false,
+      stats: testCreature['stats'],
+      options: extractObject['options'],
+      dbg: dbg,
+      extra: {},
+   };
    if (testCreature.bred) result.extra.IB = testCreature.IB * 100;
 
    if (exception) {
@@ -86,7 +97,6 @@ export function PerformPerfTest(testData, duration = 5000) {
          testCreature.tamed = (testData.mode == "Tamed");
          testCreature.bred = (testData.mode == "Bred");
          testCreature.IB = testData.imprint / 100;
-         testCreature.exactly = !!testData.exactly;
          testCreature.values = testData.values.map(Ark.ConvertValue);
          testCreature.serverName = testData.serverName;
          testCreature.level = testData.level;

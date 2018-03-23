@@ -51,7 +51,7 @@ export const vueApp = new Vue({
       valuesJson: {},
 
       // Things that change
-      tempCreature: {},
+      tempCreature: {} as VueCreature,
    },
 
    computed: {
@@ -65,6 +65,7 @@ export const vueApp = new Vue({
       // Calcualte the paths for each of the stat images
       for (let i = 0; i < statNames.length; i++) {
          let name = statNames[i];
+         // @ts-ignore
          import("assets/" + name.toLowerCase() + ".svg").then(url => Vue.set(this.statImages, i, url));
       }
 

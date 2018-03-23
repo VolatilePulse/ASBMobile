@@ -1,3 +1,5 @@
+/// <reference path="types.ts"/>
+
 import Vue from "vue";
 
 import testServersData from "./servers_test";
@@ -5,22 +7,15 @@ import preDefinedServersData from "./servers_predef";
 import { Server } from "./ark/multipliers";
 
 
-/** @type {{[name:string]:Server}} */
-export const preDefinedServers = {};
-
-/** @type {{[name:string]:Server}} */
-export const testServers = {};
-
-/** @type {{[name:string]:Server}} */
-export const userServers = {};
+export const preDefinedServers: { [name: string]: Server } = {};
+export const testServers: { [name: string]: Server } = {};
+export const userServers: { [name: string]: Server } = {};
 
 
 /**
  * Look up a server by name, preferring user servers over anything else.
- * @param {string} name
- * @returns {Server}
  */
-export function getServerByName(name) {
+export function getServerByName(name: string): Server {
    let server = userServers[name] || preDefinedServers[name] || testServers[name];
    if (!server) {
       server = preDefinedServers["Official Server"];
@@ -31,10 +26,8 @@ export function getServerByName(name) {
 
 /**
  * Copy a server and add it as a user server.
- * @param {Server} src A server definition
- * @returns {Server} The newly created server
  */
-export function copyServer(src) {
+export function copyServer(src: Server): Server {
    let newServer = new Server(src, src.IBM, !!src['singlePlayer'], src.serverName);
    newServer.isTestOnly = false;
    newServer.isPreDefined = false;
@@ -49,10 +42,7 @@ export function copyServer(src) {
    return newServer;
 }
 
-/**
- * @param {boolean} includeTest
- */
-export async function initialise(includeTest) {
+export async function initialise(includeTest: boolean) {
    console.log("Loading pre-defined servers...");
 
    // Only run once
@@ -78,27 +68,17 @@ export async function initialise(includeTest) {
    // TODO: Load user servers from the DB using await
 }
 
-/**
- * @param {Server} server
- */
-export function addUserServer(server) {
+export function addUserServer(server: Server) {
    // TODO: Do this in the DB
    Vue.set(userServers, server.serverName, server);
 }
 
-/**
- * @param {string} name
- */
-export function deleteUserServer(name) {
+export function deleteUserServer(name: string) {
    // TODO: Do this in the DB
    Vue.delete(userServers, name);
 }
 
-/**
- * @param {string} oldName
- * @param {string} newName
- */
-export function renameServer(oldName, newName) {
+export function renameServer(oldName: string, newName: string) {
    // TODO: Do this in the database
    let server = userServers[oldName];
    deleteUserServer(oldName);

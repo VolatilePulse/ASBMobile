@@ -1,9 +1,6 @@
+/// <reference path="types.ts"/>
 
-/** @typedef {{serverName:string,multipliers:number[][],IBM:number,singlePlayer:boolean}} ServerDef */
-
-
-/** @type {ServerDef[]} */
-let servers = [
+let servers: ServerDef[] = [
    {
       serverName: "Official Server",
       IBM: 1,

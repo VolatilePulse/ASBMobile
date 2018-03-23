@@ -12,14 +12,15 @@ const DB_PREFIX = 'library_';
 
 
 class Library {
+   id: string;
+
+   private _db?: PouchDB.Database;
+
    /**
     * @param {string} id
     */
    constructor(id) {
       this.id = id;
-
-      /** @type {PouchDB.Database} */
-      this._db = undefined;
    }
 
    async load() {
@@ -39,9 +40,10 @@ class Library {
 }
 
 class LibraryManager {
+   // @ts-ignore
+   current: Library;
+
    constructor() {
-      /** @type {Library} */
-      this.current = undefined;
    }
 
    /** Initialise the library manager system */
@@ -105,7 +107,7 @@ class LibraryManager {
       }
 
       // Open and destroy the database
-      var tempDb = new PouchDB(DB_PREFIX + id);
+      var tempDb: PouchDB.Database | undefined = new PouchDB(DB_PREFIX + id);
       await tempDb.destroy();
       tempDb = undefined;
 

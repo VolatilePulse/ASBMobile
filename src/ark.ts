@@ -102,3 +102,15 @@ export function GetMultipliers(serverName, speciesName) {
 
    return multipliers;
 }
+
+
+
+interface IAdder {
+   add(a: number, b: number): number;
+}
+
+class MyAdder implements IAdder {
+   add(a: number, b: number): number {
+      return a + b;
+   }
+}

@@ -14,6 +14,7 @@ export const NEW_SERVER_ID = "___NEW___SERVER___";
  */
 export function setMult(s, p, v, server) {
    let num = v ? parseFloat(v) : undefined;
+   // @ts-ignore
    if (num <= 0) num = undefined;
    server[s][p] = num;
 }

@@ -20,7 +20,6 @@ export default withRender({
       paramIndices: Utils.Range(4),
 
       // Current state
-      /** @type {Server}} */
       server: new Server(),
 
       editName: "", // temp copy of the server name for editing
