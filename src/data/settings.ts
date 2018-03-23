@@ -14,7 +14,7 @@ class Settings {
    dummyText = "Dummy!";
    dummyNumber = 1234;
 
-   _id?: string;
+   readonly _id = ID_SETTINGS;
    _rev?: string;
 
    /** All user-specific settings with default values. Should not include anything library-specific. */
@@ -30,8 +30,7 @@ class SettingsManager {
    current: Settings;
 
    private _initialised = false;
-   private _db?: PouchDB.Database = undefined;
-   private _rev?: string;
+   private _db!: PouchDB.Database<Settings>;
    private _debouncedSave: () => void;
 
    /** The SettingsManager manages settings :) */
@@ -48,17 +47,16 @@ class SettingsManager {
       if (this._initialised) return;
       this._initialised = true;
 
-      this._db = new PouchDB(DB_SETTINGS);
+      this._db = new PouchDB(DB_SETTINGS, { revs_limit: 20 });
 
       // Ensure a row exists with the one ID
-      var result: any = undefined;
+      var result: Settings | undefined;
       try { result = await this._db.get(ID_SETTINGS); }
       catch (_) { }
 
       if (result) {
          // Overwrite our defaults with what's saved
          Object.assign(this.current, result);
-         this._rev = result._rev;
       }
       else {
          // No existing settings : save the defaults
@@ -73,14 +71,9 @@ class SettingsManager {
 
    /** Save the current settings to the database immediately */
    async save() {
-      /** @type {any} */
-      var toStore = this.current;
-      toStore._id = ID_SETTINGS;
-      toStore._rev = this._rev;
-
       console.log("Saving settings");
-      var result = await this._db.put(toStore);
-      this._rev = result.rev;
+      var result = await this._db.put(this.current);
+      this.current._rev = result.rev;
    }
 }
 

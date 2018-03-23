@@ -14,7 +14,7 @@ const DB_PREFIX = 'library_';
 class Library {
    id: string;
 
-   private _db?: PouchDB.Database;
+   private _db!: PouchDB.Database;
 
    /**
     * @param {string} id
@@ -55,12 +55,8 @@ class LibraryManager {
       await this._ensureLibraryAndSelect();
    }
 
-   /**
-    * Create a new library with the given display name. Does not select the library for use.
-    * @param {string} displayName
-    * @returns {string} The id of the created library
-    */
-   createNewLibrary(displayName) {
+   /** Create a new library with the given display name. Does not select the library for use */
+   createNewLibrary(displayName: string): string {
       // Make an ID that will be used as a the database name
       do {
          var newId = this._makeId();
@@ -75,12 +71,8 @@ class LibraryManager {
       return newId;
    }
 
-   /**
-    * Select the specified library as the current one.
-    * @param {string} id
-    * @param {boolean} force
-    */
-   async selectLibrary(id, force = false) {
+   /** Select the specified library as the current one */
+   async selectLibrary(id: string, force = false) {
       if (!force && SettingsManager.current.selectedLibrary == id) return;
 
       // Close existing library
@@ -91,16 +83,15 @@ class LibraryManager {
       await library.load();
 
       // Save the selection
-      SettingsManager.current.selectedLibrary = id;
-      SettingsManager.notifyChanged();
+      if (SettingsManager.current.selectedLibrary != id) {
+         SettingsManager.current.selectedLibrary = id;
+         SettingsManager.notifyChanged();
+      }
       this.current = library;
    }
 
-   /**
-    * Delete the specified library complately and without confirmation.
-    * @param {string} id
-    */
-   async deleteLibrary(id) {
+   /** Delete the specified library complately and without confirmation */
+   async deleteLibrary(id: string) {
       // If we're deleting the current library, clear up first
       if (id == SettingsManager.current.selectedLibrary) {
          await this.current.unload();
@@ -122,12 +113,8 @@ class LibraryManager {
       }
    }
 
-   /**
-    * Change the display name of the specified library
-    * @param {string} id
-    * @param {string} newName
-    */
-   async renameLibrary(id, newName) {
+   /** Change the display name of the specified library */
+   async renameLibrary(id: string, newName: string) {
       if (!(id in SettingsManager.current.libraryNames)) throw "Attempt to rename library that doesn't exist";
 
       Vue.set(SettingsManager.current.libraryNames, id, newName);
@@ -135,7 +122,7 @@ class LibraryManager {
    }
 
    /** Ensure a library exists and make one active */
-   async _ensureLibraryAndSelect() {
+   private async _ensureLibraryAndSelect() {
       // If no libraries exist, create a default
       if (Object.keys(SettingsManager.current.libraryNames).length < 1) {
          this.createNewLibrary(DEFAULT_LIBRARY_NAME);
@@ -147,7 +134,7 @@ class LibraryManager {
    }
 
    /** Pick a library to select, choosing either the user's last choice or the first available one */
-   _pickALibrary() {
+   private _pickALibrary() {
       var id = SettingsManager.current.selectedLibrary;
       if (!id || !(id in SettingsManager.current.libraryNames)) {
          id = Object.keys(SettingsManager.current.libraryNames)[0];
@@ -156,7 +143,7 @@ class LibraryManager {
    }
 
    /** Make a library ID based on the current date and time */
-   _makeId() {
+   private _makeId() {
       var now = new Date();
 
       // I hate Javascript
