@@ -1,6 +1,6 @@
 import Vue from 'vue';
 
-import PouchDB from 'pouchdb-browser';
+import PouchDB from 'pouchdb-core';
 import PouchFind from 'pouchdb-find';
 PouchDB.plugin(PouchFind);
 

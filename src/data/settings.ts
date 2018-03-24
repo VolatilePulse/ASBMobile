@@ -1,5 +1,5 @@
 import _debounce from 'lodash.debounce';
-import PouchDB from 'pouchdb-browser';
+import PouchDB from 'pouchdb-core';
 
 
 const DB_SETTINGS = 'settings';

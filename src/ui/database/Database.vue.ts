@@ -3,8 +3,7 @@ import Component from 'vue-class-component';
 
 import WithRender from './Database.html?style=./Database.css';
 
-// import PouchDB from 'pouchdb-browser';
-import YANG from 'yet-another-name-generator';
+// import PouchDB from 'pouchdb-core';
 
 import theStore from '@/ui/store';
 
@@ -74,7 +73,7 @@ export default class SettingsComponent extends Vue {
       const objs: any[] = [];
       for (let i = 100; i >= 0; i--) {
          const obj = {
-            name: YANG.generate({ titleize: true }),
+            name: '' + (Math.random() * 1E10),
             species: theStore.speciesNames[Math.floor(Math.random() * theStore.speciesNames.length)],
             s0: Math.floor(Math.random() * 100),
             s1: Math.floor(Math.random() * 100),

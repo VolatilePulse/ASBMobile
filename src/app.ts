@@ -1,20 +1,23 @@
 import Vue from 'vue';
+import Component from 'vue-class-component';
 import BootstrapVue from 'bootstrap-vue';
-import PouchDB from 'pouchdb-browser';
+import PouchVue from 'pouch-vue';
+
+import PouchDB from 'pouchdb-core';
+import PouchIDB from 'pouchdb-adapter-idb';
 import PouchFind from 'pouchdb-find';
 import PouchLiveFind from 'pouchdb-live-find';
-import PouchVue from 'pouch-vue';
 
 import { SettingsManager, LibraryManager } from './data';
 import * as Servers from './servers';
+import theStore from '@/ui/store';
 
 import Shell from './ui/shell/Shell.vue';
-import Component from 'vue-class-component';
-import theStore from '@/ui/store';
 
 
 Vue.use(BootstrapVue);
 
+PouchDB.plugin(PouchIDB);
 PouchDB.plugin(PouchFind);
 PouchDB.plugin(PouchLiveFind);
 
