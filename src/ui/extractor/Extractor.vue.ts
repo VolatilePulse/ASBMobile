@@ -74,7 +74,7 @@ export default class ExtractorComponent extends Vue {
 
    debugStatValue(i) {
       let creature = this.store.tempCreature;
-      if (!creature.m) return '-';
-      return creature.stats[i][0].calculateValue(creature.m[i], !creature.wild, creature.TE, creature.IB);
+      if (!this.extractor.m) return '-';
+      return creature.stats[i][0].calculateValue(this.extractor.m[i], !creature.wild, 1, 0);
    }
 }

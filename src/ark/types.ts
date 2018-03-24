@@ -13,7 +13,6 @@ interface TestData {
    species: string;
    level: number;
    imprint: number;
-   exactly?: boolean;
    mode: "Wild" | "Tamed" | "Bred";
    values: number[];
    serverName: string;

@@ -1,5 +1,6 @@
 import * as Utils from '../utils';
 import * as Ark from '../ark';
+import { StatMultiplier } from '@/ark/multipliers';
 
 export class Stat implements Stat {
    Lw: number;
@@ -25,7 +26,7 @@ export class Stat implements Stat {
       }
    }
 
-   calculateValue(m, tamed = false, TE = 0, IB = 0) {
+   calculateValue(m: StatMultiplier, tamed = false, TE = 0, IB = 0) {
       // V = (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) * (1 + TE * Tm * TmM) * (1 + Ld * Id * IdM)
       let TBHM = (tamed && m.TBHM) || 1;
       let v = m.B * TBHM;
@@ -40,7 +41,7 @@ export class Stat implements Stat {
       return v;
    }
 
-   calculateWildLevel(m, v, tamed = false, TE = 0, IB = 0) {
+   calculateWildLevel(m: StatMultiplier, v: number, tamed = false, TE = 0, IB = 0) {
       // Lw = ((V / ((1 + Ld * Id * IdM) * (1 + TE * Tm * TmM)) - Ta * TaM) / (B * TBHM * (1 + IB * 0.2 * IBM)) - 1) / (Iw * IwM)
       let TBHM = (tamed && m.TBHM) || 1;
 
@@ -61,7 +62,7 @@ export class Stat implements Stat {
       return this.Lw;
    }
 
-   calculateDomLevel(m, v, tamed = false, TE = 0, IB = 0) {
+   calculateDomLevel(m: StatMultiplier, v: number, tamed = false, TE = 0, IB = 0) {
       //  Ld = ((V / (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) / (1 + TE * Tm * TmM)) - 1) / (Id * IdM)
 
       // Prevents division by 0
@@ -78,7 +79,7 @@ export class Stat implements Stat {
       return this.Ld;
    }
 
-   calculateTE(m, v, tamed = true, IB = 0) {
+   calculateTE(m: StatMultiplier, v: number, tamed = true, IB = 0) {
       // TE = (V / (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) / (1 + Ld * Id * IdM) - 1) / (Tm * TmM)
 
       if (!tamed)
@@ -93,7 +94,7 @@ export class Stat implements Stat {
       return ((TE - 1) / this.calculateTm(tamed, m.Tm, m.TmM));
    }
 
-   calculateIB(m, v, tamed = true, TE = 1) {
+   calculateIB(m: StatMultiplier, v: number, tamed = true, TE = 1) {
       // IB = ((V / (1 + TE * Tm * TmM) / (1 + Ld * Id * IdM) - Ta * TaM) / (B * (1 + Lw * Iw * IwM) * TBHM) - 1)  / (0.2 * IBM)
 
       if (!tamed)
@@ -108,7 +109,7 @@ export class Stat implements Stat {
       return ((IB - 1) / (0.2 * m.IBM));
    }
 
-   calculateTm(tamed, Tm, TmM, TE = 1) {
+   calculateTm(tamed: boolean, Tm: number, TmM: number, TE = 1) {
       // If not tamed, the Tame Multiplier doesn't apply to the value
       if (!tamed)
          return 0;
@@ -120,7 +121,7 @@ export class Stat implements Stat {
          return (TE * Tm * TmM);
    }
 
-   calculateTa(tamed, Ta, TaM) {
+   calculateTa(tamed: boolean, Ta: number, TaM: number) {
       // If not tamed, the Tame Additive doesn't apply to the value
       if (!tamed)
          return 0;
@@ -184,7 +185,6 @@ export class Creature {
 }
 
 export class VueCreature extends Creature {
-   m: any;
 
    constructor() {
       // Initializes the Creature Constructor and gives this class those properties
@@ -196,7 +196,7 @@ export class VueCreature extends Creature {
 
       for (let i = 0; i < 8; i++) {
          this.stats[i] = [c.stats[i]];
-         this.values[i] = this.stats[i][0].calculateValue(Ark.GetMultipliers(this.serverName, this.species), !this.wild, this.TE, this.IB);
+         this.values[i] = this.stats[i][0].calculateValue(Ark.GetMultipliers(this.serverName, this.species)[i], !this.wild, this.TE, this.IB);
       }
    }
 

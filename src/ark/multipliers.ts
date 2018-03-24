@@ -13,6 +13,11 @@ export class StatMultiplier {
    TBHM?: number;
    IBM?: number;
 
+   TaM?: number;
+   TmM?: number;
+   IdM?: number;
+   IwM?: number;
+
    notUsed: boolean = false;
 
    constructor(stat: StatMultiplier);

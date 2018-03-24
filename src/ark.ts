@@ -3,7 +3,7 @@
 import { DAMAGE, SPEED, PRE_IB, PRE_TE } from './consts';
 import * as Utils from './utils';
 import * as Servers from './servers';
-import { Server } from './ark/multipliers';
+import { Server, StatMultiplier } from './ark/multipliers';
 import theStore from '@/ui/store';
 
 
@@ -23,7 +23,7 @@ export function FormatOption(option) {
    return `(${Lw}+${Ld})`;
 }
 
-export function Precision(index) {
+export function Precision(index: number) {
    // Displays Damage and Speed as 153.5(%)
    if (index == DAMAGE || index == SPEED)
       return 3;
@@ -74,7 +74,7 @@ export function ConvertValue(value, index) {
  * @param {string} speciesName
  * @return {*}
  */
-export function GetMultipliers(serverName, speciesName) {
+export function GetMultipliers(serverName: string, speciesName: string): StatMultiplier[] {
    let server = Servers.getServerByName(serverName);
 
    // The Server object tells us everything we need to know about the multipliers
