@@ -21,7 +21,7 @@ export default class SettingsComponent extends Vue {
    species: string = 'Mosasaurus';
 
    pouch = {
-      creatures() {
+      creatures(): any {
          // @ts-ignore
          if (!!this.species) {
             // @ts-ignore
@@ -62,7 +62,7 @@ export default class SettingsComponent extends Vue {
       };
    }
 
-   remove(item) {
+   remove(item: { _id: string, _rev: string }) {
       this.$pouch.remove('creatures', item._id, item._rev);
    }
 

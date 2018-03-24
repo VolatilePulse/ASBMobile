@@ -3,6 +3,7 @@ import Component from 'vue-class-component';
 
 import WithRender from './Servers.html?style=./Servers.css';
 
+// @ts-ignore
 import { Modal } from 'bootstrap-vue/es/components';
 
 import theStore from '@/ui/store';
@@ -57,8 +58,10 @@ export default class SettingsComponent extends Vue {
       }
    }
 
-   formatMult(n) { return Utils.FormatNumber(n, 2, true); }
-   valueFor(s, p) { return this.server[s][p] || (this.server['singlePlayer'] && theStore.officialSPMultiplier[s][p]) || theStore.officialServer[s][p]; }
+   formatMult(n: number) { return Utils.FormatNumber(n, 2, true); }
+   valueFor(s: number, p: number) {
+      return this.server[s][p] || (this.server['singlePlayer'] && theStore.officialSPMultiplier[s][p]) || theStore.officialServer[s][p];
+   }
 
    setMult(s: number, p: number, v: string) {
       let num = v ? parseFloat(v) : undefined;

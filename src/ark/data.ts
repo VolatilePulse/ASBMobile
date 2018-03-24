@@ -6,14 +6,10 @@ import { CreatureStats, Server } from './multipliers';
 import theStore from '@/ui/store';
 
 /**
- * Creates ASBM ready objects from a JSON String and populates the DB
- * @async
- * @param {string} json Json-encoded stirng
- * @returns {Promise}
+ * Load the data file containing creature multipliers and official server settings
+ * @param {string} json Json-encoded string with the contents of data.json
  */
-
-/** Load the data file containing creature multipliers and official server settings */
-export async function LoadData(json) {
+export function LoadData(json: string) {
    // Parse the received JSON file
    const jsonObject = JSON.parse(json);
 

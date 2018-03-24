@@ -31,9 +31,9 @@ export default class ExtractorComponent extends Vue {
    extractor: Extractor = null;
 
 
-   range(n) { return Array.from({ length: n }, (_, i) => i); }
-   formatFloat(n) { return FormatNumber(n, 2); }
-   formatRound(n) { return FormatNumber(n, 0); }
+   range(n: number) { return Array.from({ length: n }, (_, i) => i); }
+   formatFloat(n: number) { return FormatNumber(n, 2); }
+   formatRound(n: number) { return FormatNumber(n, 0); }
 
    extract() {
       const creature = this.store.tempCreature;
@@ -49,7 +49,7 @@ export default class ExtractorComponent extends Vue {
       this.extractor.extract();
    }
 
-   insertTestData(test) {
+   insertTestData(test: TestData) {
       // Copy some fields from the test directly into the extractor
       this.store.tempCreature.species = test.species;
       this.store.tempCreature.level = test.level;
@@ -66,11 +66,11 @@ export default class ExtractorComponent extends Vue {
    }
 
    // Nasty debug-only methods to show stats and their options
-   debugShowOptions(options) {
+   debugShowOptions(options: Stat[]) {
       return (options && options['length']) ? options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(',') : '-none-';
    }
 
-   debugStatValue(i) {
+   debugStatValue(i: number) {
       const creature = this.store.tempCreature;
       if (!this.extractor.m) return '-';
       return creature.stats[i][0].calculateValue(this.extractor.m[i], !creature.wild, 1, 0);

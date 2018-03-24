@@ -5,7 +5,7 @@ import WithRender from './Tester.html?style=./Tester.css';
 
 import * as Utils from '@/utils';
 import { FormatAllOptions, FormatOptions, FormatOption } from '@/ark';
-import { PerformTest, PerformPerfTest } from '@/testing';
+import { PerformTest, PerformPerfTest, TestResult } from '@/testing';
 
 import testData from '@/ark/test_data';
 import { statNames } from '@/consts';
@@ -25,11 +25,11 @@ export default class TesterComponent extends Vue {
 
    openTestIndex = 0;
    testData = testData;
-   results = [];
+   results: TestResult[] = [];
    passes = 0;
    fails = 0;
    running = false;
-   accordionIndex = null;
+   accordionIndex?: number = null;
 
    statIndices = Utils.Range(8);
    statNames = statNames;
@@ -37,22 +37,21 @@ export default class TesterComponent extends Vue {
    optionsTableFields = statNames.map((name, i) => ({ key: i, label: name, formatter: FormatOption }));
 
 
-   openResults(index) { this.openTestIndex = (this.openTestIndex !== index) ? index : null; }
-   isPass(index) { return this.results[index] && this.results[index]['pass']; }
-   isFail(index) { return this.results[index] && !this.results[index]['pass']; }
-   formatNumber(n, places = 0) { return Utils.FormatNumber(n, places); }
-   formattedOptions(options) { return options ? FormatOptions(options) : '-'; }
-   formattedStats(stats) { return FormatAllOptions(stats); }
-   formattedStat(stat) { return FormatOption(stat); }
-   dbgKeys(index) { return this.results[index]['dbg'] ? Object.keys(this.results[index].dbg).filter(key => key !== 'preFilterStats') : []; }
-   scrollSync(event) { (event.target.nextElementSibling || event.target.previousElementSibling).scrollLeft = event.target.scrollLeft; }
-   optionsForStat(testIndex, statIndex) { return this.results[testIndex].options.map(options => options[statIndex]); }
+   openResults(index: number) { this.openTestIndex = (this.openTestIndex !== index) ? index : null; }
+   isPass(index: number) { return this.results[index] && this.results[index]['pass']; }
+   isFail(index: number) { return this.results[index] && !this.results[index]['pass']; }
+   formatNumber(n: number, places = 0) { return Utils.FormatNumber(n, places); }
+   formattedOptions(options: Stat[]) { return options ? FormatOptions(options) : '-'; }
+   formattedStats(stats: Stat[][]) { return FormatAllOptions(stats); }
+   formattedStat(stat: Stat) { return FormatOption(stat); }
+   dbgKeys(index: number) { return this.results[index]['dbg'] ? Object.keys(this.results[index].dbg).filter(key => key !== 'preFilterStats') : []; }
+   scrollSync(event: any) { (event.target.nextElementSibling || event.target.previousElementSibling).scrollLeft = event.target.scrollLeft; }
+   optionsForStat(testIndex: number, statIndex: number) { return this.results[testIndex].options.map(options => options[statIndex]); }
 
    /**
     * Run a selection of tests without blocking the browser
-    * @param {number[]} indices
     */
-   async runTestSelection(indices) {
+   async runTestSelection(indices: number[]) {
       this.running = true;
       this.openTestIndex = null;
 
@@ -86,9 +85,9 @@ export default class TesterComponent extends Vue {
    }
 
    /** Run one test repeatedly to measure it's performance, blocking the browser */
-   runPerfTest(index) {
-      const { duration, runs, error } = PerformPerfTest(testData[index]);
-      if (error) {
+   runPerfTest(index: number) {
+      const { duration, runs, exception } = PerformPerfTest(testData[index]);
+      if (exception) {
          this.results[index].duration = 'X';
       }
       else {
@@ -101,7 +100,7 @@ export default class TesterComponent extends Vue {
    }
 
    /** Run just one test */
-   async runTest(index) {
+   async runTest(index: number) {
       await this.runTestSelection([index]);
       if (this.results[index] === undefined || !this.results[index]['pass'])
          this.openTestIndex = index;
@@ -126,8 +125,8 @@ export default class TesterComponent extends Vue {
 
    /** Count the number of passes and fails, excluding those that haven't run */
    updateStatus() {
-      this.passes = this.results.reduce((total, result) => total + (result && result.pass === true && 1), 0);
-      this.fails = this.results.reduce((total, result) => total + (result && result.pass === false && 1), 0);
+      this.passes = this.results.reduce((total: number, result: TestResult) => total + (result && result.pass === true && 1), 0);
+      this.fails = this.results.reduce((total: number, result: TestResult) => total + (result && result.pass === false && 1), 0);
    }
 }
 

@@ -5,6 +5,8 @@
 import cloneDeepWith from 'lodash.clonedeepwith';
 import isEqual from 'lodash.isequal';
 import isEqualWith from 'lodash.isequalwith';
+import { isString } from 'util';
+import { IsEqualCustomizer } from 'lodash';
 
 const EPSILON = 1E-10;
 
@@ -35,7 +37,8 @@ const formattersCache: Map<{ places: number, fixed: boolean }, Intl.NumberFormat
 export function FormatNumber(value: number, places = 1, fixed = false) {
    let formatter = formattersCache.get({ places, fixed });
    if (!formatter) {
-      const locale = navigator['language'] || (navigator['languages'] && navigator.languages[0]) || navigator['browserLanguage'] || 'en';
+      // @ts-ignore
+      const locale: string = navigator['language'] || (navigator['languages'] && navigator.languages[0]) || (navigator['browserLanguage'] as string) || 'en';
       if (fixed)
          formatter = new Intl.NumberFormat(locale, { maximumFractionDigits: places, minimumFractionDigits: places, useGrouping: false });
       else
@@ -76,7 +79,7 @@ export function Delay(duration: number) {
  */
 export function DelayFunction(duration: number) {
    // tslint:disable-next-line:only-arrow-functions
-   return function (...args) {
+   return function (...args: any[]) {
       return new Promise((resolve, _) => setTimeout(() => resolve(...args), duration));
    };
 }
@@ -111,15 +114,15 @@ export function RoundTo(num: number, places = 0) {
  * @param item
  * @returns {boolean}
  */
-export function IsObject(item) {
+export function IsObject(item: any) {
    return (item && typeof item === 'object' && !Array.isArray(item));
 }
 
-export function IsFunction(item) {
+export function IsFunction(item: any) {
    return (item && typeof item === 'function');
 }
 
-export function DeepCompare(a, b, fn) {
+export function DeepCompare<T>(a: T, b: T, fn: IsEqualCustomizer) {
    if (fn) return isEqualWith(a, b, fn);
    return isEqual(a, b);
 }
@@ -128,9 +131,9 @@ export function DeepCopy<T>(obj: T): T {
    return cloneDeepWith(obj, CloneCustomizer);
 }
 
-function CloneCustomizer(value, key) {
+function CloneCustomizer<T>(value: T, key: string | number): any | null {
    if (!key) return value;
-   if (key.startsWith('_')) return null;
+   if (isString(key) && key.startsWith('_')) return null;
 }
 
 /**
@@ -138,7 +141,7 @@ function CloneCustomizer(value, key) {
  * @param {object} target
  * @param {object[]} sources
  */
-export function DeepMerge(target, ...sources) {
+export function DeepMerge(target: any, ...sources: any[]): any {
    if (!sources.length)
       return target;
 
@@ -164,7 +167,7 @@ export function DeepMerge(target, ...sources) {
  * @param {object} target
  * @param {object[]} sources
  */
-export function DeepMergeSoft(target, ...sources) {
+export function DeepMergeSoft(target: any, ...sources: any[]): any {
    if (!sources.length)
       return target;
 

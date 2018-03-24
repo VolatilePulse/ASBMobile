@@ -5,18 +5,19 @@ import { VueCreature } from './ark/creature';
 import { isNumber, isString, isFunction, isObject, isArray } from 'util';
 
 
-interface TestResult {
-   pass: boolean | undefined;
-   stats: Stat[][];
-   options: Stat[][];
+export interface TestResult {
+   pass?: boolean;
+   stats?: Stat[][];
+   options?: Stat[][];
    dbg?: any;
-   extra: { [key: string]: any };
+   extra?: { [key: string]: any };
    exception?: any;
    failReason?: string;
-   duration?: number;
+   duration?: number | string;
+   runs?: number;
 }
 
-export function PerformTest(testData) {
+export function PerformTest(testData: TestData): TestResult {
    const testCreature = new VueCreature();
 
    // Set the properties to prepare for extraction
@@ -73,12 +74,9 @@ export function PerformTest(testData) {
 }
 
 /**
- *
- * @param {*} testData
- * @param {number} duration Total test duration, in milliseconds
- * @returns {{duration?:number,runs?:number,error?:string}}
+ * Run a test in performance mode, repeating it until `duration` is up and reporting on the average run time.
  */
-export function PerformPerfTest(testData, duration = 5000) {
+export function PerformPerfTest(testData: TestData, duration = 5000): TestResult {
    let runs = 0;
    let t1, t2;
    const cutoffTime = Date.now() + duration;
@@ -111,7 +109,7 @@ export function PerformPerfTest(testData, duration = 5000) {
       duration = (t2 - t1) / runs;
    }
    catch (_) {
-      return { error: '-' };
+      return { exception: '-' };
    }
 
    return { duration, runs };
@@ -122,7 +120,7 @@ export function PerformPerfTest(testData, duration = 5000) {
  * @param {any} result The test result
  * @param {any} expected The expected result
  */
-function IsPass(result, expected) {
+function IsPass(result: any, expected: any): boolean {
    if (isNumber(result))
       return isNumber(expected) && Utils.CompareFloat(result, expected);
 

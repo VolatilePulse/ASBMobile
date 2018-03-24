@@ -6,7 +6,7 @@
       "rootDir": "src",
       "alwaysStrict": true,
       "strict": true,
-      "noImplicitAny": false,
+      "noImplicitAny": true,
       "strictNullChecks": false,
       "experimentalDecorators": true,
       "allowSyntheticDefaultImports": true,

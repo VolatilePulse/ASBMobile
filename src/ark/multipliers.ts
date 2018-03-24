@@ -12,6 +12,7 @@ export class StatMultiplier {
    IBM?: number;
 
    notUsed: boolean = false;
+   noImprint: boolean = false;
 
    constructor(stat: StatMultiplier | number[] = [0, 0, 0, 0, 0]) {
       // Copy Constructor
@@ -36,13 +37,12 @@ export class StatMultiplier {
    }
 }
 
-// FIXME: TS-MIGRATION: No strong typing here at all
 export class CreatureStats {
    /**
     * Creates an array of Creature StatMultipliers
     * @param {array} stats An array of the statmultipliers
     */
-   constructor(stats, TBHM = 1, oxygenNotUsed = false, speedImprintIgnored = false) {
+   constructor(stats: StatMultiplier[], TBHM = 1, oxygenNotUsed = false, speedImprintIgnored = false) {
       for (let i = 0; i < 8; i++)
          this[i] = new StatMultiplier(stats ? stats[i] : null);
 
@@ -56,11 +56,10 @@ export class CreatureStats {
       // These values are not imprint increased
       this[consts.STAMINA].noImprint = true;
       this[consts.OXYGEN].noImprint = true;
-      if (speedImprintIgnored)
-         this[consts.SPEED].noImprint = true;
-      else
-         this[consts.SPEED].noImprint = false;
+      if (speedImprintIgnored) this[consts.SPEED].noImprint = true;
    }
+
+   [index: number]: StatMultiplier;
 }
 
 export class ServerMultiplier {

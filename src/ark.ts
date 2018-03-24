@@ -5,15 +5,15 @@ import { Server, StatMultiplier, ServerMultiplier } from './ark/multipliers';
 import theStore from '@/ui/store';
 
 
-export function FormatAllOptions(stats) {
+export function FormatAllOptions(stats: Stat[][]) {
    return stats.map(options => FormatOptions(options)).join('\n');
 }
 
-export function FormatOptions(options) {
+export function FormatOptions(options: Stat[]) {
    return options.map(option => FormatOption(option)).join(',') || '-';
 }
 
-export function FormatOption(option) {
+export function FormatOption(option: Stat) {
    if (!option) return '-';
    const { Lw, Ld, wildLevel, TE } = option;
    if (wildLevel || TE)
@@ -42,7 +42,7 @@ export function Precision(index: number) {
  * @param {number} index Number corresponding with the index of a stat
  * @returns {number} The rounded, converted value
  */
-export function DisplayValue(value, index) {
+export function DisplayValue(value: number, index: number) {
    let returnValue = value;
 
    if (index === DAMAGE || index === SPEED || index === PRE_TE || index === PRE_IB)
@@ -55,7 +55,7 @@ export function DisplayValue(value, index) {
 }
 
 // Converts a value (from the UI) to a working value for ASBM
-export function ConvertValue(value, index) {
+export function ConvertValue(value: number, index: number) {
    let returnValue = value;
 
    if (index === DAMAGE || index === SPEED || index === PRE_TE || index === PRE_IB)

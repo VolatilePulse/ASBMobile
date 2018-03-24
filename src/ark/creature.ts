@@ -1,5 +1,4 @@
 import * as Utils from '@/utils';
-import * as Ark from '@/ark';
 import { StatMultiplier, ServerMultiplier } from '@/ark/multipliers';
 
 
@@ -191,7 +190,8 @@ export class VueCreature extends Creature {
       super();
    }
 
-   copyCreature(c) {
+   /*
+   copyCreature(c: Creature) {
       Utils.DeepMerge(this, c);
 
       for (let i = 0; i < 8; i++) {
@@ -203,4 +203,5 @@ export class VueCreature extends Creature {
    clear() {
       Utils.DeepMerge(this, (new VueCreature()));
    }
+   */
 }

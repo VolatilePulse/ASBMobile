@@ -16,10 +16,7 @@ class Library {
 
    private db!: PouchDB.Database;
 
-   /**
-    * @param {string} id
-    */
-   constructor(id) {
+   constructor(id: string) {
       this.id = id;
    }
 
@@ -40,7 +37,6 @@ class Library {
 }
 
 class LibraryManager {
-   // @ts-ignore
    current: Library;
 
    constructor() {

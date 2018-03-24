@@ -22,7 +22,7 @@ export class Extractor {
    maxIB = 0;
    checkedStat: boolean[] = [];
 
-   constructor(vueCreature) {
+   constructor(vueCreature: VueCreature) {
       this.c = vueCreature;
       // TODO: Add consider wild levels
       // Only way to calculate wild levels is with a TE
@@ -242,7 +242,7 @@ export class Extractor {
       }
    }
 
-   findTEStats(tempStat: Stat, statIndex: number, maxLd) {
+   findTEStats(tempStat: Stat, statIndex: number, maxLd: number) {
       for (tempStat.Ld = 0; tempStat.Ld <= maxLd; tempStat.Ld++) {
 
          let tamingEffectiveness = -1, minTE = 0, maxTE = 0;
