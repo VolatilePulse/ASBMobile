@@ -146,6 +146,10 @@ export class Extractor {
     *  @return {undefined} There is no returned value
     */
    dynamicIBCalculation() {
+      // Generate the min/max values for future edge cases (applicable in all situations)
+      this.maxIB = this.c.IB + (5 / 10E2);
+      this.minIB = this.c.IB - (5 / 10E2);
+
       // If the entered IB works, we don't need to do anything else (Torpor can't be leveled and typically has a large value to start with)
       if (this.c.values[TORPOR] === Utils.RoundTo(this.c.stats[TORPOR][0].calculateValue(this.m[TORPOR], !this.c.wild, this.c.TE, this.c.IB), Ark.Precision(TORPOR)))
          return;
@@ -154,11 +158,8 @@ export class Extractor {
       // TODO: Add a redundant check for IBM not being set. IB shouldn't extract to more than 0.05 in either direction if set properly.
       // May not be necessary as extract should return if the Torpor Lw calculated was too high
       this.c.IB = this.c.stats[TORPOR][0].calculateIB(this.m[TORPOR], this.c.values[TORPOR]);
-
-      // Generate the min/max values for future edge cases (applicable in all situations)
-      // FIXME: Tries to check min/max of new IB, not the input one. This should also go before the first conditional
-      this.maxIB = Math.min(this.c.stats[TORPOR][0].calculateIB(this.m[TORPOR], this.c.values[TORPOR] + (0.5 / Math.pow(10, Ark.Precision(TORPOR)))), this.c.IB + (5 / 10E3));
-      this.minIB = Math.max(this.c.stats[TORPOR][0].calculateIB(this.m[TORPOR], this.c.values[TORPOR] - (0.5 / Math.pow(10, Ark.Precision(TORPOR)))), this.c.IB - (5 / 10E3));
+      this.maxIB = Math.min(this.c.stats[TORPOR][0].calculateIB(this.m[TORPOR], this.c.values[TORPOR] + (0.5 / Math.pow(10, Ark.Precision(TORPOR)))), this.maxIB);
+      this.minIB = Math.max(this.c.stats[TORPOR][0].calculateIB(this.m[TORPOR], this.c.values[TORPOR] - (0.5 / Math.pow(10, Ark.Precision(TORPOR)))), this.minIB);
 
       // Check the food stat for the IB as well (Only works if food is unleveled)
       var tempHealthStat = new Stat();
@@ -174,7 +175,7 @@ export class Extractor {
          this.c.IB = 0;
    }
 
-   uniqueStatSituation(tempStat, statIndex) {
+   uniqueStatSituation(tempStat: Stat, statIndex: number) {
       // IF a stat isn't used, set it to -1 and continue
       if (this.m[statIndex].notUsed) {
          this.c.values[statIndex] = Utils.RoundTo(tempStat.calculateValue(this.m[statIndex], !this.c.wild, this.c.TE, this.c.IB), Ark.Precision(statIndex));
@@ -204,7 +205,7 @@ export class Extractor {
       return false;
    }
 
-   nonTEStatCalculation(tempStat, statIndex, maxLd) {
+   nonTEStatCalculation(tempStat: Stat, statIndex: number, maxLd: number) {
       if (tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild, this.c.TE, this.c.IB) > maxLd)
          return;
 
@@ -214,18 +215,23 @@ export class Extractor {
       // If it doesn't calculate properly, it may have used a different IB (Mostly relevant for Food)
       else if (this.c.bred) {
          // TODO: Address this to apply proper logic as it makes mild assumptions
+         // FIXME: Really not sure what assumptions it makes, but sure...
          // This is making sure that our previously calculated IB, rounded, is at least somewhat close to the IB the stat wants to use
          if (Utils.RoundTo(tempStat.calculateIB(this.m[statIndex], this.c.values[statIndex]), 2) === Utils.RoundTo(this.c.IB, 2)) {
             var maxTempIB = tempStat.calculateIB(this.m[statIndex], this.c.values[statIndex] + (0.5 / Math.pow(10, Ark.Precision(statIndex))));
             var minTempIB = tempStat.calculateIB(this.m[statIndex], this.c.values[statIndex] - (0.5 / Math.pow(10, Ark.Precision(statIndex))));
 
             if (this.maxIB > maxTempIB && maxTempIB >= this.minIB) {
-               this.c.IB = this.maxIB = maxTempIB;
-               this.c.stats[statIndex].push(new Stat(tempStat));
+               if (this.c.values[TORPOR] === Utils.RoundTo(this.c.stats[TORPOR][0].calculateValue(this.m[TORPOR], !this.c.wild, this.c.TE, maxTempIB), Ark.Precision(TORPOR))) {
+                  this.c.IB = this.maxIB = maxTempIB;
+                  this.c.stats[statIndex].push(new Stat(tempStat));
+               }
             }
-            else if (this.minIB <= minTempIB && minTempIB < this.maxIB) {
-               this.c.IB = this.minIB = minTempIB;
-               this.c.stats[statIndex].push(new Stat(tempStat));
+            if (this.minIB <= minTempIB && minTempIB < this.maxIB) {
+               if (this.c.values[TORPOR] === Utils.RoundTo(this.c.stats[TORPOR][0].calculateValue(this.m[TORPOR], !this.c.wild, this.c.TE, minTempIB), Ark.Precision(TORPOR))) {
+                  this.c.IB = this.minIB = minTempIB;
+                  this.c.stats[statIndex].push(new Stat(tempStat));
+               }
             }
          }
       }
@@ -341,7 +347,7 @@ export class Extractor {
    }
 
    // Remove all stats that don't have a matching TE pair
-   filterByTE(index, TEstat) {
+   filterByTE(index: number, TEstat: Stat) {
       for (let i = 0; i < 7; i++) {
          if ((this.m[i].Tm) && (i !== index)) {
             for (let j = 0; j < this.c.stats[i].length; j++)
