@@ -8,6 +8,12 @@ import * as Ark from '@/ark';
 import * as Utils from '@/utils';
 import { StatMultiplier, ServerMultiplier } from '@/ark/multipliers';
 
+class TEProps {
+   TE = 0;
+   minTE = 0;
+   maxTE = 1;
+   wildLevel = 0;
+}
 
 export class Extractor {
    c: VueCreature;
@@ -21,6 +27,7 @@ export class Extractor {
    minIB = 0;
    maxIB = 0;
    checkedStat: boolean[] = [];
+   statTEmaps?: Map<number, Map<Stat, TEProps>> = new Map();
 
    constructor(vueCreature: VueCreature) {
       this.c = vueCreature;
@@ -47,6 +54,7 @@ export class Extractor {
       // Calculate the torpor stat since it doesn't accept dom levels
       tempStat.calculateWildLevel(this.m[TORPOR], this.c.values[TORPOR], (!this.c.wild), this.c.TE, this.c.IB);
       this.c.stats[TORPOR].push(new Stat(tempStat));
+      this.checkedStat[TORPOR] = true;
       if (dbg) dbg.levelFromTorpor = tempStat.Lw;
 
       // Calculate the max number of levels based on level and torpor
@@ -76,7 +84,7 @@ export class Extractor {
             // Loop all possible Lws
             for (tempStat.Lw = maxLw; tempStat.Lw >= 0; tempStat.Lw--) {
                // Calculate the highest Ld could be
-               const maxLd = tempStat.calculateDomLevel(this.m[stat], this.c.values[stat], !this.c.wild, 0, this.c.IB);
+               const maxLd = Math.min(tempStat.calculateDomLevel(this.m[stat], this.c.values[stat], !this.c.wild, 0, this.c.IB), this.domFreeMax);
 
                // If Ld is greater than the highest dom possible, quit the loop
                if (maxLd > this.domFreeMax && !this.m[stat].Tm)
@@ -107,7 +115,7 @@ export class Extractor {
       this.filterResults(dbg);
 
       // Sort the options based on most likely (deviation from the expected average)
-      // this.options.sort(this.optionDeviation);
+      this.options.sort(this.optionDeviation);
    }
 
    init() {
@@ -246,7 +254,7 @@ export class Extractor {
       for (tempStat.Ld = 0; tempStat.Ld <= maxLd; tempStat.Ld++) {
 
          let tamingEffectiveness = -1, minTE = 0, maxTE = 0;
-         // One of the most precise ways to get the exact Taming Effectiveness
+
          if (this.c.values[statIndex] === Utils.RoundTo(tempStat.calculateValue(this.m[statIndex], !this.c.wild, 1, this.c.IB), Ark.Precision(statIndex)))
             tamingEffectiveness = 1;
          else if (this.c.values[statIndex] === Utils.RoundTo(tempStat.calculateValue(this.m[statIndex], !this.c.wild, 0, this.c.IB), Ark.Precision(statIndex)))
@@ -264,19 +272,30 @@ export class Extractor {
             const expectedValue = tempStat.calculateValue(this.m[statIndex], !this.c.wild, tamingEffectiveness, this.c.IB);
             if (this.c.values[statIndex] === Utils.RoundTo(expectedValue, Ark.Precision(statIndex))) {
                // Create a new Stat to hold all of the information
-               const TEStat = new Stat(tempStat);
+               const TEStat = new TEProps();
                TEStat.wildLevel = Math.ceil(this.levelBeforeDom / (1 + 0.5 * tamingEffectiveness));
+
+               // Verify the calculated WildLevel was even possible
                if (this.levelBeforeDom === Math.floor(TEStat.wildLevel * (1 + 0.5 * tamingEffectiveness))) {
                   TEStat.TE = tamingEffectiveness;
                   TEStat.maxTE = maxTE;
                   TEStat.minTE = minTE;
-                  this.c.stats[statIndex].push(TEStat);
+
+                  const workingStat = new Stat(tempStat);
+                  this.c.stats[statIndex].push(workingStat);
+
+                  let tempMap = this.statTEmaps.get(statIndex);
+                  if (tempMap === undefined)
+                     tempMap = new Map();
+
+                  tempMap.set(workingStat, TEStat);
+                  this.statTEmaps.set(statIndex, tempMap);
                }
             }
          }
 
          // The TE would only get smaller so break the loop
-         else if (tamingEffectiveness <= 0)
+         else if (tamingEffectiveness < 0)
             break;
       }
    }
@@ -339,7 +358,7 @@ export class Extractor {
                      if (this.c.stats[i][j].Lw + wildMin - this.c.stats[i].minW > this.wildFreeMax
                         // @ts-ignore
                         || this.c.stats[i][j].Ld + domMin - this.c.stats[i].minD > this.domFreeMax
-                        || (this.m[i].Tm && !this.filterByTE(i, this.c.stats[i][j]))) {
+                        || (this.m[i].Tm > 0 && !this.filterByTE(i, this.c.stats[i][j]))) {
                         this.c.stats[i][j].removeMe = true;
 
                      }
@@ -359,21 +378,22 @@ export class Extractor {
    // Remove all stats that don't have a matching TE pair
    filterByTE(index: number, TEstat: Stat) {
       for (let i = 0; i < 7; i++) {
-         if ((this.m[i].Tm) && (i !== index)) {
+         const statTEs = this.statTEmaps.get(i);
+         if ((this.m[i].Tm > 0) && (i !== index)) {
             // FIXME: TS-TRANSITION: The linter suggests using for...of here and that might not be a bad idea to avoid all that repeated indexing
             // tslint:disable-next-line:prefer-for-of
             for (let j = 0; j < this.c.stats[i].length; j++)
-               if (this.c.stats[i][j].TE === TEstat.TE)
+               if (statTEs.get(this.c.stats[i][j]).TE === statTEs.get(TEstat).TE)
                   return true;
                // FIXME: TS-MIGRATION: TS complains that TE, minTE and maxTE might not be set... is it right?
                // @ts-ignore
-               else if (this.c.stats[i][j].maxTE > TEstat.TE && TEstat.TE >= this.c.stats[i][j].minTE) {
-                  this.c.stats[i][j].TE = TEstat.TE;
+               else if (statTEs.get(this.c.stats[i][j]).maxTE > statTEs.get(TEstat).TE && statTEs.get(TEstat).TE >= statTEs.get(this.c.stats[i][j]).minTE) {
+                  statTEs.get(this.c.stats[i][j]).TE = statTEs.get(TEstat).TE;
                   return true;
                }
                // @ts-ignore
-               else if (TEstat.maxTE > this.c.stats[i][j].TE && this.c.stats[i][j].TE >= TEstat.minTE) {
-                  TEstat.TE = this.c.stats[i][j].TE;
+               else if (statTEs.get(TEstat).maxTE > statTEs.get(this.c.stats[i][j]).TE && statTEs.get(this.c.stats[i][j]).TE >= statTEs.get(TEstat).minTE) {
+                  statTEs.get(TEstat).TE = statTEs.get(this.c.stats[i][j]).TE;
                   return true;
                }
             return false;
@@ -398,10 +418,11 @@ export class Extractor {
 
       // If the TE of the stats we have don't match, they aren't valid
       for (let i = 0; i < option.length; i++) {
-         if (TE === -1 && option[i]['TE'] !== undefined)
-            TE = option[i].TE;
-         else if (option[i]['TE'] !== undefined)
-            if (TE !== option[i].TE)
+         const statTEs = this.statTEmaps.get(i);
+         if (TE === -1 && statTEs !== undefined)
+            TE = statTEs.get(option[i]).TE;
+         else if (statTEs !== undefined)
+            if (TE !== statTEs.get(option[i]).TE)
                return false;
 
          if (!this.checkedStat[i]) {
@@ -445,7 +466,7 @@ export class Extractor {
       const tempOptions: number[] = [];
 
       // The initial array for matchingStats
-      for (let stat = 0; stat < 7; stat++) {
+      for (let stat = HEALTH; stat <= TORPOR; stat++) {
          if (this.c.stats[stat].length !== 0)
             tempOptions.push(0);
          else
@@ -457,7 +478,7 @@ export class Extractor {
 
       do {
          const tempStatOption: Stat[] = [];
-         for (let stat = 0; stat < 7; stat++) {
+         for (let stat = HEALTH; stat <= TORPOR; stat++) {
             tempStatOption.push(this.c.stats[stat][tempOptions[stat]]);
          }
          if (this.matchingStats(tempStatOption, dbg))
@@ -480,8 +501,7 @@ export class Extractor {
 
    optionDeviation(opt1: Stat[], opt2: Stat[]) {
       let opt1Dev = 0, opt2Dev = 0;
-      // FIXME: "This" doesn't exist inside of the sort call
-      const standard = this.c.stats[TORPOR][0].Lw / 7;
+      const standard = opt1[TORPOR].Lw / 7;
 
       for (let stat = 0; stat < opt1.length && stat < opt2.length; stat++) {
          opt1Dev += Math.pow(opt1[stat].Lw - standard, 2);

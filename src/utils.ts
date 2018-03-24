@@ -131,8 +131,8 @@ export function DeepCopy<T>(obj: T): T {
    return cloneDeepWith(obj, CloneCustomizer);
 }
 
-function CloneCustomizer<T>(value: T, key: string | number): any | null {
-   if (!key) return value;
+function CloneCustomizer<T>(_: T, key: string | number): any | null {
+   if (!key) return undefined;
    if (isString(key) && key.startsWith('_')) return null;
 }
 

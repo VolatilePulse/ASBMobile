@@ -6,10 +6,6 @@ export class Stat implements Stat {
    Lw: number;
    Ld: number;
 
-   TE?: number;
-   minTE?: number;
-   maxTE?: number;
-   wildLevel?: number;
    removeMe?: boolean;
 
    constructor(stat: Stat);
