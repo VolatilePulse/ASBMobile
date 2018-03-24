@@ -20,7 +20,9 @@ export class Extractor {
    m: StatMultiplier[] & ServerMultiplier[] = [];
 
    wildFreeMax = 0;
+   wildMin: number[] = [];
    domFreeMax = 0;
+   domMin: number[] = [];
    levelBeforeDom = 0;
    unusedStat = false;
    options: Stat[][] = [];
@@ -176,7 +178,6 @@ export class Extractor {
       const imprintingBonusFromFood = tempHealthStat.calculateIB(this.m[FOOD], this.c.values[FOOD]);
 
       // Check to see if the new IB still allows torpor to extract correctly
-      // FIXME: TS-TRANSITION: Should this just be `expectedValue`? Looks unchanged to me...
       const newExpectedValue = this.c.stats[TORPOR][0].calculateValue(this.m[TORPOR], !this.c.wild, this.c.TE, imprintingBonusFromFood);
       if (this.c.values[TORPOR] === Utils.RoundTo(newExpectedValue, Ark.Precision(TORPOR)))
          this.c.IB = imprintingBonusFromFood;
@@ -314,54 +315,41 @@ export class Extractor {
          if (this.options.length)
             this.c.stats.forEach(stat => stat.forEach(poss => { if (!this.options.some(option => option.includes(poss))) poss.removeMe = true; }));
 
-         for (let i = 0; i < 7; i++) {
+         for (let statIndex = HEALTH; statIndex <= SPEED; statIndex++) {
             let tempWM = -1, tempDM = -1;
             // One stat possibility is good
-            if (!this.checkedStat[i] && this.c.stats[i].length === 1) {
-               this.wildFreeMax -= this.c.stats[i][0].Lw;
-               this.domFreeMax -= this.c.stats[i][0].Ld;
-               this.checkedStat[i] = true;
+            if (!this.checkedStat[statIndex] && this.c.stats[statIndex].length === 1) {
+               this.wildFreeMax -= this.c.stats[statIndex][0].Lw;
+               this.domFreeMax -= this.c.stats[statIndex][0].Ld;
+               this.checkedStat[statIndex] = true;
             }
-            else if (!this.checkedStat[i]) {
-               // FIXME: TS-TRANSITION: The linter suggests using for...of here and that might not be a bad idea to avoid all that repeated indexing
-               // tslint:disable-next-line:prefer-for-of
-               for (let j = 0; j < this.c.stats[i].length; j++) {
+            else if (!this.checkedStat[statIndex]) {
+               for (const stat of this.c.stats[statIndex]) {
                   if (tempWM === -1)
-                     tempWM = this.c.stats[i][j].Lw;
+                     tempWM = stat.Lw;
                   if (tempDM === -1)
-                     tempDM = this.c.stats[i][j].Ld;
-                  if (tempWM > this.c.stats[i][j].Lw)
-                     tempWM = this.c.stats[i][j].Lw;
-                  if (tempDM > this.c.stats[i][j].Ld)
-                     tempDM = this.c.stats[i][j].Ld;
+                     tempDM = stat.Ld;
+                  if (tempWM > stat.Lw)
+                     tempWM = stat.Lw;
+                  if (tempDM > stat.Ld)
+                     tempDM = stat.Ld;
                }
-               // FIXME: TS-MIGRATION: Extra properties on the stat rows? Could hold these separately like: this.minW[i]
-               // @ts-ignore
-               this.c.stats[i].minW = tempWM; this.c.stats[i].minD = tempDM;
+               this.wildMin[statIndex] = tempWM; this.domMin[statIndex] = tempDM;
                wildMin += tempWM;
                domMin += tempDM;
             }
          }
 
-         // Last try to remove additional stats
-         if (!removed) {
-            for (let i = 0; i < 7; i++) {
-               // Simple stat removal
-               if (this.c.stats[i].length > 1) {
-                  // FIXME: TS-TRANSITION: The linter suggests using for...of here and that might not be a bad idea to avoid all that repeated indexing
-                  // tslint:disable-next-line:prefer-for-of
-                  for (let j = 0; j < this.c.stats[i].length; j++) {
-                     if (this.c.stats[i][j].Lw > this.wildFreeMax || this.c.stats[i][j].Ld > this.domFreeMax) {
-                        this.c.stats[i][j].removeMe = true;
-                     }
-                     // @ts-ignore
-                     if (this.c.stats[i][j].Lw + wildMin - this.c.stats[i].minW > this.wildFreeMax
-                        // @ts-ignore
-                        || this.c.stats[i][j].Ld + domMin - this.c.stats[i].minD > this.domFreeMax
-                        || (this.m[i].Tm > 0 && !this.filterByTE(i, this.c.stats[i][j]))) {
-                        this.c.stats[i][j].removeMe = true;
-
-                     }
+         for (let statIndex = HEALTH; statIndex <= SPEED; statIndex++) {
+            if (!this.checkedStat[statIndex]) {
+               for (const stat of this.c.stats[statIndex]) {
+                  if (stat.Lw > this.wildFreeMax || stat.Ld > this.domFreeMax) {
+                     stat.removeMe = true;
+                  }
+                  if (stat.Lw + wildMin - this.wildMin[statIndex] > this.wildFreeMax
+                     || stat.Ld + domMin - this.domMin[statIndex] > this.domFreeMax
+                     || (this.statTEmaps.get(statIndex) && !this.filterByTE(statIndex, stat))) {
+                     stat.removeMe = true;
                   }
                }
             }
@@ -377,25 +365,24 @@ export class Extractor {
 
    // Remove all stats that don't have a matching TE pair
    filterByTE(index: number, TEstat: Stat) {
-      for (let i = 0; i < 7; i++) {
-         const statTEs = this.statTEmaps.get(i);
-         if ((this.m[i].Tm > 0) && (i !== index)) {
-            // FIXME: TS-TRANSITION: The linter suggests using for...of here and that might not be a bad idea to avoid all that repeated indexing
-            // tslint:disable-next-line:prefer-for-of
-            for (let j = 0; j < this.c.stats[i].length; j++)
-               if (statTEs.get(this.c.stats[i][j]).TE === statTEs.get(TEstat).TE)
+      for (let statIndex = 0; statIndex < 7; statIndex++) {
+         const statTEs = this.statTEmaps.get(statIndex);
+         if (statTEs !== undefined && (statIndex !== index)) {
+            for (const stat of this.c.stats[statIndex]) {
+               const currentTEstat = statTEs.get(stat), testingTEstat = this.statTEmaps.get(index).get(TEstat);
+               if (currentTEstat.TE === testingTEstat.TE)
                   return true;
-               // FIXME: TS-MIGRATION: TS complains that TE, minTE and maxTE might not be set... is it right?
-               // @ts-ignore
-               else if (statTEs.get(this.c.stats[i][j]).maxTE > statTEs.get(TEstat).TE && statTEs.get(TEstat).TE >= statTEs.get(this.c.stats[i][j]).minTE) {
-                  statTEs.get(this.c.stats[i][j]).TE = statTEs.get(TEstat).TE;
+               else if (currentTEstat.maxTE > testingTEstat.TE && testingTEstat.TE >= currentTEstat.minTE) {
+                  currentTEstat.TE = testingTEstat.TE;
+                  statTEs.set(stat, currentTEstat);
                   return true;
                }
-               // @ts-ignore
-               else if (statTEs.get(TEstat).maxTE > statTEs.get(this.c.stats[i][j]).TE && statTEs.get(this.c.stats[i][j]).TE >= statTEs.get(TEstat).minTE) {
-                  statTEs.get(TEstat).TE = statTEs.get(this.c.stats[i][j]).TE;
+               else if (testingTEstat.maxTE > currentTEstat.TE && currentTEstat.TE >= testingTEstat.minTE) {
+                  testingTEstat.TE = currentTEstat.TE;
+                  statTEs.set(TEstat, testingTEstat);
                   return true;
                }
+            }
             return false;
          }
       }
@@ -455,8 +442,7 @@ export class Extractor {
       }
 
       initialOptionsLength = this.options.length;
-      // FIXME: TS-MIGRATION: Using 'as' is how you cast in TS, although it's only compile-time
-      this.options = this.options.filter(option => !option.some(stat => stat['removeMe'] as boolean));
+      this.options = this.options.filter(option => !option.some(stat => stat['removeMe']));
       if (dbg) dbg.numberRemoved += initialOptionsLength - this.options.length;
 
       return removed || initialOptionsLength > this.options.length;
