@@ -1,91 +1,80 @@
-// @ts-ignore
-import withRender from './Extractor.html?style=./Extractor.css';
+import Vue from 'vue';
+import Component from 'vue-class-component';
+
+import WithRender from './Extractor.html?style=./Extractor.css';
 
 import * as app from "../../app";
 import * as Ark from '../../ark';
 import { PRE_IB, statNames } from '../../consts';
-import { FormatNumber } from '../../utils';
+import { FormatNumber, FilledArray, DeepCopy } from '../../utils';
 import { Extractor } from '../../ark/extractor';
 
-import testData from '../../test_data';
+import testData from '../../ark/test_data';
+import { VueCreature } from '@/ark/creature';
+import theStore from '@/ui/store';
 
 
-export default withRender({
-   props: [],
-   template: "#extractor-template",
+@WithRender
+@Component({
+   name: "extractor",
+})
+export default class ExtractorComponent extends Vue {
+   store = theStore;
 
-   data: () => ({
-      testData: testData,
+   testData = testData;
+   statNames = statNames;
 
-      autoExtract: false,
+   autoExtract = false;
 
-      mode: "Tamed",
-      imprint: 0,
-      exactly: false,
-      values: [],
+   mode = "Tamed";
+   imprint = 0;
+   values = FilledArray(8, () => undefined);
 
-      extractor: {},
-      creature: {},
+   extractor: Extractor = null;
 
-      statNames: statNames,
-   }),
 
-   computed: {
-      speciesNames: () => app.data.speciesNames,
-      statImages: () => app.data.statImages,
-      devMode: () => app.data.status.devMode,
+   range(n) { return Array.from({ length: n }, (x, i) => i); }
+   formatFloat(n) { return FormatNumber(n, 2); }
+   formatRound(n) { return FormatNumber(n, 0); }
 
-      currentMultipliers() { return Ark.GetMultipliers(this.creature.serverName, this.creature.species); },
-   },
+   extract() {
+      let creature = this.store.tempCreature;
 
-   methods: {
-      range(n) { return Array.from({ length: n }, (x, i) => i); },
-      extract: PerformExtraction,
-      insertTestData: InsertTestData,
-      formatFloat(n) { return FormatNumber(n, 2); },
-      formatRound(n) { return FormatNumber(n, 0); },
+      // Convert properties that couldn't be bound directly to creature
+      creature.wild = (this.mode == "Wild");
+      creature.tamed = (this.mode == "Tamed");
+      creature.bred = (this.mode == "Bred");
+      creature.IB = Ark.ConvertValue(this.imprint, PRE_IB);
+      creature.values = DeepCopy(this.values.map(Ark.ConvertValue)); // convert values, then create a clean un-observed copy
 
-      // Nasty debug-only methods to show stats and their options
-      debugShowOptions: options => (options && options['length']) ? options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(',') : "-none-",
-      debugStatValue(i) {
-         var multipliers = this.currentMultipliers;
-         return this.creature.stats[i][0].calculateValue(multipliers[i], !this.extractor.wild, this.extractor.TE, this.extractor.IB);
-      }
-   },
-
-   created() {
-      this.creature = app.data.tempCreature;
+      this.extractor = new Extractor(creature);
+      this.extractor.extract();
    }
-});
 
-function InsertTestData(test) {
-   // Copy some fields from the test directly into the extractor
-   this.creature.species = test.species;
-   this.creature.level = test.level;
+   insertTestData(test) {
+      // Copy some fields from the test directly into the extractor
+      this.store.tempCreature.species = test.species;
+      this.store.tempCreature.level = test.level;
 
-   // Copy some fields into the UI, because they're converted later
-   this.imprint = test.imprint;
-   this.mode = test.mode;
-   this.exactly = test.exactly;
+      // Copy some fields into the UI, because they're converted later
+      this.imprint = test.imprint;
+      this.mode = test.mode;
 
-   // Take a copy of the stat values so they can be modified by the user
-   this.values = Array.from(test.values);
+      // Take a copy of the stat values so they can be modified by the user
+      this.values = Array.from(test.values);
 
-   // Set the current server to the one specified by the test
-   this.creature.serverName = test.serverName;
-}
+      // Set the current server to the one specified by the test
+      this.store.tempCreature.serverName = test.serverName;
+   }
 
-function PerformExtraction() {
-   // Convert properties that couldn't be bound directly to creature
-   this.creature.wild = (this.mode == "Wild");
-   this.creature.tamed = (this.mode == "Tamed");
-   this.creature.bred = (this.mode == "Bred");
-   this.creature.IB = Ark.ConvertValue(this.imprint, PRE_IB);
-   this.creature.exactly = !!this.exactly;
-   this.creature.values = this.values.map(Ark.ConvertValue);
+   // Nasty debug-only methods to show stats and their options
+   debugShowOptions(options) {
+      return (options && options['length']) ? options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(',') : "-none-";
+   }
 
-   this.extractor = new Extractor(this.creature);
-   this.extractor.extract();
-
-   //console.log(JSON.stringify(this.extractor.c.stats));
+   debugStatValue(i) {
+      let creature = this.store.tempCreature;
+      if (!creature.m) return '-';
+      return creature.stats[i][0].calculateValue(creature.m[i], !creature.wild, creature.TE, creature.IB);
+   }
 }

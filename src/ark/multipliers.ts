@@ -1,6 +1,3 @@
-/// <reference path="../types.ts" />
-
-
 "use strict";
 
 import * as Utils from '../utils';
@@ -10,11 +7,12 @@ export class StatMultiplier {
    B: number;
    Id: number;
    Iw: number;
-   TBHM: number = 0; // FIXME: TS-MIGRATION: Had no default before... is 0 right?
    Ta: number;
    Tm: number;
 
-   IBM: number = 0; // FIXME: TS-MIGRATION: Had no default before... is 0 right?
+   TBHM?: number;
+   IBM?: number;
+
    notUsed: boolean = false;
 
    constructor(stat: StatMultiplier);
@@ -74,7 +72,7 @@ export class CreatureStats {
 export class ServerMultiplier {
    IBM: number;
 
-   constructor(settingArray: number[][] = [], IBM: number) {
+   constructor(settingArray: ServerMultiplier | number[] = [], IBM: number) {
       this.IBM = IBM; // Imprint Bonus Multiplier
 
       for (var i = 0; i < 4; i++)
@@ -90,6 +88,9 @@ export class ServerMultiplier {
    set TmM(value: number) { this[consts.SERVER_TMM] = value; };
    set IdM(value: number) { this[consts.SERVER_IDM] = value; };
    set IwM(value: number) { this[consts.SERVER_IWM] = value; };
+
+   // This defines our types when accessed with a numeric index like an array
+   [index: number]: number;
 }
 
 export class Server {
@@ -99,9 +100,7 @@ export class Server {
    isTestOnly: boolean = false;
    isPreDefined: boolean = false;
 
-   /**
-    * Create a server or copy an existing one.
-    */
+   /** * Create a server or copy an existing one */
    constructor(settingsArray: MultipliersArray | Server = [], IBM = 1, singlePlayer = false, name = "") {
       this.singlePlayer = singlePlayer; // singlePlayer Setting
       this.IBM = IBM;
@@ -112,4 +111,7 @@ export class Server {
       for (var i = 0; i < 8; i++)
          this[i] = new ServerMultiplier(settingsArray[i] || new Array(4), IBM);
    }
+
+   // This defines our types when accessed with a numeric index like an array
+   [index: number]: ServerMultiplier;
 }

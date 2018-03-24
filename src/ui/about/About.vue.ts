@@ -1,15 +1,17 @@
-// @ts-ignore
-import withRender from './About.html?style=./About.css';
+import Vue from 'vue';
+import { Component } from 'vue-property-decorator'
 
-import * as app from '../../app';
+import WithRender from './About.html?style=./About.css';
 
-export default withRender({
-   name: 'about',
+import theStore from '@/ui/store';
 
-   data: () => ({
-   }),
 
-   computed: {
-      dbVersion: () => app.data.valuesJson
-   }
-});
+@WithRender
+@Component({
+   name: "about",
+})
+export default class AboutComponent extends Vue {
+   store = theStore;
+
+   get dbVersion() { return theStore.valuesJson; }
+}

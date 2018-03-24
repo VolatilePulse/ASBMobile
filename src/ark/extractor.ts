@@ -24,7 +24,7 @@ export class Extractor {
    constructor(vueCreature) {
       this.c = vueCreature;
       // FIXME: TS-MIGRATION: Should we be storing `m` inside the VueCreature? I've added m:any to VueCreature to handle this for now.
-      this.c.m = Ark.GetMultipliers(this.c.serverName, this.c.species);
+      // this.c.m = Ark.GetMultipliers(this.c.serverName, this.c.species); // this is repeated in init()
 
       // TODO: Add consider wild levels
       // Only way to calculate wild levels is with a TE
@@ -147,11 +147,8 @@ export class Extractor {
       // Make sure the multipliers haven't changed
       this.c.m = Ark.GetMultipliers(this.c.serverName, this.c.species);
 
-      // Clear the checked property for future extractions
-      for (let i = 0; i < 8; i++) {
-         // Reset the stats so we can get a fresh start
-         this.c.stats[i] = [];
-      }
+      // Clear the checked property for future extractions (also clearing out any Vue observer)
+      this.c.stats = Utils.FilledArray(8, () => []);
 
       // Change variables based on wild, tamed, bred
       if (this.c.wild)

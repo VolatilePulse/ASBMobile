@@ -44,14 +44,14 @@
    </b-navbar>
 
    <b-container fluid style="margin-top: 4rem" class="p-2 pt-0">
-      <b-progress v-show="!dataLoaded" :value="100" striped :animated="true" variant="secondary" class="fixed-top" style="height: 0.4rem"></b-progress>
+      <b-progress v-show="!store.dataLoaded" :value="100" striped :animated="true" variant="secondary" class="fixed-top" style="height: 0.4rem"></b-progress>
 
       <welcome v-if="tab=='welcome'" class="w3-container w3-animate-opacity"></welcome>
       <settings v-else-if="tab=='settings'" class="w3-container w3-animate-opacity"></settings>
-      <servers v-else-if="dataLoaded && tab=='servers'" class="w3-container w3-animate-opacity"></servers>
-      <extractor v-else-if="dataLoaded && tab=='extractor'" class="w3-container w3-animate-opacity"></extractor>
-      <tester v-else-if="dataLoaded && tab=='tester'" class="w3-container w3-animate-opacity"></tester>
-      <database v-else-if="dataLoaded && tab=='db'" class="w3-container w3-animate-opacity"></database>
+      <servers v-else-if="store.dataLoaded && tab=='servers'" class="w3-container w3-animate-opacity"></servers>
+      <extractor v-else-if="store.dataLoaded && tab=='extractor'" class="w3-container w3-animate-opacity"></extractor>
+      <tester v-else-if="store.dataLoaded && tab=='tester'" class="w3-container w3-animate-opacity"></tester>
+      <database v-else-if="store.dataLoaded && tab=='db'" class="w3-container w3-animate-opacity"></database>
       <about v-else-if="tab=='about'" class="w3-container w3-animate-opacity"></about>
    </b-container>
 </div>

@@ -1,5 +1,3 @@
-/// <reference path="types.ts"/>
-
 let servers: ServerDef[] = [
    {
       serverName: "Official Server",

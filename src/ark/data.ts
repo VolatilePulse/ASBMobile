@@ -4,8 +4,8 @@
  * @fileOverview Controls the data flow for the app
  */
 
-import * as app from '../app';
 import { CreatureStats, Server } from './multipliers';
+import theStore from '@/ui/store';
 
 /**
  * Creates ASBM ready objects from a JSON String and populates the DB
@@ -20,23 +20,22 @@ export async function LoadData(json) {
    let jsonObject = JSON.parse(json);
 
    // Clear species list, ready to be populated
-   app.data.speciesNames = [];
+   theStore.speciesNames = [];
 
    for (var creature in jsonObject.species) {
       let speciesData = jsonObject.species[creature];
-      // @ts-ignore
-      app.data.speciesNames.push(creature);
-      app.data.speciesMultipliers[creature] =
-         new CreatureStats(speciesData.stats,
-            speciesData.TBHM,
-            speciesData.noOxygen,
-            speciesData.noImprint);
+      theStore.speciesNames.push(creature);
+      theStore.speciesMultipliers[creature] = new CreatureStats(
+         speciesData.stats,
+         speciesData.TBHM,
+         speciesData.noOxygen,
+         speciesData.noImprint);
    }
 
    // Sorted species names, please
-   app.data.speciesNames.sort();
+   theStore.speciesNames.sort();
 
    // Define the constant servers and populate the list if empty
-   app.data.officialServer = new Server(jsonObject.settings.officialMultipliers, jsonObject.settings.imprintingMultiplier);
-   app.data.officialSPMultiplier = new Server(jsonObject.settings.officialMultipliersSP, jsonObject.settings.imprintingMultiplier, true);
+   theStore.officialServer = new Server(jsonObject.settings.officialMultipliers, jsonObject.settings.imprintingMultiplier);
+   theStore.officialSPMultiplier = new Server(jsonObject.settings.officialMultipliersSP, jsonObject.settings.imprintingMultiplier, true);
 }

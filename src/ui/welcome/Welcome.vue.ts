@@ -1,15 +1,17 @@
-// @ts-ignore
-import withRender from './Welcome.html?style=./Welcome.css';
+import Vue from 'vue';
+import { Component } from 'vue-property-decorator'
 
-import * as app from '../../app';
+import WithRender from './Welcome.html?style=./Welcome.css';
 
-export default withRender({
-   name: 'welcome',
+import theStore from '@/ui/store';
 
-   data: () => ({
-   }),
 
-   computed: {
-      dbVersion: () => app.data.valuesJson
-   }
-});
+@WithRender
+@Component({
+   name: "welcome",
+})
+export default class WelcomeComponent extends Vue {
+   store = theStore;
+
+   get dbVersion() { return theStore.valuesJson; }
+}

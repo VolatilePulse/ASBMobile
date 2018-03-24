@@ -1,7 +1,7 @@
 <b-container fluid>
    <b-form-group label="Server:" class="col-md-6 m-0 p-0">
       <b-input-group>
-         <b-form-select id="speciesInput" v-model="name" @change="onServerChange">
+         <b-form-select id="speciesInput" v-model="currentServerName" @change="onServerChange">
             <template slot="first">
                <option :value="newServerId">--new server--</option>
             </template>
@@ -11,7 +11,7 @@
                <option v-for="(server, name) in preDefinedServers" :key="name">{{server.serverName}} </option>
             </optgroup>
 
-            <optgroup v-if="devMode" label="Test Servers">
+            <optgroup v-if="store.devMode" label="Test Servers">
                <option v-for="(server, name) in testServers" :key="name">{{server.serverName}} </option>
             </optgroup>
          </b-form-select>
@@ -35,7 +35,7 @@
    </b-form-group>
 
    <!-- Modal used for editing server name -->
-   <b-modal id="editNameModal" ref="editNameModal" title="Edit server name" @ok.prevent="editNameOkay" centered @shown="editNameShown">
+   <b-modal id="editNameModal" ref="editNameModal" title="Edit server name" @ok.prevent="editNameSubmit" centered @shown="editNameShown">
       <b-form @submit.stop.prevent="editNameSubmit">
          <b-form-input id="editNameInput" type="text" v-model.trim="editName" :state="editNameValidity"></b-form-input>
          <b-form-invalid-feedback>
@@ -66,10 +66,10 @@
          </b-row>
          <b-row v-for="stat in statIndices">
             <b-col class="col-1 m-0 p-0 mr-2 align-self-center text-center">
-               <b-img :src="statImages[stat]" style="max-width: 2rem;"></b-img>
+               <b-img :src="store.statImages[stat]" style="max-width: 2rem;"></b-img>
             </b-col>
             <b-col v-for="param in paramIndices" class="px-1">
-               <b-form-input type="number" class="text-center px-1 mx-0 text-primary" :placeholder="formatMult(official[stat][param])" @change="setMult(stat,param,$event)"
+               <b-form-input type="number" class="text-center px-1 mx-0 text-primary" :placeholder="formatMult(store.officialServer[stat][param])" @change="setMult(stat,param,$event)"
                   :value="server[stat][param]" :disabled="!isEditable">
                </b-form-input>
             </b-col>

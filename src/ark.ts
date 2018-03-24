@@ -1,10 +1,10 @@
 "use strict";
 
 import { DAMAGE, SPEED, PRE_IB, PRE_TE } from './consts';
-import * as app from './app';
 import * as Utils from './utils';
 import * as Servers from './servers';
 import { Server } from './ark/multipliers';
+import theStore from '@/ui/store';
 
 
 export function FormatAllOptions(stats) {
@@ -78,19 +78,19 @@ export function GetMultipliers(serverName, speciesName) {
    let server = Servers.getServerByName(serverName);
 
    // The Server object tells us everything we need to know about the multipliers
-   let multipliers = Utils.DeepMergeSoft(new Server(), app.data.officialServer, server);
+   let multipliers = Utils.DeepMergeSoft(new Server(), theStore.officialServer, server);
 
    // Single Player multiplies the official/override multipliers
    if (server.singlePlayer) {
-      for (let stat in app.data.officialSPMultiplier) {
-         for (let multiplier in app.data.officialSPMultiplier[stat]) {
-            multipliers[stat][multiplier] = multipliers[stat][multiplier] * (app.data.officialSPMultiplier[stat][multiplier] || 1);
+      for (let stat in theStore.officialSPMultiplier) {
+         for (let multiplier in theStore.officialSPMultiplier[stat]) {
+            multipliers[stat][multiplier] = multipliers[stat][multiplier] * (theStore.officialSPMultiplier[stat][multiplier] || 1);
          }
       }
    }
 
    // Copy in species-related data
-   Utils.DeepMerge(multipliers, app.data.speciesMultipliers[speciesName]);
+   Utils.DeepMerge(multipliers, theStore.speciesMultipliers[speciesName]);
 
    // Set IBM for each stat
    for (let stat = 0; stat < 8; stat++) {
@@ -101,16 +101,4 @@ export function GetMultipliers(serverName, speciesName) {
    }
 
    return multipliers;
-}
-
-
-
-interface IAdder {
-   add(a: number, b: number): number;
-}
-
-class MyAdder implements IAdder {
-   add(a: number, b: number): number {
-      return a + b;
-   }
 }

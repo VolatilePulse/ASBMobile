@@ -1,5 +1,3 @@
-/// <reference path="../types.ts" />
-
 import * as Utils from '../utils';
 import * as Ark from '../ark';
 
@@ -141,20 +139,17 @@ export class Creature {
    owner?: string;
    serverName?: string;
    species?: string;
-   UUID?: string;
+   uuid?: string;
    wild = true;
    tamed = false;
    bred = false;
    TE = 0;
    IB = 0;
    level: number = 0;
-   stats: Stat[][] = [[], [], [], [], [], [], [], []];
-   values: number[] = [];
+   stats: Stat[][] = Utils.FilledArray(8, () => []);
+   values: number[] = Utils.FilledArray(8, () => undefined);
 
-   /**
-    * Copy constructor
-    * @param {Creature?} c
-    */
+   /** Empty or copy constructor */
    constructor(c: Creature);
    constructor();
    constructor(c?: Creature) {
@@ -164,7 +159,7 @@ export class Creature {
          this.owner = c.owner;
          this.serverName = c.serverName;
          this.species = c.species;
-         this.UUID = c.UUID;
+         this.uuid = c.uuid;
          this.wild = c.wild;
          this.tamed = c.tamed;
          this.bred = c.bred;
@@ -175,10 +170,10 @@ export class Creature {
          this.values = Utils.DeepCopy(c.values);
       }
       else {
-         this.stats = Utils.FilledArray(8, () => [new Stat()])
+         this.stats = Utils.FilledArray(8, () => [])
       }
 
-      // FIXME: TS-MIGRATION: Have I done the above correctly? Below was how it was before...
+      // FIXME: TS-MIGRATION: Have I done the above correctly? Below was how it was before... We don't seem to use this, much.
       /*
       // Strips extractor data from TE based stats
       for (let i = 0; i < 8; i++)

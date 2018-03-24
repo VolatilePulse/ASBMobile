@@ -1,6 +1,3 @@
-/// <reference path="types.ts"/>
-
-
 let servers: ServerDef[] = [
    {
       serverName: "kohonac HP.IDM: 2.0",

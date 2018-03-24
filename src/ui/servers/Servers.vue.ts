@@ -1,84 +1,100 @@
-// @ts-ignore
-import withRender from './Servers.html?style=./Servers.css';
+import Vue from 'vue';
+import Component from 'vue-class-component';
+
+import WithRender from './Servers.html?style=./Servers.css';
+
+import { Modal } from 'bootstrap-vue/es/components';
 
 import * as app from "../../app";
 import * as Utils from "../../utils";
 import * as Servers from "../../servers";
-
 import { Server } from '../../ark/multipliers';  // eslint-disable-line no-unused-vars
-import { setMult, onServerChange, NEW_SERVER_ID } from './behaviour';
+import { Watch } from 'vue-property-decorator';
+import theStore from '@/ui/store';
 
 
-export default withRender({
-   props: [],
-   template: "#servers-template",
+const NEW_SERVER_ID = "___NEW___SERVER___";
 
-   data: () => ({
-      // Constant things
-      newServerId: NEW_SERVER_ID,
-      statIndices: Utils.Range(8),
-      paramIndices: Utils.Range(4),
 
-      // Current state
-      server: new Server(),
+@WithRender
+@Component({
+   name: "servers",
+})
+export default class SettingsComponent extends Vue {
+   store = theStore;
 
-      editName: "", // temp copy of the server name for editing
-   }),
+   // Constant things
+   newServerId = NEW_SERVER_ID;
+   statIndices = Utils.Range(8);
+   paramIndices = Utils.Range(4);
 
-   computed: {
-      devMode() { return app.data.status.devMode; },
-      isEditable() { return !this.server.isPreDefined; },
-      canDelete() { return this.isEditable; },
+   userServers = Servers.userServers;
+   preDefinedServers = Servers.preDefinedServers;
+   testServers = Servers.testServers;
 
-      statImages() { return app.data.statImages; },
-      official() { return app.data.officialServer; },
-      officialSP() { return app.data.officialSPMultiplier; },
+   server = new Server();
+   editName = "-"; // temp copy of the server name for editing
 
-      userServers() { return Servers.userServers; },
-      preDefinedServers() { return Servers.preDefinedServers; },
-      testServers() { return Servers.testServers; },
 
-      name: {
-         get() { return app.data.tempCreature.serverName; },
-         set(value) { app.data.tempCreature.serverName = value; },
-      },
+   get currentServerName() { return theStore.tempCreature.serverName; }
+   set currentServerName(value) { theStore.tempCreature.serverName = value; }
 
-      editNameValidity() { return this.editName ? null : false; },
-   },
+   get editNameValidity() { return this.editName ? null : false; }
+   get isEditable() { return !this.server.isPreDefined; }
+   get canDelete() { return this.isEditable; }
 
-   methods: {
-      editNameShown() { this.editName = this.name; },
-      editNameOkay() { this.editNameSubmit(); },
-      editNameSubmit() {
-         if (this.editNameValidity != false) {
-            Servers.renameServer(this.name, this.editName); this.$refs.editNameModal.hide();
-            this.setServerByName(this.editName);
-         }
-      },
 
-      formatMult(n) { return Utils.FormatNumber(n, 2, true); },
-      valueFor(s, p) { return this.server[s][p] || (this.server['singlePlayer'] && this.officialSP[s][p]) || this.official[s][p]; },
-      setMult(s, p, v) { setMult(s, p, v, this.server); },
-      onServerChange(name) { onServerChange(name, this); },
+   $refs: Vue["$refs"] & {
+      editNameModal: Modal;
+      deleteModal: Modal;
+   }
 
-      deleteServer() {
-         Servers.deleteUserServer(this.name);
+
+   editNameShown() { this.editName = this.currentServerName; }
+   editNameSubmit() {
+      if (this.editNameValidity != false) {
+         Servers.renameServer(this.currentServerName, this.editName);
+         this.$refs.editNameModal.hide();
+         this.setServerByName(this.editName);
+      }
+   }
+
+   formatMult(n) { return Utils.FormatNumber(n, 2, true); }
+   valueFor(s, p) { return this.server[s][p] || (this.server['singlePlayer'] && theStore.officialSPMultiplier[s][p]) || theStore.officialServer[s][p]; }
+
+   setMult(s: number, p: number, v: string) {
+      let num = v ? parseFloat(v) : undefined;
+      if (num <= 0) num = undefined;
+      this.server[s][p] = num;
+   }
+
+   onServerChange(newName: string) {
+      if (newName == NEW_SERVER_ID) {
          this.setServerByName("Official Server");
-         this.$refs.deleteModal.hide();
-      },
+         this.copyServer();
+      }
+      else {
+         this.setServerByName(newName);
+      }
+   }
 
-      setServerByName(name) {
-         this.server = Servers.getServerByName(name);
-         app.data.currentServerName = this.server.serverName;
-      },
+   deleteServer() {
+      Servers.deleteUserServer(this.currentServerName);
+      this.setServerByName("Official Server");
+      this.$refs.deleteModal.hide();
+   }
 
-      copyServer() {
-         this.server = Servers.copyServer(this.server);
-         this.name = this.server.serverName;
-      },
-   },
+   setServerByName(name: string) {
+      this.server = Servers.getServerByName(name);
+      theStore.currentServerName = this.server.serverName;
+   }
+
+   copyServer() {
+      this.server = Servers.copyServer(this.server);
+      this.currentServerName = this.server.serverName;
+   }
 
    created() {
-      this.setServerByName(this.name);
-   },
-});
+      this.setServerByName(this.currentServerName);
+   }
+}

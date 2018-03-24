@@ -11,82 +11,45 @@ import { VueCreature } from "./ark/creature";
 import { statNames } from "./consts";
 
 import Shell from "./ui/shell/Shell.vue";
+import { Server } from "@/ark/multipliers";
+import Component from "vue-class-component";
+import theStore from "@/ui/store";
 
 Vue.use(BootstrapVue);
 
 PouchDB.plugin(PouchFind);
-// @ts-ignore
 PouchDB.plugin(PouchLiveFind);
 
 Vue.use(PouchVue, {
    pouch: PouchDB,
 });
 
-
-
 Vue.config.productionTip = false;
 
-export const vueApp = new Vue({
-   el: "#app",
-   template: '<Shell ref="shell" v-bind="status"/>',
+
+
+@Component({
+   template: '<Shell ref="shell"/>',
    components: { Shell },
-
-   data: {
-      status: {
-         dataLoaded: false,
-         devMode: true,
-      },
-
-      // Reference stuff that shouldn't change
-      statImages: [],
-      speciesNames: [],
-      speciesMultipliers: {},
-
-      officialServer: {},
-      officialSPMultiplier: {},
-
-      userServers: {},
-      preDefinedServers: {},
-
-      valuesJson: {},
-
-      // Things that change
-      tempCreature: {} as VueCreature,
-   },
-
-   computed: {
-      currentServerName: {
-         get() { return this.tempCreature.serverName; },
-         set(name) { this.tempCreature.serverName = name; },
-      }
-   },
+})
+class App extends Vue {
+   store = theStore;
 
    async created() {
-      // Calcualte the paths for each of the stat images
-      for (let i = 0; i < statNames.length; i++) {
-         let name = statNames[i];
-         // @ts-ignore
-         import("assets/" + name.toLowerCase() + ".svg").then(url => Vue.set(this.statImages, i, url));
-      }
+      await this.store.loadStatImages();
 
       // Initialise sub-systems
       await SettingsManager.initialise();
       await LibraryManager.initialise();
-      await Servers.initialise(this.status.devMode);
-
-      // Load pre-defined and user servers
-      this.userServers = Servers.userServers;
-      this.preDefinedServers = Servers.preDefinedServers;
+      await Servers.initialise(this.store.devMode);
 
       // Create a creature to use for extraction, etc
-      this.tempCreature = new VueCreature();
-      this.currentServerName = "Official Server";
+      theStore.currentServerName = "Official Server";
    }
-});
+}
 
 
-
-export const data = vueApp;
-export const shell = vueApp.$refs.shell;
+export const app = new App({ el: "#app" });
 export const settings = SettingsManager;
 export const libraries = LibraryManager;
+

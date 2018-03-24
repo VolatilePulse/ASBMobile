@@ -1,9 +1,7 @@
-/// <reference path="types.ts"/>
-
 import Vue from "vue";
 
-import testServersData from "./servers_test";
-import preDefinedServersData from "./servers_predef";
+import testServersData from "./ark/servers_test";
+import preDefinedServersData from "./ark/servers_predef";
 import { Server } from "./ark/multipliers";
 
 
