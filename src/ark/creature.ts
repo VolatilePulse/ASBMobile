@@ -135,12 +135,13 @@ export class Stat implements Stat {
 }
 
 export class Creature {
-   name?: string;
-   tribe?: string;
-   owner?: string;
-   serverName?: string;
-   species?: string;
-   uuid?: string;
+   // null is used here to ensure the fields are Observable, but still clearly not set
+   name?: string = null;
+   tribe?: string = null;
+   owner?: string = null;
+   serverName?: string = null;
+   species?: string = null;
+   uuid?: string = null;
    wild = true;
    tamed = false;
    bred = false;
