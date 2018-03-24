@@ -88,6 +88,11 @@ export class ServerMultiplier {
    [index: number]: number;
 }
 
+Object.defineProperty(ServerMultiplier.prototype, 'TaM', { enumerable: false });
+Object.defineProperty(ServerMultiplier.prototype, 'TmM', { enumerable: false });
+Object.defineProperty(ServerMultiplier.prototype, 'IdM', { enumerable: false });
+Object.defineProperty(ServerMultiplier.prototype, 'IwM', { enumerable: false });
+
 export class Server {
    singlePlayer: boolean = false;
    IBM: number = 1;

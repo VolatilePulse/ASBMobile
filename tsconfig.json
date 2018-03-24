@@ -2,7 +2,7 @@
    "compilerOptions": {
       "module": "es2015",
       "moduleResolution": "node",
-      "target": "es6",
+      "target": "es5",
       "rootDir": "src",
       "alwaysStrict": true,
       "strict": true,
@@ -21,7 +21,7 @@
       ],
       "typeRoots": [
          "node_modules/@types",
-         "src/typings"
+         "src/types"
       ],
       "baseUrl": "./",
       "paths": {
