@@ -8,11 +8,11 @@ import { TORPOR, FOOD, SPEED, HEALTH } from '../consts';
 import { Stat, VueCreature } from './creature';
 import * as Ark from '../ark';
 import * as Utils from '../utils';
-import { StatMultiplier } from '@/ark/multipliers';
+import { StatMultiplier, ServerMultiplier } from '@/ark/multipliers';
 
 export class Extractor {
    c: VueCreature;
-   m: StatMultiplier[] = [];
+   m: StatMultiplier[] & ServerMultiplier[] = [];
 
    wildFreeMax = 0;
    domFreeMax = 0;

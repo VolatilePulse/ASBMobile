@@ -3,7 +3,7 @@
 import { DAMAGE, SPEED, PRE_IB, PRE_TE } from './consts';
 import * as Utils from './utils';
 import * as Servers from './servers';
-import { Server, StatMultiplier } from './ark/multipliers';
+import { Server, StatMultiplier, ServerMultiplier } from './ark/multipliers';
 import theStore from '@/ui/store';
 
 
@@ -74,7 +74,7 @@ export function ConvertValue(value, index) {
  * @param {string} speciesName
  * @return {*}
  */
-export function GetMultipliers(serverName: string, speciesName: string): StatMultiplier[] {
+export function GetMultipliers(serverName: string, speciesName: string): StatMultiplier[] & ServerMultiplier[] {
    let server = Servers.getServerByName(serverName);
 
    // The Server object tells us everything we need to know about the multipliers

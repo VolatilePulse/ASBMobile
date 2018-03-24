@@ -1,6 +1,6 @@
 import * as Utils from '../utils';
 import * as Ark from '../ark';
-import { StatMultiplier } from '@/ark/multipliers';
+import { StatMultiplier, ServerMultiplier } from '@/ark/multipliers';
 
 export class Stat implements Stat {
    Lw: number;
@@ -26,7 +26,7 @@ export class Stat implements Stat {
       }
    }
 
-   calculateValue(m: StatMultiplier, tamed = false, TE = 0, IB = 0) {
+   calculateValue(m: StatMultiplier & ServerMultiplier, tamed = false, TE = 0, IB = 0) {
       // V = (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) * (1 + TE * Tm * TmM) * (1 + Ld * Id * IdM)
       let TBHM = (tamed && m.TBHM) || 1;
       let v = m.B * TBHM;
@@ -41,7 +41,7 @@ export class Stat implements Stat {
       return v;
    }
 
-   calculateWildLevel(m: StatMultiplier, v: number, tamed = false, TE = 0, IB = 0) {
+   calculateWildLevel(m: StatMultiplier & ServerMultiplier, v: number, tamed = false, TE = 0, IB = 0) {
       // Lw = ((V / ((1 + Ld * Id * IdM) * (1 + TE * Tm * TmM)) - Ta * TaM) / (B * TBHM * (1 + IB * 0.2 * IBM)) - 1) / (Iw * IwM)
       let TBHM = (tamed && m.TBHM) || 1;
 
@@ -62,7 +62,7 @@ export class Stat implements Stat {
       return this.Lw;
    }
 
-   calculateDomLevel(m: StatMultiplier, v: number, tamed = false, TE = 0, IB = 0) {
+   calculateDomLevel(m: StatMultiplier & ServerMultiplier, v: number, tamed = false, TE = 0, IB = 0) {
       //  Ld = ((V / (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) / (1 + TE * Tm * TmM)) - 1) / (Id * IdM)
 
       // Prevents division by 0
@@ -79,7 +79,7 @@ export class Stat implements Stat {
       return this.Ld;
    }
 
-   calculateTE(m: StatMultiplier, v: number, tamed = true, IB = 0) {
+   calculateTE(m: StatMultiplier & ServerMultiplier, v: number, tamed = true, IB = 0) {
       // TE = (V / (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) / (1 + Ld * Id * IdM) - 1) / (Tm * TmM)
 
       if (!tamed)
@@ -94,7 +94,7 @@ export class Stat implements Stat {
       return ((TE - 1) / this.calculateTm(tamed, m.Tm, m.TmM));
    }
 
-   calculateIB(m: StatMultiplier, v: number, tamed = true, TE = 1) {
+   calculateIB(m: StatMultiplier & ServerMultiplier, v: number, tamed = true, TE = 1) {
       // IB = ((V / (1 + TE * Tm * TmM) / (1 + Ld * Id * IdM) - Ta * TaM) / (B * (1 + Lw * Iw * IwM) * TBHM) - 1)  / (0.2 * IBM)
 
       if (!tamed)
