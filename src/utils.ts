@@ -6,6 +6,8 @@ import cloneDeepWith from 'lodash.clonedeepwith';
 import isEqual from 'lodash.isequal';
 import isEqualWith from 'lodash.isequalwith';
 
+const EPSILON = 1E-10;
+
 /**
  * Async JSON file read
  * @async
@@ -13,11 +15,11 @@ import isEqualWith from 'lodash.isequalwith';
 export function AsyncFileRead(filePath: string): Promise<string> {
    return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      xhr.overrideMimeType("application/json");
-      xhr.open("GET", filePath);
+      xhr.overrideMimeType('application/json');
+      xhr.open('GET', filePath);
       xhr.onload = () => resolve(xhr.responseText);
       xhr.onerror = () => reject(xhr.statusText);
-      //xhr.onerror = () => resolve(null);
+      // xhr.onerror = () => resolve(null);
       xhr.send();
    });
 }
@@ -33,7 +35,7 @@ const formattersCache: Map<{ places: number, fixed: boolean }, Intl.NumberFormat
 export function FormatNumber(value: number, places = 1, fixed = false) {
    let formatter = formattersCache.get({ places, fixed });
    if (!formatter) {
-      var locale = navigator['language'] || (navigator['languages'] && navigator.languages[0]) || navigator['browserLanguage'] || 'en';
+      const locale = navigator['language'] || (navigator['languages'] && navigator.languages[0]) || navigator['browserLanguage'] || 'en';
       if (fixed)
          formatter = new Intl.NumberFormat(locale, { maximumFractionDigits: places, minimumFractionDigits: places, useGrouping: false });
       else
@@ -65,9 +67,7 @@ export function FilledArray<T>(length: number, fn: (_: null, i: number) => T): T
  * @param {number} duration Number of milliseconds to delay for.
  */
 export function Delay(duration: number) {
-   return new Promise(function (resolve, _) {
-      setTimeout(() => resolve(), duration);
-   });
+   return new Promise((resolve, _) => setTimeout(() => resolve(), duration));
 }
 
 /**
@@ -75,10 +75,9 @@ export function Delay(duration: number) {
  * @param {number} duration Number of milliseconds to delay for.
  */
 export function DelayFunction(duration: number) {
+   // tslint:disable-next-line:only-arrow-functions
    return function (...args) {
-      return new Promise(function (resolve, _) {
-         setTimeout(() => resolve(...args), duration);
-      });
+      return new Promise((resolve, _) => setTimeout(() => resolve(...args), duration));
    };
 }
 
@@ -90,10 +89,10 @@ export function DelayFunction(duration: number) {
  * @param {number} b B
  * @param {number} epsilon Difference limit
  */
-export function CompareFloat(a: number, b: number, epsilon = 1E-10) {
+export function CompareFloat(a: number, b: number, epsilon = EPSILON) {
    if (!Number.isFinite(a) || !Number.isFinite(b)) return undefined;
 
-   var diff = Math.abs(a - b);
+   const diff = Math.abs(a - b);
    return diff < epsilon;
 }
 
@@ -104,7 +103,7 @@ export function CompareFloat(a: number, b: number, epsilon = 1E-10) {
  * @returns {number} Decimal rounded to the specified precision
  */
 export function RoundTo(num: number, places = 0) {
-   return +Number(num + 1E-10).toFixed(places);
+   return +Number(num + EPSILON).toFixed(places);
 }
 
 /**

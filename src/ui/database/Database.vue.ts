@@ -3,15 +3,15 @@ import Component from 'vue-class-component';
 
 import WithRender from './Database.html?style=./Database.css';
 
-import PouchDB from 'pouchdb-browser';
+// import PouchDB from 'pouchdb-browser';
 import YANG from 'yet-another-name-generator';
 
-import * as app from '../../app';
 import theStore from '@/ui/store';
+
 
 @WithRender
 @Component({
-   name: "database",
+   name: 'database',
 })
 export default class SettingsComponent extends Vue {
    store = theStore;
@@ -30,13 +30,13 @@ export default class SettingsComponent extends Vue {
          else {
             return { species: { $ne: '' } };
          }
-      }
-   }
+      },
+   };
 
    newRow = {
       species: '',
       name: '',
-   }
+   };
 
    // Field definitons for the live table
    fields = [
@@ -51,7 +51,7 @@ export default class SettingsComponent extends Vue {
       { key: 's5', label: '6', sortable: true },
       { key: 's6', label: '7', sortable: true },
       { key: 'controls', label: '&nbsp;' },
-   ]
+   ];
 
    get speciesNames() { return theStore.speciesNames; }
 
@@ -67,13 +67,13 @@ export default class SettingsComponent extends Vue {
    }
 
    destroyAll() {
-      this.$pouch.destroy("creatures");
+      this.$pouch.destroy('creatures');
    }
 
    createMany() {
-      var objs: any[] = [];
+      const objs: any[] = [];
       for (let i = 100; i >= 0; i--) {
-         var obj = {
+         const obj = {
             name: YANG.generate({ titleize: true }),
             species: theStore.speciesNames[Math.floor(Math.random() * theStore.speciesNames.length)],
             s0: Math.floor(Math.random() * 100),
@@ -87,16 +87,16 @@ export default class SettingsComponent extends Vue {
          objs.push(obj);
       }
 
-      this.$pouch.bulkDocs("creatures", objs);
+      this.$pouch.bulkDocs('creatures', objs);
    }
 
    async initDatabase() {
-      //let db = new PouchDB('creatures');
+      // let db = new PouchDB('creatures');
 
       try {
          // These do nothing if the index already exists
-         //await db.createIndex({ index: { fields: ['species'] } });
-         //await db.createIndex({ index: { fields: ['name'] } });
+         // await db.createIndex({ index: { fields: ['species'] } });
+         // await db.createIndex({ index: { fields: ['name'] } });
       }
       catch (err) {
          console.error(err);
@@ -105,6 +105,6 @@ export default class SettingsComponent extends Vue {
 
    async created() {
       await this.initDatabase();
-      //this.$pouch.sync('creatures', '...remote host...');
+      // this.$pouch.sync('creatures', '...remote host...');
    }
 }

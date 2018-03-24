@@ -1,7 +1,5 @@
-"use strict";
+import * as consts from '@/consts';
 
-import * as Utils from '../utils';
-import * as consts from '../consts';
 
 export class StatMultiplier {
    B: number;
@@ -15,8 +13,6 @@ export class StatMultiplier {
 
    notUsed: boolean = false;
 
-   constructor(stat: StatMultiplier);
-   constructor(stat: number[]);
    constructor(stat: StatMultiplier | number[] = [0, 0, 0, 0, 0]) {
       // Copy Constructor
       if (stat instanceof StatMultiplier) {
@@ -27,10 +23,8 @@ export class StatMultiplier {
          this.Ta = stat.Ta;
          this.Tm = stat.Tm;
 
-         if (stat.IBM)
-            this.IBM = stat.IBM;
-         if (stat.notUsed)
-            this.notUsed = stat.notUsed;
+         if (stat.IBM) this.IBM = stat.IBM;
+         if (stat.notUsed) this.notUsed = stat.notUsed;
       }
       else {
          this.B = stat[consts.STAT_B]; // Base Value
@@ -49,7 +43,7 @@ export class CreatureStats {
     * @param {array} stats An array of the statmultipliers
     */
    constructor(stats, TBHM = 1, oxygenNotUsed = false, speedImprintIgnored = false) {
-      for (var i = 0; i < 8; i++)
+      for (let i = 0; i < 8; i++)
          this[i] = new StatMultiplier(stats ? stats[i] : null);
 
       this[consts.HEALTH].TBHM = TBHM;
@@ -75,19 +69,21 @@ export class ServerMultiplier {
    constructor(settingArray: ServerMultiplier | number[] = [], IBM: number) {
       this.IBM = IBM; // Imprint Bonus Multiplier
 
-      for (var i = 0; i < 4; i++)
+      for (let i = 0; i < 4; i++)
          this[i] = settingArray[i]; // will use undefined if not set, which is fine
    }
 
-   get TaM() { return this[consts.SERVER_TAM] };
-   get TmM() { return this[consts.SERVER_TMM] };
-   get IdM() { return this[consts.SERVER_IDM] };
-   get IwM() { return this[consts.SERVER_IWM] };
+   get TaM() { return this[consts.SERVER_TAM]; }
+   set TaM(value: number) { this[consts.SERVER_TAM] = value; }
 
-   set TaM(value: number) { this[consts.SERVER_TAM] = value; };
-   set TmM(value: number) { this[consts.SERVER_TMM] = value; };
-   set IdM(value: number) { this[consts.SERVER_IDM] = value; };
-   set IwM(value: number) { this[consts.SERVER_IWM] = value; };
+   get TmM() { return this[consts.SERVER_TMM]; }
+   set TmM(value: number) { this[consts.SERVER_TMM] = value; }
+
+   get IdM() { return this[consts.SERVER_IDM]; }
+   set IdM(value: number) { this[consts.SERVER_IDM] = value; }
+
+   get IwM() { return this[consts.SERVER_IWM]; }
+   set IwM(value: number) { this[consts.SERVER_IWM] = value; }
 
    // This defines our types when accessed with a numeric index like an array
    [index: number]: number;
@@ -101,15 +97,16 @@ export class Server {
    isPreDefined: boolean = false;
 
    /** * Create a server or copy an existing one */
-   constructor(settingsArray: MultipliersArray | Server = [], IBM = 1, singlePlayer = false, name = "") {
+   constructor(settingsArray: MultipliersArray | Server = [], IBM = 1, singlePlayer = false, name = '') {
       this.singlePlayer = singlePlayer; // singlePlayer Setting
       this.IBM = IBM;
       this.serverName = name;
       this.isTestOnly = false;
       this.isPreDefined = false;
 
-      for (var i = 0; i < 8; i++)
+      for (let i = 0; i < 8; i++) {
          this[i] = new ServerMultiplier(settingsArray[i] || new Array(4), IBM);
+      }
    }
 
    // This defines our types when accessed with a numeric index like an array

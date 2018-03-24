@@ -3,18 +3,22 @@ import Component from 'vue-class-component';
 
 import WithRender from './Tester.html?style=./Tester.css';
 
-import * as Utils from '../../utils';
-import { FormatAllOptions, FormatOptions, FormatOption } from '../../ark';
-import { PerformTest, PerformPerfTest } from '../../testing';
+import * as Utils from '@/utils';
+import { FormatAllOptions, FormatOptions, FormatOption } from '@/ark';
+import { PerformTest, PerformPerfTest } from '@/testing';
 
-import testData from '../../ark/test_data';
-import { statNames } from '../../consts';
+import testData from '@/ark/test_data';
+import { statNames } from '@/consts';
 import theStore from '@/ui/store';
+
+
+const ASYNC_RUN_TIME_MS = 200;
+const ASYNC_DELAY_TIME_MS = 100;
 
 
 @WithRender
 @Component({
-   name: "tester",
+   name: 'tester',
 })
 export default class TesterComponent extends Vue {
    store = theStore;
@@ -33,14 +37,14 @@ export default class TesterComponent extends Vue {
    optionsTableFields = statNames.map((name, i) => ({ key: i, label: name, formatter: FormatOption }));
 
 
-   openResults(index) { this.openTestIndex = (this.openTestIndex != index) ? index : null; }
+   openResults(index) { this.openTestIndex = (this.openTestIndex !== index) ? index : null; }
    isPass(index) { return this.results[index] && this.results[index]['pass']; }
    isFail(index) { return this.results[index] && !this.results[index]['pass']; }
    formatNumber(n, places = 0) { return Utils.FormatNumber(n, places); }
    formattedOptions(options) { return options ? FormatOptions(options) : '-'; }
    formattedStats(stats) { return FormatAllOptions(stats); }
    formattedStat(stat) { return FormatOption(stat); }
-   dbgKeys(index) { return this.results[index]['dbg'] ? Object.keys(this.results[index].dbg).filter(key => key != "preFilterStats") : []; }
+   dbgKeys(index) { return this.results[index]['dbg'] ? Object.keys(this.results[index].dbg).filter(key => key !== 'preFilterStats') : []; }
    scrollSync(event) { (event.target.nextElementSibling || event.target.previousElementSibling).scrollLeft = event.target.scrollLeft; }
    optionsForStat(testIndex, statIndex) { return this.results[testIndex].options.map(options => options[statIndex]); }
 
@@ -57,17 +61,17 @@ export default class TesterComponent extends Vue {
 
       // Unblock the browser for a moment
       await Utils.Delay(100);
-      let nextYield = Date.now() + 200; // schedule next unblock
+      let nextYield = Date.now() + ASYNC_RUN_TIME_MS; // schedule next unblock
 
       let failFound = false;
-      for (let index of indices) {
+      for (const index of indices) {
          // Unblock the browser once every 200ms
          if (Date.now() > nextYield) {
-            nextYield = Date.now() + 200;
-            await Utils.Delay(100);
+            nextYield = Date.now() + ASYNC_RUN_TIME_MS;
+            await Utils.Delay(ASYNC_DELAY_TIME_MS);
          }
 
-         let result = PerformTest(testData[index]);
+         const result = PerformTest(testData[index]);
          Vue.set(this.results, index, result);
 
          // Open the first failed case only
@@ -83,9 +87,9 @@ export default class TesterComponent extends Vue {
 
    /** Run one test repeatedly to measure it's performance, blocking the browser */
    runPerfTest(index) {
-      let { duration, runs, error } = PerformPerfTest(testData[index]);
+      const { duration, runs, error } = PerformPerfTest(testData[index]);
       if (error) {
-         this.results[index].duration = "X";
+         this.results[index].duration = 'X';
       }
       else {
          if (this.results[index]) this.results[index].duration = duration;
@@ -99,7 +103,7 @@ export default class TesterComponent extends Vue {
    /** Run just one test */
    async runTest(index) {
       await this.runTestSelection([index]);
-      if (this.results[index] == undefined || !this.results[index]['pass'])
+      if (this.results[index] === undefined || !this.results[index]['pass'])
          this.openTestIndex = index;
       else
          this.openTestIndex = null;
@@ -122,8 +126,8 @@ export default class TesterComponent extends Vue {
 
    /** Count the number of passes and fails, excluding those that haven't run */
    updateStatus() {
-      this.passes = this.results.reduce((total, result) => total + (result && result.pass == true && 1), 0);
-      this.fails = this.results.reduce((total, result) => total + (result && result.pass == false && 1), 0);
+      this.passes = this.results.reduce((total, result) => total + (result && result.pass === true && 1), 0);
+      this.fails = this.results.reduce((total, result) => total + (result && result.pass === false && 1), 0);
    }
 }
 

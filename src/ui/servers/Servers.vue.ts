@@ -5,20 +5,18 @@ import WithRender from './Servers.html?style=./Servers.css';
 
 import { Modal } from 'bootstrap-vue/es/components';
 
-import * as app from "../../app";
-import * as Utils from "../../utils";
-import * as Servers from "../../servers";
-import { Server } from '../../ark/multipliers';  // eslint-disable-line no-unused-vars
-import { Watch } from 'vue-property-decorator';
 import theStore from '@/ui/store';
+import { Server } from '@/ark/multipliers';  // eslint-disable-line no-unused-vars
+import * as Servers from '@/servers';
+import * as Utils from '@/utils';
 
 
-const NEW_SERVER_ID = "___NEW___SERVER___";
+const NEW_SERVER_ID = '___NEW___SERVER___';
 
 
 @WithRender
 @Component({
-   name: "servers",
+   name: 'servers',
 })
 export default class SettingsComponent extends Vue {
    store = theStore;
@@ -33,7 +31,7 @@ export default class SettingsComponent extends Vue {
    testServers = Servers.testServers;
 
    server = new Server();
-   editName = "-"; // temp copy of the server name for editing
+   editName = '-'; // temp copy of the server name for editing
 
 
    get currentServerName() { return theStore.tempCreature.serverName; }
@@ -44,15 +42,15 @@ export default class SettingsComponent extends Vue {
    get canDelete() { return this.isEditable; }
 
 
-   $refs: Vue["$refs"] & {
+   $refs: Vue['$refs'] & {
       editNameModal: Modal;
       deleteModal: Modal;
-   }
+   };
 
 
    editNameShown() { this.editName = this.currentServerName; }
    editNameSubmit() {
-      if (this.editNameValidity != false) {
+      if (this.editNameValidity !== false) {
          Servers.renameServer(this.currentServerName, this.editName);
          this.$refs.editNameModal.hide();
          this.setServerByName(this.editName);
@@ -69,8 +67,8 @@ export default class SettingsComponent extends Vue {
    }
 
    onServerChange(newName: string) {
-      if (newName == NEW_SERVER_ID) {
-         this.setServerByName("Official Server");
+      if (newName === NEW_SERVER_ID) {
+         this.setServerByName('Official Server');
          this.copyServer();
       }
       else {
@@ -80,7 +78,7 @@ export default class SettingsComponent extends Vue {
 
    deleteServer() {
       Servers.deleteUserServer(this.currentServerName);
-      this.setServerByName("Official Server");
+      this.setServerByName('Official Server');
       this.$refs.deleteModal.hide();
    }
 

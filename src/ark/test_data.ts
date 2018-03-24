@@ -1,5 +1,6 @@
-"use strict";
-
+// tslint:disable:max-line-length
+// tslint:disable:object-literal-key-quotes
+// tslint:disable:quotemark
 
 // Some test data
 const testData: TestData[] = [

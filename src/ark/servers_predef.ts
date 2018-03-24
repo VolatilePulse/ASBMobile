@@ -1,12 +1,12 @@
-let servers: ServerDef[] = [
+const servers: ServerDef[] = [
    {
-      serverName: "Official Server",
+      serverName: 'Official Server',
       IBM: 1,
       singlePlayer: false,
       multipliers: [],
    },
    {
-      serverName: "Official Single Player",
+      serverName: 'Official Single Player',
       IBM: 1,
       singlePlayer: true,
       multipliers: [],

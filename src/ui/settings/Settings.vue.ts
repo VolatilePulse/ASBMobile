@@ -3,12 +3,13 @@ import Component from 'vue-class-component';
 
 import WithRender from './Settings.html?style=./Settings.css';
 
-import * as app from '../../app';
+import * as app from '@/app';
 import theStore from '@/ui/store';
+
 
 @WithRender
 @Component({
-   name: "settings",
+   name: 'settings',
 })
 export default class SettingsComponent extends Vue {
    store = theStore;
@@ -22,10 +23,10 @@ export default class SettingsComponent extends Vue {
 
    get renameLibraryNameValidity() { return this.renameLibraryName ? null : false; }
 
-   $refs: Vue["$refs"] & {
+   $refs: Vue['$refs'] & {
       deleteLibraryModal: any;
       renameLibraryModal: any;
-   }
+   };
 
 
    markDirty() { app.settings.notifyChanged(); }
@@ -41,7 +42,7 @@ export default class SettingsComponent extends Vue {
    }
 
    renameLibrarySubmit() {
-      if (this.renameLibraryNameValidity != false) {
+      if (this.renameLibraryNameValidity !== false) {
          app.libraries.renameLibrary(this.renameLibraryId, this.renameLibraryName);
          this.$refs.renameLibraryModal.hide();
       }

@@ -1,4 +1,3 @@
-
 import * as Ark from './ark';
 import * as Utils from './utils';
 import { Extractor } from './ark/extractor';
@@ -18,29 +17,27 @@ interface TestResult {
 }
 
 export function PerformTest(testData) {
-   let testCreature = new VueCreature();
+   const testCreature = new VueCreature();
 
    // Set the properties to prepare for extraction
-   testCreature.wild = (testData.mode == "Wild");
-   testCreature.tamed = (testData.mode == "Tamed");
-   testCreature.bred = (testData.mode == "Bred");
+   testCreature.wild = (testData.mode === 'Wild');
+   testCreature.tamed = (testData.mode === 'Tamed');
+   testCreature.bred = (testData.mode === 'Bred');
    testCreature.IB = testData.imprint / 100;
    testCreature.values = testData.values.map(Ark.ConvertValue);
    testCreature.serverName = testData.serverName;
    testCreature.level = testData.level;
    testCreature.species = testData.species;
 
-   let extractObject = new Extractor(testCreature);
+   const extractObject = new Extractor(testCreature);
 
-   let dbg: any = {
+   const dbg: any = {
       totalRecursion: 0,
       numberRemoved: 0,
    };
 
-   /** @type {number} */
-   let t1, t2;
-   /** @type {object} */
-   let exception;
+   let t1: number, t2: number;
+   let exception: Error;
 
    try {
       t1 = performance.now();
@@ -51,7 +48,7 @@ export function PerformTest(testData) {
       exception = ex;
    }
 
-   let result: TestResult = {
+   const result: TestResult = {
       pass: false,
       stats: testCreature['stats'],
       options: extractObject['options'],
@@ -84,25 +81,25 @@ export function PerformTest(testData) {
 export function PerformPerfTest(testData, duration = 5000) {
    let runs = 0;
    let t1, t2;
-   let cutoffTime = Date.now() + duration;
+   const cutoffTime = Date.now() + duration;
 
    try {
       t1 = performance.now();
 
       do {
-         let testCreature = new VueCreature();
+         const testCreature = new VueCreature();
 
          // Set the properties to prepare for extraction
-         testCreature.wild = (testData.mode == "Wild");
-         testCreature.tamed = (testData.mode == "Tamed");
-         testCreature.bred = (testData.mode == "Bred");
+         testCreature.wild = (testData.mode === 'Wild');
+         testCreature.tamed = (testData.mode === 'Tamed');
+         testCreature.bred = (testData.mode === 'Bred');
          testCreature.IB = testData.imprint / 100;
          testCreature.values = testData.values.map(Ark.ConvertValue);
          testCreature.serverName = testData.serverName;
          testCreature.level = testData.level;
          testCreature.species = testData.species;
 
-         let extractObject = new Extractor(testCreature);
+         const extractObject = new Extractor(testCreature);
 
          extractObject.extract();
          runs += 1;
@@ -114,7 +111,7 @@ export function PerformPerfTest(testData, duration = 5000) {
       duration = (t2 - t1) / runs;
    }
    catch (_) {
-      return { error: "-" };
+      return { error: '-' };
    }
 
    return { duration, runs };
@@ -130,17 +127,17 @@ function IsPass(result, expected) {
       return isNumber(expected) && Utils.CompareFloat(result, expected);
 
    if (isString(result))
-      return isString(expected) && expected == result;
+      return isString(expected) && expected === result;
 
    if (isFunction(result))
       return false;
 
-   if (isArray(result) && isArray(expected) && result.length != expected.length)
+   if (isArray(result) && isArray(expected) && result.length !== expected.length)
       return false;
 
    if (isObject(result) || isArray(result)) {
-      for (let key in result) {
-         if (key.startsWith("_")) continue;
+      for (const key in result) {
+         if (key.startsWith('_')) continue;
          if (!IsPass(result[key], expected[key])) return false;
       }
    }

@@ -1,6 +1,7 @@
-import * as Utils from '../utils';
-import * as Ark from '../ark';
+import * as Utils from '@/utils';
+import * as Ark from '@/ark';
 import { StatMultiplier, ServerMultiplier } from '@/ark/multipliers';
+
 
 export class Stat implements Stat {
    Lw: number;
@@ -28,7 +29,7 @@ export class Stat implements Stat {
 
    calculateValue(m: StatMultiplier & ServerMultiplier, tamed = false, TE = 0, IB = 0) {
       // V = (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) * (1 + TE * Tm * TmM) * (1 + Ld * Id * IdM)
-      let TBHM = (tamed && m.TBHM) || 1;
+      const TBHM = (tamed && m.TBHM) || 1;
       let v = m.B * TBHM;
 
       if (this.Lw > 0)
@@ -43,10 +44,10 @@ export class Stat implements Stat {
 
    calculateWildLevel(m: StatMultiplier & ServerMultiplier, v: number, tamed = false, TE = 0, IB = 0) {
       // Lw = ((V / ((1 + Ld * Id * IdM) * (1 + TE * Tm * TmM)) - Ta * TaM) / (B * TBHM * (1 + IB * 0.2 * IBM)) - 1) / (Iw * IwM)
-      let TBHM = (tamed && m.TBHM) || 1;
+      const TBHM = (tamed && m.TBHM) || 1;
 
       // Prevents division by 0
-      if (m.Iw == 0)
+      if (m.Iw === 0)
          return this.Lw = 0;
 
       let wildLevel = (1 + this.Ld * m.Id * m.IdM);
@@ -66,10 +67,10 @@ export class Stat implements Stat {
       //  Ld = ((V / (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) / (1 + TE * Tm * TmM)) - 1) / (Id * IdM)
 
       // Prevents division by 0
-      if (m.Id == 0 || !tamed)
+      if (m.Id === 0 || !tamed)
          return this.Ld = 0;
 
-      let TBHM = m.TBHM ? m.TBHM : 1;
+      const TBHM = m.TBHM ? m.TBHM : 1;
       let domLevel = m.B * TBHM;
       domLevel *= (1 + this.Lw * m.Iw * m.IwM);
       domLevel *= (1 + IB * 0.2 * m.IBM);
@@ -85,7 +86,7 @@ export class Stat implements Stat {
       if (!tamed)
          return -1;
 
-      let TBHM = m.TBHM ? m.TBHM : 1;
+      const TBHM = m.TBHM ? m.TBHM : 1;
       let TE = m.B * TBHM;
       TE *= (1 + this.Lw * m.Iw * m.IwM);
       TE *= (1 + IB * 0.2 * m.IBM);
@@ -100,8 +101,8 @@ export class Stat implements Stat {
       if (!tamed)
          return 0;
 
-      let TBHM = m.TBHM ? m.TBHM : 1;
-      var IB = v;
+      const TBHM = m.TBHM ? m.TBHM : 1;
+      let IB = v;
       IB /= (1 + this.calculateTm(tamed, m.Tm, m.TmM, TE));
       IB /= (1 + this.Ld * m.Id * m.IdM);
       IB = (IB - this.calculateTa(tamed, m.Ta, m.TaM)) / (m.B * TBHM);
@@ -152,8 +153,6 @@ export class Creature {
    values: number[] = Utils.FilledArray(8, () => undefined);
 
    /** Empty or copy constructor */
-   constructor(c: Creature);
-   constructor();
    constructor(c?: Creature) {
       if (c instanceof Creature) {
          this.name = c.name;
@@ -172,7 +171,7 @@ export class Creature {
          this.values = Utils.DeepCopy(c.values);
       }
       else {
-         this.stats = Utils.FilledArray(8, () => [])
+         this.stats = Utils.FilledArray(8, () => []);
       }
 
       // FIXME: TS-MIGRATION: Have I done the above correctly? Below was how it was before... We don't seem to use this, much.
@@ -202,6 +201,6 @@ export class VueCreature extends Creature {
    }
 
    clear() {
-      Utils.DeepMerge(this, new VueCreature);
+      Utils.DeepMerge(this, (new VueCreature()));
    }
 }

@@ -8,7 +8,7 @@
    "editor.detectIndentation": false,
    "editor.tabSize": 3,
    "editor.formatOnSave": true,
-   "html.format.wrapLineLength": 132,
+   "html.format.wrapLineLength": 160,
    "javascript.implicitProjectConfig.checkJs": true,
    "vue-peek.supportedLanguages": [
       "vue",

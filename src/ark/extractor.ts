@@ -1,14 +1,13 @@
-"use strict";
-
 /**
  * @fileOverview Contains the ASBM.Extraction Object
  */
 
-import { TORPOR, FOOD, SPEED, HEALTH } from '../consts';
+import { TORPOR, FOOD, SPEED, HEALTH } from '@/consts';
 import { Stat, VueCreature } from './creature';
-import * as Ark from '../ark';
-import * as Utils from '../utils';
+import * as Ark from '@/ark';
+import * as Utils from '@/utils';
 import { StatMultiplier, ServerMultiplier } from '@/ark/multipliers';
+
 
 export class Extractor {
    c: VueCreature;
@@ -61,7 +60,7 @@ export class Extractor {
 
       // Loop all stats except for torpor
       for (let stat = HEALTH; stat <= SPEED; stat++) {
-         tempStat = new Stat;
+         tempStat = new Stat();
 
          // Covers unused stats like oxygen
          if (this.uniqueStatSituation(tempStat, stat))
@@ -69,7 +68,7 @@ export class Extractor {
 
          else {
             // Calculate the highest Lw could be
-            var maxLw = tempStat.calculateWildLevel(this.m[stat], this.c.values[stat], !this.c.wild, 0, this.c.IB);
+            let maxLw = tempStat.calculateWildLevel(this.m[stat], this.c.values[stat], !this.c.wild, 0, this.c.IB);
 
             if (maxLw > this.levelBeforeDom || (maxLw === 0 && this.m[stat].Iw === 0))
                maxLw = this.levelBeforeDom;
@@ -77,7 +76,7 @@ export class Extractor {
             // Loop all possible Lws
             for (tempStat.Lw = maxLw; tempStat.Lw >= 0; tempStat.Lw--) {
                // Calculate the highest Ld could be
-               var maxLd = tempStat.calculateDomLevel(this.m[stat], this.c.values[stat], !this.c.wild, 0, this.c.IB);
+               const maxLd = tempStat.calculateDomLevel(this.m[stat], this.c.values[stat], !this.c.wild, 0, this.c.IB);
 
                // If Ld is greater than the highest dom possible, quit the loop
                if (maxLd > this.domFreeMax && !this.m[stat].Tm)
@@ -98,7 +97,7 @@ export class Extractor {
       // Only filter results if we have a result for every stat
       for (let stat = HEALTH; stat <= SPEED; stat++) {
          if (this.c.stats[stat].length === 0) {
-            if (dbg) dbg.failReason = "No options found for stat " + stat;
+            if (dbg) dbg.failReason = 'No options found for stat ' + stat;
             return;
          }
       }
@@ -151,23 +150,27 @@ export class Extractor {
       this.minIB = this.c.IB - (5 / 10E2);
 
       // If the entered IB works, we don't need to do anything else (Torpor can't be leveled and typically has a large value to start with)
-      if (this.c.values[TORPOR] === Utils.RoundTo(this.c.stats[TORPOR][0].calculateValue(this.m[TORPOR], !this.c.wild, this.c.TE, this.c.IB), Ark.Precision(TORPOR)))
+      const expectedValue = this.c.stats[TORPOR][0].calculateValue(this.m[TORPOR], !this.c.wild, this.c.TE, this.c.IB);
+      if (this.c.values[TORPOR] === Utils.RoundTo(expectedValue, Ark.Precision(TORPOR)))
          return;
 
       // Extract the IB from Torpor
       // TODO: Add a redundant check for IBM not being set. IB shouldn't extract to more than 0.05 in either direction if set properly.
       // May not be necessary as extract should return if the Torpor Lw calculated was too high
       this.c.IB = this.c.stats[TORPOR][0].calculateIB(this.m[TORPOR], this.c.values[TORPOR]);
-      this.maxIB = Math.min(this.c.stats[TORPOR][0].calculateIB(this.m[TORPOR], this.c.values[TORPOR] + (0.5 / Math.pow(10, Ark.Precision(TORPOR)))), this.maxIB);
-      this.minIB = Math.max(this.c.stats[TORPOR][0].calculateIB(this.m[TORPOR], this.c.values[TORPOR] - (0.5 / Math.pow(10, Ark.Precision(TORPOR)))), this.minIB);
+      const offset = 0.5 / Math.pow(10, Ark.Precision(TORPOR));
+      this.maxIB = Math.min(this.c.stats[TORPOR][0].calculateIB(this.m[TORPOR], this.c.values[TORPOR] + offset), this.maxIB);
+      this.minIB = Math.max(this.c.stats[TORPOR][0].calculateIB(this.m[TORPOR], this.c.values[TORPOR] - offset), this.minIB);
 
       // Check the food stat for the IB as well (Only works if food is unleveled)
-      var tempHealthStat = new Stat();
+      const tempHealthStat = new Stat();
       tempHealthStat.calculateWildLevel(this.m[FOOD], this.c.values[FOOD], !this.c.wild, this.c.TE, this.c.IB);
-      var imprintingBonusFromFood = tempHealthStat.calculateIB(this.m[FOOD], this.c.values[FOOD]);
+      const imprintingBonusFromFood = tempHealthStat.calculateIB(this.m[FOOD], this.c.values[FOOD]);
 
       // Check to see if the new IB still allows torpor to extract correctly
-      if (this.c.values[TORPOR] === Utils.RoundTo(this.c.stats[TORPOR][0].calculateValue(this.m[TORPOR], !this.c.wild, this.c.TE, imprintingBonusFromFood), Ark.Precision(TORPOR)))
+      // FIXME: TS-TRANSITION: Should this just be `expectedValue`? Looks unchanged to me...
+      const newExpectedValue = this.c.stats[TORPOR][0].calculateValue(this.m[TORPOR], !this.c.wild, this.c.TE, imprintingBonusFromFood);
+      if (this.c.values[TORPOR] === Utils.RoundTo(newExpectedValue, Ark.Precision(TORPOR)))
          this.c.IB = imprintingBonusFromFood;
 
       // IB can't be lower than 0
@@ -218,17 +221,19 @@ export class Extractor {
          // FIXME: Really not sure what assumptions it makes, but sure...
          // This is making sure that our previously calculated IB, rounded, is at least somewhat close to the IB the stat wants to use
          if (Utils.RoundTo(tempStat.calculateIB(this.m[statIndex], this.c.values[statIndex]), 2) === Utils.RoundTo(this.c.IB, 2)) {
-            var maxTempIB = tempStat.calculateIB(this.m[statIndex], this.c.values[statIndex] + (0.5 / Math.pow(10, Ark.Precision(statIndex))));
-            var minTempIB = tempStat.calculateIB(this.m[statIndex], this.c.values[statIndex] - (0.5 / Math.pow(10, Ark.Precision(statIndex))));
+            const maxTempIB = tempStat.calculateIB(this.m[statIndex], this.c.values[statIndex] + (0.5 / Math.pow(10, Ark.Precision(statIndex))));
+            const minTempIB = tempStat.calculateIB(this.m[statIndex], this.c.values[statIndex] - (0.5 / Math.pow(10, Ark.Precision(statIndex))));
+
+            const expectedTorpor = this.c.stats[TORPOR][0].calculateValue(this.m[TORPOR], !this.c.wild, this.c.TE, maxTempIB);
 
             if (this.maxIB > maxTempIB && maxTempIB >= this.minIB) {
-               if (this.c.values[TORPOR] === Utils.RoundTo(this.c.stats[TORPOR][0].calculateValue(this.m[TORPOR], !this.c.wild, this.c.TE, maxTempIB), Ark.Precision(TORPOR))) {
+               if (this.c.values[TORPOR] === Utils.RoundTo(expectedTorpor, Ark.Precision(TORPOR))) {
                   this.c.IB = this.maxIB = maxTempIB;
                   this.c.stats[statIndex].push(new Stat(tempStat));
                }
             }
             if (this.minIB <= minTempIB && minTempIB < this.maxIB) {
-               if (this.c.values[TORPOR] === Utils.RoundTo(this.c.stats[TORPOR][0].calculateValue(this.m[TORPOR], !this.c.wild, this.c.TE, minTempIB), Ark.Precision(TORPOR))) {
+               if (this.c.values[TORPOR] === Utils.RoundTo(expectedTorpor, Ark.Precision(TORPOR))) {
                   this.c.IB = this.minIB = minTempIB;
                   this.c.stats[statIndex].push(new Stat(tempStat));
                }
@@ -256,9 +261,10 @@ export class Extractor {
 
          if (tamingEffectiveness >= 0 && tamingEffectiveness <= 1) {
             // If the TE allows the stat to calculate properly, add it as a possible result
-            if (this.c.values[statIndex] === Utils.RoundTo(tempStat.calculateValue(this.m[statIndex], !this.c.wild, tamingEffectiveness, this.c.IB), Ark.Precision(statIndex))) {
+            const expectedValue = tempStat.calculateValue(this.m[statIndex], !this.c.wild, tamingEffectiveness, this.c.IB);
+            if (this.c.values[statIndex] === Utils.RoundTo(expectedValue, Ark.Precision(statIndex))) {
                // Create a new Stat to hold all of the information
-               var TEStat = new Stat(tempStat);
+               const TEStat = new Stat(tempStat);
                TEStat.wildLevel = Math.ceil(this.levelBeforeDom / (1 + 0.5 * tamingEffectiveness));
                if (this.levelBeforeDom === Math.floor(TEStat.wildLevel * (1 + 0.5 * tamingEffectiveness))) {
                   TEStat.TE = tamingEffectiveness;
@@ -298,6 +304,8 @@ export class Extractor {
                this.checkedStat[i] = true;
             }
             else if (!this.checkedStat[i]) {
+               // FIXME: TS-TRANSITION: The linter suggests using for...of here and that might not be a bad idea to avoid all that repeated indexing
+               // tslint:disable-next-line:prefer-for-of
                for (let j = 0; j < this.c.stats[i].length; j++) {
                   if (tempWM === -1)
                      tempWM = this.c.stats[i][j].Lw;
@@ -321,6 +329,8 @@ export class Extractor {
             for (let i = 0; i < 7; i++) {
                // Simple stat removal
                if (this.c.stats[i].length > 1) {
+                  // FIXME: TS-TRANSITION: The linter suggests using for...of here and that might not be a bad idea to avoid all that repeated indexing
+                  // tslint:disable-next-line:prefer-for-of
                   for (let j = 0; j < this.c.stats[i].length; j++) {
                      if (this.c.stats[i][j].Lw > this.wildFreeMax || this.c.stats[i][j].Ld > this.domFreeMax) {
                         this.c.stats[i][j].removeMe = true;
@@ -350,6 +360,8 @@ export class Extractor {
    filterByTE(index: number, TEstat: Stat) {
       for (let i = 0; i < 7; i++) {
          if ((this.m[i].Tm) && (i !== index)) {
+            // FIXME: TS-TRANSITION: The linter suggests using for...of here and that might not be a bad idea to avoid all that repeated indexing
+            // tslint:disable-next-line:prefer-for-of
             for (let j = 0; j < this.c.stats[i].length; j++)
                if (this.c.stats[i][j].TE === TEstat.TE)
                   return true;
@@ -385,10 +397,10 @@ export class Extractor {
       let wildLevels = 0, domLevels = 0;
 
       // If the TE of the stats we have don't match, they aren't valid
-      for (var i = 0; i < option.length; i++) {
-         if (TE === -1 && option[i]["TE"] !== undefined)
+      for (let i = 0; i < option.length; i++) {
+         if (TE === -1 && option[i]['TE'] !== undefined)
             TE = option[i].TE;
-         else if (option[i]["TE"] !== undefined)
+         else if (option[i]['TE'] !== undefined)
             if (TE !== option[i].TE)
                return false;
 
@@ -430,7 +442,7 @@ export class Extractor {
    }
 
    generateOptions(dbg?: any) {
-      let tempOptions: number[] = [];
+      const tempOptions: number[] = [];
 
       // The initial array for matchingStats
       for (let stat = 0; stat < 7; stat++) {
@@ -440,11 +452,11 @@ export class Extractor {
             return false;
       }
 
-      let indexMax = tempOptions.length - 1;
+      const indexMax = tempOptions.length - 1;
       let selector = indexMax;
 
       do {
-         let tempStatOption: Stat[] = [];
+         const tempStatOption: Stat[] = [];
          for (let stat = 0; stat < 7; stat++) {
             tempStatOption.push(this.c.stats[stat][tempOptions[stat]]);
          }
@@ -469,7 +481,7 @@ export class Extractor {
    optionDeviation(opt1: Stat[], opt2: Stat[]) {
       let opt1Dev = 0, opt2Dev = 0;
       // FIXME: "This" doesn't exist inside of the sort call
-      let standard = this.c.stats[TORPOR][0].Lw / 7;
+      const standard = this.c.stats[TORPOR][0].Lw / 7;
 
       for (let stat = 0; stat < opt1.length && stat < opt2.length; stat++) {
          opt1Dev += Math.pow(opt1[stat].Lw - standard, 2);

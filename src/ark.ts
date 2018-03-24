@@ -1,6 +1,4 @@
-"use strict";
-
-import { DAMAGE, SPEED, PRE_IB, PRE_TE } from './consts';
+import { DAMAGE, SPEED, PRE_IB, PRE_TE, NUM_STATS } from './consts';
 import * as Utils from './utils';
 import * as Servers from './servers';
 import { Server, StatMultiplier, ServerMultiplier } from './ark/multipliers';
@@ -12,26 +10,27 @@ export function FormatAllOptions(stats) {
 }
 
 export function FormatOptions(options) {
-   return options.map(option => FormatOption(option)).join(',') || "-";
+   return options.map(option => FormatOption(option)).join(',') || '-';
 }
 
 export function FormatOption(option) {
-   if (!option) return "-";
+   if (!option) return '-';
    const { Lw, Ld, wildLevel, TE } = option;
    if (wildLevel || TE)
+      // tslint:disable-next-line:no-magic-numbers
       return `(${Lw}+${Ld} LW${wildLevel} ${Utils.FormatNumber(TE * 100, 2)}%)`;
    return `(${Lw}+${Ld})`;
 }
 
 export function Precision(index: number) {
    // Displays Damage and Speed as 153.5(%)
-   if (index == DAMAGE || index == SPEED)
+   if (index === DAMAGE || index === SPEED)
       return 3;
    // Displays TE as 98.34(%)
-   if (index == PRE_TE)
+   if (index === PRE_TE)
       return 2;
    // Displays IB as 38.8810(%)
-   if (index == PRE_IB)
+   if (index === PRE_IB)
       return 4;
    // Displays other stats as 18362.4
    return 1;
@@ -46,7 +45,7 @@ export function Precision(index: number) {
 export function DisplayValue(value, index) {
    let returnValue = value;
 
-   if (index == DAMAGE || index == SPEED || index == PRE_TE || index == PRE_IB)
+   if (index === DAMAGE || index === SPEED || index === PRE_TE || index === PRE_IB)
       returnValue *= 100;
 
    // We want to convert it to Display in ASBM
@@ -59,7 +58,7 @@ export function DisplayValue(value, index) {
 export function ConvertValue(value, index) {
    let returnValue = value;
 
-   if (index == DAMAGE || index == SPEED || index == PRE_TE || index == PRE_IB)
+   if (index === DAMAGE || index === SPEED || index === PRE_TE || index === PRE_IB)
       returnValue /= 100;
 
    // We want to convert it to Use in ASBM
@@ -70,20 +69,17 @@ export function ConvertValue(value, index) {
 
 /**
  * Generate a multipliers object for the Extractor
- * @param {string} serverName
- * @param {string} speciesName
- * @return {*}
  */
 export function GetMultipliers(serverName: string, speciesName: string): StatMultiplier[] & ServerMultiplier[] {
-   let server = Servers.getServerByName(serverName);
+   const server = Servers.getServerByName(serverName);
 
    // The Server object tells us everything we need to know about the multipliers
-   let multipliers = Utils.DeepMergeSoft(new Server(), theStore.officialServer, server);
+   const multipliers = Utils.DeepMergeSoft(new Server(), theStore.officialServer, server);
 
    // Single Player multiplies the official/override multipliers
    if (server.singlePlayer) {
-      for (let stat in theStore.officialSPMultiplier) {
-         for (let multiplier in theStore.officialSPMultiplier[stat]) {
+      for (const stat in theStore.officialSPMultiplier) {
+         for (const multiplier in theStore.officialSPMultiplier[stat]) {
             multipliers[stat][multiplier] = multipliers[stat][multiplier] * (theStore.officialSPMultiplier[stat][multiplier] || 1);
          }
       }
@@ -93,7 +89,7 @@ export function GetMultipliers(serverName: string, speciesName: string): StatMul
    Utils.DeepMerge(multipliers, theStore.speciesMultipliers[speciesName]);
 
    // Set IBM for each stat
-   for (let stat = 0; stat < 8; stat++) {
+   for (let stat = 0; stat < NUM_STATS; stat++) {
       if (multipliers[stat].noImprint)
          multipliers[stat].IBM = 0;
       else

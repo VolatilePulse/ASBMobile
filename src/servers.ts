@@ -1,8 +1,8 @@
-import Vue from "vue";
+import Vue from 'vue';
 
-import testServersData from "./ark/servers_test";
-import preDefinedServersData from "./ark/servers_predef";
-import { Server } from "./ark/multipliers";
+import testServersData from './ark/servers_test';
+import preDefinedServersData from './ark/servers_predef';
+import { Server } from './ark/multipliers';
 
 
 export const preDefinedServers: { [name: string]: Server } = {};
@@ -16,7 +16,7 @@ export const userServers: { [name: string]: Server } = {};
 export function getServerByName(name: string): Server {
    let server = userServers[name] || preDefinedServers[name] || testServers[name];
    if (!server) {
-      server = preDefinedServers["Official Server"];
+      server = preDefinedServers['Official Server'];
    }
    return server;
 }
@@ -26,13 +26,13 @@ export function getServerByName(name: string): Server {
  * Copy a server and add it as a user server.
  */
 export function copyServer(src: Server): Server {
-   let newServer = new Server(src, src.IBM, !!src['singlePlayer'], src.serverName);
+   const newServer = new Server(src, src.IBM, !!src['singlePlayer'], src.serverName);
    newServer.isTestOnly = false;
    newServer.isPreDefined = false;
 
    // Give it a new name
    do
-      newServer.serverName = "Copy of " + newServer.serverName;
+      newServer.serverName = 'Copy of ' + newServer.serverName;
    while (newServer.serverName in userServers);
 
    addUserServer(newServer);
@@ -41,23 +41,20 @@ export function copyServer(src: Server): Server {
 }
 
 export async function initialise(includeTest: boolean) {
-   console.log("Loading pre-defined servers...");
-
    // Only run once
    if (Object.keys(preDefinedServers).length > 0) return;
 
    if (includeTest) {
-      for (let src of testServersData) {
-         let server = new Server(src.multipliers, src.IBM, src.singlePlayer, src.serverName);
+      for (const src of testServersData) {
+         const server = new Server(src.multipliers, src.IBM, src.singlePlayer, src.serverName);
          server.isTestOnly = true;
          server.isPreDefined = true;
          testServers[server.serverName] = server;
       }
    }
 
-   for (let src of preDefinedServersData) {
-
-      let server = new Server(src.multipliers, src.IBM, src.singlePlayer, src.serverName);
+   for (const src of preDefinedServersData) {
+      const server = new Server(src.multipliers, src.IBM, src.singlePlayer, src.serverName);
       server.isTestOnly = false;
       server.isPreDefined = true;
       preDefinedServers[server.serverName] = server;
@@ -78,7 +75,7 @@ export function deleteUserServer(name: string) {
 
 export function renameServer(oldName: string, newName: string) {
    // TODO: Do this in the database
-   let server = userServers[oldName];
+   const server = userServers[oldName];
    deleteUserServer(oldName);
    server.serverName = newName;
    addUserServer(server);

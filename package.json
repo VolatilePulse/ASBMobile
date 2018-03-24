@@ -10,7 +10,8 @@
       "start": "node build/dev-server.js",
       "build": "node build/build.js",
       "eslint": "eslint --ext .js,.vue src",
-      "values": "node scripts/make_values.js"
+      "values": "node scripts/make_values.js",
+      "tslint": "tslint -p ."
    },
    "dependencies": {
       "@types/lodash.clonedeepwith": "^4.5.3",

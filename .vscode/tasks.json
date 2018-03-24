@@ -17,6 +17,13 @@
          "problemMatcher": [
             "$eslint-stylish"
          ]
+      },
+      {
+         "type": "npm",
+         "script": "tslint",
+         "problemMatcher": [
+            "$tslint5"
+         ]
       }
    ]
 }

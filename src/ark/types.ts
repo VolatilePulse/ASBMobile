@@ -1,23 +1,23 @@
 
-type MultipliersArray = ((number | undefined)[] | undefined)[];
+type MultipliersArray = Array<Array<number | undefined> | undefined>;
 
 interface ServerDef {
    serverName: string;
    IBM: number;
    singlePlayer: boolean;
    multipliers: MultipliersArray;
-};
+}
 
 interface TestData {
    tag: string;
    species: string;
    level: number;
    imprint: number;
-   mode: "Wild" | "Tamed" | "Bred";
+   mode: 'Wild' | 'Tamed' | 'Bred';
    values: number[];
    serverName: string;
    results: Stat[][];
-};
+}
 
 interface Stat {
    Lw: number;
@@ -28,4 +28,4 @@ interface Stat {
    maxTE?: number;
    wildLevel?: number;
    removeMe?: boolean;
-};
+}

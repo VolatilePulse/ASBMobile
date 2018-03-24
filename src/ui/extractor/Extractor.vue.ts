@@ -3,20 +3,18 @@ import Component from 'vue-class-component';
 
 import WithRender from './Extractor.html?style=./Extractor.css';
 
-import * as app from "../../app";
-import * as Ark from '../../ark';
-import { PRE_IB, statNames } from '../../consts';
-import { FormatNumber, FilledArray, DeepCopy } from '../../utils';
-import { Extractor } from '../../ark/extractor';
+import * as Ark from '@/ark';
+import { Extractor } from '@/ark/extractor';
+import { PRE_IB, statNames } from '@/consts';
+import { DeepCopy, FilledArray, FormatNumber } from '@/utils';
 
-import testData from '../../ark/test_data';
-import { VueCreature } from '@/ark/creature';
 import theStore from '@/ui/store';
+import testData from '@/ark/test_data';
 
 
 @WithRender
 @Component({
-   name: "extractor",
+   name: 'extractor',
 })
 export default class ExtractorComponent extends Vue {
    store = theStore;
@@ -26,24 +24,24 @@ export default class ExtractorComponent extends Vue {
 
    autoExtract = false;
 
-   mode = "Tamed";
+   mode = 'Tamed';
    imprint = 0;
    values = FilledArray(8, () => undefined);
 
    extractor: Extractor = null;
 
 
-   range(n) { return Array.from({ length: n }, (x, i) => i); }
+   range(n) { return Array.from({ length: n }, (_, i) => i); }
    formatFloat(n) { return FormatNumber(n, 2); }
    formatRound(n) { return FormatNumber(n, 0); }
 
    extract() {
-      let creature = this.store.tempCreature;
+      const creature = this.store.tempCreature;
 
       // Convert properties that couldn't be bound directly to creature
-      creature.wild = (this.mode == "Wild");
-      creature.tamed = (this.mode == "Tamed");
-      creature.bred = (this.mode == "Bred");
+      creature.wild = (this.mode === 'Wild');
+      creature.tamed = (this.mode === 'Tamed');
+      creature.bred = (this.mode === 'Bred');
       creature.IB = Ark.ConvertValue(this.imprint, PRE_IB);
       creature.values = DeepCopy(this.values.map(Ark.ConvertValue)); // convert values, then create a clean un-observed copy
 
@@ -69,11 +67,11 @@ export default class ExtractorComponent extends Vue {
 
    // Nasty debug-only methods to show stats and their options
    debugShowOptions(options) {
-      return (options && options['length']) ? options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(',') : "-none-";
+      return (options && options['length']) ? options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(',') : '-none-';
    }
 
    debugStatValue(i) {
-      let creature = this.store.tempCreature;
+      const creature = this.store.tempCreature;
       if (!this.extractor.m) return '-';
       return creature.stats[i][0].calculateValue(this.extractor.m[i], !creature.wild, 1, 0);
    }

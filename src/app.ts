@@ -1,4 +1,4 @@
-import Vue from "vue";
+import Vue from 'vue';
 import BootstrapVue from 'bootstrap-vue';
 import PouchDB from 'pouchdb-browser';
 import PouchFind from 'pouchdb-find';
@@ -6,14 +6,12 @@ import PouchLiveFind from 'pouchdb-live-find';
 import PouchVue from 'pouch-vue';
 
 import { SettingsManager, LibraryManager } from './data';
-import * as Servers from "./servers";
-import { VueCreature } from "./ark/creature";
-import { statNames } from "./consts";
+import * as Servers from './servers';
 
-import Shell from "./ui/shell/Shell.vue";
-import { Server } from "@/ark/multipliers";
-import Component from "vue-class-component";
-import theStore from "@/ui/store";
+import Shell from './ui/shell/Shell.vue';
+import Component from 'vue-class-component';
+import theStore from '@/ui/store';
+
 
 Vue.use(BootstrapVue);
 
@@ -25,7 +23,6 @@ Vue.use(PouchVue, {
 });
 
 Vue.config.productionTip = false;
-
 
 
 @Component({
@@ -44,12 +41,12 @@ class App extends Vue {
       await Servers.initialise(this.store.devMode);
 
       // Create a creature to use for extraction, etc
-      theStore.currentServerName = "Official Server";
+      theStore.currentServerName = 'Official Server';
    }
 }
 
 
-export const app = new App({ el: "#app" });
+export const app = new App({ el: '#app' });
 export const settings = SettingsManager;
 export const libraries = LibraryManager;
 

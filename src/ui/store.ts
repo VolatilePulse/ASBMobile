@@ -1,8 +1,8 @@
-import Vue from "vue";
+import Vue from 'vue';
 
-import { Creature, VueCreature } from "@/ark/creature";
-import { Server, CreatureStats } from "@/ark/multipliers";
-import { statNames } from "@/consts";
+import { VueCreature } from '@/ark/creature';
+import { Server, CreatureStats } from '@/ark/multipliers';
+import { statNames } from '@/consts';
 
 
 class Store {
@@ -24,9 +24,9 @@ class Store {
    async loadStatImages() {
       // Calcualte the paths for each of the stat images
       for (let i = 0; i < statNames.length; i++) {
-         let name = statNames[i];
+         const name = statNames[i];
          // @ts-ignore
-         import("assets/" + name.toLowerCase() + ".svg").then(url => Vue.set(this.statImages, i, url));
+         import('assets/' + name.toLowerCase() + '.svg').then(url => Vue.set(this.statImages, i, url));
       }
    }
 }

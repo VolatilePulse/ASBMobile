@@ -14,6 +14,7 @@
       "robertohuertasm.vscode-icons",
       "wayou.vscode-todo-highlight",
       "eg2.vscode-npm-script",
-      "yzhang.markdown-all-in-one"
+      "yzhang.markdown-all-in-one",
+      "eg2.tslint"
    ]
 }

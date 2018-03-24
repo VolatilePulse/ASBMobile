@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  * @fileOverview Controls the data flow for the app
  */
@@ -17,13 +15,13 @@ import theStore from '@/ui/store';
 /** Load the data file containing creature multipliers and official server settings */
 export async function LoadData(json) {
    // Parse the received JSON file
-   let jsonObject = JSON.parse(json);
+   const jsonObject = JSON.parse(json);
 
    // Clear species list, ready to be populated
    theStore.speciesNames = [];
 
-   for (var creature in jsonObject.species) {
-      let speciesData = jsonObject.species[creature];
+   for (const creature in jsonObject.species) {
+      const speciesData = jsonObject.species[creature];
       theStore.speciesNames.push(creature);
       theStore.speciesMultipliers[creature] = new CreatureStats(
          speciesData.stats,

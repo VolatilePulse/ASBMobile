@@ -1,0 +1,84 @@
+{
+   "defaultSeverity": "warning",
+   "extends": [
+      "tslint:recommended"
+   ],
+   "rulesDirectory": [],
+   "linterOptions": {
+      "exclude": [
+         "build/**",
+         "config/**",
+         "docs/**",
+         "scripts/**"
+      ]
+   },
+   "jsRules": {
+      "max-line-length": {
+         "options": [
+            160
+         ]
+      }
+   },
+   "rules": {
+      "max-line-length": {
+         "options": [
+            160
+         ]
+      },
+      "member-access": false,
+      "ordered-imports": false,
+      "member-ordering": [
+         true,
+         {
+            "order": "fields-first"
+         }
+      ],
+      "quotemark": [
+         true,
+         "single",
+         "avoid-template",
+         "avoid-escape"
+      ],
+      "forin": false,
+      "curly": [
+         false,
+         "ignore-same-line"
+      ],
+      "object-literal-sort-keys": false,
+      "one-line": [
+         true,
+         "check-open-brace"
+      ],
+      "max-classes-per-file": false,
+      "interface-name": false,
+      "no-consecutive-blank-lines": [
+         true,
+         2
+      ],
+      "no-string-literal": false,
+      "arrow-parens": [
+         true,
+         "ban-single-arg-parens"
+      ],
+      "one-variable-per-declaration": false,
+      "object-literal-shorthand": false,
+      "trailing-comma": [
+         true,
+         {
+            "objects": "always",
+            "arrays": "always",
+            "functions": "never",
+            "typeLiterals": "ignore"
+         }
+      ],
+      "no-console": false,
+      "space-before-function-paren": [
+         true,
+         {
+            "anonymous": "always",
+            "named": "never",
+            "asyncArrow": "always"
+         }
+      ]
+   }
+}
