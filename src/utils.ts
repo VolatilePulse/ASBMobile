@@ -2,11 +2,8 @@
  * @fileOverview Miscellaneous functions used throughout the app
  */
 
-import cloneDeepWith from 'lodash.clonedeepwith';
-import isEqual from 'lodash.isequal';
-import isEqualWith from 'lodash.isequalwith';
+import cloneDeepWith from 'lodash-es/clonedeepwith';
 import { isString } from 'util';
-import { IsEqualCustomizer } from 'lodash';
 
 const EPSILON = 1E-10;
 
@@ -120,11 +117,6 @@ export function IsObject(item: any) {
 
 export function IsFunction(item: any) {
    return (item && typeof item === 'function');
-}
-
-export function DeepCompare<T>(a: T, b: T, fn: IsEqualCustomizer) {
-   if (fn) return isEqualWith(a, b, fn);
-   return isEqual(a, b);
 }
 
 export function DeepCopy<T>(obj: T): T {

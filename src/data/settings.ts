@@ -1,4 +1,4 @@
-import _debounce from 'lodash.debounce';
+import debounce from 'lodash-es/debounce';
 import PouchDB from 'pouchdb-core';
 
 
@@ -42,7 +42,7 @@ class SettingsManager {
 
       // lodash.debounce produces a function we can call whenever a setting changes.
       // It will only call this.save() after a timeout, no matter how often it is called before-hand.
-      this.debouncedSave = _debounce(this.save.bind(this), SAVE_TIMEOUT, { maxWait: SAVE_MAX_TIMEOUT });
+      this.debouncedSave = debounce(this.save.bind(this), SAVE_TIMEOUT, { maxWait: SAVE_MAX_TIMEOUT });
    }
 
    /** Initialise the settings manager */
