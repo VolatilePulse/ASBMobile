@@ -16,23 +16,38 @@ class TEProps {
 }
 
 export class Extractor {
+   /** Stores all of the creature data */
    c: VueCreature;
+   /** Stores all multipliers for stat calculations */
    m: StatMultiplier[] & ServerMultiplier[] = [];
 
+   /** A counter to see how many wild stat levels are unaccounted for */
    wildFreeMax = 0;
+   /** A counter to see how many dom stat levels are unaccounted for */
    domFreeMax = 0;
+   /** What level the creature was born/tamed at */
    levelBeforeDom = 0;
+   /** A flag signifying a stat isn't displayed by Ark */
    unusedStat = false;
+   /** The lowest that the IB can be */
    minIB = 0;
+   /** The IB value must be lower than this to be valid */
    maxIB = 0;
+   /** A running total of each stat's minimum wild stat levels */
    minWild = 0;
+   /** A running total of each stat's minimum dom stat levels */
    minDom = 0;
 
+   /** Stores each stats minimum wild stat level */
    wildMin: number[] = [];
+   /** Stores each stats minimum dom stat level */
    domMin: number[] = [];
+   /** Contains stat options from SPEED to TORPOR, numerically */
    options: Stat[][] = [];
+   /** Signifies that a stat only has one possibility */
    checkedStat: boolean[] = [];
-   statTEmaps: Map<number, Map<Stat, TEProps>> = new Map();
+   /** Contains all of the TE properties for stats */
+   statTEmaps: Array<Map<Stat, TEProps>> = [];
 
    constructor(vueCreature: VueCreature) {
       this.c = vueCreature;
@@ -175,7 +190,7 @@ export class Extractor {
     *
     *  @return {undefined} There is no returned value
     */
-   dynamicIBCalculation() {
+   dynamicIBCalculation(): void {
       // Generate the min/max values for future edge cases (applicable in all situations)
       this.maxIB = this.c.IB + (5 / 10E2);
       this.minIB = this.c.IB - (5 / 10E2);
@@ -273,13 +288,14 @@ export class Extractor {
    }
 
    findTEStats(tempStat: Stat, statIndex: number, maxLd: number) {
+      const EPSILON = 0.001;
       for (tempStat.Ld = 0; tempStat.Ld <= maxLd; tempStat.Ld++) {
 
          let tamingEffectiveness = -1, minTE = 0, maxTE = 0;
 
-         if (this.c.values[statIndex] === Utils.RoundTo(tempStat.calculateValue(this.m[statIndex], !this.c.wild, 1, this.c.IB), Ark.Precision(statIndex)))
+         if (Math.abs(this.c.values[statIndex] - tempStat.calculateValue(this.m[statIndex], !this.c.wild, 1, this.c.IB)) < EPSILON)
             tamingEffectiveness = 1;
-         else if (this.c.values[statIndex] === Utils.RoundTo(tempStat.calculateValue(this.m[statIndex], !this.c.wild, 0, this.c.IB), Ark.Precision(statIndex)))
+         else if (Math.abs(this.c.values[statIndex] - tempStat.calculateValue(this.m[statIndex], !this.c.wild, 0, this.c.IB)) < EPSILON)
             tamingEffectiveness = 0;
          else
             tamingEffectiveness = tempStat.calculateTE(this.m[statIndex], this.c.values[statIndex]);
@@ -292,7 +308,7 @@ export class Extractor {
          if (tamingEffectiveness >= 0 && tamingEffectiveness <= 1) {
             // If the TE allows the stat to calculate properly, add it as a possible result
             const expectedValue = tempStat.calculateValue(this.m[statIndex], !this.c.wild, tamingEffectiveness, this.c.IB);
-            if (this.c.values[statIndex] === Utils.RoundTo(expectedValue, Ark.Precision(statIndex))) {
+            if (Math.abs(this.c.values[statIndex] - expectedValue) < EPSILON) {
                // Create a new Stat to hold all of the information
                const TEStat = new TEProps();
                TEStat.wildLevel = Math.ceil(this.levelBeforeDom / (1 + 0.5 * tamingEffectiveness));
@@ -306,12 +322,12 @@ export class Extractor {
                   const workingStat = new Stat(tempStat);
                   this.c.stats[statIndex].push(workingStat);
 
-                  let tempMap = this.statTEmaps.get(statIndex);
+                  let tempMap = this.statTEmaps[statIndex];
                   if (tempMap === undefined)
                      tempMap = new Map();
 
                   tempMap.set(workingStat, TEStat);
-                  this.statTEmaps.set(statIndex, tempMap);
+                  this.statTEmaps[statIndex] = tempMap;
                }
             }
          }
@@ -326,6 +342,7 @@ export class Extractor {
       if (dbg && !dbg['filterLoops']) dbg.filterLoops = 0;
 
       let removed = false;
+      const localStats = this.c.stats;
 
       do {
          if (dbg) dbg.filterLoops += 1;
@@ -334,18 +351,18 @@ export class Extractor {
 
          // Find any stats that do not exist as a possible option
          if (this.options.length)
-            this.c.stats.forEach(stat => stat.forEach(poss => { if (!this.options.some(option => option.includes(poss))) poss.removeMe = true; }));
+            localStats.forEach(stat => stat.forEach(poss => { if (!this.options.some(option => option.includes(poss))) poss.removeMe = true; }));
 
          for (let statIndex = HEALTH; statIndex <= SPEED; statIndex++) {
             let tempWM = -1, tempDM = -1;
             // One stat possibility is good
-            if (!this.checkedStat[statIndex] && this.c.stats[statIndex].length === 1) {
-               this.wildFreeMax -= this.c.stats[statIndex][0].Lw;
-               this.domFreeMax -= this.c.stats[statIndex][0].Ld;
+            if (!this.checkedStat[statIndex] && localStats[statIndex].length === 1) {
+               this.wildFreeMax -= localStats[statIndex][0].Lw;
+               this.domFreeMax -= localStats[statIndex][0].Ld;
                this.checkedStat[statIndex] = true;
             }
             else if (!this.checkedStat[statIndex]) {
-               for (const stat of this.c.stats[statIndex]) {
+               for (const stat of localStats[statIndex]) {
                   if (tempWM === -1)
                      tempWM = stat.Lw;
                   if (tempDM === -1)
@@ -363,13 +380,13 @@ export class Extractor {
 
          for (let statIndex = HEALTH; statIndex <= SPEED; statIndex++) {
             if (!this.checkedStat[statIndex]) {
-               for (const stat of this.c.stats[statIndex]) {
+               for (const stat of localStats[statIndex]) {
                   if (stat.Lw > this.wildFreeMax || stat.Ld > this.domFreeMax) {
                      stat.removeMe = true;
                   }
                   if (stat.Lw + this.minWild - this.wildMin[statIndex] > this.wildFreeMax
                      || stat.Ld + this.minDom - this.domMin[statIndex] > this.domFreeMax
-                     || (this.statTEmaps.size > 1 && this.statTEmaps.get(statIndex) && !this.filterByTE(statIndex, stat))) {
+                     || (this.statTEmaps.length > 1 && this.statTEmaps[statIndex] && !this.filterByTE(statIndex, stat))) {
                      stat.removeMe = true;
                   }
                }
@@ -387,10 +404,10 @@ export class Extractor {
    // Remove all stats that don't have a matching TE pair
    filterByTE(index: number, TEstat: Stat) {
       for (let statIndex = 0; statIndex < 7; statIndex++) {
-         const statTEs = this.statTEmaps.get(statIndex);
+         const statTEs = this.statTEmaps[statIndex];
          if (statTEs !== undefined && (statIndex !== index)) {
             for (const stat of this.c.stats[statIndex]) {
-               const currentTEstat = statTEs.get(stat), testingTEstat = this.statTEmaps.get(index).get(TEstat);
+               const currentTEstat = statTEs.get(stat), testingTEstat = this.statTEmaps[index].get(TEstat);
                if (currentTEstat.TE === testingTEstat.TE)
                   return true;
                else if (currentTEstat.maxTE > testingTEstat.TE && testingTEstat.TE >= currentTEstat.minTE) {
@@ -426,12 +443,15 @@ export class Extractor {
 
       // If the TE of the stats we have don't match, they aren't valid
       for (let i = 0; i < option.length; i++) {
-         const statTEs = this.statTEmaps.get(i);
-         if (TE === -1 && statTEs !== undefined)
-            TE = statTEs.get(option[i]).TE;
-         else if (statTEs !== undefined)
-            if (TE !== statTEs.get(option[i]).TE)
-               return false;
+         // Only if there is more than 2 TE stats
+         if (this.statTEmaps.length > 1) {
+            const statTEs = this.statTEmaps[i];
+            if (TE === -1 && statTEs !== undefined)
+               TE = statTEs.get(option[i]).TE;
+            else if (statTEs !== undefined)
+               if (TE !== statTEs.get(option[i]).TE)
+                  return false;
+         }
 
          if (!this.checkedStat[i]) {
             if (option[i].Lw > 0)
@@ -469,12 +489,21 @@ export class Extractor {
       return removed || initialOptionsLength > this.options.length;
    }
 
-   generateOptions(dbg?: any) {
+   /**
+    * Generates all possible options based on the current possible stats
+    *
+    * @param {*} [dbg = undefined] Debug object used to store information for testing
+    * @returns {boolean} False if a stat has 0 possibilities, True otherwise
+    */
+   generateOptions(dbg?: any): boolean {
+      /** Contains the indices used to generate the option array */
       const tempOptions: number[] = [];
+
+      const localStats: Stat[][] = this.c.stats;
 
       // The initial array for matchingStats
       for (let stat = HEALTH; stat <= TORPOR; stat++) {
-         if (this.c.stats[stat].length !== 0)
+         if (localStats[stat].length !== 0)
             tempOptions.push(0);
          else
             return false;
@@ -484,16 +513,16 @@ export class Extractor {
       let selector = indexMax;
 
       do {
-         const tempStatOption: Stat[] = [];
-         for (let stat = HEALTH; stat <= TORPOR; stat++) {
-            tempStatOption.push(this.c.stats[stat][tempOptions[stat]]);
-         }
+         /** Holds the  */
+         const tempStatOption: Stat[] = localStats.map((options, stat) => options[tempOptions[stat]]);
+
+         // Verify the option generated was valid and add it to options
          if (this.matchingStats(tempStatOption, dbg))
             this.options.push(tempStatOption.slice());
 
          tempOptions[selector]++;
 
-         while (selector !== -1 && tempOptions[selector] === this.c.stats[selector].length) {
+         while (selector !== -1 && tempOptions[selector] === localStats[selector].length) {
             tempOptions[selector] = 0;
             selector--;
             if (selector !== -1)
@@ -506,13 +535,26 @@ export class Extractor {
       return true;
    }
 
-   optionDeviation(opt1: Stat[], opt2: Stat[]) {
-      let opt1Dev = 0, opt2Dev = 0;
+   /**
+    * Option sort comparison function using deviation from the stat mean to determine sort order
+    *
+    * @param opt1 First option to compare
+    * @param opt2 Second option to compare
+    *
+    * @returns {number} The difference between the deviation total
+    */
+   optionDeviation(opt1: Stat[], opt2: Stat[]): number {
+      /** The stat mean used as our baseline for deviation */
       const standard = opt1[TORPOR].Lw / 7;
+      /** Contains the deviation total used to compare */
+      let opt1Dev = 0;
+      /** Contains the deviation total used to compare */
+      let opt2Dev = 0;
 
+      // Square the deviation from standard and total it up
       for (let stat = 0; stat < opt1.length && stat < opt2.length; stat++) {
-         opt1Dev += Math.pow(opt1[stat].Lw - standard, 2);
-         opt2Dev += Math.pow(opt2[stat].Lw - standard, 2);
+         opt1Dev += (opt1[stat].Lw - standard) * (opt1[stat].Lw - standard);
+         opt2Dev += (opt2[stat].Lw - standard) * (opt1[stat].Lw - standard);
       }
 
       return opt1Dev - opt2Dev;
