@@ -29,7 +29,9 @@ Vue.config.productionTip = false;
 
 
 @Component({
-   template: '<Shell ref="shell"/>',
+   render(createElement) {
+      return createElement('Shell', { ref: 'shell' });
+   },
    components: { Shell },
 })
 class App extends Vue {
