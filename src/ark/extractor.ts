@@ -20,16 +20,19 @@ export class Extractor {
    m: StatMultiplier[] & ServerMultiplier[] = [];
 
    wildFreeMax = 0;
-   wildMin: number[] = [];
    domFreeMax = 0;
-   domMin: number[] = [];
    levelBeforeDom = 0;
    unusedStat = false;
-   options: Stat[][] = [];
    minIB = 0;
    maxIB = 0;
+   minWild = 0;
+   minDom = 0;
+
+   wildMin: number[] = [];
+   domMin: number[] = [];
+   options: Stat[][] = [];
    checkedStat: boolean[] = [];
-   statTEmaps?: Map<number, Map<Stat, TEProps>> = new Map();
+   statTEmaps: Map<number, Map<Stat, TEProps>> = new Map();
 
    constructor(vueCreature: VueCreature) {
       this.c = vueCreature;
@@ -69,38 +72,56 @@ export class Extractor {
          this.dynamicIBCalculation();
 
       // Loop all stats except for torpor
-      for (let stat = HEALTH; stat <= SPEED; stat++) {
+      for (let statIndex = HEALTH; statIndex <= SPEED; statIndex++) {
          tempStat = new Stat();
 
          // Covers unused stats like oxygen
-         if (this.uniqueStatSituation(tempStat, stat))
-            continue;
-
-         else {
+         if (!this.uniqueStatSituation(tempStat, statIndex)) {
             // Calculate the highest Lw could be
-            let maxLw = tempStat.calculateWildLevel(this.m[stat], this.c.values[stat], !this.c.wild, 0, this.c.IB);
+            let maxLw = tempStat.calculateWildLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild, 0, this.c.IB);
 
-            if (maxLw > this.levelBeforeDom || (maxLw === 0 && this.m[stat].Iw === 0))
-               maxLw = this.levelBeforeDom;
+            if (maxLw > this.wildFreeMax - this.minWild || (maxLw === 0 && this.m[statIndex].Iw === 0))
+               maxLw = this.wildFreeMax - this.minWild;
 
             // Loop all possible Lws
             for (tempStat.Lw = maxLw; tempStat.Lw >= 0; tempStat.Lw--) {
                // Calculate the highest Ld could be
-               const maxLd = Math.min(tempStat.calculateDomLevel(this.m[stat], this.c.values[stat], !this.c.wild, 0, this.c.IB), this.domFreeMax);
+               const maxLd = tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild, 0, this.c.IB);
 
                // If Ld is greater than the highest dom possible, quit the loop
-               if (maxLd > this.domFreeMax && !this.m[stat].Tm)
+               if (maxLd > this.domFreeMax - this.minDom && !this.m[statIndex].Tm)
                   break;
 
                // We don't need to calculate TE to extract the levels
-               if (this.c.bred || this.m[stat].Tm <= 0) {
-                  this.nonTEStatCalculation(tempStat, stat, maxLd);
+               if (this.c.bred || this.m[statIndex].Tm <= 0) {
+                  this.nonTEStatCalculation(tempStat, statIndex, maxLd);
                }
 
                // If this stat has a Tm and is tamed, we need to manually loop through the Ld
                else
-                  this.findTEStats(tempStat, stat, maxLd);
+                  this.findTEStats(tempStat, statIndex, maxLd);
             }
+         }
+         if (this.c.stats[statIndex].length === 1) {
+            this.wildFreeMax -= this.c.stats[statIndex][0].Lw;
+            this.domFreeMax -= this.c.stats[statIndex][0].Ld;
+            this.checkedStat[statIndex] = true;
+         }
+         else if (this.c.stats[statIndex].length > 1) {
+            let tempWM = -1, tempDM = -1;
+            for (const stat of this.c.stats[statIndex]) {
+               if (tempWM === -1)
+                  tempWM = stat.Lw;
+               if (tempDM === -1)
+                  tempDM = stat.Ld;
+               if (tempWM > stat.Lw)
+                  tempWM = stat.Lw;
+               if (tempDM > stat.Ld)
+                  tempDM = stat.Ld;
+            }
+            this.wildMin[statIndex] = tempWM; this.domMin[statIndex] = tempDM;
+            this.minWild += tempWM;
+            this.minDom += tempDM;
          }
       }
 
@@ -309,7 +330,7 @@ export class Extractor {
       do {
          if (dbg) dbg.filterLoops += 1;
          removed = false;
-         let wildMin = 0, domMin = 0;
+         this.minWild = 0, this.minDom = 0;
 
          // Find any stats that do not exist as a possible option
          if (this.options.length)
@@ -335,8 +356,8 @@ export class Extractor {
                      tempDM = stat.Ld;
                }
                this.wildMin[statIndex] = tempWM; this.domMin[statIndex] = tempDM;
-               wildMin += tempWM;
-               domMin += tempDM;
+               this.minWild += tempWM;
+               this.minDom += tempDM;
             }
          }
 
@@ -346,9 +367,9 @@ export class Extractor {
                   if (stat.Lw > this.wildFreeMax || stat.Ld > this.domFreeMax) {
                      stat.removeMe = true;
                   }
-                  if (stat.Lw + wildMin - this.wildMin[statIndex] > this.wildFreeMax
-                     || stat.Ld + domMin - this.domMin[statIndex] > this.domFreeMax
-                     || (this.statTEmaps.get(statIndex) && !this.filterByTE(statIndex, stat))) {
+                  if (stat.Lw + this.minWild - this.wildMin[statIndex] > this.wildFreeMax
+                     || stat.Ld + this.minDom - this.domMin[statIndex] > this.domFreeMax
+                     || (this.statTEmaps.size > 1 && this.statTEmaps.get(statIndex) && !this.filterByTE(statIndex, stat))) {
                      stat.removeMe = true;
                   }
                }
@@ -494,11 +515,6 @@ export class Extractor {
          opt2Dev += Math.pow(opt2[stat].Lw - standard, 2);
       }
 
-      if (opt1Dev > opt2Dev)
-         return 1;
-      else if (opt1Dev < opt2Dev)
-         return -1;
-
-      return 0;
+      return opt1Dev - opt2Dev;
    }
 }
