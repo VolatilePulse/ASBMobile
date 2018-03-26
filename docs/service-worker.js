@@ -1,1 +1,29 @@
-"use strict";var precacheConfig=[["index.html","49b851990e21702ad2d37de5103f4e80"],["service-worker.js","e1f3be2d83e9cf3dc6d8b4c27180752b"],["static/css/app.f672fb6d72bcdcc66e49962a0d140b2d.css","7565575e80943f5d03918cb80c8874c0"],["static/data.json","4f4ebe98cd27b62188c881ef3d560110"],["static/js/0.e15778fe613e979df617.js","24ffb1eedf0a555e8f50527fa89891ce"],["static/js/1.e86c93decc5818dcf02a.js","4d3c6e3b85a37785f04c62fc5a64df78"],["static/js/2.ec84636acd3b0230bac5.js","437695d503b14204be288e098747f7d1"],["static/js/3.f754fb2997eccfa3780b.js","2958d30987efc9724754af1fa3b94aee"],["static/js/4.359ac8e4fbcae5cd48f9.js","fbf882ce90b151c40b0910641f62d833"],["static/js/5.64fa42c34d9d8392aacc.js","3855f6b489ff934c06118e849f8c3f4f"],["static/js/6.16a3c7fe6d77485a4f9a.js","c7cea75b49fae1e5230c917d86247d3c"],["static/js/7.546be05a50bb261a8ed2.js","50ac87fbdadaf97cd2ec5e571c7546e1"],["static/js/8.119bac4a1556a3362984.js","d912e58e08f9b856f0d7521a290e8842"],["static/js/app.c31a56a9cf410f8edb73.js","08631dade066545906783d9b6b1e6d6f"],["static/js/manifest.80cd376269ba610ff285.js","63f7990cb918c5173e9ca752d8f79128"],["static/js/vendor.a4e69ae8d0fd51640828.js","bf1f71a7744e0dd29a1d3a62e7df0159"]],cacheName="sw-precache-v3-my-vue-app-"+(self.registration?self.registration.scope:""),ignoreUrlParametersMatching=[/^utm_/],addDirectoryIndex=function(e,t){var n=new URL(e);return"/"===n.pathname.slice(-1)&&(n.pathname+=t),n.toString()},cleanResponse=function(e){return e.redirected?("body"in e?Promise.resolve(e.body):e.blob()).then(function(t){return new Response(t,{headers:e.headers,status:e.status,statusText:e.statusText})}):Promise.resolve(e)},createCacheKey=function(e,t,n,a){var r=new URL(e);return a&&r.pathname.match(a)||(r.search+=(r.search?"&":"")+encodeURIComponent(t)+"="+encodeURIComponent(n)),r.toString()},isPathWhitelisted=function(e,t){if(0===e.length)return!0;var n=new URL(t).pathname;return e.some(function(e){return n.match(e)})},stripIgnoredUrlParameters=function(e,t){var n=new URL(e);return n.hash="",n.search=n.search.slice(1).split("&").map(function(e){return e.split("=")}).filter(function(e){return t.every(function(t){return!t.test(e[0])})}).map(function(e){return e.join("=")}).join("&"),n.toString()},hashParamName="_sw-precache",urlsToCacheKeys=new Map(precacheConfig.map(function(e){var t=e[0],n=e[1],a=new URL(t,self.location),r=createCacheKey(a,hashParamName,n,!1);return[a.toString(),r]}));function setOfCachedUrls(e){return e.keys().then(function(e){return e.map(function(e){return e.url})}).then(function(e){return new Set(e)})}self.addEventListener("install",function(e){e.waitUntil(caches.open(cacheName).then(function(e){return setOfCachedUrls(e).then(function(t){return Promise.all(Array.from(urlsToCacheKeys.values()).map(function(n){if(!t.has(n)){var a=new Request(n,{credentials:"same-origin"});return fetch(a).then(function(t){if(!t.ok)throw new Error("Request for "+n+" returned a response with status "+t.status);return cleanResponse(t).then(function(t){return e.put(n,t)})})}}))})}).then(function(){return self.skipWaiting()}))}),self.addEventListener("activate",function(e){var t=new Set(urlsToCacheKeys.values());e.waitUntil(caches.open(cacheName).then(function(e){return e.keys().then(function(n){return Promise.all(n.map(function(n){if(!t.has(n.url))return e.delete(n)}))})}).then(function(){return self.clients.claim()}))}),self.addEventListener("fetch",function(e){if("GET"===e.request.method){var t,n=stripIgnoredUrlParameters(e.request.url,ignoreUrlParametersMatching),a="index.html";(t=urlsToCacheKeys.has(n))||(n=addDirectoryIndex(n,a),t=urlsToCacheKeys.has(n));0,t&&e.respondWith(caches.open(cacheName).then(function(e){return e.match(urlsToCacheKeys.get(n)).then(function(e){if(e)return e;throw Error("The cached response that was expected is missing.")})}).catch(function(t){return console.warn('Couldn\'t serve response for "%s" from cache: %O',e.request.url,t),fetch(e.request)}))}});
+/**
+ * Welcome to your Workbox-powered service worker!
+ *
+ * You'll need to register this file in your web app and you should
+ * disable HTTP caching for this file too.
+ * See https://goo.gl/nhQhGp
+ *
+ * The rest of the code is auto-generated. Please don't update this file
+ * directly; instead, make changes to your Workbox build configuration
+ * and re-run your build process.
+ * See https://goo.gl/2aRDsh
+ */
+
+importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.0.1/workbox-sw.js");
+
+importScripts(
+  "/ASBMobile/precache-manifest.6b9a210a80d771d4cc1656992e3105d7.js"
+);
+
+workbox.core.setCacheNameDetails({prefix: "asb-mobile"});
+
+/**
+ * The workboxSW.precacheAndRoute() method efficiently caches and responds to
+ * requests for URLs in the manifest.
+ * See https://goo.gl/S9QRab
+ */
+self.__precacheManifest = [].concat(self.__precacheManifest || []);
+workbox.precaching.suppressWarnings();
+workbox.precaching.precacheAndRoute(self.__precacheManifest, {});
