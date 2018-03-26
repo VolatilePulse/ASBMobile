@@ -128,6 +128,10 @@ export class Stat implements Stat {
       else
          return (Ta * TaM);
    }
+
+   isEqual(stat: Stat) {
+      return this.Lw === stat.Lw && this.Ld === stat.Ld;
+   }
 }
 
 export class Creature {

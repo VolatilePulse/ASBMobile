@@ -94,23 +94,23 @@ export class Extractor {
             if (maxLw > this.wildFreeMax - this.minWild || (maxLw === 0 && this.m[statIndex].Iw === 0))
                maxLw = this.wildFreeMax - this.minWild;
 
+            const localMap = this.statTEmaps.find(map => map !== undefined);
             // Loop all possible Lws
             for (tempStat.Lw = maxLw; tempStat.Lw >= 0; tempStat.Lw--) {
                // Calculate the highest Ld could be
-               const maxLd = tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild, 0, this.c.IB);
-
-               // If Ld is greater than the highest dom possible, quit the loop
-               if (maxLd > this.domFreeMax - this.minDom && !this.m[statIndex].Tm)
-                  break;
+               let maxLd = tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild, 0, this.c.IB);
+               maxLd = Math.min(maxLd, this.domFreeMax - this.minDom);
 
                // We don't need to calculate TE to extract the levels
-               if (this.c.bred || this.m[statIndex].Tm <= 0) {
+               if (this.c.bred || this.m[statIndex].Tm <= 0)
                   this.nonTEStatCalculation(tempStat, statIndex, maxLd);
-               }
 
                // If this stat has a Tm and is tamed, we need to manually loop through the Ld
-               else
+               else if (localMap === undefined)
                   this.findTEStats(tempStat, statIndex, maxLd);
+
+               else if (localMap !== undefined)
+                  this.findMultiTEStat(tempStat, statIndex, maxLd, localMap);
             }
          }
          if (this.c.stats[statIndex].length === 1) {
@@ -334,6 +334,26 @@ export class Extractor {
       }
    }
 
+   findMultiTEStat(tempStat: Stat, statIndex: number, maxLd: number, map: Map<Stat, TEProps>): void {
+      const EPSILON = 0.0005;
+      const localStats = this.c.stats[statIndex];
+      this.statTEmaps[statIndex] = this.statTEmaps[statIndex] || new Map();
+
+      map.forEach(statTE => {
+         if (tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild, statTE.TE, this.c.IB) <= maxLd) {
+
+            if (Math.abs(this.c.values[statIndex] - tempStat.calculateValue(this.m[statIndex], !this.c.wild, statTE.TE, this.c.IB)) >= EPSILON)
+               return;
+            if (localStats.find(stat => tempStat.isEqual(stat)))
+               return;
+
+            const workingStat = new Stat(tempStat);
+            localStats.push(workingStat);
+            this.statTEmaps[statIndex].set(workingStat, statTE);
+         }
+      });
+   }
+
    filterResults(dbg?: any) {
       if (dbg && !dbg['filterLoops']) dbg.filterLoops = 0;
 
@@ -406,16 +426,6 @@ export class Extractor {
                const currentTEstat = statTEs.get(stat), testingTEstat = this.statTEmaps[index].get(TEstat);
                if (currentTEstat.TE === testingTEstat.TE)
                   return true;
-               else if (currentTEstat.maxTE > testingTEstat.TE && testingTEstat.TE >= currentTEstat.minTE) {
-                  currentTEstat.TE = testingTEstat.TE;
-                  statTEs.set(stat, currentTEstat);
-                  return true;
-               }
-               else if (testingTEstat.maxTE > currentTEstat.TE && currentTEstat.TE >= testingTEstat.minTE) {
-                  testingTEstat.TE = currentTEstat.TE;
-                  statTEs.set(TEstat, testingTEstat);
-                  return true;
-               }
             }
             return false;
          }
