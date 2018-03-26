@@ -1,7 +1,3 @@
-/**
- * @fileOverview Contains the ASBM.Extraction Object
- */
-
 import { TORPOR, FOOD, SPEED, HEALTH } from '@/consts';
 import { Stat, VueCreature } from './creature';
 import * as Ark from '@/ark';
@@ -532,7 +528,7 @@ export class Extractor {
          if (selector !== -1)
             selector = indexMax;
       } while (selector !== -1);
-      return true;
+      return this.options.length ? true : false;
    }
 
    /**

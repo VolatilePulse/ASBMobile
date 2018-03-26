@@ -59,6 +59,12 @@ const servers: ServerDef[] = [
       singlePlayer: false,
       multipliers: [],
    },
+   {
+      serverName: 'VestedWind',
+      IBM: 3,
+      singlePlayer: false,
+      multipliers: [, [, , 2], , , [, , 150], [, , 2], [, , 4]],
+   },
 ];
 
 export default servers;

@@ -235,6 +235,41 @@ const testData: TestData[] = [
       serverName: "DelilahEve",
       results: [[{ "Lw": 108, "Ld": 0 }], [{ "Lw": 80, "Ld": 0 }], [{ "Lw": 80, "Ld": 0 }], [{ "Lw": 84, "Ld": 0 }], [{ "Lw": 91, "Ld": 0 }], [{ "Lw": 81, "Ld": 0 }], [{ "Lw": 83, "Ld": 0 }], [{ "Lw": 607, "Ld": 0 }]],
    },
+   {
+      tag: "AIMEE (ASB rounding)",
+      species: "Allosaurus", level: 342, imprint: 71.5, mode: "Bred",
+      values: [13680.1, 1850.0, 360.0, 29571.4, 1150.9, 411.4, 132.9, 30657.6],
+      serverName: "VestedWind",
+      results: [],
+   },
+   {
+      tag: "Sophia (ASBM: 0 ASB: 1)",
+      species: "Allosaurus", level: 284, imprint: 71.5, mode: "Tamed",
+      values: [5796.1, 1450.0, 645.0, 16214.5, 668.8, 425.7, 90.0, 17980.5],
+      serverName: "VestedWind",
+      results: [],
+   },
+   {
+      tag: "Sophia (ASBM: 0 ASB: 2)",
+      species: "Allosaurus", level: 342, imprint: 71.5, mode: "Tamed",
+      values: [10177.9, 2320.0, 645.0, 16214.5, 12707.2, 1873.1, 122.4, 17980.5],
+      serverName: "VestedWind",
+      results: [],
+   },
+   {
+      tag: "Logan (ASBM: 0 ASB: 3)",
+      species: "Argentavis", level: 269, imprint: 71.5, mode: "Tamed",
+      values: [3285.1, 1300.0, 705.0, 10600.0, 816.0, 425.0, 100.0, 10248.5],
+      serverName: "VestedWind",
+      results: [],
+   },
+   {
+      tag: "NITEBITE (ASBM: 0 ASB: 4)",
+      species: "Megalosaurus", level: 153, imprint: 71.5, mode: "Tamed",
+      values: [5945.1, 1200.0, 465.0, 6669.4, 3444.0, 231.6, 100.0, 7657.5],
+      serverName: "VestedWind",
+      results: [],
+   },
 ];
 
 export default testData;
