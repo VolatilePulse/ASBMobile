@@ -224,7 +224,7 @@ const testData: TestData[] = [
       species: 'Giganotosaurus', level: 3521, imprint: 0, mode: 'Tamed',
       values: [38555.6, 597.8, 460.2, 13198.5, 5079.6, 2798.3, 106.5, 2042200.0],
       serverName: 'Official Server',
-      results: [],
+      results: [[{ Lw: 532, Ld: 18 }], [{ Lw: 599, Ld: 15 }, { Lw: 491, Ld: 20 }, { Lw: 391, Ld: 25 }, { Lw: 120, Ld: 41 }], [{ Lw: 509, Ld: 14 }, { Lw: 432, Ld: 19 }, { Lw: 367, Ld: 24 }], [{ Lw: 857, Ld: 2 }, { Lw: 438, Ld: 23 }], [{ Lw: 531, Ld: 15 }], [{ Lw: 485, Ld: 17 }], [{ Lw: 501, Ld: 21 }, { Lw: 478, Ld: 21 }, { Lw: 435, Ld: 21 }, { Lw: 430, Ld: 21 }], [{ Lw: 3387, Ld: 0 }]],
    },
    {
       tag: 'Direwolf (ASB rounding)',
@@ -245,7 +245,7 @@ const testData: TestData[] = [
       species: 'Allosaurus', level: 284, imprint: 71.5, mode: 'Tamed',
       values: [5796.1, 1450.0, 645.0, 16214.5, 668.8, 425.7, 90.0, 17980.5],
       serverName: 'VestedWind',
-      results: [],
+      results: [[{ Lw: 41, Ld: 0 }], [{ Lw: 48, Ld: 0 }], [{ Lw: 33, Ld: 0 }], [{ Lw: 37, Ld: 0 }], [{ Lw: 38, Ld: 0 }], [{ Lw: 51, Ld: 0 }], [{ Lw: 35, Ld: 0 }], [{ Lw: 283, Ld: 0 }]],
    },
    {
       tag: 'Sophia (ASBM: 0 ASB: 2)',
@@ -266,7 +266,7 @@ const testData: TestData[] = [
       species: 'Megalosaurus', level: 153, imprint: 71.5, mode: 'Tamed',
       values: [5945.1, 1200.0, 465.0, 6669.4, 3444.0, 231.6, 100.0, 7657.5],
       serverName: 'VestedWind',
-      results: [],
+      results: [[{ Lw: 24, Ld: 0 }], [{ Lw: 15, Ld: 3 }], [{ Lw: 21, Ld: 0 }], [{ Lw: 19, Ld: 0 }], [{ Lw: 32, Ld: 1 }], [{ Lw: 18, Ld: 0 }], [{ Lw: 19, Ld: 0 }], [{ Lw: 148, Ld: 0 }]],
    },
 ];
 
