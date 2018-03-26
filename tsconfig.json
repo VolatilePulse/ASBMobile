@@ -1,9 +1,9 @@
 {
    "compilerOptions": {
+      "target": "es2015",
       "module": "es2015",
+      "jsx": "preserve",
       "moduleResolution": "node",
-      "target": "es5",
-      "rootDir": "src",
       "alwaysStrict": true,
       "strict": true,
       "noImplicitAny": true,
@@ -15,21 +15,29 @@
       "noImplicitReturns": true,
       "noImplicitThis": true,
       "sourceMap": true,
+      "emitDecoratorMetadata": true,
+      "baseUrl": ".",
+      "rootDir": "src",
       "lib": [
          "dom",
          "es2017"
       ],
-      "typeRoots": [
-         "node_modules/@types",
-         "src/types"
+      "types": [
+         "node",
+         "mocha",
+         "chai"
       ],
-      "baseUrl": "./",
       "paths": {
          "@/*": [
             "src/*"
          ]
       }
    },
+   "include": [
+      "src/**/*.ts",
+      "src/**/*.vue",
+      "tests/**/*.ts"
+   ],
    "exclude": [
       "node_modules"
    ]

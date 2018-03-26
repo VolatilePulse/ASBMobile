@@ -1,25 +1,14 @@
 {
    "defaultSeverity": "warning",
    "extends": [
-      "tslint:recommended"
+      //"tslint:recommended"
    ],
-   "rulesDirectory": [],
-   "linterOptions": {
-      "exclude": [
-         "build/**",
-         "config/**",
-         "docs/**",
-         "scripts/**"
-      ]
-   },
-   "jsRules": {
-      "max-line-length": {
-         "options": [
-            160
-         ]
-      }
-   },
    "rules": {
+      "indent": [
+         true,
+         "spaces",
+         3
+      ],
       "max-line-length": {
          "options": [
             160

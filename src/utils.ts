@@ -2,8 +2,8 @@
  * @fileOverview Miscellaneous functions used throughout the app
  */
 
-import cloneDeepWith from 'lodash-es/clonedeepwith';
 import { isString } from 'util';
+import cloneDeepWith from 'lodash-es/cloneDeepWith';
 
 const EPSILON = 1E-10;
 

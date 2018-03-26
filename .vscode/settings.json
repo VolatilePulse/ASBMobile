@@ -1,10 +1,4 @@
 {
-   "liveServer.settings.mount": [
-      [
-         "/ASBMobile",
-         "/docs"
-      ],
-   ],
    "editor.detectIndentation": false,
    "editor.tabSize": 3,
    "editor.formatOnSave": true,
@@ -32,4 +26,12 @@
       "**/docs/**"
    ],
    "cSpell.enabled": false,
+   "vetur.format.defaultFormatter.ts": "vscode-typescript",
+   "vetur.format.defaultFormatter.scss": "none",
+   "vetur.format.defaultFormatter.html": "js-beautify-html",
+   "files.exclude": {
+      "**/.git": true,
+      "**/.DS_Store": true,
+      "**/.user-certs": true
+   },
 }

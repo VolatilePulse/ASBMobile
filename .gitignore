@@ -1,3 +1,5 @@
+.user-certs
+
 *.userprefs
 .vs/
 .vscode/*

@@ -4,7 +4,7 @@ const cloneDeep = require('lodash.clonedeep');
 
 
 const URL = "https://raw.githubusercontent.com/cadon/ARKStatsExtractor/master/ARKBreedingStats/json/values.json";
-const OUTPUT = "static/data.json";
+const OUTPUT = "public/data/data.json";
 
 const SPECIES_FIELDS = {
    'statsRaw': 'stats',

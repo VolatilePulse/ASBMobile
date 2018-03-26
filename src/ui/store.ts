@@ -15,6 +15,7 @@ class Store {
 
    devMode: boolean = true;
    dataLoaded: boolean = false;
+   dataLoadError: string;
 
    tempCreature: VueCreature = new VueCreature();
 
@@ -26,7 +27,7 @@ class Store {
       for (let i = 0; i < statNames.length; i++) {
          const name = statNames[i];
          // @ts-ignore
-         import('assets/' + name.toLowerCase() + '.svg').then(url => Vue.set(this.statImages, i, url));
+         import('@/assets/' + name.toLowerCase() + '.svg').then(url => Vue.set(this.statImages, i, url));
       }
    }
 }

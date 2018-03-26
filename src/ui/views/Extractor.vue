@@ -1,0 +1,59 @@
+<template>
+   <b-container fluid>
+      <b-form-group label="Species:">
+         <b-form-select v-model="store.tempCreature.species" :options="store.speciesNames"></b-form-select>
+      </b-form-group>
+      <b-form-group label="Level:">
+         <b-form-input type="number" v-model.number="store.tempCreature.level"></b-form-input>
+      </b-form-group>
+      <b-form inline>
+         <b-form-radio-group v-model="mode">
+            <b-form-radio value="Wild">Wild</b-form-radio>
+            <b-form-radio value="Tamed" checked>Tamed</b-form-radio>
+            <b-form-radio value="Bred">Bred</b-form-radio>
+         </b-form-radio-group>
+      </b-form>
+      <b-form-group v-show="mode=='Wild'" label="Auto-Extract Levels:">
+         <b-form-checkbox v-model="autoExtract"></b-form-checkbox>
+      </b-form-group>
+      <b-form-group v-show="mode=='Tamed'" label="Taming Effectiveness:">
+         <b-form-input type="number" v-model.number="store.tempCreature.TE"></b-form-input>
+      </b-form-group>
+      <b-form-group v-show="mode=='Bred'" label="Imprint:">
+         <b-form-input type="number" v-model.number="imprint"></b-form-input>
+         <b-form-checkbox v-model="store.tempCreature.exactly">Exactly</b-form-checkbox>
+      </b-form-group>
+
+      <b-form-group label="Stats">
+         <b-row v-for="i in range(8)" class="mb-1 align-items-center" :key="i">
+            <div class="col-1 m-0 p-1 h-100">
+               <b-img :src="store.statImages[i]" fluid-grow class="align-items-center" style="max-height:28px;min-height:22px"></b-img>
+            </div>
+            <b-form-input type="number" v-model.number="values[i]" :placeholder="statNames[i]" class="col-3"></b-form-input>
+            <div v-if="store.tempCreature.stats[7].length" class="col-2">
+               <span v-if="store.tempCreature.stats[i] && store.tempCreature.stats[i].length > 0">
+                  <span>{{store.tempCreature.stats[i][0].Lw}}</span>
+                  <span>{{store.tempCreature.stats[i][0].Ld}}</span>
+                  <span>={{formatFloat(debugStatValue(i))}}</span>
+               </span>
+            </div>
+            <div v-if="store.tempCreature.stats[i]" class="col">
+               <label>{{debugShowOptions(store.tempCreature.stats[i])}}</label>
+            </div>
+         </b-row>
+         <b-button @click="extract">Extract</b-button>
+      </b-form-group>
+
+      <b-form-group v-if="store.devMode" label="Test Data:">
+         <b-button v-for="data in testData" variant="link" @click.prevent="insertTestData(data)" :key="data.tag">{{data.tag}}</b-button>
+      </b-form-group>
+
+   </b-container>
+</template>
+
+<script lang="ts">
+import { Component } from 'vue-property-decorator';
+import Behaviour from '../behaviour/Extractor';
+@Component
+export default class extends Behaviour { }
+</script>
