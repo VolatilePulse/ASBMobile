@@ -38,6 +38,13 @@ export default class extends Common {
    scrollSync(event: any) { (event.target.nextElementSibling || event.target.previousElementSibling).scrollLeft = event.target.scrollLeft; }
    optionsForStat(testIndex: number, statIndex: number) { return this.results[testIndex].options.map(options => options[statIndex]); }
 
+   displayResults(statOptions: Stat[][]) {
+      const json = JSON.stringify(statOptions);
+      const clean = json.replace(/"/g, '');
+      console.log('Test result:');
+      console.log(clean);
+   }
+
    /**
     * Run a selection of tests without blocking the browser
     */

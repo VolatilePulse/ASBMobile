@@ -64,7 +64,9 @@
                      <b-container fluid class="py-1">
                         <b-row class="">
                            <h6 class="col-6">Results</h6>
-                           <h6 class="col-6">Expected</h6>
+                           <h6 class="col-6 mb-0">Expected
+                              <b-button variant="success" class="p-0 px-2 m-0 float-right" style="margin-top:-0.15rem!important" v-b-tooltip title="Print to console" @click="displayResults(testData[index].results)">P</b-button>
+                           </h6>
                         </b-row>
                         <b-row class="">
                            <pre class="col-6 py-0 my-0 small" @scroll.passive="scrollSync" style="border-right: 1px solid #8ac8; border-top: 1px solid #8ac8">{{formattedStats(results[index].stats)}}</pre>
