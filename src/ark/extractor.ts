@@ -6,8 +6,6 @@ import { StatMultiplier, ServerMultiplier } from '@/ark/multipliers';
 
 class TEProps {
    TE = 0;
-   minTE = 0;
-   maxTE = 1;
    wildLevel = 0;
 }
 
@@ -98,8 +96,7 @@ export class Extractor {
             // Loop all possible Lws
             for (tempStat.Lw = maxLw; tempStat.Lw >= 0; tempStat.Lw--) {
                // Calculate the highest Ld could be
-               let maxLd = tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild, 0, this.c.IB);
-               maxLd = Math.min(maxLd, this.domFreeMax - this.minDom);
+               const maxLd = Math.min(tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild), this.domFreeMax - this.minDom);
 
                // We don't need to calculate TE to extract the levels
                if (this.c.bred || this.m[statIndex].Tm <= 0)
@@ -193,6 +190,7 @@ export class Extractor {
 
       // If the entered IB works, we don't need to do anything else (Torpor can't be leveled and typically has a large value to start with)
       const expectedValue = this.c.stats[TORPOR][0].calculateValue(this.m[TORPOR], !this.c.wild, this.c.TE, this.c.IB);
+
       if (this.c.values[TORPOR] === Utils.RoundTo(expectedValue, Ark.Precision(TORPOR)))
          return;
 
@@ -287,7 +285,7 @@ export class Extractor {
       const EPSILON = 0.001;
       for (tempStat.Ld = 0; tempStat.Ld <= maxLd; tempStat.Ld++) {
 
-         let tamingEffectiveness = -1, minTE = 0, maxTE = 0;
+         let tamingEffectiveness = -1;
 
          if (Math.abs(this.c.values[statIndex] - tempStat.calculateValue(this.m[statIndex], !this.c.wild, 1, this.c.IB)) < EPSILON)
             tamingEffectiveness = 1;
@@ -295,11 +293,6 @@ export class Extractor {
             tamingEffectiveness = 0;
          else
             tamingEffectiveness = tempStat.calculateTE(this.m[statIndex], this.c.values[statIndex]);
-
-         // TE *must* be lower than this
-         maxTE = Math.min(tempStat.calculateTE(this.m[statIndex], this.c.values[statIndex] + (0.5 / Math.pow(10, Ark.Precision(statIndex)))), 1);
-         // TE can be equal to or greater than this
-         minTE = Math.max(tempStat.calculateTE(this.m[statIndex], this.c.values[statIndex] - (0.5 / Math.pow(10, Ark.Precision(statIndex)))), 0);
 
          if (tamingEffectiveness >= 0 && tamingEffectiveness <= 1) {
             // If the TE allows the stat to calculate properly, add it as a possible result
@@ -312,8 +305,6 @@ export class Extractor {
                // Verify the calculated WildLevel was even possible
                if (this.levelBeforeDom === Math.floor(TEStat.wildLevel * (1 + 0.5 * tamingEffectiveness))) {
                   TEStat.TE = tamingEffectiveness;
-                  TEStat.maxTE = maxTE;
-                  TEStat.minTE = minTE;
 
                   const workingStat = new Stat(tempStat);
                   this.c.stats[statIndex].push(workingStat);

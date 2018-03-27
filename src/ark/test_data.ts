@@ -249,17 +249,17 @@ const testData: TestData[] = [
    },
    {
       tag: 'Sophia (ASBM: 0 ASB: 2)',
-      species: 'Allosaurus', level: 342, imprint: 71.5, mode: 'Tamed',
+      species: 'Allosaurus', level: 330, imprint: 71.5, mode: 'Tamed',
       values: [10177.9, 2320.0, 645.0, 16214.5, 12707.2, 1873.1, 122.4, 17980.5],
       serverName: 'VestedWind',
-      results: [],
+      results: [[{ Lw: 41, Ld: 14 }], [{ Lw: 48, Ld: 3 }], [{ Lw: 33, Ld: 0 }], [{ Lw: 37, Ld: 0 }], [{ Lw: 38, Ld: 3 }], [{ Lw: 51, Ld: 17 }], [{ Lw: 35, Ld: 9 }], [{ Lw: 283, Ld: 0 }]],
    },
    {
       tag: 'Logan (ASBM: 0 ASB: 3)',
-      species: 'Argentavis', level: 269, imprint: 71.5, mode: 'Tamed',
-      values: [3285.1, 1300.0, 705.0, 10600.0, 816.0, 425.0, 100.0, 10248.5],
+      species: 'Argentavis', level: 290, imprint: 71.5, mode: 'Tamed',
+      values: [3285.1, 4420.0, 705.0, 10600.0, 14280.0, 808.0, 100.0, 10248.5],
       serverName: 'VestedWind',
-      results: [],
+      results: [[{ Lw: 40, Ld: 0 }], [{ Lw: 48, Ld: 15 }, { Lw: 45, Ld: 16 }], [{ Lw: 37, Ld: 0 }], [{ Lw: 43, Ld: 0 }], [{ Lw: 52, Ld: 2 }], [{ Lw: 51, Ld: 3 }, { Lw: 48, Ld: 4 }], [{ Lw: 0, Ld: 0 }], [{ Lw: 268, Ld: 0 }]],
    },
    {
       tag: 'NITEBITE (ASBM: 0 ASB: 4)',
