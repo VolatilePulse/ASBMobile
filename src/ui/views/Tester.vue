@@ -59,13 +59,30 @@
                <!-- result details -->
                <b-tabs v-if="index in results && openTestIndex==index">
 
+                  <!-- options -->
+                  <b-tab v-if="results[index]['options']" :title="'Options'+(results[index] && results[index]['options'] && ' ('+results[index].options.length+')')">
+                     <table class="table table-striped table-sm table-responsive m-0 table-bordered small">
+                        <tr>
+                           <th scope="row" class="align-middle text-right" style="font-weight: bold">WL</th>
+                           <td v-for="optionIndex in range(results[index].options.length)" class="text-center" :key="optionIndex">{{optionWildLevel(index,optionIndex)}}</td>
+                        </tr>
+                        <tr>
+                           <th scope="row" class="align-middle text-right" style="font-weight: bold">TE</th>
+                           <td v-for="optionIndex in range(results[index].options.length)" class="text-center" :key="optionIndex">{{(optionTE(index,optionIndex))}}</td>
+                        </tr>
+                        <tr v-for="(statName,statIndex) in statNames.slice(0,8)" :key="statIndex">
+                           <th scope="row" class="align-middle text-right" style="font-weight: bold">{{statName}}</th>
+                           <td v-for="(stat,i) in optionsForStat(index,statIndex)" class="text-center" :key="statIndex+','+i">{{formattedStat(stat)}}</td>
+                        </tr>
+                     </table>
+                  </b-tab>
                   <!-- results / expected -->
                   <b-tab v-if="results[index]['stats']" title="Results">
                      <b-container fluid class="py-1">
                         <b-row class="">
                            <h6 class="col-6">Results</h6>
                            <h6 class="col-6 mb-0">Expected
-                              <b-button variant="success" class="p-0 px-2 m-0 float-right" style="margin-top:-0.15rem!important" v-b-tooltip title="Print to console" @click="displayResults(testData[index].results)">P</b-button>
+                              <b-button variant="success" class="p-0 px-2 m-0 float-right" style="margin-top:-0.15rem!important" v-b-tooltip title="Print to console" @click="displayResults(results[index].stats)">P</b-button>
                            </h6>
                         </b-row>
                         <b-row class="">
@@ -73,15 +90,6 @@
                            <pre class="col-6 py-0 my-0 small" @scroll.passive="scrollSync" style="border-top: 1px solid #8ac8">{{formattedStats(testData[index].results)}}</pre>
                         </b-row>
                      </b-container>
-                  </b-tab>
-                  <!-- options -->
-                  <b-tab v-if="results[index]['options']" :title="'Options'+(results[index] && results[index]['options'] && ' ('+results[index].options.length+')')">
-                     <table class="table table-striped table-sm table-responsive m-0 table-bordered small">
-                        <tr v-for="(statName,statIndex) in statNames.slice(0,8)" :key="statIndex">
-                           <th scope="row" class="align-middle text-right" style="font-weight: bold">{{statName}}</th>
-                           <td v-for="(stat,i) in optionsForStat(index,statIndex)" class="text-center" :key="statIndex+','+i">{{formattedStat(stat)}}</td>
-                        </tr>
-                     </table>
                   </b-tab>
                   <!-- debug values -->
                   <b-tab title="Debug">

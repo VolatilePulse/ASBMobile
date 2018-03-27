@@ -4,7 +4,7 @@ import * as Ark from '@/ark';
 import * as Utils from '@/utils';
 import { StatMultiplier, ServerMultiplier } from '@/ark/multipliers';
 
-class TEProps {
+export class TEProps {
    TE = 0;
    wildLevel = 0;
 }

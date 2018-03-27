@@ -6,6 +6,7 @@ import testData from '@/ark/test_data';
 import { statNames } from '@/consts';
 import { TestResult, PerformTest, PerformPerfTest } from '@/testing';
 import { FormatOption, FormatOptions, FormatAllOptions } from '@/ark';
+import { TEProps } from '@/ark/extractor';
 
 
 const ASYNC_RUN_TIME_MS = 200;
@@ -43,6 +44,33 @@ export default class extends Common {
       const clean = json.replace(/"/g, '');
       console.log('Test result:');
       console.log(clean);
+   }
+
+   findTEStat(testIndex: number, optionIndex: number): TEProps {
+      var results = this.results[testIndex];
+      var optionSet = results.options[optionIndex];
+
+      for (var statIndex in this.range(8)) {
+         var map = results.mapTE[statIndex];
+         var stat = optionSet[statIndex];
+         if (!stat || !map) continue;
+         var teProp = map.get(stat);
+         if (teProp) return teProp;
+      }
+
+      return undefined;
+   }
+
+   optionWildLevel(testIndex: number, optionIndex: number): string {
+      var val = this.findTEStat(testIndex, optionIndex);
+      if (!val) return '';
+      return val.wildLevel.toFixed();
+   }
+
+   optionTE(testIndex: number, optionIndex: number): string {
+      var val = this.findTEStat(testIndex, optionIndex);
+      if (!val) return '';
+      return (val.TE * 100).toFixed(1) + '%';
    }
 
    /**

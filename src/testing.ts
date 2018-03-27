@@ -1,6 +1,6 @@
 import * as Ark from './ark';
 import * as Utils from './utils';
-import { Extractor } from './ark/extractor';
+import { Extractor, TEProps } from './ark/extractor';
 import { VueCreature } from './ark/creature';
 import { isNumber, isString, isFunction, isObject, isArray } from 'util';
 
@@ -9,6 +9,7 @@ export interface TestResult {
    pass?: boolean;
    stats?: Stat[][];
    options?: Stat[][];
+   mapTE?: Map<Stat, TEProps>[];
    dbg?: any;
    extra?: { [key: string]: any };
    exception?: any;
@@ -53,6 +54,7 @@ export function PerformTest(testData: TestData): TestResult {
       pass: false,
       stats: testCreature['stats'],
       options: extractObject['options'],
+      mapTE: extractObject['statTEmaps'],
       dbg: dbg,
       extra: {},
    };
