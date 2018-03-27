@@ -13,12 +13,11 @@ export function FormatOptions(options: Stat[]) {
    return options.map(option => FormatOption(option)).join(',') || '-';
 }
 
-export function FormatOption(option: Stat) {
+export function FormatOption(option: Stat, noBrackets = false) {
    if (!option) return '-';
-   const { Lw, Ld, wildLevel, TE } = option;
-   if (wildLevel || TE)
-      // tslint:disable-next-line:no-magic-numbers
-      return `(${Lw}+${Ld} LW${wildLevel} ${Utils.FormatNumber(TE * 100, 2)}%)`;
+   const { Lw, Ld } = option;
+   if (noBrackets)
+      return `${Lw}+${Ld}`;
    return `(${Lw}+${Ld})`;
 }
 

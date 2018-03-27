@@ -61,20 +61,20 @@
 
                   <!-- options -->
                   <b-tab v-if="results[index]['options']" :title="'Options'+(results[index] && results[index]['options'] && ' ('+results[index].options.length+')')">
-                     <table class="table table-striped table-sm table-responsive m-0 table-bordered small">
-                        <tr>
-                           <th scope="row" class="align-middle text-right" style="font-weight: bold">WL</th>
-                           <td v-for="optionIndex in range(results[index].options.length)" class="text-center" :key="optionIndex">{{optionWildLevel(index,optionIndex)}}</td>
-                        </tr>
-                        <tr>
-                           <th scope="row" class="align-middle text-right" style="font-weight: bold">TE</th>
-                           <td v-for="optionIndex in range(results[index].options.length)" class="text-center" :key="optionIndex">{{(optionTE(index,optionIndex))}}</td>
-                        </tr>
-                        <tr v-for="(statName,statIndex) in statNames.slice(0,8)" :key="statIndex">
-                           <th scope="row" class="align-middle text-right" style="font-weight: bold">{{statName}}</th>
-                           <td v-for="(stat,i) in optionsForStat(index,statIndex)" class="text-center" :key="statIndex+','+i">{{formattedStat(stat)}}</td>
-                        </tr>
-                     </table>
+                     <div class="d-flex flex-row options-flex">
+                        <div class="flex-column font-weight-bold px-2 text-right">
+                           <div>Wild&nbsp;lvl</div>
+                           <div>Tame&nbsp;Eff</div>
+                           <div class="option-break"></div>
+                           <div v-for="statName in statNames" :key="statName">{{statName}}</div>
+                        </div>
+                        <div v-for="(options,optionIndex) in results[index].options" :key="optionIndex" class="flex-column text-center px-2">
+                           <div>{{optionWildLevel(index,optionIndex)||'-'}}</div>
+                           <div>{{optionTE(index,optionIndex)||'-'}}</div>
+                           <div class="option-break"></div>
+                           <div v-for="(stat,statIndex) in options" :key="optionIndex+','+statIndex">{{formattedStat(stat, true)}}</div>
+                        </div>
+                     </div>
                   </b-tab>
                   <!-- results / expected -->
                   <b-tab v-if="results[index]['stats']" title="Results">
@@ -119,8 +119,7 @@
    </b-container>
 </template>
 
-
-<style scoped>
+<style lang="scss">
 .testpill {
   width: 5.5em;
 }
@@ -128,8 +127,16 @@
 .bg-grey {
   background-color: #ddd;
 }
-</style>
 
+.options-flex {
+  overflow-x: scroll;
+}
+
+.option-break {
+  height: 2px;
+  background-color: #555;
+}
+</style>
 
 <script lang="ts">
 import { Component } from 'vue-property-decorator';

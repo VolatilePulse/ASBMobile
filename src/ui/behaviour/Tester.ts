@@ -34,7 +34,7 @@ export default class extends Common {
    formatNumber(n: number, places = 0) { return Utils.FormatNumber(n, places); }
    formattedOptions(options: Stat[]) { return options ? FormatOptions(options) : '-'; }
    formattedStats(stats: Stat[][]) { return FormatAllOptions(stats); }
-   formattedStat(stat: Stat) { return FormatOption(stat); }
+   formattedStat(stat: Stat, noBrackets: boolean = false) { return FormatOption(stat, noBrackets); }
    dbgKeys(index: number) { return this.results[index]['dbg'] ? Object.keys(this.results[index].dbg).filter(key => key !== 'preFilterStats') : []; }
    scrollSync(event: any) { (event.target.nextElementSibling || event.target.previousElementSibling).scrollLeft = event.target.scrollLeft; }
    optionsForStat(testIndex: number, statIndex: number) { return this.results[testIndex].options.map(options => options[statIndex]); }
