@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.0.1/workbox-sw.js");
 
 importScripts(
-  "/ASBMobile/precache-manifest.c51c169affdd6e4617a59eb10f44282e.js"
+  "/ASBMobile/precache-manifest.35fe4a587a24a7c067465c0f481c9970.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "asb-mobile"});
