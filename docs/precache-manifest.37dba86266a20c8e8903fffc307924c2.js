@@ -12,7 +12,7 @@ self.__precacheManifest = [
     "url": "/ASBMobile/img/torpor.09681831.svg"
   },
   {
-    "revision": "7bb8abc804f49cc2e7686b966ad0ee19",
+    "revision": "50f10457ff4033a7b12317ba515fbe4b",
     "url": "/ASBMobile/data/data.json"
   },
   {
