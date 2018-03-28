@@ -9,27 +9,37 @@ import theStore from '@/ui/store';
  * Load the data file containing creature multipliers and official server settings
  * @param {string} json Json-encoded string with the contents of data.json
  */
-export function LoadData(json: string) {
+export function ParseDatabase(json: string) {
    // Parse the received JSON file
    const jsonObject = JSON.parse(json);
 
-   // Clear species list, ready to be populated
-   theStore.speciesNames = [];
+   // Local stores for constructing the data (unobserved until read)
+   var speciesNames = [];
+   var speciesMultipliers: { [species: string]: CreatureStats } = {};
 
+   // Read all of the species data
    for (const creature in jsonObject.species) {
       const speciesData = jsonObject.species[creature];
-      theStore.speciesNames.push(creature);
-      theStore.speciesMultipliers[creature] = new CreatureStats(
+      speciesNames.push(creature);
+      speciesMultipliers[creature] = new CreatureStats(
          speciesData.stats,
          speciesData.TBHM,
          speciesData.noOxygen,
          speciesData.noImprint);
    }
 
-   // Sorted species names, please
-   theStore.speciesNames.sort();
+   // Sort species names for nicer display
+   speciesNames.sort();
+
+   // Make it available in the store, enabling obvservation
+   theStore.speciesNames = speciesNames;
+   theStore.speciesMultipliers = speciesMultipliers;
 
    // Define the constant servers and populate the list if empty
    theStore.officialServer = new Server(jsonObject.settings.officialMultipliers, jsonObject.settings.imprintingMultiplier);
    theStore.officialSPMultiplier = new Server(jsonObject.settings.officialMultipliersSP, jsonObject.settings.imprintingMultiplier, true);
+
+   // Make the whole DB available incase it's needed
+   // FIXME: Consider removing this if nothing uses it as it stops it from being GC'd
+   theStore.valuesJson = jsonObject;
 }

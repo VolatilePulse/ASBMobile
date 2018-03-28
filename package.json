@@ -5,6 +5,7 @@
    "author": "VolatilePulse",
    "private": true,
    "repository": "github:VolatilePulse/ASBMobile",
+   "main": "src/main.ts",
    "scripts": {
       "dev": "vue-cli-service serve",
       "serve": "vue-cli-service serve",
@@ -55,17 +56,6 @@
    "postcss": {
       "plugins": {
          "autoprefixer": {}
-      }
-   },
-   "vue": {
-      "baseUrl": "/ASBMobile/",
-      "lintOnSave": true,
-      "outputDir": "docs",
-      "dll": false,
-      "pwa": {
-         "name": "ASB Mobile",
-         "themeColor": "#2e54a5",
-         "msTileColor": "#00aba9"
       }
    },
    "browserslist": [

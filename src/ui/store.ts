@@ -3,19 +3,22 @@ import Vue from 'vue';
 import { VueCreature } from '@/ark/creature';
 import { Server, CreatureStats } from '@/ark/multipliers';
 import { statNames } from '@/consts';
+import { Delay } from '@/utils';
 
 
 class Store {
    statImages: any[] = [];
    speciesNames: string[] = [];
    speciesMultipliers: { [species: string]: CreatureStats } = {};
-   officialServer: Server;
-   officialSPMultiplier: Server;
+   officialServer: Server = null;
+   officialSPMultiplier: Server = null;
    valuesJson: any;
 
+   applicationVersion: string = process.env.VERSION;
    devMode: boolean = true;
    dataLoaded: boolean = false;
-   dataLoadError: string;
+   dataLoadError: string = null;
+   updateAvailable: boolean = false;
 
    tempCreature: VueCreature = new VueCreature();
 
@@ -23,11 +26,13 @@ class Store {
    set currentServerName(value) { this.tempCreature.serverName = value; }
 
    async loadStatImages() {
+      // Let the rest of the app start first - these aren't urgent
+      await Delay(200);
+
       // Calcualte the paths for each of the stat images
       for (let i = 0; i < statNames.length; i++) {
          const name = statNames[i];
-         // @ts-ignore
-         import('@/assets/' + name.toLowerCase() + '.svg').then(url => Vue.set(this.statImages, i, url));
+         Vue.set(this.statImages, i, require('@/assets/' + name.toLowerCase() + '.svg'));
       }
    }
 }
