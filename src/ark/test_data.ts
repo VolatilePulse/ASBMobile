@@ -235,10 +235,10 @@ const testData: TestData[] = [
    },
    {
       tag: 'AIMEE (ASB rounding)',
-      species: 'Allosaurus', level: 342, imprint: 71.5, mode: 'Bred',
+      species: 'Allosaurus', level: 342, imprint: 71, mode: 'Bred',
       values: [13680.1, 1850.0, 360.0, 29571.4, 1150.9, 411.4, 132.9, 30657.6],
       serverName: 'VestedWind',
-      results: [],
+      results: [[{ Lw: 71, Ld: 0 }], [{ Lw: 64, Ld: 0 }], [{ Lw: 14, Ld: 0 }], [{ Lw: 50, Ld: 0 }], [{ Lw: 56, Ld: 0 }], [{ Lw: 28, Ld: 0 }], [{ Lw: 58, Ld: 0 }], [{ Lw: 341, Ld: 0 }]],
    },
    {
       tag: 'Sophia (ASBM: 0 ASB: 1)',

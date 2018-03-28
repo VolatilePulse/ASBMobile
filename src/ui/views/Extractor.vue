@@ -21,7 +21,6 @@
       </b-form-group>
       <b-form-group v-show="mode=='Bred'" label="Imprint:">
          <b-form-input type="number" v-model.number="imprint"></b-form-input>
-         <b-form-checkbox v-model="store.tempCreature.exactly">Exactly</b-form-checkbox>
       </b-form-group>
 
       <b-form-group label="Stats">

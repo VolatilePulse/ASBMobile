@@ -21,8 +21,6 @@ export class Extractor {
    domFreeMax = 0;
    /** What level the creature was born/tamed at */
    levelBeforeDom = 0;
-   /** A flag signifying a stat isn't displayed by Ark */
-   unusedStat = false;
    /** The lowest that the IB can be */
    minIB = 0;
    /** The IB value must be lower than this to be valid */
@@ -31,6 +29,12 @@ export class Extractor {
    minWild = 0;
    /** A running total of each stat's minimum dom stat levels */
    minDom = 0;
+   /** A running total of each stat's minimum dom stat levels */
+   originalIB = 0;
+   /** A flag signifying a stat isn't displayed by Ark */
+   unusedStat = false;
+   /** A flag signifying a successful extraction */
+   success = true;
 
    /** Stores each stats minimum wild stat level */
    wildMin: number[] = [];
@@ -54,84 +58,135 @@ export class Extractor {
       // Should not rely on wild level steps as, it will speed up extraction, but not everyone may set it :(
 
       // considerWildLevelSteps = considerWildLevelSteps && !bred;
+      // Make sure the multipliers haven't changed
+      this.m = Ark.GetMultipliers(this.c.serverName, this.c.species);
+
+      // Clear the checked property for future extractions (also clearing out any Vue observer)
+      this.c.stats = Utils.FilledArray(8, () => []);
+
+      // Change variables based on wild, tamed, bred
+      if (this.c.wild)
+         this.c.TE = this.c.IB = 0;
+
+      else if (this.c.tamed)
+         this.c.IB = 0;
+
+      else
+         this.c.TE = 1;
    }
 
    extract(dbg?: any) {
       // TODO: Add either a way to throw errors w/ codes (for specific reasons like bad multipliers, stats, etc.)
       //    Or provide an alternative method (returning under bad situations is acceptable for now)
 
-      // Make sure we initialize specific variables before extraction
-      this.init();
-
       let tempStat = new Stat();
 
       // Calculate the torpor stat since it doesn't accept dom levels
-      tempStat.calculateWildLevel(this.m[TORPOR], this.c.values[TORPOR], (!this.c.wild), this.c.TE, this.c.IB);
-      this.c.stats[TORPOR].push(new Stat(tempStat));
-      this.checkedStat[TORPOR] = true;
-      if (dbg) dbg.levelFromTorpor = tempStat.Lw;
+      if (!this.c.bred) {
+         tempStat.calculateWildLevel(this.m[TORPOR], this.c.values[TORPOR], !this.c.wild, this.c.TE, 0);
+         this.c.stats[TORPOR].push(new Stat(tempStat));
+      }
 
-      // Calculate the max number of levels based on level and torpor
-      this.wildFreeMax = this.c.stats[TORPOR][0].Lw;
-      this.levelBeforeDom = this.c.stats[TORPOR][0].Lw + 1;
-      this.domFreeMax = Math.max(this.c.level - this.wildFreeMax - 1, 0);
-
-      // If it's bred, we need to do some magic with the IB
-      if (this.c.bred)
-         this.dynamicIBCalculation();
-
-      // Loop all stats except for torpor
-      for (let statIndex = HEALTH; statIndex <= SPEED; statIndex++) {
-         tempStat = new Stat();
-
-         // Covers unused stats like oxygen
-         if (!this.uniqueStatSituation(tempStat, statIndex)) {
-            // Calculate the highest Lw could be
-            let maxLw = tempStat.calculateWildLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild, 0, this.c.IB);
-
-            if (maxLw > this.wildFreeMax - this.minWild || (maxLw === 0 && this.m[statIndex].Iw === 0))
-               maxLw = this.wildFreeMax - this.minWild;
-
-            const localMap = this.statTEmaps.find(map => map !== undefined);
-            // Loop all possible Lws
-            for (tempStat.Lw = maxLw; tempStat.Lw >= 0; tempStat.Lw--) {
-               // Calculate the highest Ld could be
-               const maxLd = Math.min(tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild), this.domFreeMax - this.minDom);
-
-               // We don't need to calculate TE to extract the levels
-               if (this.c.bred || this.m[statIndex].Tm <= 0)
-                  this.nonTEStatCalculation(tempStat, statIndex, maxLd);
-
-               // If this stat has a Tm and is tamed, we need to manually loop through the Ld
-               else if (localMap === undefined)
-                  this.findTEStats(tempStat, statIndex, maxLd);
-
-               else if (localMap !== undefined)
-                  this.findMultiTEStat(tempStat, statIndex, maxLd, localMap);
-            }
-         }
-         if (this.c.stats[statIndex].length === 1) {
-            this.wildFreeMax -= this.c.stats[statIndex][0].Lw;
-            this.domFreeMax -= this.c.stats[statIndex][0].Ld;
-            this.checkedStat[statIndex] = true;
-         }
-         else if (this.c.stats[statIndex].length > 1) {
-            let tempWM = -1, tempDM = -1;
-            for (const stat of this.c.stats[statIndex]) {
-               if (tempWM === -1)
-                  tempWM = stat.Lw;
-               if (tempDM === -1)
-                  tempDM = stat.Ld;
-               if (tempWM > stat.Lw)
-                  tempWM = stat.Lw;
-               if (tempDM > stat.Ld)
-                  tempDM = stat.Ld;
-            }
-            this.wildMin[statIndex] = tempWM; this.domMin[statIndex] = tempDM;
-            this.minWild += tempWM;
-            this.minDom += tempDM;
+      else {
+         this.originalIB = this.c.IB;
+         // Create an empty stat to be pushed off immediately for all bred creatures
+         this.c.stats[TORPOR].push(new Stat());
+         this.minIB = Math.max(this.originalIB - 0.005, 0);
+         this.maxIB = this.originalIB + 0.005;
+         const minTorporLw = tempStat.calculateWildLevel(this.m[TORPOR], this.c.values[TORPOR], !this.c.wild, 1, this.maxIB);
+         tempStat.calculateWildLevel(this.m[TORPOR], this.c.values[TORPOR], !this.c.wild, 1, this.minIB);
+         for (; tempStat.Lw >= minTorporLw; tempStat.Lw--) {
+            this.c.stats[TORPOR].push(new Stat(tempStat));
          }
       }
+      this.checkedStat[TORPOR] = true;
+
+      do {
+         // Reset flag to test for failed cases
+         this.success = true;
+
+         // Reset arrays to handle multiplie loops
+         for (let index = HEALTH; index <= SPEED; index++) {
+            this.c.stats[index] = [];
+            this.checkedStat[index] = false;
+         }
+
+         // Remove the previous torpor stat as it was no good
+         if (this.c.bred)
+            this.c.stats[TORPOR].shift();
+
+         // Calculate the max number of levels based on level and torpor
+         this.wildFreeMax = this.c.stats[TORPOR][0].Lw;
+         this.levelBeforeDom = this.c.stats[TORPOR][0].Lw + 1;
+         this.domFreeMax = Math.max(this.c.level - this.wildFreeMax - 1, 0);
+
+         // If it's bred, we need to do some magic with the IB
+         if (this.c.bred)
+            this.dynamicIBCalculation();
+
+         // Loop all stats except for torpor
+         for (let statIndex = HEALTH; statIndex <= SPEED && this.success; statIndex++) {
+            tempStat = new Stat();
+
+            // Covers unused stats like oxygen
+            if (!this.uniqueStatSituation(tempStat, statIndex)) {
+               // Calculate the highest Lw could be
+               let maxLw = tempStat.calculateWildLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild, 0, this.c.IB);
+
+               if (maxLw > this.wildFreeMax - this.minWild || (maxLw === 0 && this.m[statIndex].Iw === 0))
+                  maxLw = this.wildFreeMax - this.minWild;
+
+               const localMap = this.statTEmaps.find(map => map !== undefined);
+               // Loop all possible Lws
+               for (tempStat.Lw = maxLw; tempStat.Lw >= 0; tempStat.Lw--) {
+                  // Calculate the highest Ld could be
+                  const maxLd = Math.min(tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild), this.domFreeMax - this.minDom);
+
+                  // We don't need to calculate TE to extract the levels
+                  if (this.c.bred || this.m[statIndex].Tm <= 0)
+                     this.nonTEStatCalculation(tempStat, statIndex, maxLd);
+
+                  // If this stat has a Tm and is tamed, we need to manually loop through the Ld
+                  else if (localMap === undefined)
+                     this.findTEStats(tempStat, statIndex, maxLd);
+
+                  else if (localMap !== undefined)
+                     this.findMultiTEStat(tempStat, statIndex, maxLd, localMap);
+               }
+            }
+            if (this.c.stats[statIndex].length === 1) {
+               this.wildFreeMax -= this.c.stats[statIndex][0].Lw;
+               this.domFreeMax -= this.c.stats[statIndex][0].Ld;
+               this.checkedStat[statIndex] = true;
+            }
+            else if (this.c.stats[statIndex].length > 1) {
+               let tempWM = -1, tempDM = -1;
+               for (const stat of this.c.stats[statIndex]) {
+                  if (tempWM === -1)
+                     tempWM = stat.Lw;
+                  if (tempDM === -1)
+                     tempDM = stat.Ld;
+                  if (tempWM > stat.Lw)
+                     tempWM = stat.Lw;
+                  if (tempDM > stat.Ld)
+                     tempDM = stat.Ld;
+               }
+               this.wildMin[statIndex] = tempWM; this.domMin[statIndex] = tempDM;
+               this.minWild += tempWM;
+               this.minDom += tempDM;
+            }
+
+            // No stat possibilities were found for this stat
+            else
+               this.success = false;
+         }
+         // Clear out the rest of the torpor results since we found the correct one
+         if (this.success && this.c.bred)
+            this.c.stats[TORPOR] = [this.c.stats[TORPOR][0]];
+
+      } while (this.c.stats[TORPOR].length !== 1 && !this.success && this.c.bred);
+
+      if (dbg) dbg.levelFromTorpor = this.c.stats[TORPOR][0].Lw;
 
       // Only filter results if we have a result for every stat
       for (let stat = HEALTH; stat <= SPEED; stat++) {
@@ -149,33 +204,6 @@ export class Extractor {
       this.options.sort(this.optionDeviation);
    }
 
-   init() {
-      // Make sure the multipliers haven't changed
-      this.m = Ark.GetMultipliers(this.c.serverName, this.c.species);
-
-      // Clear the checked property for future extractions (also clearing out any Vue observer)
-      this.c.stats = Utils.FilledArray(8, () => []);
-
-      // Change variables based on wild, tamed, bred
-      if (this.c.wild)
-         this.c.TE = this.c.IB = 0;
-
-      else if (this.c.tamed)
-         this.c.IB = 0;
-
-      else
-         this.c.TE = 1;
-
-      this.wildFreeMax = 0;
-      this.domFreeMax = 0;
-      this.levelBeforeDom = 0;
-      this.unusedStat = false;
-      this.options = [];
-      this.minIB = 0;
-      this.maxIB = 0;
-      this.checkedStat = [];
-   }
-
    /**
     *  Attempts to calculate a valid Imprint Bonus from the one entered. While it doesn't support the same "Exactly" option that ASB does,
     *    it does first attempt to look at the entered IB to see if it's valid first. Unfortunately, that also means that the IB must be rounded
@@ -185,8 +213,8 @@ export class Extractor {
     */
    dynamicIBCalculation(): void {
       // Generate the min/max values for future edge cases (applicable in all situations)
-      this.maxIB = this.c.IB + (5 / 10E2);
-      this.minIB = this.c.IB - (5 / 10E2);
+      this.minIB = Math.max(this.originalIB - 0.005, 0);
+      this.maxIB = this.originalIB + 0.005;
 
       // If the entered IB works, we don't need to do anything else (Torpor can't be leveled and typically has a large value to start with)
       const expectedValue = this.c.stats[TORPOR][0].calculateValue(this.m[TORPOR], !this.c.wild, this.c.TE, this.c.IB);
@@ -529,7 +557,7 @@ export class Extractor {
          if (selector !== -1)
             selector = indexMax;
       } while (selector !== -1);
-      return this.options.length ? true : false;
+      return !!this.options.length;
    }
 
    /**
