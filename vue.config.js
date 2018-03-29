@@ -1,13 +1,18 @@
 module.exports = {
+   // Basic options
    "baseUrl": "/ASBMobile/",
    "lintOnSave": true,
    "outputDir": "docs",
    "dll": false,
+
+   // These values mirror the manifest and are inserted into index.html
    "pwa": {
       "name": "ASB Mobile",
       "themeColor": "#2e54a5",
       "msTileColor": "#00aba9"
    },
+
+   // Extensions to vue-cli's internal webpack build process go here
    chainWebpack: config => {
       config
          .plugin('define')
