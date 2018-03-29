@@ -1,4 +1,5 @@
 import * as consts from '@/consts';
+import { MultipliersArray } from '@/ark/types';
 
 
 export class StatMultiplier {
@@ -88,6 +89,8 @@ export class ServerMultiplier {
    [index: number]: number;
 }
 
+// This is a fix for TypeScript's transpiler marking properties as enumerable.
+// Not required if Babel is used, but not harmful to leave in.
 Object.defineProperty(ServerMultiplier.prototype, 'TaM', { enumerable: false });
 Object.defineProperty(ServerMultiplier.prototype, 'TmM', { enumerable: false });
 Object.defineProperty(ServerMultiplier.prototype, 'IdM', { enumerable: false });

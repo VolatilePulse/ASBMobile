@@ -3,9 +3,11 @@ import Common from '@/ui/behaviour/Common';
 
 import * as Ark from '@/ark';
 import testData from '@/ark/test_data';
-import { FilledArray, DeepCopy } from '@/utils';
+import { FilledArray, DeepCopy, Delay } from '@/utils';
 import { Extractor } from '@/ark/extractor';
 import { PRE_IB } from '@/consts';
+import { TestData } from '@/ark/types';
+import { Stat } from '@/ark/creature';
 
 
 @Component
@@ -17,10 +19,14 @@ export default class extends Common {
    mode = 'Tamed';
    imprint = 0;
    values = FilledArray(8, () => undefined);
+   disableExtract = false;
 
    extractor: Extractor = null;
 
    extract() {
+      if (this.disableExtract) return;
+      this.disableExtract = true;
+
       const creature = this.store.tempCreature;
 
       // Convert properties that couldn't be bound directly to creature
@@ -32,6 +38,7 @@ export default class extends Common {
 
       this.extractor = new Extractor(creature);
       this.extractor.extract();
+      Delay(500).then(() => this.disableExtract = false);
    }
 
    insertTestData(test: TestData) {

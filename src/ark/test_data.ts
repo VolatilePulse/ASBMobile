@@ -1,3 +1,5 @@
+import { TestData } from '@/ark/types';
+
 // tslint:disable:max-line-length
 
 // Some test data

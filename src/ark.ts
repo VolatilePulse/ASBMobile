@@ -1,8 +1,10 @@
 import { DAMAGE, SPEED, PRE_IB, PRE_TE, NUM_STATS } from './consts';
 import * as Utils from './utils';
 import * as Servers from './servers';
-import { Server, StatMultiplier, ServerMultiplier } from './ark/multipliers';
+import { Server } from './ark/multipliers';
 import theStore from '@/ui/store';
+import { Stat } from '@/ark/creature';
+import { CombinedMultipliers } from '@/ark/types';
 
 
 export function FormatAllOptions(stats: Stat[][]) {
@@ -69,7 +71,7 @@ export function ConvertValue(value: number, index: number) {
 /**
  * Generate a multipliers object for the Extractor
  */
-export function GetMultipliers(serverName: string, speciesName: string): StatMultiplier[] & ServerMultiplier[] {
+export function GetMultipliers(serverName: string, speciesName: string): CombinedMultipliers {
    const server = Servers.getServerByName(serverName);
 
    // The Server object tells us everything we need to know about the multipliers

@@ -1,3 +1,5 @@
+import { ServerDef } from '@/ark/types';
+
 const servers: ServerDef[] = [
    {
       serverName: 'Official Server',

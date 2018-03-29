@@ -2,7 +2,8 @@ import { TORPOR, FOOD, SPEED, HEALTH } from '@/consts';
 import { Stat, VueCreature } from './creature';
 import * as Ark from '@/ark';
 import * as Utils from '@/utils';
-import { StatMultiplier, ServerMultiplier } from '@/ark/multipliers';
+import { CombinedMultipliers } from '@/ark/types';
+
 
 export class TEProps {
    TE = 0;
@@ -13,7 +14,7 @@ export class Extractor {
    /** Stores all of the creature data */
    c: VueCreature;
    /** Stores all multipliers for stat calculations */
-   m: StatMultiplier[] & ServerMultiplier[] = [];
+   m: CombinedMultipliers = [];
 
    /** A counter to see how many wild stat levels are unaccounted for */
    wildFreeMax = 0;

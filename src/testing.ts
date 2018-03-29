@@ -1,8 +1,9 @@
 import * as Ark from './ark';
 import * as Utils from './utils';
 import { Extractor, TEProps } from './ark/extractor';
-import { VueCreature } from './ark/creature';
+import { VueCreature, Stat } from './ark/creature';
 import { isNumber, isString, isFunction, isObject, isArray } from 'util';
+import { TestData } from '@/ark/types';
 
 
 export interface TestResult {

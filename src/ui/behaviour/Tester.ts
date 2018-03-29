@@ -7,6 +7,7 @@ import { statNames } from '@/consts';
 import { TestResult, PerformTest, PerformPerfTest } from '@/testing';
 import { FormatOption, FormatOptions, FormatAllOptions } from '@/ark';
 import { TEProps } from '@/ark/extractor';
+import { Stat } from '@/ark/creature';
 
 
 const ASYNC_RUN_TIME_MS = 200;
