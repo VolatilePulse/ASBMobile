@@ -34,4 +34,7 @@
       "**/.DS_Store": true,
       "**/.user-certs": true
    },
+   "html.suggest.angular1": false,
+   "html.suggest.ionic": false,
+   "html-css-class-completion.includeGlobPattern": "**/*.{css,html,vue}",
 }
