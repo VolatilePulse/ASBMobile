@@ -32,6 +32,7 @@
          <div>
             And...
             <ul>
+               <li>vue-cli v3</li>
                <li>Bootstrap-vue</li>
                <li>Pouch-vue</li>
                <li>Icons from
