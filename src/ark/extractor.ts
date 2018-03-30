@@ -1,4 +1,4 @@
-import { TORPOR, FOOD, SPEED, HEALTH } from '@/consts';
+import { TORPOR, FOOD, SPEED, HEALTH, STAMINA, OXYGEN, DAMAGE, WEIGHT } from '@/consts';
 import { Stat, VueCreature } from './creature';
 import * as Ark from '@/ark';
 import * as Utils from '@/utils';
@@ -432,7 +432,7 @@ export class Extractor {
          removed = this.statRemover(dbg);
 
          if (!removed && this.options.length === 0)
-            removed = this.generateOptions(dbg);
+            removed = this.dynamicGenerator(dbg);
 
       } while (removed);
    }
@@ -558,6 +558,289 @@ export class Extractor {
          if (selector !== -1)
             selector = indexMax;
       } while (selector !== -1);
+      return !!this.options.length;
+   }
+
+   dynamicGenerator(dbg?: any): boolean {
+      const localStats = this.c.stats;
+      const localCheckedStats = this.checkedStat;
+      const localMap = this.statTEmaps;
+
+      let runningWild = 0;
+      let runningDom = 0;
+      let runningTE = -1;
+      let currentTE = -1;
+      let statIndexTE = -1;
+
+      for (let health of localStats[HEALTH]) {
+         if (dbg) dbg.totalRecursion++;
+         if (!localCheckedStats[HEALTH]) {
+            runningWild += health.Lw;
+            runningDom += health.Ld;
+         }
+         if (localMap[HEALTH] !== undefined) {
+            if (runningTE === -1) {
+               runningTE = currentTE = localMap[HEALTH].get(health).TE;
+               statIndexTE = HEALTH;
+            }
+            else
+               currentTE = localMap[HEALTH].get(health).TE;
+         }
+
+         if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
+            runningWild -= health.Lw;
+            runningDom = health.Ld;
+            currentTE = runningTE;
+            continue;
+         }
+
+         for (let stamina of localStats[STAMINA]) {
+            if (dbg) dbg.totalRecursion++;
+            if (!localCheckedStats[STAMINA]) {
+               runningWild += stamina.Lw;
+               runningDom += stamina.Ld;
+            }
+            if (localMap[STAMINA] !== undefined) {
+               if (runningTE === -1) {
+                  runningTE = currentTE = localMap[STAMINA].get(stamina).TE;
+                  statIndexTE = STAMINA;
+               }
+               else
+                  currentTE = localMap[STAMINA].get(stamina).TE;
+            }
+
+            if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
+               runningWild -= stamina.Lw;
+               runningDom -= stamina.Ld;
+               currentTE = runningTE;
+               continue;
+            }
+
+            for (let oxygen of localStats[OXYGEN]) {
+               if (dbg) dbg.totalRecursion++;
+               if (!localCheckedStats[OXYGEN]) {
+                  runningWild += oxygen.Lw;
+                  runningDom += oxygen.Ld;
+               }
+               if (localMap[OXYGEN] !== undefined) {
+                  if (runningTE === -1) {
+                     runningTE = currentTE = localMap[OXYGEN].get(oxygen).TE;
+                     statIndexTE = OXYGEN;
+                  }
+                  else
+                     currentTE = localMap[OXYGEN].get(oxygen).TE;
+               }
+
+               if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
+                  runningWild -= oxygen.Lw;
+                  runningDom -= oxygen.Ld;
+                  currentTE = runningTE;
+                  continue;
+               }
+
+               for (let food of localStats[FOOD]) {
+                  if (dbg) dbg.totalRecursion++;
+                  if (!localCheckedStats[FOOD]) {
+                     runningWild += food.Lw;
+                     runningDom += food.Ld;
+                  }
+                  if (localMap[FOOD] !== undefined) {
+                     if (runningTE === -1) {
+                        runningTE = currentTE = localMap[FOOD].get(food).TE;
+                        statIndexTE = FOOD;
+                     }
+                     else
+                        currentTE = localMap[FOOD].get(food).TE;
+                  }
+
+                  if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
+                     runningWild -= food.Lw;
+                     runningDom -= food.Ld;
+                     currentTE = runningTE;
+                     continue;
+                  }
+
+                  for (let weight of localStats[WEIGHT]) {
+                     if (dbg) dbg.totalRecursion++;
+                     if (!localCheckedStats[WEIGHT]) {
+                        runningWild += weight.Lw;
+                        runningDom += weight.Ld;
+                     }
+                     if (localMap[WEIGHT] !== undefined) {
+                        if (runningTE === -1) {
+                           runningTE = currentTE = localMap[WEIGHT].get(weight).TE;
+                           statIndexTE = WEIGHT;
+                        }
+                        else
+                           currentTE = localMap[WEIGHT].get(weight).TE;
+                     }
+
+                     if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
+                        runningWild -= weight.Lw;
+                        runningDom -= weight.Ld;
+                        currentTE = runningTE;
+                        continue;
+                     }
+
+                     for (let damage of localStats[DAMAGE]) {
+                        if (dbg) dbg.totalRecursion++;
+                        if (!localCheckedStats[DAMAGE]) {
+                           runningWild += damage.Lw;
+                           runningDom += damage.Ld;
+                        }
+                        if (localMap[DAMAGE] !== undefined) {
+                           if (runningTE === -1) {
+                              runningTE = currentTE = localMap[DAMAGE].get(damage).TE;
+                              statIndexTE = DAMAGE;
+                           }
+                           else
+                              currentTE = localMap[DAMAGE].get(damage).TE;
+                        }
+
+                        if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
+                           runningWild -= damage.Lw;
+                           runningDom -= damage.Ld;
+                           currentTE = runningTE;
+                           continue;
+                        }
+
+                        for (let speed of localStats[SPEED]) {
+                           if (dbg) dbg.totalRecursion++;
+                           if (!localCheckedStats[SPEED]) {
+                              runningWild += speed.Lw;
+                              runningDom += speed.Ld;
+                           }
+                           if (localMap[SPEED] !== undefined) {
+                              if (runningTE === -1) {
+                                 runningTE = currentTE = localMap[SPEED].get(speed).TE;
+                                 statIndexTE = SPEED;
+                              }
+                              else
+                                 currentTE = localMap[SPEED].get(speed).TE;
+                           }
+
+                           if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
+                              runningWild -= speed.Lw;
+                              runningDom -= speed.Ld;
+                              currentTE = runningTE;
+                              continue;
+                           }
+
+                           for (let torpor of localStats[TORPOR]) {
+                              if (dbg) dbg.totalRecursion++;
+                              if (!localCheckedStats[TORPOR]) {
+                                 runningWild += torpor.Lw;
+                                 runningDom += torpor.Ld;
+                              }
+                              if (localMap[TORPOR] !== undefined) {
+                                 if (runningTE === -1) {
+                                    runningTE = currentTE = localMap[TORPOR].get(torpor).TE;
+                                    statIndexTE = TORPOR;
+                                 }
+                                 else
+                                    currentTE = localMap[TORPOR].get(torpor).TE;
+                              }
+
+                              if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
+                                 runningWild -= torpor.Lw;
+                                 runningDom -= torpor.Ld;
+                                 currentTE = runningTE;
+                                 continue;
+                              }
+                              // We finally got to a good stat combination
+                              else if (runningWild === this.wildFreeMax && runningDom === this.domFreeMax && currentTE === runningTE) {
+                                 let option: Stat[] = [];
+                                 option.push(health);
+                                 option.push(stamina);
+                                 option.push(oxygen);
+                                 option.push(food);
+                                 option.push(weight);
+                                 option.push(damage)
+                                 option.push(speed);
+                                 option.push(torpor);
+                                 this.options.push(option);
+                              }
+
+
+                              if (!this.checkedStat[TORPOR]) {
+                                 runningWild -= torpor.Lw;
+                                 runningDom -= torpor.Ld;
+                              }
+                              if (statIndexTE === TORPOR)
+                                 statIndexTE = currentTE = -1;
+                              else
+                                 currentTE = statIndexTE;
+                           }
+
+                           if (!this.checkedStat[SPEED]) {
+                              runningWild -= speed.Lw;
+                              runningDom -= speed.Ld;
+                           }
+                           if (statIndexTE === SPEED)
+                              statIndexTE = currentTE = -1;
+                           else
+                              currentTE = statIndexTE;
+                        }
+
+                        if (!this.checkedStat[DAMAGE]) {
+                           runningWild -= damage.Lw;
+                           runningDom -= damage.Ld;
+                        }
+                        if (statIndexTE === DAMAGE)
+                           statIndexTE = currentTE = -1;
+                        else
+                           currentTE = statIndexTE;
+                     }
+
+                     if (!this.checkedStat[WEIGHT]) {
+                        runningWild -= weight.Lw;
+                        runningDom -= weight.Ld;
+                     }
+                     if (statIndexTE === WEIGHT)
+                        statIndexTE = currentTE = -1;
+                     else
+                        currentTE = statIndexTE;
+                  }
+
+                  if (!this.checkedStat[FOOD]) {
+                     runningWild -= food.Lw;
+                     runningDom -= food.Ld;
+                  }
+                  if (statIndexTE === FOOD)
+                     statIndexTE = currentTE = -1;
+                  else
+                     currentTE = statIndexTE;
+               }
+
+               if (!this.checkedStat[OXYGEN]) {
+                  runningWild -= oxygen.Lw;
+                  runningDom -= oxygen.Ld;
+               }
+               if (statIndexTE === OXYGEN)
+                  statIndexTE = currentTE = -1;
+               else
+                  currentTE = statIndexTE;
+            }
+
+            if (!this.checkedStat[STAMINA]) {
+               runningWild -= stamina.Lw;
+               runningDom -= stamina.Ld;
+            }
+            if (statIndexTE === STAMINA)
+               statIndexTE = currentTE = -1;
+            else
+               currentTE = statIndexTE;
+         }
+
+         if (!this.checkedStat[HEALTH]) {
+            runningWild -= health.Lw;
+            runningDom = health.Ld;
+         }
+         if (statIndexTE === HEALTH)
+            statIndexTE = currentTE = -1;
+         else
+            currentTE = statIndexTE;
+      }
       return !!this.options.length;
    }
 
