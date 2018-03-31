@@ -1,49 +1,46 @@
 # Database Layout
 
 General limitations:
- * IDs cannot be renamed. That makes names a bad option for an ID, but they can still be indexed as a secondary field.
- * Databases cannot be renamed. If we want to support multiple libraries then mappings to/from displayable names will have to be kept elsewhere.
+ * IDs cannot be renamed. That makes names a bad option for an ID, but they can still be indexed as a secondary field for performance.
+ * Databases cannot be renamed. To support multiple libraries, mappings to/from displayable names will be kept in the settings DB.
+ * IndexedDB databases when used through PouchDB are closer in function to a single traditional database table.
+ * In order to best fit our data we should split object types into different databases.
 
 Layout:
- * Settings DB - general application settings, unrelated to a specific library
- * Library DBs - many separate libraries, each containing creatures, servers and library-specific settings
+ * Settings DB - general application settings and settings related to specific libraries
+ * Library Servers DBs - separate DB for each library, containing only servers
+ * Library Creature DBs - separate DB for each library, containing only creatures
 
 ## Settings
+ * Contains application settings and settings for each library.
+ * Application settings should be stored in a single entry with the index `settings`.
+ * Library settings should be stored in entries named after the library ID.
 
- * Designed for application-related settings only, so settings related to a library or server should be stored elsewhere.
- * Stored in a single entry inside a database called `settings`.
- * The only entry will have an ID of `settings` also.
-
-Contents of the entry:
+Contents of the application `settings` entry:
 | Key | Type (jsdoc) | Description |
 |-:|:-:|-|
 | libraries | `{[name:string]:string}` | Library display name -> database name mapping |
 
-## Libraries
-
- * Support multiple creature libraries.
- * Store each library in a different database, for good separation and performance.
- * It is not possible to rename databases after creation so each DB will need a unique, unchanging name.
- * Database names will be mapped from display names by maintaining a dictionary in Settings.
- * Each library database should be prefixed by `"library_"`.
-
-Libraries need to contain:
- * Library-specific settings
- * Server definitions
- * Creature definitions
-
-### Library Settings
- * Library-specific settings should be kept with an ID of `settings`.
-
-Fields:
+Contents of library settings entries:
 | Key | Type (jsdoc) | Default (if unset) | Description |
 |-:|:-:|-|-|
 | showDead | `boolean` | `true` | Whether to show creatures with status Dead |
 | showUnavilable | `boolean` | `true` | Whether to show creatures with status Unavilable |
 | librarySort | `string` | `"name"` | Column name to sort the lirary on |
 
+## Libraries
+ * Support multiple libraries, each containing server definitions and creatures.
+ * It is not possible to rename databases after creation so each DB will need a unique, unchanging name.
+ * Database IDs will be mapped from display names by maintaining the `libraries` dictionary in Settings.
+ * For performance, each object type stored in the library should be held in a different database, with a name to include the library's ID.
+
+Libraries contain:
+ * Server definitions
+ * Creature definitions
+
 ### Server Defintions
-Servers should be stored in the library database with an ID consisting of the prefix `server_`, followed by a UUID.
+Servers should be stored in a database named `servers_` followed by the library ID.
+Primary keys are references by creatures that may move around, so UUIDs are the most sensible choice.
 
 Fields:
 | Key | Type (jsdoc) | Default (if unset) | Description |
@@ -52,18 +49,19 @@ Fields:
 | singlePlayer | `boolean` | `false` | Apply single player extra multipliers? |
 | multipliers | `number[][]` | - | 8x4 array with multipliers, or null if not overridden from official |
 | IBM | `boolean` | `1` | Imprint multiplier |
-| wildLevelStep | `number?` | `1` | The size of the step between wild creature levels, or 1 if undefined |
+| wildLevelStep | `number?` | `1` | The size of the step between wild creature levels, or undefined |
 
 
 ### Creature Defintions
-Creatures should be stored in the library database with an ID consisting of the prefix `creature_`, followed by its UUID. A creature's UUID is either imported or created at random.
+Creatures should be stored in a database named `creatures_` followed by the library ID.
+Primary keys for creatures are simply the creature's UUID, which is either imported or created at random.
 
 If creatures reference pre-defined servers they may do so without including them in the servers list in the library.
 
 Fields:
 | Key | Type (jsdoc) | Default (if unset) | Description |
 |-:|:-:|-|-|
-| server_uuid | `string` | - | The server the creature was defined for |
+| server_uuid | `string` | - | The server the creature belongs to |
 | species | `string` | - | Species name |
 | name | `string` | - | Creature name |
 | female | `boolean` | - | Set if the creature is female |
