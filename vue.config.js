@@ -21,5 +21,12 @@ module.exports = {
             args[0]['process.env'].VERSION = args[0]['process.env']['NODE_ENV'] == '"development"' ? '"DEV"' : JSON.stringify(require("./package.json").version);
             return args;
          });
+      config
+         .plugin('fork-ts-checker')
+         .tap(args => {
+            // Change the linting output format so the line number is included with the filename (so VSCode can jump straight to it)
+            args[0]['formatter'] = 'default';
+            return args;
+         })
    }
 }

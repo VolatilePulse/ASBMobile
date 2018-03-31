@@ -7,16 +7,45 @@
          "type": "npm",
          "script": "dev",
          "problemMatcher": [
-            "$eslint-stylish",
-            "$eslint-compact"
+            "$tslint5"
          ]
+         /*
+         // The problemMAtcher above doesn't work. Below is my attempt to replace it.
+         "problemMatcher": {
+            "owner": "tslint",
+            "fileLocation": "absolute",
+            "pattern": {
+               // This matches, but doesn't work. Maybe because the lint/type checkers are forked process?
+               "regexp": "(?:\u001B\\[[0-9]+m)*(\\w+)\\sin\\s(?:\u001B\\[[0-9]+m)*(.+?)\\((\\d+),(\\d+)\\)(?:\u001B\\[[0-9]+m)*:(?:\u001B\\[[0-9]+m)*\r?\n(?:\u001B\\[[0-9]+m)*(.+):\\s(?:\u001B\\[[0-9]+m)*(.*)$",
+               "severity": 1,
+               "file": 2,
+               "line": 3,
+               "column": 4,
+               "message": 5
+            }
+         }
+         */
       },
       {
          "type": "npm",
          "script": "build",
-         "problemMatcher": [
-            "$eslint-stylish"
-         ]
+         "problemMatcher": {
+            "base": "$tslint5",
+            "fileLocation": "relative"
+         }
+      },
+      {
+         "type": "npm",
+         "script": "lint",
+         "problemMatcher": {
+            "base": "$tslint5",
+            "fileLocation": "relative"
+         }
+      },
+      {
+         "type": "npm",
+         "script": "values",
+         "problemMatcher": []
       }
    ]
 }
