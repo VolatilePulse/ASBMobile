@@ -13,7 +13,8 @@
       "test": "vue-cli-service test",
       "lint": "vue-cli-service lint",
       "values": "node scripts/make_values.js",
-      "liveserver": "ws -c scripts/liveserver.conf.js"
+      "liveserver": "ws -c scripts/liveserver.conf.js",
+      "gencert": "bash scripts/generate-ssl.sh"
    },
    "dependencies": {
       "bootstrap-vue": "^2.0.0-rc.2",
