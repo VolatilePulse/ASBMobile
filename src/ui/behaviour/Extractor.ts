@@ -20,7 +20,10 @@ export default class extends Common {
    imprint = 0;
    values = FilledArray(8, () => undefined);
    disableExtract = false;
+   success = false;
+   selectedOption = 0;
 
+   options: string[] = [];
    extractor: Extractor = null;
 
    extract() {
@@ -38,6 +41,14 @@ export default class extends Common {
 
       this.extractor = new Extractor(creature);
       this.extractor.extract();
+
+      this.success = this.extractor.success;
+
+      if (this.success)
+         this.options = this.formatOptions(this.extractor.options);
+
+      // Force the option picker to show if this.options.length > 1
+
       Delay(500).then(() => this.disableExtract = false);
    }
 
@@ -59,12 +70,34 @@ export default class extends Common {
 
    // Nasty debug-only methods to show stats and their options
    debugShowOptions(options: Stat[]) {
-      return (options && options['length']) ? options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(',') : '-none-';
+      return (options && options['length']) ? options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(', ') : '-none-';
    }
 
    debugStatValue(i: number) {
       const creature = this.store.tempCreature;
       if (!this.extractor || !this.extractor.m) return '-';
-      return creature.stats[i][0].calculateValue(this.extractor.m[i], !creature.wild, 1, 0);
+      return this.extractor.options[this.selectedOption][i].calculateValue(this.extractor.m[i], !creature.wild, 1, 0);
+   }
+
+   formatOptions(options: Stat[][]) {
+      let optionStrings: string[] = [];
+
+      for (let option of options) {
+         let tempString = '';
+
+         if (this.extractor.statTEmaps.length) {
+            this.extractor.statTEmaps.find(index => index !== undefined).forEach((propTE, stat) => {
+               if (option.includes(stat)) {
+                  tempString += propTE.wildLevel + ' ';
+                  tempString += (propTE.TE * 100).toFixed(2) + '% - ';
+               }
+            });
+         }
+
+         tempString += this.debugShowOptions(option);
+         optionStrings.push(tempString);
+      }
+
+      return optionStrings;
    }
 }

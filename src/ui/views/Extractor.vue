@@ -29,23 +29,28 @@
                <b-img :src="store.statImages[i]" fluid-grow class="align-items-center" style="max-height:28px;min-height:22px"></b-img>
             </div>
             <b-form-input type="number" v-model.number="values[i]" :placeholder="statNames[i]" class="col-3"></b-form-input>
-            <div v-if="store.tempCreature.stats[7].length" class="col-2">
-               <span v-if="store.tempCreature.stats[i] && store.tempCreature.stats[i].length > 0">
-                  <span>{{store.tempCreature.stats[i][0].Lw}}</span>
-                  <span>{{store.tempCreature.stats[i][0].Ld}}</span>
-                  <span>={{formatFloat(debugStatValue(i))}}</span>
+            <div v-if="success" class="col-2">
+               <span v-if="extractor">
+                  <span>({{extractor.options[selectedOption][i].Lw}},</span>
+                  <span> {{extractor.options[selectedOption][i].Ld}})</span>
+                  <span> = {{formatFloat(debugStatValue(i))}}</span>
                </span>
-            </div>
-            <div v-if="store.tempCreature.stats[i]" class="col">
-               <label>{{debugShowOptions(store.tempCreature.stats[i])}}</label>
             </div>
          </b-row>
          <b-button @click="extract">Extract</b-button>
+         <b-button v-b-modal.optionPicker v-if="success && options.length > 1">Options</b-button>
       </b-form-group>
 
       <b-form-group v-if="store.devMode" label="Test Data:">
          <b-button v-for="data in testData" variant="link" @click.prevent="insertTestData(data)" :key="data.tag">{{data.tag}}</b-button>
       </b-form-group>
+
+      <!-- Option Picker Modal -->
+      <b-modal id="optionPicker" title="Stat Option Picker" size="lg" centered>
+         <b-form-select v-model="selectedOption" class="mb-3" :select-size="options.length">
+            <option v-for="(option, index) in options" v-bind:key="index" :value=index>{{option}}</option>
+         </b-form-select>
+      </b-modal>
 
    </b-container>
 </template>

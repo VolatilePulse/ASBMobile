@@ -201,8 +201,10 @@ export class Extractor {
       if (dbg) dbg.preFilterStats = Utils.DeepCopy(this.c.stats);
       this.filterResults(dbg);
 
+      this.success = !!this.options.length;
+
       // Sort the options based on most likely (deviation from the expected average)
-      this.options.sort(this.optionDeviation);
+      this.options.sort((opt1, opt2) => this.optionDeviation(opt1, opt2));
    }
 
    /**
@@ -539,7 +541,6 @@ export class Extractor {
       let selector = indexMax;
 
       do {
-         /** Holds the  */
          const tempStatOption: Stat[] = localStats.map((options, stat) => options[tempOptions[stat]]);
 
          // Verify the option generated was valid and add it to options
@@ -590,6 +591,8 @@ export class Extractor {
          if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
             runningWild -= health.Lw;
             runningDom = health.Ld;
+            if (statIndexTE === HEALTH)
+               runningTE = -1;
             currentTE = runningTE;
             continue;
          }
@@ -612,6 +615,8 @@ export class Extractor {
             if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
                runningWild -= stamina.Lw;
                runningDom -= stamina.Ld;
+               if (statIndexTE === STAMINA)
+                  runningTE = -1;
                currentTE = runningTE;
                continue;
             }
@@ -634,6 +639,8 @@ export class Extractor {
                if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
                   runningWild -= oxygen.Lw;
                   runningDom -= oxygen.Ld;
+                  if (statIndexTE === OXYGEN)
+                     runningTE = -1;
                   currentTE = runningTE;
                   continue;
                }
@@ -656,6 +663,8 @@ export class Extractor {
                   if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
                      runningWild -= food.Lw;
                      runningDom -= food.Ld;
+                     if (statIndexTE === FOOD)
+                        runningTE = -1;
                      currentTE = runningTE;
                      continue;
                   }
@@ -678,6 +687,8 @@ export class Extractor {
                      if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
                         runningWild -= weight.Lw;
                         runningDom -= weight.Ld;
+                        if (statIndexTE === WEIGHT)
+                           runningTE = -1;
                         currentTE = runningTE;
                         continue;
                      }
@@ -700,6 +711,8 @@ export class Extractor {
                         if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
                            runningWild -= damage.Lw;
                            runningDom -= damage.Ld;
+                           if (statIndexTE === DAMAGE)
+                              runningTE = -1;
                            currentTE = runningTE;
                            continue;
                         }
@@ -722,6 +735,8 @@ export class Extractor {
                            if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
                               runningWild -= speed.Lw;
                               runningDom -= speed.Ld;
+                              if (statIndexTE === SPEED)
+                                 runningTE = -1;
                               currentTE = runningTE;
                               continue;
                            }
@@ -744,11 +759,13 @@ export class Extractor {
                               if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
                                  runningWild -= torpor.Lw;
                                  runningDom -= torpor.Ld;
+                                 if (statIndexTE === TORPOR)
+                                    runningTE = -1;
                                  currentTE = runningTE;
                                  continue;
                               }
                               // We finally got to a good stat combination
-                              else if (runningWild === this.wildFreeMax && runningDom === this.domFreeMax && currentTE === runningTE) {
+                              else if ((runningWild === this.wildFreeMax || this.unusedStat) && runningDom === this.domFreeMax && currentTE === runningTE) {
                                  let option: Stat[] = [];
                                  option.push(health);
                                  option.push(stamina);
@@ -767,9 +784,8 @@ export class Extractor {
                                  runningDom -= torpor.Ld;
                               }
                               if (statIndexTE === TORPOR)
-                                 statIndexTE = currentTE = -1;
-                              else
-                                 currentTE = statIndexTE;
+                                 runningTE = -1;
+                              currentTE = runningTE;
                            }
 
                            if (!this.checkedStat[SPEED]) {
@@ -777,9 +793,8 @@ export class Extractor {
                               runningDom -= speed.Ld;
                            }
                            if (statIndexTE === SPEED)
-                              statIndexTE = currentTE = -1;
-                           else
-                              currentTE = statIndexTE;
+                              runningTE = -1;
+                           currentTE = runningTE;
                         }
 
                         if (!this.checkedStat[DAMAGE]) {
@@ -787,9 +802,8 @@ export class Extractor {
                            runningDom -= damage.Ld;
                         }
                         if (statIndexTE === DAMAGE)
-                           statIndexTE = currentTE = -1;
-                        else
-                           currentTE = statIndexTE;
+                           runningTE = -1;
+                        currentTE = runningTE;
                      }
 
                      if (!this.checkedStat[WEIGHT]) {
@@ -797,9 +811,8 @@ export class Extractor {
                         runningDom -= weight.Ld;
                      }
                      if (statIndexTE === WEIGHT)
-                        statIndexTE = currentTE = -1;
-                     else
-                        currentTE = statIndexTE;
+                        runningTE = -1;
+                     currentTE = runningTE;
                   }
 
                   if (!this.checkedStat[FOOD]) {
@@ -807,9 +820,8 @@ export class Extractor {
                      runningDom -= food.Ld;
                   }
                   if (statIndexTE === FOOD)
-                     statIndexTE = currentTE = -1;
-                  else
-                     currentTE = statIndexTE;
+                     runningTE = -1;
+                  currentTE = runningTE;
                }
 
                if (!this.checkedStat[OXYGEN]) {
@@ -817,9 +829,8 @@ export class Extractor {
                   runningDom -= oxygen.Ld;
                }
                if (statIndexTE === OXYGEN)
-                  statIndexTE = currentTE = -1;
-               else
-                  currentTE = statIndexTE;
+                  runningTE = -1;
+               currentTE = runningTE;
             }
 
             if (!this.checkedStat[STAMINA]) {
@@ -827,9 +838,8 @@ export class Extractor {
                runningDom -= stamina.Ld;
             }
             if (statIndexTE === STAMINA)
-               statIndexTE = currentTE = -1;
-            else
-               currentTE = statIndexTE;
+               runningTE = -1;
+            currentTE = runningTE;
          }
 
          if (!this.checkedStat[HEALTH]) {
@@ -837,9 +847,8 @@ export class Extractor {
             runningDom = health.Ld;
          }
          if (statIndexTE === HEALTH)
-            statIndexTE = currentTE = -1;
-         else
-            currentTE = statIndexTE;
+            runningTE = -1;
+         currentTE = runningTE;
       }
       return !!this.options.length;
    }
