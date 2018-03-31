@@ -9,9 +9,19 @@
       "eg2.vscode-npm-script",
       "yzhang.markdown-all-in-one",
       "eg2.tslint",
-      // totally optional but useful
+      "streetsidesoftware.code-spell-checker",
+      "vector-of-bool.gitflow",
+      "codezombiech.gitignore",
+      "Zignd.html-css-class-completion",
+      // Totally optional but useful
       "anseki.vscode-color",
       "robertohuertasm.vscode-icons",
       "wayou.vscode-todo-highlight",
+      "formulahendry.code-runner",
+      "aeschli.vscode-css-formatter",
+      "CoenraadS.bracket-pair-colorizer",
+      "dariofuzinato.vue-peek",
+      // Useful but very user-specific
+      //"ow.vscode-subword-navigation",
    ]
 }

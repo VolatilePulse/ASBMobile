@@ -41,7 +41,7 @@ export class StatMultiplier {
 export class CreatureStats {
    /**
     * Creates an array of Creature StatMultipliers
-    * @param {array} stats An array of the statmultipliers
+    * @param {array} stats An array of the stat multipliers
     */
    constructor(stats: StatMultiplier[], TBHM = 1, oxygenNotUsed = false, speedImprintIgnored = false) {
       for (let i = 0; i < 8; i++)
@@ -103,7 +103,7 @@ export class Server {
    isTestOnly: boolean = false;
    isPreDefined: boolean = false;
 
-   /** * Create a server or copy an existing one */
+   /** Create a server or copy an existing one */
    constructor(settingsArray: MultipliersArray | Server = [], IBM = 1, singlePlayer = false, name = '') {
       this.singlePlayer = singlePlayer; // singlePlayer Setting
       this.IBM = IBM;

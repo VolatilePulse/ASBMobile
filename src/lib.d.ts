@@ -2,7 +2,7 @@
 
 
 // Cheap fix: these just resolve as 'any' so they act like untyped Javascript
-declare module "bootstrap-vue";
-declare module "pouch-vue";
-declare module "pouchdb-live-find";
+declare module 'bootstrap-vue';
+declare module 'pouch-vue';
+declare module 'pouchdb-live-find';
 

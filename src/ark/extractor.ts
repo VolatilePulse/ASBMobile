@@ -106,7 +106,7 @@ export class Extractor {
          // Reset flag to test for failed cases
          this.success = true;
 
-         // Reset arrays to handle multiplie loops
+         // Reset arrays to handle multiple loops
          for (let index = HEALTH; index <= SPEED; index++) {
             this.c.stats[index] = [];
             this.checkedStat[index] = false;
@@ -219,7 +219,7 @@ export class Extractor {
       this.minIB = Math.max(this.originalIB - 0.005, 0);
       this.maxIB = this.originalIB + 0.005;
 
-      // If the entered IB works, we don't need to do anything else (Torpor can't be leveled and typically has a large value to start with)
+      // If the entered IB works, we don't need to do anything else (Torpor can't be levelled and typically has a large value to start with)
       const expectedValue = this.c.stats[TORPOR][0].calculateValue(this.m[TORPOR], !this.c.wild, this.c.TE, this.c.IB);
 
       if (this.c.values[TORPOR] === Utils.RoundTo(expectedValue, Ark.Precision(TORPOR)))
@@ -233,7 +233,7 @@ export class Extractor {
       this.maxIB = Math.min(this.c.stats[TORPOR][0].calculateIB(this.m[TORPOR], this.c.values[TORPOR] + offset), this.maxIB);
       this.minIB = Math.max(this.c.stats[TORPOR][0].calculateIB(this.m[TORPOR], this.c.values[TORPOR] - offset), this.minIB);
 
-      // Check the food stat for the IB as well (Only works if food is unleveled)
+      // Check the food stat for the IB as well (Only works if food is un-levelled)
       const tempHealthStat = new Stat();
       tempHealthStat.calculateWildLevel(this.m[FOOD], this.c.values[FOOD], !this.c.wild, this.c.TE, this.c.IB);
       const imprintingBonusFromFood = tempHealthStat.calculateIB(this.m[FOOD], this.c.values[FOOD]);

@@ -29,7 +29,7 @@ class Store {
       // Let the rest of the app start first - these aren't urgent
       await Delay(200);
 
-      // Calcualte the paths for each of the stat images
+      // Calculate the paths for each of the stat images
       for (let i = 0; i < statNames.length; i++) {
          const name = statNames[i];
          Vue.set(this.statImages, i, require('@/assets/' + name.toLowerCase() + '.svg'));
