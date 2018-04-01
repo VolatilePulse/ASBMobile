@@ -767,16 +767,7 @@ export class Extractor {
                               }
                               // We finally got to a good stat combination
                               else if ((runningWild === this.wildFreeMax || this.unusedStat) && runningDom === this.domFreeMax && currentTE === runningTE) {
-                                 const option: Stat[] = [];
-                                 option.push(health);
-                                 option.push(stamina);
-                                 option.push(oxygen);
-                                 option.push(food);
-                                 option.push(weight);
-                                 option.push(damage);
-                                 option.push(speed);
-                                 option.push(torpor);
-                                 this.options.push(option);
+                                 this.options.push([health, stamina, oxygen, food, weight, damage, speed, torpor]);
                               }
 
                               if (!this.checkedStat[TORPOR]) {
