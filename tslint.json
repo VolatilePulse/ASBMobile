@@ -65,6 +65,7 @@
             "named": "never",
             "asyncArrow": "always"
          }
-      ]
+      ],
+      "prefer-conditional-expression": false
    }
 }

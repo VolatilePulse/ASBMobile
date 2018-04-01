@@ -1,6 +1,11 @@
 import { StatMultiplier, ServerMultiplier } from '@/ark/multipliers';
 
 
+interface StatLike {
+   Lw: number;
+   Ld: number;
+}
+
 /** Server multiplier overrides */
 export type MultipliersArray = Array<Array<number | undefined> | undefined>;
 
@@ -22,5 +27,5 @@ export interface TestData {
    mode: 'Wild' | 'Tamed' | 'Bred';
    values: number[];
    serverName: string;
-   results: Array<Array<{ Lw: number, Ld: number }>>;
+   results: StatLike[][];
 }

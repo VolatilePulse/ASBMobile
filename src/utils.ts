@@ -36,8 +36,6 @@ export function FormatNumber(value: number, places = 1, fixed = false) {
    if (!formatter) {
       // @ts-ignore
       const locale: string = navigator['language'] || (navigator['languages'] && navigator.languages[0]) || (navigator['browserLanguage'] as string) || 'en';
-      // FIXME: Not sure how to correct this one
-      // tslint:disable-next-line:prefer-conditional-expression
       if (fixed)
          formatter = new Intl.NumberFormat(locale, { maximumFractionDigits: places, minimumFractionDigits: places, useGrouping: false });
       else

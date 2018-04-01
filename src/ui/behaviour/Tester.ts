@@ -128,8 +128,6 @@ export default class extends Common {
    /** Run just one test */
    async runTest(index: number) {
       await this.runTestSelection([index]);
-      // FIXME: tslint really doesn't like your code :)
-      // tslint:disable-next-line:prefer-conditional-expression
       if (this.results[index] === undefined || !this.results[index]['pass'])
          this.openTestIndex = index;
       else

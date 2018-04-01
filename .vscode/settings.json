@@ -2,6 +2,7 @@
    "editor.detectIndentation": false,
    "editor.tabSize": 3,
    "editor.formatOnSave": true,
+   "files.insertFinalNewline": true,
    "html.format.wrapLineLength": 160,
    "javascript.implicitProjectConfig.checkJs": true,
    "vue-peek.supportedLanguages": [
