@@ -22,5 +22,5 @@ export interface TestData {
    mode: 'Wild' | 'Tamed' | 'Bred';
    values: number[];
    serverName: string;
-   results: { Lw: number, Ld: number }[][];
+   results: Array<Array<{ Lw: number, Ld: number }>>;
 }

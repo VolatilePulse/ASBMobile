@@ -11,7 +11,7 @@ const servers: ServerDef[] = [
       serverName: 'eldoco87',
       IBM: 1,
       singlePlayer: false,
-      multipliers: [, , , , , , [2]],
+      multipliers: [[], [], [], [], [], [], [2]],
    },
    {
       serverName: '[BLPP] Jane',
@@ -29,7 +29,7 @@ const servers: ServerDef[] = [
       serverName: 'Coldino SP',
       IBM: 1,
       singlePlayer: true,
-      multipliers: [, [2, , 2], , , [10, , 10], [0.2, , 0.22], [3, , 3]],
+      multipliers: [[], [2, , 2], [], [], [10, , 10], [0.2, , 0.22], [3, , 3]],
    },
    {
       serverName: 'Tp',
@@ -41,13 +41,13 @@ const servers: ServerDef[] = [
       serverName: 'ARK PVE Community Server',
       IBM: 1,
       singlePlayer: false,
-      multipliers: [, , , , [, , 3, 1.5]],
+      multipliers: [[], [], [], [], [, , 3, 1.5]],
    },
    {
       serverName: 'Dusty.P',
       IBM: 1,
       singlePlayer: false,
-      multipliers: [, , , , [, , 2], , [, , 1.2]],
+      multipliers: [[], [], [], [], [, , 2], [], [, , 1.2]],
    },
    {
       serverName: 'enohka',
@@ -65,7 +65,7 @@ const servers: ServerDef[] = [
       serverName: 'VestedWind',
       IBM: 3,
       singlePlayer: false,
-      multipliers: [, [, , 2], , , [, , 150], [, , 2], [, , 4]],
+      multipliers: [[], [, , 2], [], [], [, , 150], [, , 2], [, , 4]],
    },
 ];
 

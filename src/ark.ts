@@ -90,12 +90,8 @@ export function GetMultipliers(serverName: string, speciesName: string): Combine
    Utils.DeepMerge(multipliers, theStore.speciesMultipliers[speciesName]);
 
    // Set IBM for each stat
-   for (let stat = 0; stat < NUM_STATS; stat++) {
-      if (multipliers[stat].noImprint)
-         multipliers[stat].IBM = 0;
-      else
-         multipliers[stat].IBM = server.IBM;
-   }
+   for (let stat = 0; stat < NUM_STATS; stat++)
+      multipliers[stat].IBM = multipliers[stat].noImprint ? 0 : server.IBM;
 
    return multipliers;
 }

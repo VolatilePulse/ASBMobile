@@ -47,12 +47,9 @@
       "Falsey",
       "GC'd",
       "Maxage",
-      "Melee",
       "Mult",
       "Stats",
       "TBHM",
-      "centered",
-      "color",
       "consts",
       "debounced",
       "dismissible",
@@ -74,8 +71,9 @@
       "**/vscode-extension/**",
       "**/.git/**",
       ".vscode",
-      "src/ark/servers_*.ts",
-      "src/ark/test_data.ts",
+      "**/src/ark/servers_*.ts",
+      "**/src/ark/test_data.ts",
+      "**/public/data/data.json",
    ],
    "cSpell.enabledLanguageIds": [
       "c",
@@ -105,4 +103,5 @@
       "yml",
       "vue"
    ],
+   "cSpell.language": "en,en-US,en-GB",
 }

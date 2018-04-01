@@ -1,19 +1,16 @@
 {
    "defaultSeverity": "warning",
    "extends": [
-      //"tslint:recommended"
+      "tslint:latest"
    ],
    "rules": {
-      "indent": [
-         true,
-         "spaces",
-         3
-      ],
       "max-line-length": {
          "options": [
             160
          ]
       },
+      "no-submodule-imports": false,
+      "no-implicit-dependencies": false,
       "member-access": false,
       "ordered-imports": false,
       "member-ordering": [

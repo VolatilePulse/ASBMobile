@@ -80,9 +80,9 @@ export default class extends Common {
    }
 
    formatOptions(options: Stat[][]) {
-      let optionStrings: string[] = [];
+      const optionStrings: string[] = [];
 
-      for (let option of options) {
+      for (const option of options) {
          let tempString = '';
 
          if (this.extractor.statTEmaps.length) {

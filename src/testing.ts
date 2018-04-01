@@ -10,7 +10,7 @@ export interface TestResult {
    pass?: boolean;
    stats?: Stat[][];
    options?: Stat[][];
-   mapTE?: Map<Stat, TEProps>[];
+   mapTE?: Array<Map<Stat, TEProps>>;
    dbg?: any;
    extra?: { [key: string]: any };
    exception?: any;

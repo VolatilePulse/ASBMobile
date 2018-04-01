@@ -17,6 +17,6 @@ export default class extends Vue {
    formatRound(n: number) { return FormatNumber(n, 0); }
 
    range(n: number): number[] {
-      return Range(n)
+      return Range(n);
    }
 }

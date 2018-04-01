@@ -14,8 +14,8 @@ export function ParseDatabase(json: string) {
    const jsonObject = JSON.parse(json);
 
    // Local stores for constructing the data (unobserved until read)
-   var speciesNames = [];
-   var speciesMultipliers: { [species: string]: CreatureStats } = {};
+   const speciesNames = [];
+   const speciesMultipliers: { [species: string]: CreatureStats } = {};
 
    // Read all of the species data
    for (const creature in jsonObject.species) {

@@ -48,14 +48,14 @@ export default class extends Common {
    }
 
    findTEStat(testIndex: number, optionIndex: number): TEProps {
-      var results = this.results[testIndex];
-      var optionSet = results.options[optionIndex];
+      const results = this.results[testIndex];
+      const optionSet = results.options[optionIndex];
 
-      for (var statIndex in this.range(8)) {
-         var map = results.mapTE[statIndex];
-         var stat = optionSet[statIndex];
+      for (const statIndex in this.range(8)) {
+         const map = results.mapTE[statIndex];
+         const stat = optionSet[statIndex];
          if (!stat || !map) continue;
-         var teProp = map.get(stat);
+         const teProp = map.get(stat);
          if (teProp) return teProp;
       }
 
@@ -63,13 +63,13 @@ export default class extends Common {
    }
 
    optionWildLevel(testIndex: number, optionIndex: number): string {
-      var val = this.findTEStat(testIndex, optionIndex);
+      const val = this.findTEStat(testIndex, optionIndex);
       if (!val) return '';
       return val.wildLevel.toFixed();
    }
 
    optionTE(testIndex: number, optionIndex: number): string {
-      var val = this.findTEStat(testIndex, optionIndex);
+      const val = this.findTEStat(testIndex, optionIndex);
       if (!val) return '';
       return (val.TE * 100).toFixed(1) + '%';
    }
@@ -128,6 +128,8 @@ export default class extends Common {
    /** Run just one test */
    async runTest(index: number) {
       await this.runTestSelection([index]);
+      // FIXME: tslint really doesn't like your code :)
+      // tslint:disable-next-line:prefer-conditional-expression
       if (this.results[index] === undefined || !this.results[index]['pass'])
          this.openTestIndex = index;
       else

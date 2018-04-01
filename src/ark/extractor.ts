@@ -385,7 +385,8 @@ export class Extractor {
       do {
          if (dbg) dbg.filterLoops += 1;
          removed = false;
-         this.minWild = 0, this.minDom = 0;
+         this.minWild = 0;
+         this.minDom = 0;
 
          // Find any stats that do not exist as a possible option
          if (this.options.length)
@@ -573,7 +574,7 @@ export class Extractor {
       let currentTE = -1;
       let statIndexTE = -1;
 
-      for (let health of localStats[HEALTH]) {
+      for (const health of localStats[HEALTH]) {
          if (dbg) dbg.totalRecursion++;
          if (!localCheckedStats[HEALTH]) {
             runningWild += health.Lw;
@@ -597,7 +598,7 @@ export class Extractor {
             continue;
          }
 
-         for (let stamina of localStats[STAMINA]) {
+         for (const stamina of localStats[STAMINA]) {
             if (dbg) dbg.totalRecursion++;
             if (!localCheckedStats[STAMINA]) {
                runningWild += stamina.Lw;
@@ -621,7 +622,7 @@ export class Extractor {
                continue;
             }
 
-            for (let oxygen of localStats[OXYGEN]) {
+            for (const oxygen of localStats[OXYGEN]) {
                if (dbg) dbg.totalRecursion++;
                if (!localCheckedStats[OXYGEN]) {
                   runningWild += oxygen.Lw;
@@ -645,7 +646,7 @@ export class Extractor {
                   continue;
                }
 
-               for (let food of localStats[FOOD]) {
+               for (const food of localStats[FOOD]) {
                   if (dbg) dbg.totalRecursion++;
                   if (!localCheckedStats[FOOD]) {
                      runningWild += food.Lw;
@@ -669,7 +670,7 @@ export class Extractor {
                      continue;
                   }
 
-                  for (let weight of localStats[WEIGHT]) {
+                  for (const weight of localStats[WEIGHT]) {
                      if (dbg) dbg.totalRecursion++;
                      if (!localCheckedStats[WEIGHT]) {
                         runningWild += weight.Lw;
@@ -693,7 +694,7 @@ export class Extractor {
                         continue;
                      }
 
-                     for (let damage of localStats[DAMAGE]) {
+                     for (const damage of localStats[DAMAGE]) {
                         if (dbg) dbg.totalRecursion++;
                         if (!localCheckedStats[DAMAGE]) {
                            runningWild += damage.Lw;
@@ -717,7 +718,7 @@ export class Extractor {
                            continue;
                         }
 
-                        for (let speed of localStats[SPEED]) {
+                        for (const speed of localStats[SPEED]) {
                            if (dbg) dbg.totalRecursion++;
                            if (!localCheckedStats[SPEED]) {
                               runningWild += speed.Lw;
@@ -741,7 +742,7 @@ export class Extractor {
                               continue;
                            }
 
-                           for (let torpor of localStats[TORPOR]) {
+                           for (const torpor of localStats[TORPOR]) {
                               if (dbg) dbg.totalRecursion++;
                               if (!localCheckedStats[TORPOR]) {
                                  runningWild += torpor.Lw;
@@ -766,18 +767,17 @@ export class Extractor {
                               }
                               // We finally got to a good stat combination
                               else if ((runningWild === this.wildFreeMax || this.unusedStat) && runningDom === this.domFreeMax && currentTE === runningTE) {
-                                 let option: Stat[] = [];
+                                 const option: Stat[] = [];
                                  option.push(health);
                                  option.push(stamina);
                                  option.push(oxygen);
                                  option.push(food);
                                  option.push(weight);
-                                 option.push(damage)
+                                 option.push(damage);
                                  option.push(speed);
                                  option.push(torpor);
                                  this.options.push(option);
                               }
-
 
                               if (!this.checkedStat[TORPOR]) {
                                  runningWild -= torpor.Lw;
