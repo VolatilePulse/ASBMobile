@@ -35,7 +35,7 @@ export function PerformTest(testData: TestData): TestResult {
    const extractObject = new Extractor(testCreature);
 
    const dbg: any = {
-      totalRecursion: 0,
+      totalIterations: 0,
       numberRemoved: 0,
    };
 
@@ -79,12 +79,14 @@ export function PerformTest(testData: TestData): TestResult {
 /**
  * Run a test in performance mode, repeating it until `duration` is up and reporting on the average run time.
  */
-export function PerformPerfTest(testData: TestData, duration = 5000): TestResult {
+export function PerformPerfTest(testData: TestData, duration = 5000, generateProfiler = false): TestResult {
    let runs = 0;
    let t1, t2;
    const cutoffTime = Date.now() + duration;
 
    try {
+      if (generateProfiler && window.console && window.console.profile)
+         console.profile(testData.tag);
       t1 = performance.now();
 
       do {
@@ -108,6 +110,8 @@ export function PerformPerfTest(testData: TestData, duration = 5000): TestResult
       while (Date.now() < cutoffTime);
 
       t2 = performance.now();
+      if (generateProfiler && window.console && window.console.profile)
+         console.profileEnd();
 
       duration = (t2 - t1) / runs;
    }

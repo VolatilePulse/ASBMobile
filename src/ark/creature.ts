@@ -54,7 +54,7 @@ export class Stat implements Stat {
 
       wildLevel /= (m.B * TBHM);
       wildLevel /= (1 + IB * 0.2 * m.IBM);
-      this.Lw = Math.max(Utils.RoundTo((wildLevel - 1) / (m.Iw * m.IwM), 0), 0);
+      this.Lw = Math.max(Math.round((wildLevel - 1) / (m.Iw * m.IwM)), 0);
       return this.Lw;
    }
 
@@ -71,7 +71,7 @@ export class Stat implements Stat {
       domLevel *= (1 + IB * 0.2 * m.IBM);
       domLevel = v / (domLevel + this.calculateTa(tamed, m.Ta, m.TaM));
       domLevel /= (1 + this.calculateTm(tamed, m.Tm, m.TmM, TE));
-      this.Ld = Math.max(Utils.RoundTo((domLevel - 1) / (m.Id * m.IdM), 0), 0);
+      this.Ld = Math.max(Math.round((domLevel - 1) / (m.Id * m.IdM)), 0);
       return this.Ld;
    }
 

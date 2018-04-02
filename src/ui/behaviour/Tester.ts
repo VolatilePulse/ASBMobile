@@ -112,7 +112,7 @@ export default class extends Common {
 
    /** Run one test repeatedly to measure it's performance, blocking the browser */
    runPerfTest(index: number) {
-      const { duration, runs, exception } = PerformPerfTest(testData[index]);
+      const { duration, runs, exception } = PerformPerfTest(testData[index], undefined, true);
       if (exception) {
          this.results[index].duration = 'X';
       }
