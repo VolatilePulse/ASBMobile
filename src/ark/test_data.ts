@@ -270,6 +270,13 @@ const testData: TestData[] = [
       serverName: 'VestedWind',
       results: [[{ Lw: 24, Ld: 0 }], [{ Lw: 15, Ld: 3 }], [{ Lw: 21, Ld: 0 }], [{ Lw: 19, Ld: 0 }], [{ Lw: 32, Ld: 1 }], [{ Lw: 18, Ld: 0 }], [{ Lw: 19, Ld: 0 }], [{ Lw: 148, Ld: 0 }]],
    },
+   {
+      tag: 'Featherlight',
+      species: 'Featherlight', level: 136, imprint: 0, mode: 'Tamed',
+      values: [460.3, 648, 1063.4, 1242, 85.4, 608.5, 230, 377.3],
+      serverName: 'Official Single Player',
+      results: [[{ Lw: 15, Ld: 0 }], [{ Lw: 17, Ld: 14 }], [{ Lw: 13, Ld: 13 }], [{ Lw: 14, Ld: 0 }], [{ Lw: 11, Ld: 0 }], [{ Lw: 8, Ld: 20 }], [{ Lw: 10, Ld: 0 }], [{ Lw: 88, Ld: 0 }]],
+   }
 ];
 
 export default testData;
