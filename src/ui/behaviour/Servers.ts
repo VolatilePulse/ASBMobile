@@ -60,10 +60,10 @@ export default class extends Common {
       this.server[s][p] = num;
    }
 
-   onServerChange(newName: string) {
+   async onServerChange(newName: string) {
       if (newName === NEW_SERVER_ID) {
          this.setServerByName('Official Server');
-         this.copyServer();
+         await this.copyServer();
       }
       else {
          this.setServerByName(newName);
@@ -81,8 +81,8 @@ export default class extends Common {
       theStore.currentServerName = this.server.serverName;
    }
 
-   copyServer() {
-      this.server = Servers.copyServer(this.server);
+   async copyServer() {
+      this.server = await Servers.copyServer(this.server);
       this.currentServerName = this.server.serverName;
    }
 

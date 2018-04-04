@@ -2,6 +2,8 @@ import PouchDB from 'pouchdb-core';
 import PouchFind from 'pouchdb-find';
 import Vue from 'vue';
 import SettingsManager from './settings';
+import { Server } from '@/ark/multipliers';
+import * as Servers from '@/servers';
 
 PouchDB.plugin(PouchFind);
 
@@ -19,19 +21,38 @@ class Library {
       this.id = id;
    }
 
-   async load() {
+   async initialise() {
       if (this.db) return;
       this.db = new PouchDB(DB_PREFIX + this.id);
 
-      // TODO: Load all servers
+      // Load all servers
+      await this.loadServers();
 
       // TODO: Decide if we should load all creatures
    }
 
-   async unload() {
+   async dispose() {
       if (!this.db) return;
       await this.db.close();
       this.db = undefined;
+   }
+
+   async addServer(_server: Server) {
+      // TODO: Implement me
+   }
+
+   async saveServer(_server: Server) {
+      // TODO: Implement me
+   }
+
+   async deleteServer(_server: Server) {
+      // TODO: Implement me
+   }
+
+   private async loadServers() {
+
+      //var docs = this.db.find({})
+      Servers.userServers;
    }
 }
 
@@ -73,11 +94,11 @@ class LibraryManager {
       if (!force && SettingsManager.current.selectedLibrary === id) return;
 
       // Close existing library
-      if (this.current) this.current.unload();
+      if (this.current) this.current.dispose();
 
       // Open the new one
       const library = new Library(id);
-      await library.load();
+      await library.initialise();
 
       // Save the selection
       if (SettingsManager.current.selectedLibrary !== id) {
@@ -91,7 +112,7 @@ class LibraryManager {
    async deleteLibrary(id: string) {
       // If we're deleting the current library, clear up first
       if (id === SettingsManager.current.selectedLibrary) {
-         await this.current.unload();
+         await this.current.dispose();
       }
 
       // Open and destroy the database

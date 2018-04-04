@@ -1,14 +1,19 @@
 import Vue from 'vue';
+import PouchDB from 'pouchdb-core';
 
 import testServersData from './ark/servers_test';
 import preDefinedServersData from './ark/servers_predef';
 import { Server } from './ark/multipliers';
+import { LibraryManager } from '@/data';
+import { TableMonitor } from '@/data/table';
+import { Delay } from '@/utils';
 
 
 export const preDefinedServers: { [name: string]: Server } = {};
 export const testServers: { [name: string]: Server } = {};
 export const userServers: { [name: string]: Server } = {};
 
+export let lifeFinder: TableMonitor<Server>;
 
 /**
  * Look up a server by name, preferring user servers over anything else.
@@ -25,7 +30,7 @@ export function getServerByName(name: string): Server {
 /**
  * Copy a server and add it as a user server.
  */
-export function copyServer(src: Server): Server {
+export async function copyServer(src: Server): Promise<Server> {
    const newServer = new Server(src, src.IBM, !!src['singlePlayer'], src.serverName);
    newServer.isTestOnly = false;
    newServer.isPreDefined = false;
@@ -35,7 +40,7 @@ export function copyServer(src: Server): Server {
       newServer.serverName = 'Copy of ' + newServer.serverName;
    while (newServer.serverName in userServers);
 
-   addUserServer(newServer);
+   await addUserServer(newServer);
 
    return newServer;
 }
@@ -60,23 +65,53 @@ export async function initialise(includeTest: boolean) {
       preDefinedServers[server.serverName] = server;
    }
 
-   // TODO: Load user servers from the DB using await
+   try {
+      lifeFinder = new TableMonitor<Server>('servers');
+      await lifeFinder.initialise();
+
+      console.log(lifeFinder.name);
+
+      var db = new PouchDB<Server>('servers');
+
+      await Delay(10);
+
+      await db.post(preDefinedServers['Official Server']);
+      await waitForChange(); console.log(lifeFinder.cache.content.map(o => o._id).join(', '));
+      await db.post(preDefinedServers['Official Single Player']);
+      await waitForChange(); console.log(lifeFinder.cache.content.map(o => o._id).join(', '));
+   } catch (ex) {
+      console.error(ex);
+   }
 }
 
-export function addUserServer(server: Server) {
-   // TODO: Do this in the DB
+var timerId = 1;
+
+async function waitForChange() {
+   var current = lifeFinder.cache.content.length;
+   console.time('timer ' + timerId);
+   do
+      await Delay(10);
+   while (lifeFinder.cache.content.length == current);
+   console.timeEnd('timer ' + timerId++);
+}
+
+export async function addUserServer(server: Server) {
    Vue.set(userServers, server.serverName, server);
+   LibraryManager.current.addServer(server);
 }
 
-export function deleteUserServer(name: string) {
-   // TODO: Do this in the DB
+export async function deleteUserServer(name: string) {
+   const server = userServers[name];
+   if (!server) throw Error(`Unable to find server '${name}' to delete`);
    Vue.delete(userServers, name);
+   LibraryManager.current.deleteServer(server);
 }
 
-export function renameServer(oldName: string, newName: string) {
-   // TODO: Do this in the database
-   const server = userServers[oldName];
-   deleteUserServer(oldName);
+export async function renameServer(oldName: string, newName: string) {
+   let server = userServers[oldName];
+   if (!server) throw Error(`Unable to find server '${oldName}' to rename`);
    server.serverName = newName;
-   addUserServer(server);
+   Vue.delete(userServers, oldName);
+   Vue.set(userServers, server.serverName, server);
+   LibraryManager.current.saveServer(server);
 }
