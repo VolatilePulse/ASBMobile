@@ -1,9 +1,8 @@
-import Vue from 'vue';
-
 import { VueCreature } from '@/ark/creature';
-import { Server, CreatureStats } from '@/ark/multipliers';
+import { CreatureStats, Server } from '@/ark/multipliers';
 import { statNames } from '@/consts';
 import { Delay } from '@/utils';
+import Vue from 'vue';
 
 
 class Store {

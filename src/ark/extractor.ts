@@ -1,8 +1,8 @@
-import { TORPOR, FOOD, SPEED, HEALTH, STAMINA, OXYGEN, DAMAGE, WEIGHT } from '@/consts';
-import { Stat, VueCreature } from './creature';
 import * as Ark from '@/ark';
-import * as Utils from '@/utils';
 import { CombinedMultipliers } from '@/ark/types';
+import { DAMAGE, FOOD, HEALTH, OXYGEN, SPEED, STAMINA, TORPOR, WEIGHT } from '@/consts';
+import * as Utils from '@/utils';
+import { Stat, VueCreature } from './creature';
 
 
 export class TEProps {

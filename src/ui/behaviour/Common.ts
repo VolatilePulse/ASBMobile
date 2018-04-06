@@ -1,8 +1,7 @@
-import { Vue, Component } from 'vue-property-decorator';
-
+import { NUM_STATS, statNames } from '@/consts';
 import theStore from '@/ui/store';
-import { Range, FormatNumber } from '@/utils';
-import { statNames, NUM_STATS } from '@/consts';
+import { FormatNumber, Range } from '@/utils';
+import { Component, Vue } from 'vue-property-decorator';
 
 
 @Component

@@ -1,5 +1,5 @@
+import { ServerMultiplier, StatMultiplier } from '@/ark/multipliers';
 import * as Utils from '@/utils';
-import { StatMultiplier, ServerMultiplier } from '@/ark/multipliers';
 
 
 export class Stat implements Stat {

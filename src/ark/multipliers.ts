@@ -1,5 +1,5 @@
-import * as consts from '@/consts';
 import { MultipliersArray } from '@/ark/types';
+import * as consts from '@/consts';
 
 
 export class StatMultiplier {

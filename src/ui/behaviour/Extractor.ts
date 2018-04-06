@@ -1,13 +1,12 @@
-import { Component } from 'vue-property-decorator';
-import Common from '@/ui/behaviour/Common';
-
 import * as Ark from '@/ark';
-import testData from '@/ark/test_data';
-import { FilledArray, DeepCopy, Delay } from '@/utils';
-import { Extractor } from '@/ark/extractor';
-import { PRE_IB } from '@/consts';
-import { TestData } from '@/ark/types';
 import { Stat } from '@/ark/creature';
+import { Extractor } from '@/ark/extractor';
+import testData from '@/ark/test_data';
+import { TestData } from '@/ark/types';
+import { PRE_IB } from '@/consts';
+import Common from '@/ui/behaviour/Common';
+import { DeepCopy, Delay, FilledArray } from '@/utils';
+import { Component } from 'vue-property-decorator';
 
 
 @Component

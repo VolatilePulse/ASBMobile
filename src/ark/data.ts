@@ -2,8 +2,9 @@
  * @fileOverview Controls the data flow for the app
  */
 
-import { CreatureStats, Server } from './multipliers';
 import theStore from '@/ui/store';
+import { CreatureStats, Server } from './multipliers';
+
 
 /**
  * Load the data file containing creature multipliers and official server settings

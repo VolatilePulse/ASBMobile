@@ -1,4 +1,4 @@
-import { StatMultiplier, ServerMultiplier } from '@/ark/multipliers';
+import { ServerMultiplier, StatMultiplier } from '@/ark/multipliers';
 
 
 interface StatLike {

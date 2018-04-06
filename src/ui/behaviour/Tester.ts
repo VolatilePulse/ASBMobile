@@ -1,13 +1,12 @@
-import { Vue, Component } from 'vue-property-decorator';
-import Common from '@/ui/behaviour/Common';
-
-import * as Utils from '@/utils';
+import { FormatAllOptions, FormatOption, FormatOptions } from '@/ark';
+import { Stat } from '@/ark/creature';
+import { TEProps } from '@/ark/extractor';
 import testData from '@/ark/test_data';
 import { statNames } from '@/consts';
-import { TestResult, PerformTest, PerformPerfTest } from '@/testing';
-import { FormatOption, FormatOptions, FormatAllOptions } from '@/ark';
-import { TEProps } from '@/ark/extractor';
-import { Stat } from '@/ark/creature';
+import { PerformPerfTest, PerformTest, TestResult } from '@/testing';
+import Common from '@/ui/behaviour/Common';
+import * as Utils from '@/utils';
+import { Component, Vue } from 'vue-property-decorator';
 
 
 const ASYNC_RUN_TIME_MS = 200;

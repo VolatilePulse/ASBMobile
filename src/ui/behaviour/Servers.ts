@@ -1,13 +1,11 @@
-import { Vue, Component } from 'vue-property-decorator';
+import { Server } from '@/ark/multipliers';
+import * as Servers from '@/servers';
 import Common from '@/ui/behaviour/Common';
-
+import theStore from '@/ui/store';
+import * as Utils from '@/utils';
 // @ts-ignore
 import { Modal } from 'bootstrap-vue/es/components';
-
-import theStore from '@/ui/store';
-import { Server } from '@/ark/multipliers';  // eslint-disable-line no-unused-vars
-import * as Servers from '@/servers';
-import * as Utils from '@/utils';
+import { Component, Vue } from 'vue-property-decorator';
 
 
 const NEW_SERVER_ID = '___NEW___SERVER___';

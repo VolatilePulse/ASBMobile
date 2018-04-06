@@ -1,5 +1,6 @@
 import { ServerDef } from '@/ark/types';
 
+
 const servers: ServerDef[] = [
    {
       serverName: 'kohonac HP.IDM: 2.0',

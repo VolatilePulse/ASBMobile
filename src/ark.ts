@@ -1,10 +1,10 @@
-import { DAMAGE, SPEED, PRE_IB, PRE_TE, NUM_STATS } from './consts';
-import * as Utils from './utils';
-import * as Servers from './servers';
-import { Server } from './ark/multipliers';
-import theStore from '@/ui/store';
 import { Stat } from '@/ark/creature';
 import { CombinedMultipliers } from '@/ark/types';
+import { DAMAGE, NUM_STATS, PRE_IB, PRE_TE, SPEED } from '@/consts';
+import theStore from '@/ui/store';
+import { Server } from './ark/multipliers';
+import * as Servers from './servers';
+import * as Utils from './utils';
 
 
 export function FormatAllOptions(stats: Stat[][]) {
@@ -43,7 +43,7 @@ export function Precision(index: number) {
  * @param {number} index Number corresponding with the index of a stat
  * @returns {number} The rounded, converted value
  */
-export function DisplayValue(value: number, index: number) {
+export function DisplayValue(value: number, index: number): number {
    let returnValue = value;
 
    if (index === DAMAGE || index === SPEED || index === PRE_TE || index === PRE_IB)

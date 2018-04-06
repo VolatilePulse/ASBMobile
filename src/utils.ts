@@ -31,7 +31,7 @@ const formattersCache: Map<{ places: number, fixed: boolean }, Intl.NumberFormat
  * @param {number} places Number of decimal places, at most, to show
  * @param {boolean} fixed True to always show digits after the decimal place when they are zero
  */
-export function FormatNumber(value: number, places = 1, fixed = false) {
+export function FormatNumber(value: number, places: number = 1, fixed: boolean = false) {
    let formatter = formattersCache.get({ places, fixed });
    if (!formatter) {
       // @ts-ignore
@@ -89,7 +89,7 @@ export function DelayFunction(duration: number) {
  * @param {number} b B
  * @param {number} epsilon Difference limit
  */
-export function CompareFloat(a: number, b: number, epsilon = EPSILON) {
+export function CompareFloat(a: number, b: number, epsilon: number = EPSILON) {
    if (!Number.isFinite(a) || !Number.isFinite(b)) return undefined;
 
    const diff = Math.abs(a - b);
@@ -102,7 +102,7 @@ export function CompareFloat(a: number, b: number, epsilon = EPSILON) {
  * @param {number} places Number of decimals to be rounded to
  * @returns {number} Decimal rounded to the specified precision
  */
-export function RoundTo(num: number, places = 0) {
+export function RoundTo(num: number, places: number = 0): number {
    return +Number(num + EPSILON).toFixed(places);
 }
 

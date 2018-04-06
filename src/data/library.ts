@@ -1,10 +1,9 @@
-import Vue from 'vue';
-
 import PouchDB from 'pouchdb-core';
 import PouchFind from 'pouchdb-find';
-PouchDB.plugin(PouchFind);
-
+import Vue from 'vue';
 import SettingsManager from './settings';
+
+PouchDB.plugin(PouchFind);
 
 
 const DEFAULT_LIBRARY_NAME = 'default';

@@ -1,6 +1,6 @@
-import { Vue, Component } from 'vue-property-decorator';
+import { LibraryManager, SettingsManager } from '@/data';
 import Common from '@/ui/behaviour/Common';
-import { SettingsManager, LibraryManager } from '@/data';
+import { Component, Vue } from 'vue-property-decorator';
 
 
 @Component
