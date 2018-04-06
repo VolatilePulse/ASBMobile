@@ -1,8 +1,9 @@
 export const HEALTH = 0, STAMINA = 1, OXYGEN = 2, FOOD = 3, WEIGHT = 4, DAMAGE = 5, SPEED = 6, TORPOR = 7;
 export const PRE_TE = -1, PRE_IB = -2;
 
-export const _EPSILON = 1E-10;
-export const EPSILON = [
+export const EPSILON = 1E-10;
+
+export const STAT_EPSILON = [
    0.05,
    0.05,
    0.05,

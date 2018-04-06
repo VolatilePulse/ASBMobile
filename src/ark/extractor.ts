@@ -1,7 +1,7 @@
 import * as IA from 'interval-arithmetic';
 import * as compile from 'interval-arithmetic-eval';
 
-import { TORPOR, FOOD, SPEED, HEALTH, STAMINA, OXYGEN, DAMAGE, WEIGHT, EPSILON } from '@/consts';
+import { TORPOR, FOOD, SPEED, HEALTH, STAMINA, OXYGEN, DAMAGE, WEIGHT, STAT_EPSILON } from '@/consts';
 import { Stat, VueCreature } from './creature';
 import * as Ark from '@/ark';
 import * as Utils from '@/utils';
@@ -50,10 +50,12 @@ export class Extractor {
    checkedStat: boolean[] = [];
    /** Contains all of the TE properties for stats */
    statTEmaps: Array<Map<Stat, TEProps>> = [];
+   /** Contains all stat-specific variables for intervals */
+   rangeStats: Array<{ [name: string]: number | Interval }> = [];
    /** Contains all variables for intervals */
-   rangeVars: any = [];
+   rangeVars: { [name: string]: number | Interval } = {};
    /** Contains all functions for intervals */
-   rangeFuncs: any = [];
+   rangeFuncs: { [name: string]: CompiledEquation } = {};
 
    constructor(vueCreature: VueCreature) {
       this.c = vueCreature;
@@ -222,50 +224,50 @@ export class Extractor {
 
    init() {
       for (let statIndex = HEALTH; statIndex <= TORPOR; statIndex++) {
-         this.rangeVars.push({});
-         this.rangeVars[statIndex].V = IA().halfOpenRight(this.c.values[statIndex] - EPSILON[statIndex], this.c.values[statIndex] + EPSILON[statIndex]);
+         this.rangeStats.push({});
+         this.rangeStats[statIndex].V = IA().halfOpenRight(this.c.values[statIndex] - STAT_EPSILON[statIndex], this.c.values[statIndex] + STAT_EPSILON[statIndex]);
 
          // Stat & Server Multipliers
-         this.rangeVars[statIndex].B = this.m[statIndex].B;
-         this.rangeVars[statIndex].Iw = this.m[statIndex].Iw;
-         this.rangeVars[statIndex].IwM = this.m[statIndex].IwM;
-         this.rangeVars[statIndex].Id = this.m[statIndex].Id;
-         this.rangeVars[statIndex].IdM = this.m[statIndex].IdM;
-         this.rangeVars[statIndex].Ta = this.m[statIndex].Ta;
-         this.rangeVars[statIndex].TaM = this.m[statIndex].TaM;
-         this.rangeVars[statIndex].Tm = this.m[statIndex].Tm;
-         this.rangeVars[statIndex].TmM = this.m[statIndex].TmM;
+         this.rangeStats[statIndex].B = this.m[statIndex].B;
+         this.rangeStats[statIndex].Iw = this.m[statIndex].Iw;
+         this.rangeStats[statIndex].IwM = this.m[statIndex].IwM;
+         this.rangeStats[statIndex].Id = this.m[statIndex].Id;
+         this.rangeStats[statIndex].IdM = this.m[statIndex].IdM;
+         this.rangeStats[statIndex].Ta = this.m[statIndex].Ta;
+         this.rangeStats[statIndex].TaM = this.m[statIndex].TaM;
+         this.rangeStats[statIndex].Tm = this.m[statIndex].Tm;
+         this.rangeStats[statIndex].TmM = this.m[statIndex].TmM;
 
-         this.rangeVars[statIndex].TBHM = this.m[statIndex].TBHM || 1;
-         this.rangeVars[statIndex].IBM = this.m[statIndex].IBM;
+         this.rangeStats[statIndex].TBHM = this.m[statIndex].TBHM || 1;
+         this.rangeStats[statIndex].IBM = this.m[statIndex].IBM;
 
          if (this.c.wild) {
-            this.rangeVars[statIndex].Id = 0;
-            this.rangeVars[statIndex].IdM = 0;
-            this.rangeVars[statIndex].Ta = 0;
-            this.rangeVars[statIndex].TaM = 0;
-            this.rangeVars[statIndex].Tm = 0;
-            this.rangeVars[statIndex].TmM = 0;
-            this.rangeVars[statIndex].TBHM = 1;
+            this.rangeStats[statIndex].Id = 0;
+            this.rangeStats[statIndex].IdM = 0;
+            this.rangeStats[statIndex].Ta = 0;
+            this.rangeStats[statIndex].TaM = 0;
+            this.rangeStats[statIndex].Tm = 0;
+            this.rangeStats[statIndex].TmM = 0;
+            this.rangeStats[statIndex].TBHM = 1;
 
-            this.rangeVars[statIndex].TE = 1;
-            this.rangeVars[statIndex].IB = 0;
-            this.rangeVars[statIndex].IBM = 0;
+            this.rangeStats[statIndex].TE = 1;
+            this.rangeStats[statIndex].IB = 0;
+            this.rangeStats[statIndex].IBM = 0;
          }
          else {
             if (this.c.tamed) {
-               this.rangeVars[statIndex].IB = 0;
-               this.rangeVars[statIndex].IBM = 0;
+               this.rangeStats[statIndex].IB = 0;
+               this.rangeStats[statIndex].IBM = 0;
             }
             else if (this.c.bred) {
-               this.rangeVars[statIndex].TE = 1;
+               this.rangeStats[statIndex].TE = 1;
             }
             if (this.m[statIndex].Ta < 0) {
-               this.rangeVars[statIndex].TaM = 1;
+               this.rangeStats[statIndex].TaM = 1;
             }
             if (this.m[statIndex].Tm < 0) {
-               this.rangeVars[statIndex].TmM = 1;
-               this.rangeVars[statIndex].TE = 1;
+               this.rangeStats[statIndex].TmM = 1;
+               this.rangeStats[statIndex].TE = 1;
             }
          }
       }
@@ -385,9 +387,9 @@ export class Extractor {
    findTEStats(tempStat: Stat, statIndex: number, maxLd: number) {
       const localEPSILON = 0.001;
       for (tempStat.Ld = 0; tempStat.Ld <= maxLd; tempStat.Ld++) {
-         this.rangeVars[statIndex].Lw = tempStat.Lw;
-         this.rangeVars[statIndex].Ld = tempStat.Ld;
-         this.rangeVars.TE = this.rangeFuncs.calcTE.eval(this.rangeVars[statIndex]);
+         this.rangeStats[statIndex].Lw = tempStat.Lw;
+         this.rangeStats[statIndex].Ld = tempStat.Ld;
+         this.rangeVars.TE = this.rangeFuncs.calcTE.eval(this.rangeStats[statIndex]);
          const rangeWL = this.rangeFuncs.calcWL.eval(this.rangeVars);
 
          const minWL = Math.ceil(rangeWL.lo);
