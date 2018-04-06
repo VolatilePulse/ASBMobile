@@ -5,6 +5,7 @@
 declare module 'bootstrap-vue';
 declare module 'pouch-vue';
 declare module 'pouchdb-live-find';
+<<<<<<< HEAD
 
 // Common for PouchDB
 declare interface DeletedMeta { _deleted: boolean; }
@@ -53,3 +54,7 @@ declare module '*.vue' {
    import Vue from 'vue';
    export default Vue;
 }
+=======
+declare module 'interval-arithmetic';
+declare module 'interval-arithmetic-eval';
+>>>>>>> Initial Interval Arithmetic implementation
