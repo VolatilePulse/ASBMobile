@@ -5,4 +5,5 @@
 declare module 'bootstrap-vue';
 declare module 'pouch-vue';
 declare module 'pouchdb-live-find';
-
+declare module 'interval-arithmetic';
+declare module 'interval-arithmetic-eval';

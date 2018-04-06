@@ -1,4 +1,7 @@
-import { TORPOR, FOOD, SPEED, HEALTH, STAMINA, OXYGEN, DAMAGE, WEIGHT } from '@/consts';
+import * as IA from 'interval-arithmetic';
+import * as compile from 'interval-arithmetic-eval';
+
+import { TORPOR, FOOD, SPEED, HEALTH, STAMINA, OXYGEN, DAMAGE, WEIGHT, EPSILON } from '@/consts';
 import { Stat, VueCreature } from './creature';
 import * as Ark from '@/ark';
 import * as Utils from '@/utils';
@@ -47,6 +50,10 @@ export class Extractor {
    checkedStat: boolean[] = [];
    /** Contains all of the TE properties for stats */
    statTEmaps: Array<Map<Stat, TEProps>> = [];
+   /** Contains all variables for intervals */
+   rangeVars: any = [];
+   /** Contains all functions for intervals */
+   rangeFuncs: any = [];
 
    constructor(vueCreature: VueCreature) {
       this.c = vueCreature;
@@ -79,6 +86,9 @@ export class Extractor {
    extract(dbg?: any) {
       // TODO: Add either a way to throw errors w/ codes (for specific reasons like bad multipliers, stats, etc.)
       //    Or provide an alternative method (returning under bad situations is acceptable for now)
+
+      // Used to initialize all relevant interval variables
+      this.init();
 
       let tempStat = new Stat();
 
@@ -120,6 +130,9 @@ export class Extractor {
          this.wildFreeMax = this.c.stats[TORPOR][0].Lw;
          this.levelBeforeDom = this.c.stats[TORPOR][0].Lw + 1;
          this.domFreeMax = Math.max(this.c.level - this.wildFreeMax - 1, 0);
+
+         // Set range to be used for TE calculations
+         this.rangeVars.tamedLevel = IA().halfOpenRight(this.levelBeforeDom, this.levelBeforeDom + 1);
 
          // If it's bred, we need to do some magic with the IB
          if (this.c.bred)
@@ -205,6 +218,61 @@ export class Extractor {
 
       // Sort the options based on most likely (deviation from the expected average)
       this.options.sort((opt1, opt2) => this.optionDeviation(opt1, opt2));
+   }
+
+   init() {
+      for (let statIndex = HEALTH; statIndex <= TORPOR; statIndex++) {
+         this.rangeVars.push({});
+         this.rangeVars[statIndex].V = IA().halfOpenRight(this.c.values[statIndex] - EPSILON[statIndex], this.c.values[statIndex] + EPSILON[statIndex]);
+
+         // Stat & Server Multipliers
+         this.rangeVars[statIndex].B = this.m[statIndex].B;
+         this.rangeVars[statIndex].Iw = this.m[statIndex].Iw;
+         this.rangeVars[statIndex].IwM = this.m[statIndex].IwM;
+         this.rangeVars[statIndex].Id = this.m[statIndex].Id;
+         this.rangeVars[statIndex].IdM = this.m[statIndex].IdM;
+         this.rangeVars[statIndex].Ta = this.m[statIndex].Ta;
+         this.rangeVars[statIndex].TaM = this.m[statIndex].TaM;
+         this.rangeVars[statIndex].Tm = this.m[statIndex].Tm;
+         this.rangeVars[statIndex].TmM = this.m[statIndex].TmM;
+
+         this.rangeVars[statIndex].TBHM = this.m[statIndex].TBHM || 1;
+         this.rangeVars[statIndex].IBM = this.m[statIndex].IBM;
+
+         if (this.c.wild) {
+            this.rangeVars[statIndex].Id = 0;
+            this.rangeVars[statIndex].IdM = 0;
+            this.rangeVars[statIndex].Ta = 0;
+            this.rangeVars[statIndex].TaM = 0;
+            this.rangeVars[statIndex].Tm = 0;
+            this.rangeVars[statIndex].TmM = 0;
+            this.rangeVars[statIndex].TBHM = 1;
+
+            this.rangeVars[statIndex].TE = 1;
+            this.rangeVars[statIndex].IB = 0;
+            this.rangeVars[statIndex].IBM = 0;
+         }
+         else {
+            if (this.c.tamed) {
+               this.rangeVars[statIndex].IB = 0;
+               this.rangeVars[statIndex].IBM = 0;
+            }
+            else if (this.c.bred) {
+               this.rangeVars[statIndex].TE = 1;
+            }
+            if (this.m[statIndex].Ta < 0) {
+               this.rangeVars[statIndex].TaM = 1;
+            }
+            if (this.m[statIndex].Tm < 0) {
+               this.rangeVars[statIndex].TmM = 1;
+               this.rangeVars[statIndex].TE = 1;
+            }
+         }
+      }
+
+      this.rangeFuncs.calcTE = compile('(V / (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) / (1 + Ld * Id * IdM) - 1) / (Tm * TmM)');
+      this.rangeFuncs.calcWL = compile('tamedLevel / (1 + 0.5 * TE)');
+      this.rangeFuncs.calcTEFromWL = compile('(tamedLevel / wildLevel - 1) / 0.5');
    }
 
    /**
@@ -315,14 +383,36 @@ export class Extractor {
    }
 
    findTEStats(tempStat: Stat, statIndex: number, maxLd: number) {
-      const EPSILON = 0.001;
+      const localEPSILON = 0.001;
       for (tempStat.Ld = 0; tempStat.Ld <= maxLd; tempStat.Ld++) {
+         this.rangeVars[statIndex].Lw = tempStat.Lw;
+         this.rangeVars[statIndex].Ld = tempStat.Ld;
+         this.rangeVars.TE = this.rangeFuncs.calcTE.eval(this.rangeVars[statIndex]);
+         const rangeWL = this.rangeFuncs.calcWL.eval(this.rangeVars);
+
+         const minWL = Math.ceil(rangeWL.lo);
+         const maxWL = Math.ceil(rangeWL.hi);
+
+         for (let i = minWL; i <= maxWL; i++) {
+            this.rangeVars.wildLevel = i;
+            let tempTEs = this.rangeFuncs.calcTEFromWL.eval(this.rangeVars);
+            tempTEs = IA.intersection(tempTEs, IA(0, 1));
+            const tempTE = IA.intersection(this.rangeVars.TE, tempTEs);
+
+            // Valid range
+            if (!IA.isEmpty(tempTE) && !IA.isWhole(tempTE)) {
+               console.log('Lw = ' + tempStat.Lw + '\t\tLd = ' + tempStat.Ld + '\t\t\tWL = ' + i);
+               console.log('Before:\t\t' + (this.rangeVars.TE.lo).toFixed(20) + '\t<= TE <=\t' + this.rangeVars.TE.hi);
+               console.log('tempTEs:\t' + (tempTEs.lo).toFixed(20) + '\t<= TE <=\t' + tempTEs.hi);
+               console.log('After:\t\t' + (tempTE.lo).toFixed(20) + '\t<= TE <=\t' + tempTE.hi + '\n');
+            }
+         }
 
          let tamingEffectiveness = -1;
 
-         if (Math.abs(this.c.values[statIndex] - tempStat.calculateValue(this.m[statIndex], !this.c.wild, 1, this.c.IB)) < EPSILON)
+         if (Math.abs(this.c.values[statIndex] - tempStat.calculateValue(this.m[statIndex], !this.c.wild, 1, this.c.IB)) < localEPSILON)
             tamingEffectiveness = 1;
-         else if (Math.abs(this.c.values[statIndex] - tempStat.calculateValue(this.m[statIndex], !this.c.wild, 0, this.c.IB)) < EPSILON)
+         else if (Math.abs(this.c.values[statIndex] - tempStat.calculateValue(this.m[statIndex], !this.c.wild, 0, this.c.IB)) < localEPSILON)
             tamingEffectiveness = 0;
          else
             tamingEffectiveness = tempStat.calculateTE(this.m[statIndex], this.c.values[statIndex]);
@@ -330,7 +420,7 @@ export class Extractor {
          if (tamingEffectiveness >= 0 && tamingEffectiveness <= 1) {
             // If the TE allows the stat to calculate properly, add it as a possible result
             const expectedValue = tempStat.calculateValue(this.m[statIndex], !this.c.wild, tamingEffectiveness, this.c.IB);
-            if (Math.abs(this.c.values[statIndex] - expectedValue) < EPSILON) {
+            if (Math.abs(this.c.values[statIndex] - expectedValue) < localEPSILON) {
                // Create a new Stat to hold all of the information
                const TEStat = new TEProps();
                TEStat.wildLevel = Math.ceil(this.levelBeforeDom / (1 + 0.5 * tamingEffectiveness));
@@ -359,7 +449,7 @@ export class Extractor {
    }
 
    findMultiTEStat(tempStat: Stat, statIndex: number, maxLd: number, map: Map<Stat, TEProps>): void {
-      const EPSILON = 0.0005;
+      const localEPSILON = 0.0005;
       const localStats = this.c.stats[statIndex];
       this.statTEmaps[statIndex] = this.statTEmaps[statIndex] || new Map();
 
@@ -367,7 +457,7 @@ export class Extractor {
       map.forEach(statTE => {
          if (tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild, statTE.TE, this.c.IB) <= maxLd) {
 
-            if (Math.abs(this.c.values[statIndex] - tempStat.calculateValue(this.m[statIndex], !this.c.wild, statTE.TE, this.c.IB)) >= EPSILON)
+            if (Math.abs(this.c.values[statIndex] - tempStat.calculateValue(this.m[statIndex], !this.c.wild, statTE.TE, this.c.IB)) >= localEPSILON)
                return;
             if (localStats.find(stat => tempStat.isEqual(stat)))
                return;
