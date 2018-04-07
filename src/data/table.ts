@@ -99,7 +99,7 @@ export class Table<ContentType extends {}> implements ITable<ContentType> {
 
 export class TableMonitor<ContentType extends {}> implements IAsyncDisposable {
    public name: string;
-   public cache: { content: ContentType[] } = { content: [] };
+   public cache: { content: Stored<ContentType>[] } = { content: [] };
 
    private maxWait: number;
    private debouncedUpdate: any;
@@ -144,7 +144,7 @@ export class TableMonitor<ContentType extends {}> implements IAsyncDisposable {
       }
    }
 
-   onUpdate(_update: string, aggregate: ContentType[]) {
+   onUpdate(_update: string, aggregate: Stored<ContentType>[]) {
       this.cache.content = aggregate;
    }
 }
