@@ -100,7 +100,7 @@ const testData: TestData[] = [
       species: 'Argentavis', level: 256, imprint: 0, mode: 'Tamed',
       values: [6738.8, 2552.0, 600.0, 7400.0, 1172.1, 455.5, 100, 8376.5],
       serverName: 'ARK PVE Community Server',
-      results: [[{ Lw: 46, Ld: 12 }], [{ Lw: 38, Ld: 16 }], [{ Lw: 30, Ld: 0 }], [{ Lw: 27, Ld: 0 }], [{ Lw: 32, Ld: 3 }], [{ Lw: 43, Ld: 8 }], [{ Lw: 0, Ld: 0 }], [{ Lw: 216, Ld: 0 }]],
+      results: [[{ Lw: 46, Ld: 12 }], [{ Lw: 38, Ld: 16 }], [{ Lw: 30, Ld: 0 }, { Lw: 15, Ld: 6 }], [{ Lw: 27, Ld: 0 }], [{ Lw: 32, Ld: 3 }], [{ Lw: 58, Ld: 2 }, { Lw: 43, Ld: 8 }], [{ Lw: 0, Ld: 0 }], [{ Lw: 216, Ld: 0 }]],
    },
    {
       tag: 'Achilles (Thylacoleo) - Level 224 (Ronin)',

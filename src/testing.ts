@@ -10,7 +10,7 @@ export interface TestResult {
    pass?: boolean;
    stats?: Stat[][];
    options?: Stat[][];
-   mapTE?: Array<Map<Stat, TEProps>>;
+   mapTE?: Map<Stat, TEProps>;
    dbg?: any;
    extra?: { [key: string]: any };
    exception?: any;
@@ -55,7 +55,7 @@ export function PerformTest(testData: TestData): TestResult {
       pass: false,
       stats: testCreature['stats'],
       options: extractObject['options'],
-      mapTE: extractObject['statTEmaps'],
+      mapTE: extractObject['statTEMap'],
       dbg: dbg,
       extra: {},
    };

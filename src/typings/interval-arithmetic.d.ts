@@ -11,6 +11,11 @@ declare interface IntervalArithmeticStatic {
    isEmpty(value: Interval): boolean;
    isWhole(value: Interval): boolean;
    intersection(a: Interval, b: Interval): Interval;
+
+   round: {
+      enable(): void,
+      disable(): void,
+   }
 }
 
 declare class Interval {

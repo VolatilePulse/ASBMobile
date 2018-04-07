@@ -49,7 +49,7 @@ export class Extractor {
    /** Signifies that a stat only has one possibility */
    checkedStat: boolean[] = [];
    /** Contains all of the TE properties for stats */
-   statTEmaps: Array<Map<Stat, TEProps>> = [];
+   statTEMap: Map<Stat, TEProps> = new Map();
    /** Contains all stat-specific variables for intervals */
    rangeStats: Array<{ [name: string]: number | Interval }> = [];
    /** Contains all variables for intervals */
@@ -89,6 +89,8 @@ export class Extractor {
       // TODO: Add either a way to throw errors w/ codes (for specific reasons like bad multipliers, stats, etc.)
       //    Or provide an alternative method (returning under bad situations is acceptable for now)
 
+      // Turn Interval Arithmetic rounding off
+      IA.round.disable();
       // Used to initialize all relevant interval variables
       this.init();
 
@@ -152,24 +154,43 @@ export class Extractor {
                if (maxLw > this.wildFreeMax - this.minWild || (maxLw === 0 && this.m[statIndex].Iw === 0))
                   maxLw = this.wildFreeMax - this.minWild;
 
-               const localMap = this.statTEmaps.find(map => map !== undefined);
-               // Loop all possible Lws
-               for (tempStat.Lw = maxLw; tempStat.Lw >= 0; tempStat.Lw--) {
-                  // Calculate the highest Ld could be
-                  const maxLd = Math.min(tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild), this.domFreeMax - this.minDom);
-
-                  // We don't need to calculate TE to extract the levels
-                  if (this.c.bred || this.m[statIndex].Tm <= 0)
+               // We don't need to calculate TE to extract the levels
+               if (this.c.bred || this.m[statIndex].Tm <= 0) {
+                  // Loop all possible Lws
+                  for (tempStat.Lw = maxLw; tempStat.Lw >= 0; tempStat.Lw--) {
+                     // Calculate the highest Ld could be
+                     const maxLd = Math.min(tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex],
+                        !this.c.wild), this.domFreeMax - this.minDom);
                      this.nonTEStatCalculation(tempStat, statIndex, maxLd);
+                  }
+               }
 
+               else {
+                  const localMap = this.statTEMap;
                   // If this stat has a Tm and is tamed, we need to manually loop through the Ld
-                  else if (localMap === undefined)
-                     this.findTEStats(tempStat, statIndex, maxLd);
+                  if (localMap.size === 0) {
+                     // Loop all possible Lws
+                     for (tempStat.Lw = maxLw; tempStat.Lw >= 0; tempStat.Lw--) {
+                        // Calculate the highest Ld could be
+                        const maxLd = Math.min(tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex],
+                           !this.c.wild), this.domFreeMax - this.minDom);
+                        this.findTEStats(tempStat, statIndex, maxLd, localMap);
+                     }
+                  }
+                  // Otherwise, we only need to compare the TEs that exist within the map already
+                  else {
+                     // Loop all possible Lws
+                     for (tempStat.Lw = maxLw; tempStat.Lw >= 0; tempStat.Lw--) {
+                        // Calculate the highest Ld could be
+                        const maxLd = Math.min(tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex],
+                           !this.c.wild), this.domFreeMax - this.minDom);
+                        this.findMultiTEStat(tempStat, statIndex, maxLd, localMap);
+                     }
+                  }
 
-                  else if (localMap !== undefined)
-                     this.findMultiTEStat(tempStat, statIndex, maxLd, localMap);
                }
             }
+
             if (this.c.stats[statIndex].length === 1) {
                this.wildFreeMax -= this.c.stats[statIndex][0].Lw;
                this.domFreeMax -= this.c.stats[statIndex][0].Ld;
@@ -202,6 +223,9 @@ export class Extractor {
 
       } while (this.c.stats[TORPOR].length !== 1 && !this.success && this.c.bred);
 
+      // Turn Interval Arithmetic rounding back on
+      IA.round.enable();
+
       if (dbg) dbg.levelFromTorpor = this.c.stats[TORPOR][0].Lw;
 
       // Only filter results if we have a result for every stat
@@ -225,7 +249,10 @@ export class Extractor {
    init() {
       for (let statIndex = HEALTH; statIndex <= TORPOR; statIndex++) {
          this.rangeStats.push({});
-         this.rangeStats[statIndex].V = IA().halfOpenRight(this.c.values[statIndex] - STAT_EPSILON[statIndex], this.c.values[statIndex] + STAT_EPSILON[statIndex]);
+         this.rangeStats[statIndex].V = IA().halfOpenRight(
+            this.c.values[statIndex] - STAT_EPSILON[statIndex],
+            this.c.values[statIndex] + STAT_EPSILON[statIndex]
+         );
 
          // Stat & Server Multipliers
          this.rangeStats[statIndex].B = this.m[statIndex].B;
@@ -384,76 +411,55 @@ export class Extractor {
       }
    }
 
-   findTEStats(tempStat: Stat, statIndex: number, maxLd: number) {
-      const localEPSILON = 0.001;
+   findTEStats(tempStat: Stat, statIndex: number, maxLd: number, map: Map<Stat, TEProps>) {
+      const localRangeStats = this.rangeStats[statIndex];
+      const localRangeVars = this.rangeVars;
+      const localRangeFuncs = this.rangeFuncs;
+
       for (tempStat.Ld = 0; tempStat.Ld <= maxLd; tempStat.Ld++) {
-         this.rangeStats[statIndex].Lw = tempStat.Lw;
-         this.rangeStats[statIndex].Ld = tempStat.Ld;
-         this.rangeVars.TE = this.rangeFuncs.calcTE.eval(this.rangeStats[statIndex]);
-         const rangeWL = this.rangeFuncs.calcWL.eval(this.rangeVars);
+         localRangeStats.Lw = tempStat.Lw;
+         localRangeStats.Ld = tempStat.Ld;
+         localRangeVars.TE = localRangeFuncs.calcTE.eval(localRangeStats);
+
+         // If the range is greater than 1
+         if (localRangeVars.TE.lo > 1)
+            continue;
+
+         // If the range is less than 0, it will only continue to get smaller
+         if (localRangeVars.TE.hi < 0)
+            break;
+
+         localRangeVars.TE = IA.intersection(localRangeVars.TE, IA(0, 1));
+
+         const rangeWL = localRangeFuncs.calcWL.eval(localRangeVars);
 
          const minWL = Math.ceil(rangeWL.lo);
          const maxWL = Math.ceil(rangeWL.hi);
 
          for (let i = minWL; i <= maxWL; i++) {
-            this.rangeVars.wildLevel = i;
-            let tempTEs = this.rangeFuncs.calcTEFromWL.eval(this.rangeVars);
-            tempTEs = IA.intersection(tempTEs, IA(0, 1));
-            const tempTE = IA.intersection(this.rangeVars.TE, tempTEs);
+            localRangeVars.wildLevel = i;
+            let tempTERange = localRangeFuncs.calcTEFromWL.eval(localRangeVars);
+            tempTERange = IA.intersection(localRangeVars.TE, tempTERange);
 
             // Valid range
-            if (!IA.isEmpty(tempTE) && !IA.isWhole(tempTE)) {
-               console.log('Lw = ' + tempStat.Lw + '\t\tLd = ' + tempStat.Ld + '\t\t\tWL = ' + i);
-               console.log('Before:\t\t' + (this.rangeVars.TE.lo).toFixed(20) + '\t<= TE <=\t' + this.rangeVars.TE.hi);
-               console.log('tempTEs:\t' + (tempTEs.lo).toFixed(20) + '\t<= TE <=\t' + tempTEs.hi);
-               console.log('After:\t\t' + (tempTE.lo).toFixed(20) + '\t<= TE <=\t' + tempTE.hi + '\n');
-            }
-         }
-
-         let tamingEffectiveness = -1;
-
-         if (Math.abs(this.c.values[statIndex] - tempStat.calculateValue(this.m[statIndex], !this.c.wild, 1, this.c.IB)) < localEPSILON)
-            tamingEffectiveness = 1;
-         else if (Math.abs(this.c.values[statIndex] - tempStat.calculateValue(this.m[statIndex], !this.c.wild, 0, this.c.IB)) < localEPSILON)
-            tamingEffectiveness = 0;
-         else
-            tamingEffectiveness = tempStat.calculateTE(this.m[statIndex], this.c.values[statIndex]);
-
-         if (tamingEffectiveness >= 0 && tamingEffectiveness <= 1) {
-            // If the TE allows the stat to calculate properly, add it as a possible result
-            const expectedValue = tempStat.calculateValue(this.m[statIndex], !this.c.wild, tamingEffectiveness, this.c.IB);
-            if (Math.abs(this.c.values[statIndex] - expectedValue) < localEPSILON) {
-               // Create a new Stat to hold all of the information
+            if (!IA.isEmpty(tempTERange) && !IA.isWhole(tempTERange)) {
                const TEStat = new TEProps();
-               TEStat.wildLevel = Math.ceil(this.levelBeforeDom / (1 + 0.5 * tamingEffectiveness));
+               TEStat.wildLevel = i;
+               // Get the average of the TE range
+               TEStat.TE = (localRangeVars.TE.lo + localRangeVars.TE.hi) / 2;
 
-               // Verify the calculated WildLevel was even possible
-               if (this.levelBeforeDom === Math.floor(TEStat.wildLevel * (1 + 0.5 * tamingEffectiveness))) {
-                  TEStat.TE = tamingEffectiveness;
+               const workingStat = new Stat(tempStat);
+               this.c.stats[statIndex].push(workingStat);
 
-                  const workingStat = new Stat(tempStat);
-                  this.c.stats[statIndex].push(workingStat);
-
-                  let tempMap = this.statTEmaps[statIndex];
-                  if (tempMap === undefined)
-                     tempMap = new Map();
-
-                  tempMap.set(workingStat, TEStat);
-                  this.statTEmaps[statIndex] = tempMap;
-               }
+               map.set(workingStat, TEStat);
             }
          }
-
-         // The TE would only get smaller so break the loop
-         else if (tamingEffectiveness < 0)
-            break;
       }
    }
 
    findMultiTEStat(tempStat: Stat, statIndex: number, maxLd: number, map: Map<Stat, TEProps>): void {
       const localEPSILON = 0.0005;
       const localStats = this.c.stats[statIndex];
-      this.statTEmaps[statIndex] = this.statTEmaps[statIndex] || new Map();
 
       // FIXME: This needs cleaned up, badly
       map.forEach(statTE => {
@@ -466,7 +472,7 @@ export class Extractor {
 
             const workingStat = new Stat(tempStat);
             localStats.push(workingStat);
-            this.statTEmaps[statIndex].set(workingStat, statTE);
+            map.set(workingStat, statTE);
          }
       });
    }
@@ -520,7 +526,7 @@ export class Extractor {
                   }
                   if (stat.Lw + this.minWild - this.wildMin[statIndex] > this.wildFreeMax
                      || stat.Ld + this.minDom - this.domMin[statIndex] > this.domFreeMax
-                     || (this.statTEmaps.length > 1 && this.statTEmaps[statIndex] && !this.filterByTE(statIndex, stat))) {
+                     || (this.m[statIndex].Tm > 0 && this.statTEMap.size > 0 && !this.filterByTE(statIndex, stat, this.statTEMap))) {
                      stat.removeMe = true;
                   }
                }
@@ -536,13 +542,13 @@ export class Extractor {
    }
 
    // Remove all stats that don't have a matching TE pair
-   filterByTE(index: number, TEstat: Stat) {
+   filterByTE(index: number, TEstat: Stat, map: Map<Stat, TEProps>) {
       for (let statIndex = 0; statIndex < 7; statIndex++) {
-         const statTEs = this.statTEmaps[statIndex];
-         if (statTEs !== undefined && (statIndex !== index)) {
+         if (statIndex !== index && this.m[statIndex].Tm > 0) {
             for (const stat of this.c.stats[statIndex]) {
-               const currentTEstat = statTEs.get(stat), testingTEstat = this.statTEmaps[index].get(TEstat);
-               if (currentTEstat.TE === testingTEstat.TE)
+               const currentTEstat = map.get(stat);
+               const testingTEstat = map.get(TEstat);
+               if (testingTEstat !== undefined && currentTEstat.TE === testingTEstat.TE)
                   return true;
             }
             return false;
@@ -578,7 +584,7 @@ export class Extractor {
     */
    generateOptions(dbg?: any): boolean {
       const localCheckedStats = this.checkedStat;
-      const localMap = this.statTEmaps;
+      const localMap = this.statTEMap;
       const localStats = this.c.stats;
       const freeWild = this.wildFreeMax;
       const freeDom = this.domFreeMax;
@@ -613,11 +619,14 @@ export class Extractor {
             runningWild += localStat.Lw;
             runningDom += localStat.Ld;
          }
-         if (localMap[statIndex] !== undefined) {
-            currentTE = localMap[statIndex].get(localStat).TE;
-            if (runningTE === -1) {
-               runningTE = currentTE;
-               statIndexTE = statIndex;
+         if (localMap.size > 0) {
+            const tempTE = localMap.get(localStat);
+            if (tempTE !== undefined) {
+               currentTE = tempTE.TE;
+               if (runningTE === -1) {
+                  runningTE = currentTE;
+                  statIndexTE = statIndex;
+               }
             }
          }
 
@@ -654,10 +663,10 @@ export class Extractor {
       return !!this.options.length;
    }
 
-   dynamicGenerator(dbg?: any): boolean {
+   /* dynamicGenerator(dbg?: any): boolean {
       const localStats = this.c.stats;
       const localCheckedStats = this.checkedStat;
-      const localMap = this.statTEmaps;
+      const localMap = this.statTEMap;
 
       let runningWild = 0;
       let runningDom = 0;
@@ -933,7 +942,7 @@ export class Extractor {
          currentTE = runningTE;
       }
       return !!this.options.length;
-   }
+   } */
 
    /**
     * Option sort comparison function using deviation from the stat mean to determine sort order

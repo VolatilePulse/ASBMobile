@@ -52,11 +52,9 @@ export default class extends Common {
       const optionSet = results.options[optionIndex];
 
       for (const statIndex in this.range(8)) {
-         const map = results.mapTE[statIndex];
-         const stat = optionSet[statIndex];
-         if (!stat || !map) continue;
-         const teProp = map.get(stat);
-         if (teProp) return teProp;
+         const stat: Stat = optionSet[statIndex];
+         const TE = results.mapTE.get(stat);
+         if (TE) return TE;
       }
 
       return undefined;
