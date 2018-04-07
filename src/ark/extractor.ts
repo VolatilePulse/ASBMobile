@@ -147,6 +147,8 @@ export class Extractor {
       // TODO: Add either a way to throw errors w/ codes (for specific reasons like bad multipliers, stats, etc.)
       //    Or provide an alternative method (returning under bad situations is acceptable for now)
 
+      // Turn Interval Arithmetic rounding off
+      IA.round.disable();
       // Used to initialize all relevant interval variables
       this.init();
 
@@ -278,6 +280,9 @@ export class Extractor {
          if (this.success)
             break;
       }
+
+      // Turn Interval Arithmetic rounding back on
+      IA.round.enable();
 
       if (dbg) dbg.levelFromTorpor = this.c.stats[TORPOR][0].Lw;
 
