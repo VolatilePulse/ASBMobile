@@ -85,8 +85,8 @@ export default class extends Common {
       for (const option of options) {
          let tempString = '';
 
-         if (this.extractor.statTEmaps.length) {
-            this.extractor.statTEmaps.find(index => index !== undefined).forEach((propTE, stat) => {
+         if (this.extractor.statTEMap.size) {
+            this.extractor.statTEMap.forEach((propTE, stat) => {
                if (option.includes(stat)) {
                   tempString += propTE.wildLevel + ' ';
                   tempString += (propTE.TE * 100).toFixed(2) + '% - ';

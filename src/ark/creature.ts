@@ -59,7 +59,7 @@ export class Stat implements Stat {
    }
 
    calculateDomLevel(m: StatMultiplier & ServerMultiplier, v: number, tamed = false, TE = 0, IB = 0) {
-      //  Ld = ((V / (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) / (1 + TE * Tm * TmM)) - 1) / (Id * IdM)
+      // Ld = ((V / (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) / (1 + TE * Tm * TmM)) - 1) / (Id * IdM)
 
       // Prevents division by 0
       if (m.Id === 0 || !tamed)

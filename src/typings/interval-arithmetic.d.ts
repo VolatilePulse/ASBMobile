@@ -8,8 +8,11 @@ declare interface IntervalArithmeticStatic {
    (): Interval;
    (lo: number, hi: number): Interval;
 
-   isEmpty(value: Interval): boolean;
-   isWhole(value: Interval): boolean;
+   isEmpty(range: Interval): boolean;
+   isWhole(range: Interval): boolean;
+   hasValue(range: Interval, value: number): boolean;
+   hasInterval(a: Interval, b: Interval): boolean;
+
    intersection(a: Interval, b: Interval): Interval;
 
    round: {

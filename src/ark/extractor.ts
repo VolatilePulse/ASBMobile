@@ -1,12 +1,10 @@
+import * as Ark from '@/ark';
+import { CombinedMultipliers } from '@/ark/types';
+import { FOOD, HEALTH, SPEED, STAT_EPSILON, TORPOR } from '@/consts';
+import * as Utils from '@/utils';
 import * as IA from 'interval-arithmetic';
 import * as compile from 'interval-arithmetic-eval';
-
-import { TORPOR, FOOD, SPEED, HEALTH, STAMINA, OXYGEN, DAMAGE, WEIGHT, STAT_EPSILON } from '@/consts';
 import { Stat, VueCreature } from './creature';
-import * as Ark from '@/ark';
-import * as Utils from '@/utils';
-import { CombinedMultipliers } from '@/ark/types';
-
 
 export class TEProps {
    TE = 0;
@@ -48,10 +46,14 @@ export class Extractor {
    options: Stat[][] = [];
    /** Signifies that a stat only has one possibility */
    checkedStat: boolean[] = [];
+   /** Whether a stat is based on TE */
+   isTEStat: boolean[] = Utils.FilledArray(8, () => false);
    /** Contains all of the TE properties for stats */
    statTEMap: Map<Stat, TEProps> = new Map();
+
+   // Variables for IA ranges
    /** Contains all stat-specific variables for intervals */
-   rangeStats: Array<{ [name: string]: number | Interval }> = [];
+   rangeStats: Array<{ [name: string]: number | Interval }> = Utils.FilledArray(8, () => ({}));
    /** Contains all variables for intervals */
    rangeVars: { [name: string]: number | Interval } = {};
    /** Contains all functions for intervals */
@@ -95,10 +97,13 @@ export class Extractor {
       this.init();
 
       let tempStat = new Stat();
+      this.rangeVars.Lw = 0;
+      this.rangeVars.Ld = 0;
 
       // Calculate the torpor stat since it doesn't accept dom levels
       if (!this.c.bred) {
-         tempStat.calculateWildLevel(this.m[TORPOR], this.c.values[TORPOR], !this.c.wild, this.c.TE, 0);
+         // FIXME: Needs converted to an average
+         tempStat.Lw = Math.round(this.rangeFuncs.calcLw.eval({ ...this.rangeVars, ...this.rangeStats[TORPOR] }).lo);
          this.c.stats[TORPOR].push(new Stat(tempStat));
       }
 
@@ -155,7 +160,7 @@ export class Extractor {
                   maxLw = this.wildFreeMax - this.minWild;
 
                // We don't need to calculate TE to extract the levels
-               if (this.c.bred || this.m[statIndex].Tm <= 0) {
+               if (!this.c.tamed || this.m[statIndex].Tm <= 0) {
                   // Loop all possible Lws
                   for (tempStat.Lw = maxLw; tempStat.Lw >= 0; tempStat.Lw--) {
                      // Calculate the highest Ld could be
@@ -197,12 +202,8 @@ export class Extractor {
                this.checkedStat[statIndex] = true;
             }
             else if (this.c.stats[statIndex].length > 1) {
-               let tempWM = -1, tempDM = -1;
+               let tempWM = this.wildFreeMax, tempDM = this.domFreeMax;
                for (const stat of this.c.stats[statIndex]) {
-                  if (tempWM === -1)
-                     tempWM = stat.Lw;
-                  if (tempDM === -1)
-                     tempDM = stat.Ld;
                   if (tempWM > stat.Lw)
                      tempWM = stat.Lw;
                   if (tempDM > stat.Ld)
@@ -247,8 +248,8 @@ export class Extractor {
    }
 
    init() {
+      // rangeStats
       for (let statIndex = HEALTH; statIndex <= TORPOR; statIndex++) {
-         this.rangeStats.push({});
          this.rangeStats[statIndex].V = IA().halfOpenRight(
             this.c.values[statIndex] - STAT_EPSILON[statIndex],
             this.c.values[statIndex] + STAT_EPSILON[statIndex]
@@ -269,12 +270,6 @@ export class Extractor {
          this.rangeStats[statIndex].IBM = this.m[statIndex].IBM;
 
          if (this.c.wild) {
-            this.rangeStats[statIndex].Id = 0;
-            this.rangeStats[statIndex].IdM = 0;
-            this.rangeStats[statIndex].Ta = 0;
-            this.rangeStats[statIndex].TaM = 0;
-            this.rangeStats[statIndex].Tm = 0;
-            this.rangeStats[statIndex].TmM = 0;
             this.rangeStats[statIndex].TBHM = 1;
 
             this.rangeStats[statIndex].TE = 1;
@@ -282,16 +277,10 @@ export class Extractor {
             this.rangeStats[statIndex].IBM = 0;
          }
          else {
-            if (this.c.tamed) {
-               this.rangeStats[statIndex].IB = 0;
-               this.rangeStats[statIndex].IBM = 0;
-            }
-            else if (this.c.bred) {
-               this.rangeStats[statIndex].TE = 1;
-            }
-            if (this.m[statIndex].Ta < 0) {
+            // Handle negative values
+            if (this.m[statIndex].Ta < 0)
                this.rangeStats[statIndex].TaM = 1;
-            }
+
             if (this.m[statIndex].Tm < 0) {
                this.rangeStats[statIndex].TmM = 1;
                this.rangeStats[statIndex].TE = 1;
@@ -299,9 +288,30 @@ export class Extractor {
          }
       }
 
-      this.rangeFuncs.calcTE = compile('(V / (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) / (1 + Ld * Id * IdM) - 1) / (Tm * TmM)');
+      // rangeVars
+      if (this.c.wild) {
+         this.rangeVars.TE = 0;
+         this.rangeVars.IB = 0;
+      }
+      else if (this.c.tamed) {
+         this.rangeVars.TE = IA(0, 1);
+         this.rangeVars.IB = 0;
+      }
+      else {
+         this.rangeVars.TE = 1;
+         this.rangeVars.IB = IA(0, 1.05);
+      }
+      this.rangeVars.Lw = 0;
+      this.rangeVars.Ld = 0;
+
+      // rangeFuncs
       this.rangeFuncs.calcWL = compile('tamedLevel / (1 + 0.5 * TE)');
       this.rangeFuncs.calcTEFromWL = compile('(tamedLevel / wildLevel - 1) / 0.5');
+      this.rangeFuncs.calcValue = compile('(B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) * (1 + TE * Tm * TmM) * (1 + Ld * Id * IdM)');
+      this.rangeFuncs.calcLw = compile('((V / ((1 + Ld * Id * IdM) * (1 + TE * Tm * TmM)) - Ta * TaM) / (B * TBHM * (1 + IB * 0.2 * IBM)) - 1) / (Iw * IwM)');
+      this.rangeFuncs.calcLd = compile('((V / (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) / (1 + TE * Tm * TmM)) - 1) / (Id * IdM)');
+      this.rangeFuncs.calcTE = compile('(V / (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) / (1 + Ld * Id * IdM) - 1) / (Tm * TmM)');
+      this.rangeFuncs.calcIB = compile('((V / (1 + TE * Tm * TmM) / (1 + Ld * Id * IdM) - Ta * TaM) / (B * (1 + Lw * Iw * IwM) * TBHM) - 1)  / (0.2 * IBM)');
    }
 
    /**
@@ -312,33 +322,48 @@ export class Extractor {
     *  @return {undefined} There is no returned value
     */
    dynamicIBCalculation(): void {
+      const localRangeVars = this.rangeVars;
+      const localRangeStats = this.rangeStats;
+      const localRangeFuncs = this.rangeFuncs;
       // Generate the min/max values for future edge cases (applicable in all situations)
-      this.minIB = Math.max(this.originalIB - 0.005, 0);
-      this.maxIB = this.originalIB + 0.005;
+      localRangeVars.IB = IA().halfOpenRight(this.originalIB - 0.005, this.originalIB + 0.005);
+      localRangeVars.IB = IA.intersection(localRangeVars.IB, IA(0, Infinity));
+
+      this.minIB = localRangeVars.IB.lo;
+      this.maxIB = localRangeVars.IB.hi;
 
       // If the entered IB works, we don't need to do anything else (Torpor can't be levelled and typically has a large value to start with)
-      const expectedValue = this.c.stats[TORPOR][0].calculateValue(this.m[TORPOR], !this.c.wild, this.c.TE, this.c.IB);
-
-      if (this.c.values[TORPOR] === Utils.RoundTo(expectedValue, Ark.Precision(TORPOR)))
+      const expectedValue = localRangeFuncs.calcValue.eval({ ...localRangeVars, ...localRangeStats[TORPOR] });
+      if (IA.hasValue(expectedValue, this.c.values[TORPOR]))
          return;
 
       // Extract the IB from Torpor
-      // TODO: Add a redundant check for IBM not being set. IB shouldn't extract to more than 0.05 in either direction if set properly.
-      // May not be necessary as extract should return if the Torpor Lw calculated was too high
-      this.c.IB = this.c.stats[TORPOR][0].calculateIB(this.m[TORPOR], this.c.values[TORPOR]);
-      const offset = 0.5 / Math.pow(10, Ark.Precision(TORPOR));
-      this.maxIB = Math.min(this.c.stats[TORPOR][0].calculateIB(this.m[TORPOR], this.c.values[TORPOR] + offset), this.maxIB);
-      this.minIB = Math.max(this.c.stats[TORPOR][0].calculateIB(this.m[TORPOR], this.c.values[TORPOR] - offset), this.minIB);
+      localRangeVars.Lw = this.c.stats[TORPOR][0].Lw;
+      localRangeVars.Ld = this.c.stats[TORPOR][0].Ld;
+      const tempIBRange = localRangeFuncs.calcIB.eval({ ...localRangeVars, ...localRangeStats[TORPOR] });
+
+      // Verify that the IB hasn't exceed the possible range
+      if (!IA.hasInterval(tempIBRange, localRangeVars.IB))
+         return;
+
+      localRangeVars.IB = IA.intersection(tempIBRange, localRangeVars.IB);
+
+      // Convert Intervals to numbers
+      this.c.IB = (localRangeVars.IB.lo + localRangeVars.IB.hi) / 2;
+      this.minIB = localRangeVars.IB.lo;
+      this.maxIB = localRangeVars.IB.hi;
 
       // Check the food stat for the IB as well (Only works if food is un-levelled)
-      const tempHealthStat = new Stat();
-      tempHealthStat.calculateWildLevel(this.m[FOOD], this.c.values[FOOD], !this.c.wild, this.c.TE, this.c.IB);
-      const imprintingBonusFromFood = tempHealthStat.calculateIB(this.m[FOOD], this.c.values[FOOD]);
+      localRangeVars.Lw = 0;
+      localRangeVars.Ld = 0;
+      // FIXME: Needs converted to an average
+      localRangeVars.Lw = Math.round(localRangeFuncs.calcValue.eval({ ...localRangeVars, ...localRangeStats[FOOD] }).hi);
+      localRangeVars.IB = localRangeFuncs.calcIB.eval({ ...localRangeVars, ...localRangeStats[FOOD] });
 
       // Check to see if the new IB still allows torpor to extract correctly
-      const newExpectedValue = this.c.stats[TORPOR][0].calculateValue(this.m[TORPOR], !this.c.wild, this.c.TE, imprintingBonusFromFood);
-      if (this.c.values[TORPOR] === Utils.RoundTo(newExpectedValue, Ark.Precision(TORPOR)))
-         this.c.IB = imprintingBonusFromFood;
+      const newExpectedValue = localRangeFuncs.calcValue.eval({ ...localRangeVars, ...localRangeStats[FOOD] });
+      if (IA.hasValue(newExpectedValue, this.c.values[TORPOR]))
+         this.c.IB = (localRangeVars.IB.lo + localRangeVars.IB.hi) / 2;
 
       // IB can't be lower than 0
       if (this.c.IB < 0)
@@ -417,9 +442,9 @@ export class Extractor {
       const localRangeFuncs = this.rangeFuncs;
 
       for (tempStat.Ld = 0; tempStat.Ld <= maxLd; tempStat.Ld++) {
-         localRangeStats.Lw = tempStat.Lw;
-         localRangeStats.Ld = tempStat.Ld;
-         localRangeVars.TE = localRangeFuncs.calcTE.eval(localRangeStats);
+         localRangeVars.Lw = tempStat.Lw;
+         localRangeVars.Ld = tempStat.Ld;
+         localRangeVars.TE = localRangeFuncs.calcTE.eval({ ...localRangeVars, ...localRangeStats });
 
          // If the range is greater than 1
          if (localRangeVars.TE.lo > 1)
@@ -494,7 +519,7 @@ export class Extractor {
             localStats.forEach(stat => stat.forEach(poss => { if (!this.options.some(option => option.includes(poss))) poss.removeMe = true; }));
 
          for (let statIndex = HEALTH; statIndex <= SPEED; statIndex++) {
-            let tempWM = -1, tempDM = -1;
+            let tempWM = this.wildFreeMax, tempDM = this.domFreeMax;
             // One stat possibility is good
             if (!this.checkedStat[statIndex] && localStats[statIndex].length === 1) {
                this.wildFreeMax -= localStats[statIndex][0].Lw;
@@ -503,10 +528,6 @@ export class Extractor {
             }
             else if (!this.checkedStat[statIndex]) {
                for (const stat of localStats[statIndex]) {
-                  if (tempWM === -1)
-                     tempWM = stat.Lw;
-                  if (tempDM === -1)
-                     tempDM = stat.Ld;
                   if (tempWM > stat.Lw)
                      tempWM = stat.Lw;
                   if (tempDM > stat.Ld)
@@ -662,287 +683,6 @@ export class Extractor {
 
       return !!this.options.length;
    }
-
-   /* dynamicGenerator(dbg?: any): boolean {
-      const localStats = this.c.stats;
-      const localCheckedStats = this.checkedStat;
-      const localMap = this.statTEMap;
-
-      let runningWild = 0;
-      let runningDom = 0;
-      let runningTE = -1;
-      let currentTE = -1;
-      let statIndexTE = -1;
-
-      for (const health of localStats[HEALTH]) {
-         if (dbg) dbg.totalIterations++;
-         if (!localCheckedStats[HEALTH]) {
-            runningWild += health.Lw;
-            runningDom += health.Ld;
-         }
-         if (localMap[HEALTH] !== undefined) {
-            if (runningTE === -1) {
-               runningTE = currentTE = localMap[HEALTH].get(health).TE;
-               statIndexTE = HEALTH;
-            }
-            else
-               currentTE = localMap[HEALTH].get(health).TE;
-         }
-
-         if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
-            runningWild -= health.Lw;
-            runningDom = health.Ld;
-            if (statIndexTE === HEALTH)
-               runningTE = -1;
-            currentTE = runningTE;
-            continue;
-         }
-
-         for (const stamina of localStats[STAMINA]) {
-            if (dbg) dbg.totalIterations++;
-            if (!localCheckedStats[STAMINA]) {
-               runningWild += stamina.Lw;
-               runningDom += stamina.Ld;
-            }
-            if (localMap[STAMINA] !== undefined) {
-               if (runningTE === -1) {
-                  runningTE = currentTE = localMap[STAMINA].get(stamina).TE;
-                  statIndexTE = STAMINA;
-               }
-               else
-                  currentTE = localMap[STAMINA].get(stamina).TE;
-            }
-
-            if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
-               runningWild -= stamina.Lw;
-               runningDom -= stamina.Ld;
-               if (statIndexTE === STAMINA)
-                  runningTE = -1;
-               currentTE = runningTE;
-               continue;
-            }
-
-            for (const oxygen of localStats[OXYGEN]) {
-               if (dbg) dbg.totalIterations++;
-               if (!localCheckedStats[OXYGEN]) {
-                  runningWild += oxygen.Lw;
-                  runningDom += oxygen.Ld;
-               }
-               if (localMap[OXYGEN] !== undefined) {
-                  if (runningTE === -1) {
-                     runningTE = currentTE = localMap[OXYGEN].get(oxygen).TE;
-                     statIndexTE = OXYGEN;
-                  }
-                  else
-                     currentTE = localMap[OXYGEN].get(oxygen).TE;
-               }
-
-               if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
-                  runningWild -= oxygen.Lw;
-                  runningDom -= oxygen.Ld;
-                  if (statIndexTE === OXYGEN)
-                     runningTE = -1;
-                  currentTE = runningTE;
-                  continue;
-               }
-
-               for (const food of localStats[FOOD]) {
-                  if (dbg) dbg.totalIterations++;
-                  if (!localCheckedStats[FOOD]) {
-                     runningWild += food.Lw;
-                     runningDom += food.Ld;
-                  }
-                  if (localMap[FOOD] !== undefined) {
-                     if (runningTE === -1) {
-                        runningTE = currentTE = localMap[FOOD].get(food).TE;
-                        statIndexTE = FOOD;
-                     }
-                     else
-                        currentTE = localMap[FOOD].get(food).TE;
-                  }
-
-                  if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
-                     runningWild -= food.Lw;
-                     runningDom -= food.Ld;
-                     if (statIndexTE === FOOD)
-                        runningTE = -1;
-                     currentTE = runningTE;
-                     continue;
-                  }
-
-                  for (const weight of localStats[WEIGHT]) {
-                     if (dbg) dbg.totalIterations++;
-                     if (!localCheckedStats[WEIGHT]) {
-                        runningWild += weight.Lw;
-                        runningDom += weight.Ld;
-                     }
-                     if (localMap[WEIGHT] !== undefined) {
-                        if (runningTE === -1) {
-                           runningTE = currentTE = localMap[WEIGHT].get(weight).TE;
-                           statIndexTE = WEIGHT;
-                        }
-                        else
-                           currentTE = localMap[WEIGHT].get(weight).TE;
-                     }
-
-                     if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
-                        runningWild -= weight.Lw;
-                        runningDom -= weight.Ld;
-                        if (statIndexTE === WEIGHT)
-                           runningTE = -1;
-                        currentTE = runningTE;
-                        continue;
-                     }
-
-                     for (const damage of localStats[DAMAGE]) {
-                        if (dbg) dbg.totalIterations++;
-                        if (!localCheckedStats[DAMAGE]) {
-                           runningWild += damage.Lw;
-                           runningDom += damage.Ld;
-                        }
-                        if (localMap[DAMAGE] !== undefined) {
-                           if (runningTE === -1) {
-                              runningTE = currentTE = localMap[DAMAGE].get(damage).TE;
-                              statIndexTE = DAMAGE;
-                           }
-                           else
-                              currentTE = localMap[DAMAGE].get(damage).TE;
-                        }
-
-                        if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
-                           runningWild -= damage.Lw;
-                           runningDom -= damage.Ld;
-                           if (statIndexTE === DAMAGE)
-                              runningTE = -1;
-                           currentTE = runningTE;
-                           continue;
-                        }
-
-                        for (const speed of localStats[SPEED]) {
-                           if (dbg) dbg.totalIterations++;
-                           if (!localCheckedStats[SPEED]) {
-                              runningWild += speed.Lw;
-                              runningDom += speed.Ld;
-                           }
-                           if (localMap[SPEED] !== undefined) {
-                              if (runningTE === -1) {
-                                 runningTE = currentTE = localMap[SPEED].get(speed).TE;
-                                 statIndexTE = SPEED;
-                              }
-                              else
-                                 currentTE = localMap[SPEED].get(speed).TE;
-                           }
-
-                           if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
-                              runningWild -= speed.Lw;
-                              runningDom -= speed.Ld;
-                              if (statIndexTE === SPEED)
-                                 runningTE = -1;
-                              currentTE = runningTE;
-                              continue;
-                           }
-
-                           for (const torpor of localStats[TORPOR]) {
-                              if (dbg) dbg.totalIterations++;
-                              if (!localCheckedStats[TORPOR]) {
-                                 runningWild += torpor.Lw;
-                                 runningDom += torpor.Ld;
-                              }
-                              if (localMap[TORPOR] !== undefined) {
-                                 if (runningTE === -1) {
-                                    runningTE = currentTE = localMap[TORPOR].get(torpor).TE;
-                                    statIndexTE = TORPOR;
-                                 }
-                                 else
-                                    currentTE = localMap[TORPOR].get(torpor).TE;
-                              }
-
-                              if (runningWild > this.wildFreeMax || runningDom > this.domFreeMax || currentTE !== runningTE) {
-                                 runningWild -= torpor.Lw;
-                                 runningDom -= torpor.Ld;
-                                 if (statIndexTE === TORPOR)
-                                    runningTE = -1;
-                                 currentTE = runningTE;
-                                 continue;
-                              }
-                              // We finally got to a good stat combination
-                              else if ((runningWild === this.wildFreeMax || this.unusedStat) && runningDom === this.domFreeMax && currentTE === runningTE) {
-                                 this.options.push([health, stamina, oxygen, food, weight, damage, speed, torpor]);
-                              }
-
-                              if (!this.checkedStat[TORPOR]) {
-                                 runningWild -= torpor.Lw;
-                                 runningDom -= torpor.Ld;
-                              }
-                              if (statIndexTE === TORPOR)
-                                 runningTE = -1;
-                              currentTE = runningTE;
-                           }
-
-                           if (!this.checkedStat[SPEED]) {
-                              runningWild -= speed.Lw;
-                              runningDom -= speed.Ld;
-                           }
-                           if (statIndexTE === SPEED)
-                              runningTE = -1;
-                           currentTE = runningTE;
-                        }
-
-                        if (!this.checkedStat[DAMAGE]) {
-                           runningWild -= damage.Lw;
-                           runningDom -= damage.Ld;
-                        }
-                        if (statIndexTE === DAMAGE)
-                           runningTE = -1;
-                        currentTE = runningTE;
-                     }
-
-                     if (!this.checkedStat[WEIGHT]) {
-                        runningWild -= weight.Lw;
-                        runningDom -= weight.Ld;
-                     }
-                     if (statIndexTE === WEIGHT)
-                        runningTE = -1;
-                     currentTE = runningTE;
-                  }
-
-                  if (!this.checkedStat[FOOD]) {
-                     runningWild -= food.Lw;
-                     runningDom -= food.Ld;
-                  }
-                  if (statIndexTE === FOOD)
-                     runningTE = -1;
-                  currentTE = runningTE;
-               }
-
-               if (!this.checkedStat[OXYGEN]) {
-                  runningWild -= oxygen.Lw;
-                  runningDom -= oxygen.Ld;
-               }
-               if (statIndexTE === OXYGEN)
-                  runningTE = -1;
-               currentTE = runningTE;
-            }
-
-            if (!this.checkedStat[STAMINA]) {
-               runningWild -= stamina.Lw;
-               runningDom -= stamina.Ld;
-            }
-            if (statIndexTE === STAMINA)
-               runningTE = -1;
-            currentTE = runningTE;
-         }
-
-         if (!this.checkedStat[HEALTH]) {
-            runningWild -= health.Lw;
-            runningDom = health.Ld;
-         }
-         if (statIndexTE === HEALTH)
-            runningTE = -1;
-         currentTE = runningTE;
-      }
-      return !!this.options.length;
-   } */
 
    /**
     * Option sort comparison function using deviation from the stat mean to determine sort order
