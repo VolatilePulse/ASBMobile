@@ -1,11 +1,9 @@
-const Enumerable = require('linq');
-const fs = require('fs');
+import Enumerable from 'linq';
+import * as fs from 'fs';
 
-
-const DATA = "static/data.json";
+const DATA = "public/data/data.json";
 const STAT_B = 0, STAT_IW = 1, STAT_ID = 2, STAT_TA = 3, STAT_TM = 4;
 const statNames = ['Health', 'Stamina', 'Oxygen', 'Food', 'Weight', 'Melee', 'Speed', 'Torpor'];
-
 
 /** @returns {{species:{[name:string]:{stats:number[][]}}}} */
 function readData() {
@@ -16,9 +14,6 @@ function readData() {
    return values;
 }
 
-
-
-
 /**
  * Your filter logic here...
  * You're passed the species stat values.
@@ -27,11 +22,8 @@ function readData() {
  * @returns {boolean} True if this species should be selected.
  */
 function myFilter(stats) {
-   return Enumerable.from(stats).any(values => Enumerable.from(values.slice(1)).all(v => v == 0));
+   return Enumerable.from(stats).any(values => Enumerable.from(values.slice(STAT_TM)).all(v => v < 0));
 }
-
-
-
 
 let values = readData();
 
