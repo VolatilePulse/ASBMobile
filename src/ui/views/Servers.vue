@@ -84,18 +84,6 @@
 input:focus::placeholder {
   color: transparent;
 }
-input:focus::-webkit-input-placeholder {
-  color: transparent;
-}
-input:focus:-moz-placeholder {
-  color: transparent;
-} /* FF 4-18 */
-input:focus::-moz-placeholder {
-  color: transparent;
-} /* FF 19+ */
-input:focus:-ms-input-placeholder {
-  color: transparent;
-} /* IE 10+ */
 </style>
 
 
