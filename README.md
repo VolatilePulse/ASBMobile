@@ -33,6 +33,7 @@ For reference: <https://github.com/petervanderdoes/gitflow-avh>
 - Verify app compatibility with iOS
 - Import/export library
 - Disable devMode by default and provide a mechanism to turn it back on (store in settings)
+- Create continuous tester using random creatures and random server parameters
 
 ### Low Priority
 - Store app & data versions in settings and use to display short changelog
