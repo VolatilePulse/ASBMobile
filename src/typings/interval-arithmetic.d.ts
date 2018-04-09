@@ -6,14 +6,15 @@ declare const IntervalArithmeticConst: IntervalArithmeticStatic;
 
 declare interface IntervalArithmeticStatic {
    (): Interval;
+   (value: number): Interval;
    (lo: number, hi: number): Interval;
 
    isEmpty(range: Interval): boolean;
    isWhole(range: Interval): boolean;
-   hasValue(range: Interval, value: number): boolean;
-   hasInterval(a: Interval, b: Interval): boolean;
+   hasValue(range: number | Interval, value: number): boolean;
+   hasInterval(a: Interval, b: number | Interval): boolean;
 
-   intersection(a: Interval, b: Interval): Interval;
+   intersection(a: Interval, b: number | Interval): Interval;
 
    round: {
       enable(): void,

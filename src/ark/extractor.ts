@@ -6,6 +6,18 @@ import * as IA from 'interval-arithmetic';
 import * as compile from 'interval-arithmetic-eval';
 import { Stat, VueCreature } from './creature';
 
+/** Return the average of an Interval */
+function intervalAverage(range: Interval): number {
+   return (range.lo + range.hi) / 2;
+}
+
+// Generator that yields the inner int range from the interval
+function* intFromRange(interval: Interval, fn?: (value: number) => number) {
+   const min = fn ? fn(interval.lo) : Math.ceil(interval.lo);
+   const max = fn ? fn(interval.hi) : Math.floor(interval.hi);
+   for (let i = min; i <= max; i++) yield i;
+}
+
 export class TEProps {
    TE = 0;
    wildLevel = 0;
@@ -23,10 +35,6 @@ export class Extractor {
    domFreeMax = 0;
    /** What level the creature was born/tamed at */
    levelBeforeDom = 0;
-   /** The lowest that the IB can be */
-   minIB = 0;
-   /** The IB value must be lower than this to be valid */
-   maxIB = 0;
    /** A running total of each stat's minimum wild stat levels */
    minWild = 0;
    /** A running total of each stat's minimum dom stat levels */
@@ -91,8 +99,6 @@ export class Extractor {
       // TODO: Add either a way to throw errors w/ codes (for specific reasons like bad multipliers, stats, etc.)
       //    Or provide an alternative method (returning under bad situations is acceptable for now)
 
-      // Turn Interval Arithmetic rounding off
-      IA.round.disable();
       // Used to initialize all relevant interval variables
       this.init();
 
@@ -100,28 +106,13 @@ export class Extractor {
       this.rangeVars.Lw = 0;
       this.rangeVars.Ld = 0;
 
-      // Calculate the torpor stat since it doesn't accept dom levels
-      if (!this.c.bred) {
-         // FIXME: Needs converted to an average
-         tempStat.Lw = Math.round(this.rangeFuncs.calcLw.eval({ ...this.rangeVars, ...this.rangeStats[TORPOR] }).lo);
-         this.c.stats[TORPOR].push(new Stat(tempStat));
-      }
+      this.c.stats[TORPOR].push(new Stat());
+      let torporLwRange: Interval = IA();
 
-      else {
-         this.originalIB = this.c.IB;
-         // Create an empty stat to be pushed off immediately for all bred creatures
-         this.c.stats[TORPOR].push(new Stat());
-         this.minIB = Math.max(this.originalIB - 0.005, 0);
-         this.maxIB = this.originalIB + 0.005;
-         const minTorporLw = tempStat.calculateWildLevel(this.m[TORPOR], this.c.values[TORPOR], !this.c.wild, 1, this.maxIB);
-         tempStat.calculateWildLevel(this.m[TORPOR], this.c.values[TORPOR], !this.c.wild, 1, this.minIB);
-         for (; tempStat.Lw >= minTorporLw; tempStat.Lw--) {
-            this.c.stats[TORPOR].push(new Stat(tempStat));
-         }
-      }
+      torporLwRange = this.rangeFuncs.calcLw.eval({ ...this.rangeVars, ...this.rangeStats[TORPOR] });
       this.checkedStat[TORPOR] = true;
 
-      do {
+      for (this.c.stats[TORPOR][0].Lw of intFromRange(torporLwRange, Math.round)) {
          // Reset flag to test for failed cases
          this.success = true;
 
@@ -130,10 +121,6 @@ export class Extractor {
             this.c.stats[index] = [];
             this.checkedStat[index] = false;
          }
-
-         // Remove the previous torpor stat as it was no good
-         if (this.c.bred)
-            this.c.stats[TORPOR].shift();
 
          // Calculate the max number of levels based on level and torpor
          this.wildFreeMax = this.c.stats[TORPOR][0].Lw;
@@ -192,7 +179,6 @@ export class Extractor {
                         this.findMultiTEStat(tempStat, statIndex, maxLd, localMap);
                      }
                   }
-
                }
             }
 
@@ -218,14 +204,9 @@ export class Extractor {
             else
                this.success = false;
          }
-         // Clear out the rest of the torpor results since we found the correct one
-         if (this.success && this.c.bred)
-            this.c.stats[TORPOR] = [this.c.stats[TORPOR][0]];
-
-      } while (this.c.stats[TORPOR].length !== 1 && !this.success && this.c.bred);
-
-      // Turn Interval Arithmetic rounding back on
-      IA.round.enable();
+         if (this.success)
+            break;
+      }
 
       if (dbg) dbg.levelFromTorpor = this.c.stats[TORPOR][0].Lw;
 
@@ -269,13 +250,8 @@ export class Extractor {
          this.rangeStats[statIndex].TBHM = this.m[statIndex].TBHM || 1;
          this.rangeStats[statIndex].IBM = this.m[statIndex].IBM;
 
-         if (this.c.wild) {
+         if (this.c.wild)
             this.rangeStats[statIndex].TBHM = 1;
-
-            this.rangeStats[statIndex].TE = 1;
-            this.rangeStats[statIndex].IB = 0;
-            this.rangeStats[statIndex].IBM = 0;
-         }
          else {
             // Handle negative values
             if (this.m[statIndex].Ta < 0)
@@ -291,79 +267,66 @@ export class Extractor {
       // rangeVars
       if (this.c.wild) {
          this.rangeVars.TE = 0;
-         this.rangeVars.IB = 0;
+         this.rangeVars.IB = IA(0);
       }
       else if (this.c.tamed) {
          this.rangeVars.TE = IA(0, 1);
-         this.rangeVars.IB = 0;
+         this.rangeVars.IB = IA(0);
       }
       else {
          this.rangeVars.TE = 1;
-         this.rangeVars.IB = IA(0, 1.05);
+         this.originalIB = this.c.IB;
+         this.rangeVars.IB = IA().halfOpenRight(this.originalIB - 0.005, this.originalIB + 0.005);
+         this.rangeVars.IB = IA.intersection(this.rangeVars.IB, IA(0, Infinity));
       }
       this.rangeVars.Lw = 0;
       this.rangeVars.Ld = 0;
 
       // rangeFuncs
-      this.rangeFuncs.calcWL = compile('tamedLevel / (1 + 0.5 * TE)');
-      this.rangeFuncs.calcTEFromWL = compile('(tamedLevel / wildLevel - 1) / 0.5');
-      this.rangeFuncs.calcValue = compile('(B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) * (1 + TE * Tm * TmM) * (1 + Ld * Id * IdM)');
-      this.rangeFuncs.calcLw = compile('((V / ((1 + Ld * Id * IdM) * (1 + TE * Tm * TmM)) - Ta * TaM) / (B * TBHM * (1 + IB * 0.2 * IBM)) - 1) / (Iw * IwM)');
-      this.rangeFuncs.calcLd = compile('((V / (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) / (1 + TE * Tm * TmM)) - 1) / (Id * IdM)');
-      this.rangeFuncs.calcTE = compile('(V / (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) / (1 + Ld * Id * IdM) - 1) / (Tm * TmM)');
-      this.rangeFuncs.calcIB = compile('((V / (1 + TE * Tm * TmM) / (1 + Ld * Id * IdM) - Ta * TaM) / (B * (1 + Lw * Iw * IwM) * TBHM) - 1)  / (0.2 * IBM)');
+      this.rangeFuncs.calcWL = compile('tamedLevel/(1+0.5*TE)');
+      this.rangeFuncs.calcTEFromWL = compile('(tamedLevel/wildLevel-1)/0.5');
+      this.rangeFuncs.calcValue = compile('(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)*(1+TE*Tm*TmM)*(1+Ld*Id*IdM)');
+      this.rangeFuncs.calcLw = compile('((V/((1+Ld*Id*IdM)*(1+TE*Tm*TmM))-Ta*TaM)/(B*TBHM*(1+IB*0.2*IBM))-1)/(Iw*IwM)');
+      this.rangeFuncs.calcLd = compile('((V/(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)/(1+TE*Tm*TmM))-1)/(Id*IdM)');
+      this.rangeFuncs.calcTE = compile('(V/(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)/(1+Ld*Id*IdM)-1)/(Tm*TmM)');
+      this.rangeFuncs.calcIB = compile('((V/(1+TE*Tm*TmM)/(1+Ld*Id*IdM)-Ta*TaM)/(B*(1+Lw*Iw*IwM)*TBHM)-1)/(0.2*IBM)');
    }
 
    /**
-    *  Attempts to calculate a valid Imprint Bonus from the one entered. While it doesn't support the same "Exactly" option that ASB does,
-    *    it does first attempt to look at the entered IB to see if it's valid first. Unfortunately, that also means that the IB must be rounded
-    *    before the Extractor can use it as the assumption is made (to create the min/max IB) that 0.05 in either direction is still valid.
+    *  Attempts to calculate a valid Imprint Bonus from the one entered. While it doesn't support the same "Exactly"
+    *  option that ASB does, it does first attempt to look at the entered IB to see if it's valid first. Unfortunately,
+    *  that also means that the IB must be rounded before the Extractor can use it as the assumption is made (to create
+    *  the min/max IB) that 0.05 in either direction is still valid.
     *
     *  @return {undefined} There is no returned value
     */
    dynamicIBCalculation(): void {
       const localRangeVars = this.rangeVars;
-      const localRangeStats = this.rangeStats;
+      const localRangeFood = this.rangeStats[FOOD];
+      const localRangeTorpor = this.rangeStats[TORPOR];
       const localRangeFuncs = this.rangeFuncs;
-      // Generate the min/max values for future edge cases (applicable in all situations)
-      localRangeVars.IB = IA().halfOpenRight(this.originalIB - 0.005, this.originalIB + 0.005);
-      localRangeVars.IB = IA.intersection(localRangeVars.IB, IA(0, Infinity));
 
-      this.minIB = localRangeVars.IB.lo;
-      this.maxIB = localRangeVars.IB.hi;
-
-      // If the entered IB works, we don't need to do anything else (Torpor can't be levelled and typically has a large value to start with)
-      const expectedValue = localRangeFuncs.calcValue.eval({ ...localRangeVars, ...localRangeStats[TORPOR] });
-      if (IA.hasValue(expectedValue, this.c.values[TORPOR]))
-         return;
-
-      // Extract the IB from Torpor
+      // Get stat levels from torpor
       localRangeVars.Lw = this.c.stats[TORPOR][0].Lw;
       localRangeVars.Ld = this.c.stats[TORPOR][0].Ld;
-      const tempIBRange = localRangeFuncs.calcIB.eval({ ...localRangeVars, ...localRangeStats[TORPOR] });
 
-      // Verify that the IB hasn't exceed the possible range
-      if (!IA.hasInterval(tempIBRange, localRangeVars.IB))
-         return;
-
-      localRangeVars.IB = IA.intersection(tempIBRange, localRangeVars.IB);
+      // Extract the IB from Torpor
+      let tempIBRange = localRangeFuncs.calcIB.eval({ ...localRangeVars, ...localRangeTorpor, });
+      tempIBRange = IA.intersection(tempIBRange, localRangeVars.IB);
 
       // Convert Intervals to numbers
-      this.c.IB = (localRangeVars.IB.lo + localRangeVars.IB.hi) / 2;
-      this.minIB = localRangeVars.IB.lo;
-      this.maxIB = localRangeVars.IB.hi;
+      this.c.IB = intervalAverage(tempIBRange);
 
       // Check the food stat for the IB as well (Only works if food is un-levelled)
       localRangeVars.Lw = 0;
       localRangeVars.Ld = 0;
-      // FIXME: Needs converted to an average
-      localRangeVars.Lw = Math.round(localRangeFuncs.calcValue.eval({ ...localRangeVars, ...localRangeStats[FOOD] }).hi);
-      localRangeVars.IB = localRangeFuncs.calcIB.eval({ ...localRangeVars, ...localRangeStats[FOOD] });
+      localRangeVars.Lw = Math.round(intervalAverage(localRangeFuncs.calcValue.eval({ ...localRangeVars, ...localRangeFood })));
+      tempIBRange = localRangeFuncs.calcIB.eval({ ...localRangeVars, ...localRangeFood });
 
       // Check to see if the new IB still allows torpor to extract correctly
-      const newExpectedValue = localRangeFuncs.calcValue.eval({ ...localRangeVars, ...localRangeStats[FOOD] });
+      const newExpectedValue = localRangeFuncs.calcValue.eval({ ...localRangeVars, ...localRangeFood });
       if (IA.hasValue(newExpectedValue, this.c.values[TORPOR]))
-         this.c.IB = (localRangeVars.IB.lo + localRangeVars.IB.hi) / 2;
+         this.c.IB = intervalAverage(tempIBRange);
 
       // IB can't be lower than 0
       if (this.c.IB < 0)
@@ -379,21 +342,19 @@ export class Extractor {
          return true;
       }
 
-      // We can't calculate speed if a stat is unused
-      else if (this.unusedStat && statIndex === SPEED) {
+      // We can't calculate stats that don't allow wild Increasees if a stat is unused
+      else if (this.unusedStat && !this.m[statIndex].Iw) {
          // Calculate DOM for speed
-         this.c.stats[SPEED] = [new Stat(-1, tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild, 0, this.c.IB))];
-         this.domFreeMax -= this.c.stats[SPEED][0].Ld;
-         this.checkedStat[statIndex] = this.checkedStat[SPEED] = true;
+         this.c.stats[statIndex] = [new Stat(-1, tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild, 0, this.c.IB))];
+         this.domFreeMax -= this.c.stats[statIndex][0].Ld;
+         this.checkedStat[statIndex] = true;
          return true;
       }
 
       // Creatures that don't allow speed to increase domestically also don't allow wild levels
-      else if (!this.m[statIndex].Id && statIndex === SPEED) {
-         // Calculate DOM for speed
-         this.c.stats[SPEED] = [new Stat(0, tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild, 0, this.c.IB))];
-         this.domFreeMax -= this.c.stats[SPEED][0].Ld;
-         this.checkedStat[statIndex] = this.checkedStat[SPEED] = true;
+      else if (!this.m[statIndex].Id) {
+         this.c.stats[statIndex] = [new Stat(0, 0)];
+         this.checkedStat[statIndex] = true;
          return true;
       }
 
@@ -418,17 +379,17 @@ export class Extractor {
             const maxTempIB = tempStat.calculateIB(this.m[statIndex], this.c.values[statIndex] + (0.5 / Math.pow(10, Ark.Precision(statIndex))));
             const minTempIB = tempStat.calculateIB(this.m[statIndex], this.c.values[statIndex] - (0.5 / Math.pow(10, Ark.Precision(statIndex))));
 
-            const expectedTorpor = this.c.stats[TORPOR][0].calculateValue(this.m[TORPOR], !this.c.wild, this.c.TE, maxTempIB);
-
-            if (this.maxIB > maxTempIB && maxTempIB >= this.minIB) {
+            if (IA.hasValue(this.rangeVars.IB, maxTempIB)) {
+               const expectedTorpor = this.c.stats[TORPOR][0].calculateValue(this.m[TORPOR], !this.c.wild, this.c.TE, maxTempIB);
                if (this.c.values[TORPOR] === Utils.RoundTo(expectedTorpor, Ark.Precision(TORPOR))) {
-                  this.c.IB = this.maxIB = maxTempIB;
+                  this.c.IB = this.rangeVars.IB = maxTempIB;
                   this.c.stats[statIndex].push(new Stat(tempStat));
                }
             }
-            if (this.minIB <= minTempIB && minTempIB < this.maxIB) {
+            if (IA.hasValue(this.rangeVars.IB, minTempIB)) {
+               const expectedTorpor = this.c.stats[TORPOR][0].calculateValue(this.m[TORPOR], !this.c.wild, this.c.TE, minTempIB);
                if (this.c.values[TORPOR] === Utils.RoundTo(expectedTorpor, Ark.Precision(TORPOR))) {
-                  this.c.IB = this.minIB = minTempIB;
+                  this.c.IB = this.rangeVars.IB = minTempIB;
                   this.c.stats[statIndex].push(new Stat(tempStat));
                }
             }
@@ -471,7 +432,7 @@ export class Extractor {
                const TEStat = new TEProps();
                TEStat.wildLevel = i;
                // Get the average of the TE range
-               TEStat.TE = (localRangeVars.TE.lo + localRangeVars.TE.hi) / 2;
+               TEStat.TE = intervalAverage(localRangeVars.TE);
 
                const workingStat = new Stat(tempStat);
                this.c.stats[statIndex].push(workingStat);
