@@ -51,6 +51,7 @@
       "Mult",
       "Stats",
       "TBHM",
+      "UUIDs",
       "consts",
       "debounced",
       "dismissible",
@@ -74,7 +75,7 @@
       ".vscode",
       "**/src/ark/servers_*.ts",
       "**/src/ark/test_data.ts",
-      "**/public/data/data.json",
+      "**/public/data/*.json",
    ],
    "cSpell.enabledLanguageIds": [
       "c",
