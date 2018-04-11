@@ -40,6 +40,9 @@ class Library implements IAsyncDisposable {
       this.serverTable = new Table<Server>(SERVERS_PREFIX + this.id);
       await this.serverTable.initialise();
 
+      // Ensure mirror is populated
+      await this.serverMirror.waitForInitialData();
+
       // TODO: Decide if we should load all creatures
 
       this.initialised = true;

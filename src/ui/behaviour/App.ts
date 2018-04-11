@@ -24,13 +24,17 @@ export default class AppShell extends Common {
       // Initialise the central store
       await theStore.initialise();
 
-      // Hook important changes
-      theStore.eventListener.on(EVENT_LIBRARY_CHANGED, activateSelectedServer);
-
       // Initialise remaining subsystems
       await Servers.initialise();
       await SettingsManager.initialise();
       await LibraryManager.initialise();
+
+      // Activate last selected server
+      activateSelectedServer();
+
+      // Hook important changes
+      theStore.eventListener.on(EVENT_LIBRARY_CHANGED, activateSelectedServer);
+
    }
 
    catchUnhandledRejection(event: any) {
