@@ -1,3 +1,5 @@
+import { DatabaseObject } from '@/data/database';
+import theStore from '@/ui/store';
 import debounce from 'lodash-es/debounce';
 import PouchDB from 'pouchdb-core';
 
@@ -7,21 +9,18 @@ const ID_SETTINGS = 'the';
 const SAVE_TIMEOUT = 1000;
 const SAVE_MAX_TIMEOUT = 5000;
 
-class Settings {
+
+class Settings extends DatabaseObject {
    dbVersion = 1;
    libraryNames: { [id: string]: string } = {};
-   selectedLibrary?: string = undefined;
-   dummyText = 'Dummy!';
-   dummyNumber = 1234;
+   selectedLibrary?: string = null;
 
-   // tslint:disable-next-line:variable-name : Variable name required for DB instraction
-   readonly _id = ID_SETTINGS;
-   // tslint:disable-next-line:variable-name : Variable name required for DB instraction
-   _rev?: string;
+   // FIXME: Move to library settings
+   selectedServerId?: string = null;
 
    /** All user-specific settings with default values. Should not include anything library-specific. */
    constructor() {
-      // do nothing
+      super(ID_SETTINGS);
    }
 }
 
@@ -34,7 +33,7 @@ class SettingsManager {
 
    private initialised = false;
    private db!: PouchDB.Database<Settings>;
-   private debouncedSave: () => void;
+   private debouncedSave: any;
 
    /** The SettingsManager manages settings :) */
    constructor() {
@@ -70,13 +69,19 @@ class SettingsManager {
 
    /** Mark settings as changed (they will be saved later) */
    notifyChanged() {
+      theStore.changesPending.settings = true;
       this.debouncedSave();
+   }
+
+   saveIfChanged() {
+      this.debouncedSave.flush();
    }
 
    /** Save the current settings to the database immediately */
    async save() {
       const result = await this.db.put(this.current);
       this.current._rev = result.rev;
+      theStore.changesPending.settings = false;
    }
 }
 

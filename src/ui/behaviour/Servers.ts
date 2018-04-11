@@ -1,6 +1,8 @@
-import { Server } from '@/ark/multipliers';
+import { ID_OFFICIAL_SERVER } from '@/ark/servers_predef';
+import { LibraryManager } from '@/data';
+import { Server } from '@/data/objects';
 import * as Servers from '@/servers';
-import Common from '@/ui/behaviour/Common';
+import Common, { catchAsyncErrors } from '@/ui/behaviour/Common';
 import theStore from '@/ui/store';
 import * as Utils from '@/utils';
 // @ts-ignore
@@ -12,26 +14,19 @@ const NEW_SERVER_ID = '___NEW___SERVER___';
 
 
 @Component
-export default class extends Common {
+export default class ServersTab extends Common {
    // Constant things
    newServerId = NEW_SERVER_ID;
    statIndices = Utils.Range(8);
    paramIndices = Utils.Range(4);
 
-   userServers = Servers.userServers;
+   get userServers() { return LibraryManager.current.getUserServersCache().content; }
    preDefinedServers = Servers.preDefinedServers;
    testServers = Servers.testServers;
 
-   server = new Server();
    editName = '-'; // temp copy of the server name for editing
 
-
-   get currentServerName() { return theStore.tempCreature.serverName; }
-   set currentServerName(value) { theStore.tempCreature.serverName = value; }
-
-   get editNameValidity() { return this.editName ? null : false; }
-   get isEditable() { return !this.server.isPreDefined; }
-   get canDelete() { return this.isEditable; }
+   get isEditNameValid() { return this.editName ? null : false; }
 
 
    $refs: Vue['$refs'] & {
@@ -40,53 +35,54 @@ export default class extends Common {
    };
 
 
-   editNameShown() { this.editName = this.currentServerName; }
-   editNameSubmit() {
-      if (this.editNameValidity !== false) {
-         Servers.renameServer(this.currentServerName, this.editName);
+   editNameShown() { this.editName = this.store.server.name; }
+   async editNameSubmit() {
+      if (this.isEditNameValid !== false) {
+         this.store.server.name = this.editName;
+         await LibraryManager.current.saveServer(this.store.server as PouchDB.Core.ExistingDocument<Server>);
          this.$refs.editNameModal.hide();
-         this.setServerByName(this.editName);
       }
    }
 
-   formatMult(n: number) { return Utils.FormatNumber(n, 2, true); }
+   formatMult(s: number, p: number) { return Utils.FormatNumber(this.store.officialServer.multipliers[s][p], 2, true); }
    valueFor(s: number, p: number) {
-      return this.server[s][p] || (this.server['singlePlayer'] && theStore.officialSPMultiplier[s][p]) || theStore.officialServer[s][p];
+      return theStore.server.multipliers[s][p]
+         || (theStore.server.singlePlayer && theStore.officialServerSP.multipliers[s][p])
+         || theStore.officialServer.multipliers[s][p];
    }
 
    setMult(s: number, p: number, v: string) {
       let num = v ? parseFloat(v) : undefined;
       if (num <= 0) num = undefined;
-      this.server[s][p] = num;
+      theStore.server.multipliers[s][p] = num;
    }
 
-   async onServerChange(newName: string) {
-      if (newName === NEW_SERVER_ID) {
-         this.setServerByName('Official Server');
+   @catchAsyncErrors
+   async onServerChange(newId: string) {
+      if (newId === NEW_SERVER_ID) {
+         theStore.setCurrentServer(this.store.officialServer);
          await this.copyServer();
       }
       else {
-         this.setServerByName(newName);
+         this.setServerById(newId);
       }
    }
 
    deleteServer() {
-      Servers.deleteUserServer(this.currentServerName);
-      this.setServerByName('Official Server');
+      if (!theStore.isServerEditable) return;
+      LibraryManager.current.deleteServer(theStore.server as PouchDB.Core.ExistingDocument<Server>); // ignore async, letting it complete later
+      this.setServerById(ID_OFFICIAL_SERVER);
       this.$refs.deleteModal.hide();
    }
 
-   setServerByName(name: string) {
-      this.server = Servers.getServerByName(name);
-      theStore.currentServerName = this.server.serverName;
-   }
-
+   @catchAsyncErrors
    async copyServer() {
-      this.server = await Servers.copyServer(this.server);
-      this.currentServerName = this.server.serverName;
+      const newServer = await Servers.copyServer(theStore.server);
+      theStore.setCurrentServer(newServer);
    }
 
-   created() {
-      this.setServerByName(this.currentServerName);
+   private setServerById(id: string) {
+      const server = Servers.getServerById(id);
+      theStore.setCurrentServer(server);
    }
 }

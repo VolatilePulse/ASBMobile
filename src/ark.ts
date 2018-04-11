@@ -1,9 +1,9 @@
-import { Stat } from '@/ark/creature';
-import { CombinedMultipliers } from '@/ark/types';
-import { DAMAGE, NUM_STATS, PRE_IB, PRE_TE, SPEED } from '@/consts';
+import { StatMultipliers, StatServerMultipliers } from '@/ark/multipliers';
+import { Stat } from '@/ark/types';
+import { DAMAGE, HEALTH, NUM_STATS, PRE_IB, PRE_TE, SPEED, TORPOR } from '@/consts';
+import { Server } from '@/data/objects';
 import theStore from '@/ui/store';
-import { Server } from './ark/multipliers';
-import * as Servers from './servers';
+import merge from 'lodash-es/merge';
 import * as Utils from './utils';
 
 
@@ -68,26 +68,24 @@ export function ConvertValue(value: number, index: number) {
    return returnValue;
 }
 
-/**
- * Generate a multipliers object for the Extractor
- */
-export function GetMultipliers(serverName: string, speciesName: string): CombinedMultipliers {
-   const server = Servers.getServerByName(serverName);
+/** Gather combined multipliers for the given server and species */
+export function GetMultipliers(server: Server, speciesName: string): StatMultipliers[] {
 
-   // The Server object tells us everything we need to know about the multipliers
-   const multipliers = Utils.DeepMergeSoft(new Server(), theStore.officialServer, server);
+   // Gather raw multipliers first from the official server, overriding with settings from the given server
+   const values = merge([], theStore.officialServer.multipliers, server.multipliers);
 
-   // Single Player multiplies the official/override multipliers
+   // Apply single-player multipliers
    if (server.singlePlayer) {
-      for (const stat in theStore.officialSPMultiplier) {
-         for (const multiplier in theStore.officialSPMultiplier[stat]) {
-            multipliers[stat][multiplier] = multipliers[stat][multiplier] * (theStore.officialSPMultiplier[stat][multiplier] || 1);
+      for (let stat = HEALTH; stat <= TORPOR; stat++) {
+         for (const param in theStore.officialServerSP.multipliers[stat]) {
+            values[stat][param] *= theStore.officialServerSP.multipliers[stat][param] || 1;
          }
       }
    }
 
-   // Copy in species-related data
-   Utils.DeepMerge(multipliers, theStore.speciesMultipliers[speciesName]);
+   // Convert to objects
+   const speciesValues = theStore.speciesMultipliers[speciesName];
+   const multipliers: StatMultipliers[] = values.map((v, i) => ({ ...new StatServerMultipliers(v[0], v[1], v[2], v[3]), ...speciesValues[i] }));
 
    // Set IBM for each stat
    for (let stat = 0; stat < NUM_STATS; stat++)

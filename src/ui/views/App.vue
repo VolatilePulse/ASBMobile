@@ -29,8 +29,14 @@
       <b-container fluid style="margin-top: 4rem" class="p-2 pt-0">
          <b-progress v-show="!store.dataLoaded && !store.dataLoadError" :value="100" striped :animated="true" variant="secondary" class="fixed-top" style="height: 0.4rem"></b-progress>
 
+         <b-badge v-if="store.changesPending.settings" variant="info" style="float:right">Saving...</b-badge>
+
+         <p>Server ID:
+            <code>{{store.server ? store.server._id : "-"}}</code>
+         </p>
+
          <!-- The update available notice -->
-         <b-alert :show="store.updateAvailable" dismissible>Update available! Reload to activate.</b-alert>
+         <b-alert :show="store.updateAvailable" dismissible variant="info">Update available! Reload to activate.</b-alert>
 
          <!-- The alert on data load failure -->
          <b-alert variant="danger" :show="store.dataLoadError">
