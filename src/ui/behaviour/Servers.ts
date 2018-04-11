@@ -130,7 +130,7 @@ export default class ServersTab extends Common {
    /** Called by the watcher when the contents of the current server change */
    private onWatcherTriggered() {
       if (this.disableWatcher) return;
-      if (!this.store.isServerEditable) console.error('Watch triggered on read-only server!')
+      if (!this.store.isServerEditable) console.error('Watch triggered on read-only server!');
 
       this.debouncedSave();
       this.store.changesPending.servers = true;
