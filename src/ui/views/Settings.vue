@@ -1,14 +1,14 @@
 <template>
    <b-container fluid>
       <div class="pb-3">Database format: {{settings.dbVersion}}</div>
-      <b-form>
+      <!--b-form>
          <b-form-group label="Dummy text field:" label-for="dummyText" description="(editable, saved)">
             <b-input id="dummyText" type="text" v-model.trim="settings.dummyText" @input="markDirty"></b-input>
          </b-form-group>
          <b-form-group label="Dummy number field:" label-for="dummyNumber" description="(editable, saved)">
             <b-input id="dummyNumber" type="number" v-model.number="settings.dummyNumber" @input="markDirty"></b-input>
          </b-form-group>
-      </b-form>
+      </b-form-->
 
       <b-row>
          <b-col sm="3">Libraries

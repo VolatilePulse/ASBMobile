@@ -2,7 +2,7 @@
    <b-container fluid>
       <section class="my-3">
          <div>Application version: {{store.applicationVersion || 'n/a'}}</div>
-         <div>Database version: {{store.dataLoaded ? store.valuesJson.settings.version : "n/a"}}</div>
+         <div>Database version: {{store.dataLoaded ? store.valuesVersion : "n/a"}}</div>
       </section>
       <section>
          <div>ASBMobile is possible with help from:</div>

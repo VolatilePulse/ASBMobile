@@ -25,8 +25,8 @@ Contents of library settings entries:
 | Key | Type (jsdoc) | Default (if unset) | Description |
 |-:|:-:|-|-|
 | showDead | `boolean` | `true` | Whether to show creatures with status Dead |
-| showUnavilable | `boolean` | `true` | Whether to show creatures with status Unavilable |
-| librarySort | `string` | `"name"` | Column name to sort the lirary on |
+| showUnavailable | `boolean` | `true` | Whether to show creatures with status Unavailable |
+| librarySort | `string` | `"name"` | Column name to sort the library on |
 
 ## Libraries
  * Support multiple libraries, each containing server definitions and creatures.
@@ -70,8 +70,8 @@ Fields:
 | levels | `number[][]` | - | Array of `[Lw,Ld]` pairs, one for each stat |
 | tamingEff | `number` | - | Taming efficiency, as a percentage (0-1) |
 | imprint | `number` | - | Imprint level, as a percentage (0-1) |
-| mutMat | `number` | 0 | Number of mutations on the matriliineal line |
-| mutPat | `number` | 0 | Number of mutations on the patriliineal line |
+| mutMat | `number` | 0 | Number of mutations on the matrilineal line |
+| mutPat | `number` | 0 | Number of mutations on the patrilineal line |
 | mother_uuid | `string` | - | UUID of mother creature |
 | father_uuid | `string` | - | UUID of father creature |
 | owner | `string` | - | Free-form text field |

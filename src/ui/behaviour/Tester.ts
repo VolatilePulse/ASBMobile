@@ -1,10 +1,10 @@
 import { FormatAllOptions, FormatOption, FormatOptions } from '@/ark';
-import { Stat } from '@/ark/creature';
 import { TEProps } from '@/ark/extractor';
 import testData from '@/ark/test_data';
+import { Stat } from '@/ark/types';
 import { statNames } from '@/consts';
 import { PerformPerfTest, PerformTest, TestResult } from '@/testing';
-import Common from '@/ui/behaviour/Common';
+import Common, { catchAsyncErrors } from '@/ui/behaviour/Common';
 import * as Utils from '@/utils';
 import { Component, Vue } from 'vue-property-decorator';
 
@@ -14,7 +14,7 @@ const ASYNC_DELAY_TIME_MS = 100;
 
 
 @Component
-export default class extends Common {
+export default class TesterTab extends Common {
    openTestIndex = 0;
    testData = testData;
    results: TestResult[] = [];
@@ -76,6 +76,7 @@ export default class extends Common {
    /**
     * Run a selection of tests without blocking the browser
     */
+   @catchAsyncErrors
    async runTestSelection(indices: number[]) {
       this.running = true;
       this.openTestIndex = null;
@@ -125,6 +126,7 @@ export default class extends Common {
    }
 
    /** Run just one test */
+   @catchAsyncErrors
    async runTest(index: number) {
       await this.runTestSelection([index]);
       if (this.results[index] === undefined || !this.results[index]['pass'])
@@ -134,16 +136,19 @@ export default class extends Common {
    }
 
    /** Run all of the tests */
+   @catchAsyncErrors
    async runAllTests() {
       await this.runTestSelection(Utils.Range(testData.length));
    }
 
    /** Re-run the passes */
+   @catchAsyncErrors
    async runPasses() {
       await this.runTestSelection(Utils.Range(testData.length).filter(i => this.results[i] && this.results[i].pass));
    }
 
    /** Re-run the failures */
+   @catchAsyncErrors
    async runFails() {
       await this.runTestSelection(Utils.Range(testData.length).filter(i => this.results[i] && !this.results[i].pass));
    }

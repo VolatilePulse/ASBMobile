@@ -2,8 +2,9 @@
  * @fileOverview Miscellaneous functions used throughout the app
  */
 
-import { isString } from 'util';
 import cloneDeepWith from 'lodash-es/cloneDeepWith';
+import { isString } from 'util';
+
 
 const EPSILON = 1E-10;
 
@@ -125,7 +126,7 @@ export function DeepCopy<T>(obj: T): T {
 
 function CloneCustomizer<T>(_: T, key: string | number): any | null {
    if (!key) return undefined;
-   if (isString(key) && key.startsWith('_')) return null;
+   if (isString(key) && key.startsWith('__')) return null;
 }
 
 /**
@@ -133,7 +134,7 @@ function CloneCustomizer<T>(_: T, key: string | number): any | null {
  * @param {object} target
  * @param {object[]} sources
  */
-export function DeepMerge(target: any, ...sources: any[]): any {
+export function DeepMerge<T extends Bag>(target: T, ...sources: Bag[]): T {
    if (!sources.length)
       return target;
 
@@ -154,12 +155,17 @@ export function DeepMerge(target: any, ...sources: any[]): any {
    return DeepMerge(target, ...sources);
 }
 
+interface Bag {
+   [key: string]: any;
+   [key: number]: any;
+}
+
 /**
  * Deep merge two objects, except don't overwrite a value with 'undefined' and don't touch anything starting with '_'.
  * @param {object} target
  * @param {object[]} sources
  */
-export function DeepMergeSoft(target: any, ...sources: any[]): any {
+export function DeepMergeSoft<T extends Bag>(target: T, ...sources: Bag[]): T {
    if (!sources.length)
       return target;
 
@@ -167,7 +173,7 @@ export function DeepMergeSoft(target: any, ...sources: any[]): any {
 
    if (IsObject(target) && IsObject(source)) {
       for (const key in source) {
-         if (key.startsWith('_')) continue;
+         if (typeof key === 'string' && key.startsWith('_')) continue;
          if (IsObject(source[key])) {
             if (!target[key])
                Object.assign(target, { [key]: {} });

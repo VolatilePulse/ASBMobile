@@ -66,6 +66,14 @@
             "asyncArrow": "always"
          }
       ],
-      "prefer-conditional-expression": false
+      "prefer-conditional-expression": false,
+      "variable-name": [
+         true,
+         "ban-keywords",
+         "check-format",
+         "allow-leading-underscore",
+         "allow-snake-case",
+         "allow-pascal-case"
+      ]
    }
 }
