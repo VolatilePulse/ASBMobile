@@ -1,17 +1,18 @@
 import { SpeciesParameters } from '@/ark/multipliers';
 import { statNames } from '@/consts';
-import { SettingsManager, LibraryManager } from '@/data';
+import { LibraryManager, SettingsManager } from '@/data';
+import { MirrorCache } from '@/data/mirror';
 import { Creature, Server } from '@/data/objects';
 import { isServerEditable } from '@/servers';
 import { Delay } from '@/utils';
 import { EventEmitter } from 'events';
 import Vue from 'vue';
-import { MirrorCache } from '@/data/mirror';
 
 
 export const EVENT_SERVER_CHANGED = 'server-changed';
 export const EVENT_LIBRARY_CHANGED = 'library-changed';
 
+// Everything public in this class should be initialised to a non-undefined value to enable observation
 class Store {
    eventListener: EventEmitter = new EventEmitter();
 
@@ -30,7 +31,7 @@ class Store {
    changesPending = { settings: false, servers: false };
 
    userServersCache: MirrorCache<Server> = { content: [] };
-   isServerEditable: boolean;
+   isServerEditable: boolean = true;
    tempCreature: Creature = new Creature();
    valuesVersion: string = '-';
 
