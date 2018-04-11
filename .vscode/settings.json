@@ -54,6 +54,7 @@
       "UUIDs",
       "consts",
       "debounced",
+      "debouncer",
       "dismissible",
       "gigas",
       "linq",
