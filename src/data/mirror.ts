@@ -21,6 +21,9 @@ export class TableMirror<ContentType extends {}> implements IAsyncDisposable {
    private options: PouchDB.LiveFind.PaginateOptions = { sort: [] };
    private filter: PouchDB.Find.Selector = {};
 
+   private firstDataPromise: Promise<void>;
+   private firstDataPromiseResolver: (value?: void | PromiseLike<void>) => void;
+
    /**
     * Create a table/database mirror. Maintains an array of the contents of the database, updated live when the database changes.
     * @param name Database name to mirror.
@@ -33,6 +36,9 @@ export class TableMirror<ContentType extends {}> implements IAsyncDisposable {
 
    async initialise() {
       if (this.initialised) return;
+
+      // Setup to capture the first results
+      this.firstDataPromise = new Promise(resolve => this.firstDataPromiseResolver = resolve);
 
       // Setup pouchdb-live-find on this DB
       this.db = new PouchDB<ContentType>(this.name);
@@ -48,12 +54,20 @@ export class TableMirror<ContentType extends {}> implements IAsyncDisposable {
       this.initialised = true;
    }
 
+   /** Wait for the first initial data fetch to complete */
+   async waitForInitialData() {
+      if (!this.initialised) throw new NotInitialisedError();
+      if (!this.firstDataPromise) return;
+
+      await this.firstDataPromise;
+   }
+
    /**
     * @example setSortOrder([{name:'asc'},{level:'desc'}])
     * @example setSortOrder(['name','level'])
     * @param sort An array of fields to sort on.
     */
-   public setSortOrder(sort?: Array<string | { [propName: string]: 'asc' | 'desc' }>) {
+   setSortOrder(sort?: Array<string | { [propName: string]: 'asc' | 'desc' }>) {
       this.options.sort = sort;
       if (this.liveFeed) this.cache.content = this.liveFeed.sort(sort);
    }
@@ -74,7 +88,12 @@ export class TableMirror<ContentType extends {}> implements IAsyncDisposable {
       }
    }
 
-   onUpdate(_: string, aggregate: Array<PouchDB.Core.ExistingDocument<ContentType>>) {
+   private onUpdate(_: string, aggregate: Array<PouchDB.Core.ExistingDocument<ContentType>>) {
+      if (this.firstDataPromise) {
+         this.firstDataPromiseResolver();
+         this.firstDataPromiseResolver = undefined;
+         this.firstDataPromise = undefined;
+      }
       this.cache.content = aggregate;
    }
 }
