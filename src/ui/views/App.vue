@@ -29,8 +29,11 @@
       <b-container fluid style="margin-top: 4rem" class="p-2 pt-0">
          <b-progress v-show="!store.dataLoaded && !store.dataLoadError" :value="100" striped :animated="true" variant="secondary" class="fixed-top" style="height: 0.4rem"></b-progress>
 
-         <b-badge v-if="store.changesPending.settings" variant="info" style="float:right">Saving...</b-badge>
+         <!-- TODO: Replace: Temporary indicators for pending changes ready to be saved -->
+         <b-badge v-if="store.changesPending.settings" variant="info" style="float:right">Pending Settings Save</b-badge>
+         <b-badge v-if="store.changesPending.servers" variant="warning" style="float:right">Pending Server Save</b-badge>
 
+         <!-- TODO: Remove: Temporary indicator for current server -->
          <p>Server ID:
             <code>{{store.server ? store.server._id : "-"}}</code>
          </p>

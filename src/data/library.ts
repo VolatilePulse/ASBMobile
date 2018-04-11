@@ -65,17 +65,17 @@ class Library implements IAsyncDisposable {
    }
 
    /** Save changes to an existing server */
-   async saveServer(server: PouchDB.Core.ExistingDocument<Server>) {
+   async saveServer(server: Server) {
       if (!this.initialised) throw new NotInitialisedError();
 
-      await this.serverTable.update(server);
+      await this.serverTable.update(server as PouchDB.Core.ExistingDocument<Server>);
    }
 
    /** Delete an existing server */
-   async deleteServer(server: PouchDB.Core.ExistingDocument<Server>) {
+   async deleteServer(server: Server) {
       if (!this.initialised) throw new NotInitialisedError();
 
-      await this.serverTable.delete(server);
+      await this.serverTable.delete(server as PouchDB.Core.ExistingDocument<Server>);
    }
 
    getUserServersCache(): MirrorCache<Server> {

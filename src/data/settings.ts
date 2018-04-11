@@ -1,3 +1,4 @@
+import { SAVE_MAX_TIMEOUT, SAVE_TIMEOUT } from '@/consts';
 import { DatabaseObject } from '@/data/database';
 import theStore from '@/ui/store';
 import debounce from 'lodash-es/debounce';
@@ -6,8 +7,6 @@ import PouchDB from 'pouchdb-core';
 
 const DB_SETTINGS = 'settings';
 const ID_SETTINGS = 'the';
-const SAVE_TIMEOUT = 1000;
-const SAVE_MAX_TIMEOUT = 5000;
 
 
 class Settings extends DatabaseObject {

@@ -27,7 +27,7 @@ class Store {
    dataLoaded: boolean = false;
    dataLoadError: string = null;
    updateAvailable: boolean = false;
-   changesPending = { settings: false };
+   changesPending = { settings: false, servers: false };
 
    userServersCache: MirrorCache<Server> = { content: [] };
    isServerEditable: boolean;

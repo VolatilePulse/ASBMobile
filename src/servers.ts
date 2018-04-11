@@ -53,9 +53,9 @@ export async function copyServer(src: Server): Promise<Server> {
    // Give it a new name, checking for uniqueness
    do
       newServer.name = 'Copy of ' + newServer.name;
-   while (getServerById(newServer.name));
+   while (LibraryManager.current.getUserServersCache().content.find(server => server.name === newServer.name));
 
-   await LibraryManager.current.addServer(newServer);
+   await LibraryManager.current.saveServer(newServer);
 
    return newServer;
 }
