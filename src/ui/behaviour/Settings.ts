@@ -1,10 +1,10 @@
-import { Vue, Component } from 'vue-property-decorator';
+import { LibraryManager, SettingsManager } from '@/data';
 import Common from '@/ui/behaviour/Common';
-import { SettingsManager, LibraryManager } from '@/data';
+import { Component, Vue } from 'vue-property-decorator';
 
 
 @Component
-export default class extends Common {
+export default class SettingsTab extends Common {
    settings = SettingsManager.current;
    newLibraryName = '';
    renameLibraryName = '';
@@ -37,5 +37,9 @@ export default class extends Common {
          LibraryManager.renameLibrary(this.renameLibraryId, this.renameLibraryName);
          this.$refs.renameLibraryModal.hide();
       }
+   }
+
+   beforeDestroy() {
+      SettingsManager.saveIfChanged();
    }
 }

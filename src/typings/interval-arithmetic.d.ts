@@ -5,6 +5,11 @@ declare module 'interval-arithmetic' {
 declare const IntervalArithmeticConst: IntervalArithmeticStatic;
 
 declare interface IntervalArithmeticStatic {
+   round: {
+      enable(): void,
+      disable(): void,
+   };
+
    (): Interval;
    (value: number): Interval;
    (lo: number, hi: number): Interval;
@@ -15,11 +20,6 @@ declare interface IntervalArithmeticStatic {
    hasInterval(a: Interval, b: number | Interval): boolean;
 
    intersection(a: Interval, b: number | Interval): Interval;
-
-   round: {
-      enable(): void,
-      disable(): void,
-   }
 }
 
 declare class Interval {

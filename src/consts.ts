@@ -31,3 +31,7 @@ export const statNames = [
    'Speed',
    'Torpor',
 ];
+
+
+export const SAVE_TIMEOUT = 1000;
+export const SAVE_MAX_TIMEOUT = 10_000;

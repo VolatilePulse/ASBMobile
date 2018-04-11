@@ -1,17 +1,17 @@
-import { Component } from 'vue-property-decorator';
-import Common from '@/ui/behaviour/Common';
-
 import * as Ark from '@/ark';
-import testData from '@/ark/test_data';
-import { FilledArray, DeepCopy, Delay } from '@/utils';
 import { Extractor } from '@/ark/extractor';
+import testData from '@/ark/test_data';
+import { Stat, TestData } from '@/ark/types';
 import { PRE_IB } from '@/consts';
-import { TestData } from '@/ark/types';
-import { Stat } from '@/ark/creature';
+import { getServerById } from '@/servers';
+import Common from '@/ui/behaviour/Common';
+import theStore from '@/ui/store';
+import { DeepCopy, Delay, FilledArray } from '@/utils';
+import { Component } from 'vue-property-decorator';
 
 
 @Component
-export default class extends Common {
+export default class ExtractorTab extends Common {
    testData = testData;
 
    autoExtract = false;
@@ -39,7 +39,7 @@ export default class extends Common {
       creature.IB = Ark.ConvertValue(this.imprint, PRE_IB);
       creature.values = DeepCopy(this.values.map(Ark.ConvertValue)); // convert values, then create a clean un-observed copy
 
-      this.extractor = new Extractor(creature);
+      this.extractor = new Extractor(creature, theStore.server);
       this.extractor.extract();
 
       this.success = this.extractor.success;
@@ -65,7 +65,7 @@ export default class extends Common {
       this.values = Array.from(test.values);
 
       // Set the current server to the one specified by the test
-      this.store.tempCreature.serverName = test.serverName;
+      this.store.setCurrentServer(getServerById(test.serverId));
    }
 
    // Nasty debug-only methods to show stats and their options

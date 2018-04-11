@@ -1,68 +1,77 @@
-import { ServerDef } from '@/ark/types';
+export const SERVER_PREFIX_TEST = 'test:';
 
+// Server, without ID
+interface ServerDef {
+   name: string;
+   IBM: number;
+   singlePlayer: boolean;
+   multipliers: Array<Array<number | null | undefined>>;
+}
+
+// Servers in this group automatically have their IDs set (to 'test:<name>')
 const servers: ServerDef[] = [
    {
-      serverName: 'kohonac HP.IDM: 2.0',
+      name: 'kohonac HP.IDM: 2.0',
       IBM: 1,
       singlePlayer: true,
       multipliers: [[, , 2]],
    },
    {
-      serverName: 'eldoco87',
+      name: 'eldoco87',
       IBM: 1,
       singlePlayer: false,
       multipliers: [[], [], [], [], [], [], [2]],
    },
    {
-      serverName: '[BLPP] Jane',
+      name: '[BLPP] Jane',
       IBM: 1,
       singlePlayer: false,
       multipliers: [],
    },
    {
-      serverName: 'Zerkxy Gremory',
+      name: 'Zerkxy Gremory',
       IBM: 1,
       singlePlayer: false,
       multipliers: [],
    },
    {
-      serverName: 'Coldino SP',
+      name: 'Coldino SP',
       IBM: 1,
       singlePlayer: true,
       multipliers: [[], [2, , 2], [], [], [10, , 10], [0.2, , 0.22], [3, , 3]],
    },
    {
-      serverName: 'Tp',
+      name: 'Tp',
       IBM: 1,
       singlePlayer: false,
       multipliers: [[0.5, 0.5, 0.5, 1.3], [2.5, 2.5, 0.5], [1.3, 1.3], [1.3, 1.3, 1.3], [6, 6, 6, 6], [0.5, 0.4, 0.4], [1.6, 1.6, 1.6, 1.3], [1.3, 1.3, 1.3]],
    },
    {
-      serverName: 'ARK PVE Community Server',
+      name: 'ARK PVE Community Server',
       IBM: 1,
       singlePlayer: false,
       multipliers: [[], [], [], [], [, , 3, 1.5]],
    },
    {
-      serverName: 'Dusty.P',
+      name: 'Dusty.P',
       IBM: 1,
       singlePlayer: false,
       multipliers: [[], [], [], [], [, , 2], [], [, , 1.2]],
    },
    {
-      serverName: 'enohka',
+      name: 'enohka',
       IBM: 1,
       singlePlayer: false,
       multipliers: [],
    },
    {
-      serverName: 'DelilahEve',
+      name: 'DelilahEve',
       IBM: 1,
       singlePlayer: false,
       multipliers: [],
    },
    {
-      serverName: 'VestedWind',
+      name: 'VestedWind',
       IBM: 3,
       singlePlayer: false,
       multipliers: [[], [, , 2], [], [], [, , 150], [, , 2], [, , 4]],

@@ -20,7 +20,7 @@
       "bootstrap-vue": "^2.0.0-rc.2",
       "interval-arithmetic": "^0.6.10",
       "interval-arithmetic-eval": "^0.4.6",
-      "linq": "^3.1.0",
+      "cuid": "^2.1.1",
       "lodash-es": "^4.17.7",
       "pouch-vue": "^0.1.35",
       "pouchdb-adapter-idb": "^6.4.3",
@@ -29,9 +29,7 @@
       "register-service-worker": "^1.0.0",
       "vue": "^2.5.13",
       "vue-class-component": "^6.0.0",
-      "vue-property-decorator": "^6.0.0",
-      "vue-router": "^3.0.1",
-      "vuex": "^3.0.1"
+      "vue-property-decorator": "^6.0.0"
    },
    "devDependencies": {
       "@types/chai": "^4.1.0",
@@ -47,6 +45,7 @@
       "@vue/cli-service": "^3.0.0-beta.6",
       "@vue/test-utils": "^1.0.0-beta.10",
       "chai": "^4.1.2",
+      "linq": "^3.1.0",
       "local-web-server": "^2.5.1",
       "node-sass": "^4.7.2",
       "sass-loader": "^6.0.6",

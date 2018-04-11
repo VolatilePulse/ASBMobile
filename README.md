@@ -3,6 +3,10 @@ https://volatilepulse.github.io/ASBMobile/
 
 ### This is very much a work in progress and we ask you to please be patient as we attempt to provide the best experience possible. Unfortunately, we are not accept feature requests at this time. We are also very aware of bugs in the program at the moment. Thank you. :smile:
 
+## Inspiration
+
+This app is inspired by the wonderful [Ark Smart Breeding](https://github.com/cadon/ARKStatsExtractor) and aims to replicate some of its functionality for mobile and tablet devices.
+
 ## Development
 
 This project follows gitflow. Development work should be based off the `develop` branch, or in feature branches for large tasks.

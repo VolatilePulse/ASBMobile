@@ -4,9 +4,7 @@ declare module 'interval-arithmetic-eval' {
 
 declare const IntervalArithmeticEvalConst: IntervalArithmeticEvalStatic;
 
-declare interface IntervalArithmeticEvalStatic {
-   (equ: string): CompiledEquation;
-}
+declare type IntervalArithmeticEvalStatic = (equ: string) => CompiledEquation;
 
 declare class CompiledEquation {
    eval(variables: { [name: string]: number | Interval }): Interval;

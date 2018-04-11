@@ -1,10 +1,12 @@
 import * as Ark from '@/ark';
-import { CombinedMultipliers } from '@/ark/types';
+import { StatMultipliers } from '@/ark/multipliers';
+import { Stat } from '@/ark/types';
 import { FOOD, HEALTH, SPEED, STAT_EPSILON, TORPOR } from '@/consts';
+import { Creature, Server } from '@/data/objects';
 import * as Utils from '@/utils';
 import * as IA from 'interval-arithmetic';
 import * as compile from 'interval-arithmetic-eval';
-import { Stat, VueCreature } from './creature';
+
 
 /** Return the average of an Interval */
 function intervalAverage(range: Interval): number {
@@ -25,9 +27,9 @@ export class TEProps {
 
 export class Extractor {
    /** Stores all of the creature data */
-   c: VueCreature;
+   c: Creature;
    /** Stores all multipliers for stat calculations */
-   m: CombinedMultipliers = [];
+   m: StatMultipliers[] = [];
 
    /** A counter to see how many wild stat levels are unaccounted for */
    wildFreeMax = 0;
@@ -67,8 +69,8 @@ export class Extractor {
    /** Contains all functions for intervals */
    rangeFuncs: { [name: string]: CompiledEquation } = {};
 
-   constructor(vueCreature: VueCreature) {
-      this.c = vueCreature;
+   constructor(creature: Creature, server: Server) {
+      this.c = creature;
       // TODO: Add consider wild levels
       // Only way to calculate wild levels is with a TE
       // Creatures like gigas are unaffected, just as if they were bred
@@ -79,7 +81,7 @@ export class Extractor {
 
       // considerWildLevelSteps = considerWildLevelSteps && !bred;
       // Make sure the multipliers haven't changed
-      this.m = Ark.GetMultipliers(this.c.serverName, this.c.species);
+      this.m = Ark.GetMultipliers(server, this.c.species);
 
       // Clear the checked property for future extractions (also clearing out any Vue observer)
       this.c.stats = Utils.FilledArray(8, () => []);

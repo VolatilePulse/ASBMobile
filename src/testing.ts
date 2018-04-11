@@ -1,9 +1,10 @@
+import { Stat, TestData } from '@/ark/types';
+import { Creature } from '@/data/objects';
+import { getServerById } from '@/servers';
+import { isArray, isFunction, isNumber, isObject, isString } from 'util';
 import * as Ark from './ark';
-import * as Utils from './utils';
 import { Extractor, TEProps } from './ark/extractor';
-import { VueCreature, Stat } from './ark/creature';
-import { isNumber, isString, isFunction, isObject, isArray } from 'util';
-import { TestData } from '@/ark/types';
+import * as Utils from './utils';
 
 
 export interface TestResult {
@@ -20,7 +21,7 @@ export interface TestResult {
 }
 
 export function PerformTest(testData: TestData): TestResult {
-   const testCreature = new VueCreature();
+   const testCreature = new Creature();
 
    // Set the properties to prepare for extraction
    testCreature.wild = (testData.mode === 'Wild');
@@ -28,11 +29,13 @@ export function PerformTest(testData: TestData): TestResult {
    testCreature.bred = (testData.mode === 'Bred');
    testCreature.IB = testData.imprint / 100;
    testCreature.values = testData.values.map(Ark.ConvertValue);
-   testCreature.serverName = testData.serverName;
+   testCreature.serverId = testData.serverId;
    testCreature.level = testData.level;
    testCreature.species = testData.species;
 
-   const extractObject = new Extractor(testCreature);
+   const server = getServerById(testCreature.serverId);
+   if (!server) return { pass: false, exception: 'Unable to locate server' };
+   const extractObject = new Extractor(testCreature, server);
 
    const dbg: any = {
       totalIterations: 0,
@@ -89,8 +92,11 @@ export function PerformPerfTest(testData: TestData, duration = 5000, generatePro
          console.profile(testData.tag);
       t1 = performance.now();
 
+      const server = getServerById(testData.serverId);
+      if (!server) return { exception: 'Unable to locate server' };
+
       do {
-         const testCreature = new VueCreature();
+         const testCreature = new Creature();
 
          // Set the properties to prepare for extraction
          testCreature.wild = (testData.mode === 'Wild');
@@ -98,11 +104,11 @@ export function PerformPerfTest(testData: TestData, duration = 5000, generatePro
          testCreature.bred = (testData.mode === 'Bred');
          testCreature.IB = testData.imprint / 100;
          testCreature.values = testData.values.map(Ark.ConvertValue);
-         testCreature.serverName = testData.serverName;
+         testCreature.serverId = testData.serverId;
          testCreature.level = testData.level;
          testCreature.species = testData.species;
 
-         const extractObject = new Extractor(testCreature);
+         const extractObject = new Extractor(testCreature, server);
 
          extractObject.extract();
          runs += 1;
