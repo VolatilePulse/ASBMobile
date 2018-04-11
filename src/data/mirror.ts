@@ -9,6 +9,7 @@ export interface MirrorCache<ContentType extends {}> {
 
 export class TableMirror<ContentType extends {}> implements IAsyncDisposable {
    public name: string;
+   public ready: boolean = false;
 
    /** Cache object, isolated so it can be observed for changes. */
    public cache: MirrorCache<ContentType> = { content: [] };
@@ -50,7 +51,22 @@ export class TableMirror<ContentType extends {}> implements IAsyncDisposable {
 
       // Debounce the update handler so it isn't called too often
       this.debouncedUpdate = debounce(this.onUpdate.bind(this), this.maxWait / 2, { leading: false, trailing: true, maxWait: this.maxWait });
-      this.liveFeed.on('update', this.debouncedUpdate);
+
+      // Database change handler
+      this.liveFeed.on('update', (update, docs) => {
+         if (this.ready) return this.debouncedUpdate(update, docs);
+
+         // Short-circuit the debouncer for the initial update
+         this.ready = true;
+         this.onUpdate(update, docs);
+      });
+
+      // When the initial fetch is complete, resolve anyone waiting in `waitForInitialData`
+      this.liveFeed.then(() => {
+         this.firstDataPromiseResolver();
+         this.firstDataPromiseResolver = undefined;
+      });
+
       this.initialised = true;
    }
 
@@ -88,12 +104,7 @@ export class TableMirror<ContentType extends {}> implements IAsyncDisposable {
       }
    }
 
-   private onUpdate(_: string, aggregate: Array<PouchDB.Core.ExistingDocument<ContentType>>) {
-      if (this.firstDataPromise) {
-         this.firstDataPromiseResolver();
-         this.firstDataPromiseResolver = undefined;
-         this.firstDataPromise = undefined;
-      }
+   private onUpdate(_: PouchDB.LiveFind.Change<ContentType>, aggregate: Array<PouchDB.Core.ExistingDocument<ContentType>>) {
       this.cache.content = aggregate;
    }
 }
