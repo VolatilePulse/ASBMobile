@@ -1,11 +1,12 @@
 import { SpeciesParameters } from '@/ark/multipliers';
 import { statNames } from '@/consts';
-import { SettingsManager } from '@/data';
+import { SettingsManager, LibraryManager } from '@/data';
 import { Creature, Server } from '@/data/objects';
 import { isServerEditable } from '@/servers';
 import { Delay } from '@/utils';
 import { EventEmitter } from 'events';
 import Vue from 'vue';
+import { MirrorCache } from '@/data/mirror';
 
 
 export const EVENT_SERVER_CHANGED = 'server-changed';
@@ -28,6 +29,7 @@ class Store {
    updateAvailable: boolean = false;
    changesPending = { settings: false };
 
+   userServersCache: MirrorCache<Server> = { content: [] };
    isServerEditable: boolean;
    tempCreature: Creature = new Creature();
    valuesVersion: string = '-';
@@ -55,6 +57,10 @@ class Store {
 
       // Don't await - it can complete in its own time
       this.loadStatImages();
+
+      // Hook into library changes to get updated user servers
+      this.eventListener.on(EVENT_LIBRARY_CHANGED, () => this.onLibraryChange());
+      this.onLibraryChange();
    }
 
    async loadStatImages() {
@@ -66,6 +72,10 @@ class Store {
          const name = statNames[i];
          Vue.set(this.statImages, i, require('@/assets/' + name.toLowerCase() + '.svg'));
       }
+   }
+
+   private onLibraryChange() {
+      if (LibraryManager.current) this.userServersCache = LibraryManager.current.getUserServersCache();
    }
 }
 

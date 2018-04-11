@@ -76,6 +76,5 @@ export class TableMirror<ContentType extends {}> implements IAsyncDisposable {
 
    onUpdate(_: string, aggregate: Array<PouchDB.Core.ExistingDocument<ContentType>>) {
       this.cache.content = aggregate;
-      console.log('DB update:', this.cache);
    }
 }

@@ -13,7 +13,7 @@
                <template slot="first">
                   <option :value="newServerId">--new server--</option>
                </template>
-               <option v-for="server in userServers" :key="server._id" :value="server._id">{{server.name}}</option>
+               <option v-for="server in store.userServersCache.content" :key="server._id" :value="server._id">{{server.name}}</option>
 
                <optgroup label="Pre-Defined">
                   <option v-for="server in preDefinedServers" :key="server._id" :value="server._id">{{server.name}} </option>
@@ -57,7 +57,7 @@
          <b-form-checkbox type="checkbox" v-model="store.server['classicFlyers']" disabled>Classic Flyers</b-form-checkbox>
       </b-form-group>
 
-      <!--b-form-group label="Multipliers:" class="pt-0">
+      <b-form-group label="Multipliers:" class="pt-0">
          <div class="mx-2">
             <b-row>
                <b-col class="col-1 m-0 p-0"></b-col>
@@ -71,12 +71,12 @@
                   <b-img :src="store.statImages[stat]" style="max-width: 2rem;"></b-img>
                </b-col>
                <b-col v-for="param in paramIndices" class="px-1" :key="stat+','+param">
-                  <b-form-input type="number" class="text-center px-1 mx-0 text-primary" :placeholder="formatMult(stat,param)" @change="setMult(stat,param,$event)" :value="store.server.multipliers[stat][param]" :disabled="!store.isServerEditable">
+                  <b-form-input type="number" class="text-center px-1 mx-0 text-primary" :placeholder="formatMult(stat,param)" @change="setMult(stat,param,$event)" :value="userValue(stat,param)" :disabled="!store.isServerEditable">
                   </b-form-input>
                </b-col>
             </b-row>
          </div>
-      </b-form-group-->
+      </b-form-group>
    </b-container>
 </template>
 

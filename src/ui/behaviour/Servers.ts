@@ -20,7 +20,6 @@ export default class ServersTab extends Common {
    statIndices = Utils.Range(8);
    paramIndices = Utils.Range(4);
 
-   get userServers() { return LibraryManager.current.getUserServersCache().content; }
    preDefinedServers = Servers.preDefinedServers;
    testServers = Servers.testServers;
 
@@ -44,7 +43,15 @@ export default class ServersTab extends Common {
       }
    }
 
-   formatMult(s: number, p: number) { return Utils.FormatNumber(this.store.officialServer.multipliers[s][p], 2, true); }
+   formatMult(s: number, p: number) {
+      return Utils.FormatNumber(this.store.officialServer.multipliers[s][p], 2, true);
+   }
+
+   userValue(s: number, p: number) {
+      const multipliers = theStore.server.multipliers;
+      return (multipliers && multipliers[s]) ? multipliers[s][p] : undefined;
+   }
+
    valueFor(s: number, p: number) {
       return theStore.server.multipliers[s][p]
          || (theStore.server.singlePlayer && theStore.officialServerSP.multipliers[s][p])
@@ -54,7 +61,9 @@ export default class ServersTab extends Common {
    setMult(s: number, p: number, v: string) {
       let num = v ? parseFloat(v) : undefined;
       if (num <= 0) num = undefined;
-      theStore.server.multipliers[s][p] = num;
+      let multipliers = theStore.server.multipliers[s];
+      if (!multipliers) theStore.server.multipliers[s] = multipliers = [];
+      multipliers[p] = num;
    }
 
    @catchAsyncErrors
