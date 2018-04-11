@@ -161,12 +161,19 @@ class LibraryManager implements IAsyncDisposable {
       // If we're deleting the current library, clear up first
       if (id === SettingsManager.current.selectedLibrary) {
          await this.current.dispose();
+         this.current = null;
       }
 
-      // Open and destroy the database
-      let tempDb: PouchDB.Database | undefined = new PouchDB(CREATURES_PREFIX + id);
-      await tempDb.destroy();
-      tempDb = undefined;
+      // Open and destroy all of the databases for the library
+      for (const prefix of [CREATURES_PREFIX, SERVERS_PREFIX]) {
+         try {
+            let tempDb: PouchDB.Database | undefined = new PouchDB(prefix + id);
+            await tempDb.destroy();
+            tempDb = undefined;
+         } catch (ex) {
+            console.warn('Error when removing library database ' + (prefix + id), ex);
+         }
+      }
 
       // Remove the library from the list in settings
       Vue.delete(SettingsManager.current.libraryNames, id);
