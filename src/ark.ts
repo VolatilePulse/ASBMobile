@@ -78,7 +78,7 @@ export function GetMultipliers(server: Server, speciesName: string): StatMultipl
    if (server.singlePlayer) {
       for (let stat = HEALTH; stat <= TORPOR; stat++) {
          for (const param in theStore.officialServerSP.multipliers[stat]) {
-            values[stat][param] *= theStore.officialServerSP.multipliers[stat][param] || 1;
+            values[stat][param] = Utils.RoundTo(values[stat][param] * (theStore.officialServerSP.multipliers[stat][param] || 1), 6);
          }
       }
    }
