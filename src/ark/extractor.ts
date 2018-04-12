@@ -20,6 +20,13 @@ function* intFromRange(interval: Interval, fn?: (value: number) => number) {
    for (let i = min; i <= max; i++) yield i;
 }
 
+// Generator that yields the inner int range from the interval
+function* intFromRangeReverse(interval: Interval, fn?: (value: number) => number) {
+   const min = fn ? fn(interval.lo) : Math.ceil(interval.lo);
+   const max = fn ? fn(interval.hi) : Math.floor(interval.hi);
+   for (let i = max; i >= min; i--) yield i;
+}
+
 export class TEProps {
    TE = 0;
    wildLevel = 0;
@@ -41,8 +48,6 @@ export class Extractor {
    minWild = 0;
    /** A running total of each stat's minimum dom stat levels */
    minDom = 0;
-   /** A running total of each stat's minimum dom stat levels */
-   originalIB = 0;
    /** A flag signifying a stat isn't displayed by Ark */
    unusedStat = false;
    /** A flag signifying a successful extraction */
@@ -57,7 +62,7 @@ export class Extractor {
    /** Signifies that a stat only has one possibility */
    checkedStat: boolean[] = [];
    /** Whether a stat is based on TE */
-   isTEStat: boolean[] = Utils.FilledArray(8, () => false);
+   isTEStat: boolean[] = [];
    /** Contains all of the TE properties for stats */
    statTEMap: Map<Stat, TEProps> = new Map();
 
@@ -65,9 +70,24 @@ export class Extractor {
    /** Contains all stat-specific variables for intervals */
    rangeStats: Array<{ [name: string]: number | Interval }> = Utils.FilledArray(8, () => ({}));
    /** Contains all variables for intervals */
-   rangeVars: { [name: string]: number | Interval } = {};
+   rangeVars = {
+      Lw: 0,
+      Ld: 0,
+      IB: IA(0),
+      TE: IA(0),
+      tamedLevel: IA(0),
+      wildLevel: IA(0),
+   };
    /** Contains all functions for intervals */
-   rangeFuncs: { [name: string]: CompiledEquation } = {};
+   rangeFuncs = {
+      calcWL: compile('tamedLevel/(1+0.5*TE)'),
+      calcTEFromWL: compile('(tamedLevel/wildLevel-1)/0.5'),
+      calcValue: compile('(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)*(1+TE*Tm*TmM)*(1+Ld*Id*IdM)'),
+      calcLw: compile('((V/((1+Ld*Id*IdM)*(1+TE*Tm*TmM))-Ta*TaM)/(B*TBHM*(1+IB*0.2*IBM))-1)/(Iw*IwM)'),
+      calcLd: compile('((V/(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)/(1+TE*Tm*TmM))-1)/(Id*IdM)'),
+      calcTE: compile('(V/(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)/(1+Ld*Id*IdM)-1)/(Tm*TmM)'),
+      calcIB: compile('((V/(1+TE*Tm*TmM)/(1+Ld*Id*IdM)-Ta*TaM)/(B*(1+Lw*Iw*IwM)*TBHM)-1)/(0.2*IBM)'),
+   };
 
    constructor(creature: Creature, server: Server) {
       this.c = creature;
@@ -87,14 +107,22 @@ export class Extractor {
       this.c.stats = Utils.FilledArray(8, () => []);
 
       // Change variables based on wild, tamed, bred
-      if (this.c.wild)
+      if (this.c.wild) {
          this.c.TE = this.c.IB = 0;
-
-      else if (this.c.tamed)
+         this.rangeVars.TE = IA(0);
+         this.rangeVars.IB = IA(0);
+      }
+      else if (this.c.tamed) {
          this.c.IB = 0;
-
-      else
+         this.rangeVars.TE = IA(0, 1);
+         this.rangeVars.IB = IA(0);
+      }
+      else {
          this.c.TE = 1;
+         this.rangeVars.TE = IA(1);
+         this.rangeVars.IB = IA().halfOpenRight(this.c.IB - 0.005, this.c.IB + 0.005);
+         this.rangeVars.IB = IA.intersection(this.rangeVars.IB, IA(0, Infinity));
+      }
    }
 
    extract(dbg?: any) {
@@ -143,28 +171,36 @@ export class Extractor {
             // Covers unused stats like oxygen
             if (!this.uniqueStatSituation(tempStat, statIndex)) {
                // Calculate the highest Lw could be
-               let maxLw = tempStat.calculateWildLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild, 0, this.c.IB);
+               this.rangeVars.Ld = 0;
+               let rangeLw = this.rangeFuncs.calcLw.eval({ ...this.rangeVars, ...this.rangeStats[statIndex], ...{ TE: 0 } });
+               rangeLw.lo = 0;
 
-               if (maxLw > this.wildFreeMax - this.minWild || (maxLw === 0 && this.m[statIndex].Iw === 0))
-                  maxLw = this.wildFreeMax - this.minWild;
+               if (this.rangeStats[statIndex].Iw === 0)
+                  rangeLw.hi = this.wildFreeMax - this.minWild;
+
+               rangeLw = IA.intersection(rangeLw, IA(0, this.wildFreeMax - this.minWild));
 
                // We don't need to calculate TE to extract the levels
-               if (!this.c.tamed || this.m[statIndex].Tm <= 0) {
+               if (!this.c.tamed || this.rangeStats[statIndex].Tm <= 0) {
                   // Loop all possible Lws
-                  for (tempStat.Lw = maxLw; tempStat.Lw >= 0; tempStat.Lw--) {
+                  for (this.rangeVars.Lw of intFromRangeReverse(rangeLw)) {
                      // Calculate the highest Ld could be
-                     const maxLd = Math.min(tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex],
-                        !this.c.wild), this.domFreeMax - this.minDom);
+                     let rangeLd = this.rangeFuncs.calcLd.eval({ ...this.rangeVars, ...this.rangeStats[statIndex] });
+                     rangeLd.lo = 0;
+                     rangeLd = IA.intersection(rangeLd, IA(0, this.domFreeMax - this.minDom));
+                     const maxLd = Math.round(rangeLd.hi);
+                     tempStat.Lw = this.rangeVars.Lw;
                      this.nonTEStatCalculation(tempStat, statIndex, maxLd);
                   }
                }
 
                else {
                   const localMap = this.statTEMap;
+                  this.isTEStat[statIndex] = true;
                   // If this stat has a Tm and is tamed, we need to manually loop through the Ld
                   if (localMap.size === 0) {
                      // Loop all possible Lws
-                     for (tempStat.Lw = maxLw; tempStat.Lw >= 0; tempStat.Lw--) {
+                     for (tempStat.Lw of intFromRangeReverse(rangeLw)) {
                         // Calculate the highest Ld could be
                         const maxLd = Math.min(tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex],
                            !this.c.wild), this.domFreeMax - this.minDom);
@@ -174,7 +210,7 @@ export class Extractor {
                   // Otherwise, we only need to compare the TEs that exist within the map already
                   else {
                      // Loop all possible Lws
-                     for (tempStat.Lw = maxLw; tempStat.Lw >= 0; tempStat.Lw--) {
+                     for (tempStat.Lw of intFromRangeReverse(rangeLw)) {
                         // Calculate the highest Ld could be
                         const maxLd = Math.min(tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex],
                            !this.c.wild), this.domFreeMax - this.minDom);
@@ -265,33 +301,6 @@ export class Extractor {
             }
          }
       }
-
-      // rangeVars
-      if (this.c.wild) {
-         this.rangeVars.TE = 0;
-         this.rangeVars.IB = IA(0);
-      }
-      else if (this.c.tamed) {
-         this.rangeVars.TE = IA(0, 1);
-         this.rangeVars.IB = IA(0);
-      }
-      else {
-         this.rangeVars.TE = 1;
-         this.originalIB = this.c.IB;
-         this.rangeVars.IB = IA().halfOpenRight(this.originalIB - 0.005, this.originalIB + 0.005);
-         this.rangeVars.IB = IA.intersection(this.rangeVars.IB, IA(0, Infinity));
-      }
-      this.rangeVars.Lw = 0;
-      this.rangeVars.Ld = 0;
-
-      // rangeFuncs
-      this.rangeFuncs.calcWL = compile('tamedLevel/(1+0.5*TE)');
-      this.rangeFuncs.calcTEFromWL = compile('(tamedLevel/wildLevel-1)/0.5');
-      this.rangeFuncs.calcValue = compile('(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)*(1+TE*Tm*TmM)*(1+Ld*Id*IdM)');
-      this.rangeFuncs.calcLw = compile('((V/((1+Ld*Id*IdM)*(1+TE*Tm*TmM))-Ta*TaM)/(B*TBHM*(1+IB*0.2*IBM))-1)/(Iw*IwM)');
-      this.rangeFuncs.calcLd = compile('((V/(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)/(1+TE*Tm*TmM))-1)/(Id*IdM)');
-      this.rangeFuncs.calcTE = compile('(V/(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)/(1+Ld*Id*IdM)-1)/(Tm*TmM)');
-      this.rangeFuncs.calcIB = compile('((V/(1+TE*Tm*TmM)/(1+Ld*Id*IdM)-Ta*TaM)/(B*(1+Lw*Iw*IwM)*TBHM)-1)/(0.2*IBM)');
    }
 
    /**
@@ -363,37 +372,30 @@ export class Extractor {
       return false;
    }
 
-   nonTEStatCalculation(tempStat: Stat, statIndex: number, maxLd: number) {
+   nonTEStatCalculation(tempStat: Stat, statIndex: number, maxLd: number): void {
       if (tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild, this.c.TE, this.c.IB) > maxLd)
          return;
 
+      this.rangeVars.Ld = tempStat.Ld;
+
       // FIXME: Performance needs to increase
-      if (this.c.values[statIndex] === Utils.RoundTo(tempStat.calculateValue(this.m[statIndex], !this.c.wild, this.c.TE, this.c.IB), Ark.Precision(statIndex)))
+      const calculatedValue = this.rangeFuncs.calcValue.eval({ ...this.rangeVars, ...this.rangeStats[statIndex] });
+      if (IA.intervalsOverlap(calculatedValue, this.rangeStats[statIndex].V))
          this.c.stats[statIndex].push(new Stat(tempStat));
 
       // If it doesn't calculate properly, it may have used a different IB (Mostly relevant for Food)
       else if (this.c.bred) {
-         // TODO: Address this to apply proper logic as it makes mild assumptions
-         // FIXME: Really not sure what assumptions it makes, but sure...
-         // This is making sure that our previously calculated IB, rounded, is at least somewhat close to the IB the stat wants to use
-         // FIXME: Performance needs to increase
-         if (Utils.RoundTo(tempStat.calculateIB(this.m[statIndex], this.c.values[statIndex]), 2) === Utils.RoundTo(this.c.IB, 2)) {
-            const maxTempIB = tempStat.calculateIB(this.m[statIndex], this.c.values[statIndex] + (0.5 / Math.pow(10, Ark.Precision(statIndex))));
-            const minTempIB = tempStat.calculateIB(this.m[statIndex], this.c.values[statIndex] - (0.5 / Math.pow(10, Ark.Precision(statIndex))));
+         const rangeIB = this.rangeFuncs.calcIB.eval({ ...this.rangeVars, ...this.rangeStats[statIndex] });
 
-            if (IA.hasValue(this.rangeVars.IB, maxTempIB)) {
-               const expectedTorpor = this.c.stats[TORPOR][0].calculateValue(this.m[TORPOR], !this.c.wild, this.c.TE, maxTempIB);
-               if (this.c.values[TORPOR] === Utils.RoundTo(expectedTorpor, Ark.Precision(TORPOR))) {
-                  this.c.IB = this.rangeVars.IB = maxTempIB;
-                  this.c.stats[statIndex].push(new Stat(tempStat));
-               }
-            }
-            if (IA.hasValue(this.rangeVars.IB, minTempIB)) {
-               const expectedTorpor = this.c.stats[TORPOR][0].calculateValue(this.m[TORPOR], !this.c.wild, this.c.TE, minTempIB);
-               if (this.c.values[TORPOR] === Utils.RoundTo(expectedTorpor, Ark.Precision(TORPOR))) {
-                  this.c.IB = this.rangeVars.IB = minTempIB;
-                  this.c.stats[statIndex].push(new Stat(tempStat));
-               }
+         if (IA.intervalsOverlap(rangeIB, this.rangeVars.IB)) {
+            const tempStat2: any = {};
+            tempStat2.Lw = this.c.stats[TORPOR][0].Lw;
+            tempStat2.Ld = this.c.stats[TORPOR][0].Ld;
+            const expectedTorpor = this.rangeFuncs.calcValue.eval({ ...this.rangeVars, ...this.rangeStats[TORPOR], ...tempStat2, ...{ IB: rangeIB } });
+            if (IA.intervalsOverlap(expectedTorpor, this.rangeStats[TORPOR].V)) {
+               this.rangeVars.IB = IA.intersection(rangeIB, this.rangeVars.IB);
+               this.c.IB = intervalAverage(this.rangeVars.IB);
+               this.c.stats[statIndex].push(new Stat(this.rangeVars.Lw, this.rangeVars.Ld));
             }
          }
       }
@@ -425,7 +427,7 @@ export class Extractor {
          const maxWL = Math.ceil(rangeWL.hi);
 
          for (let i = minWL; i <= maxWL; i++) {
-            localRangeVars.wildLevel = i;
+            localRangeVars.wildLevel = IA(i);
             let tempTERange = localRangeFuncs.calcTEFromWL.eval(localRangeVars);
             tempTERange = IA.intersection(localRangeVars.TE, tempTERange);
 
@@ -510,7 +512,7 @@ export class Extractor {
                   }
                   if (stat.Lw + this.minWild - this.wildMin[statIndex] > this.wildFreeMax
                      || stat.Ld + this.minDom - this.domMin[statIndex] > this.domFreeMax
-                     || (this.m[statIndex].Tm > 0 && this.statTEMap.size > 0 && !this.filterByTE(statIndex, stat, this.statTEMap))) {
+                     || (this.isTEStat[statIndex] && this.statTEMap.size > 0 && !this.filterByTE(statIndex, stat, this.statTEMap))) {
                      stat.removeMe = true;
                   }
                }
@@ -528,7 +530,7 @@ export class Extractor {
    // Remove all stats that don't have a matching TE pair
    filterByTE(index: number, TEstat: Stat, map: Map<Stat, TEProps>) {
       for (let statIndex = 0; statIndex < 7; statIndex++) {
-         if (statIndex !== index && this.m[statIndex].Tm > 0) {
+         if (statIndex !== index && this.isTEStat[statIndex]) {
             for (const stat of this.c.stats[statIndex]) {
                const currentTEstat = map.get(stat);
                const testingTEstat = map.get(TEstat);

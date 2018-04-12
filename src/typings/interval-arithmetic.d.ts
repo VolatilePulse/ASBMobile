@@ -16,8 +16,9 @@ declare interface IntervalArithmeticStatic {
 
    isEmpty(range: Interval): boolean;
    isWhole(range: Interval): boolean;
-   hasValue(range: number | Interval, value: number): boolean;
+   hasValue(range: Interval, value: number): boolean;
    hasInterval(a: Interval, b: number | Interval): boolean;
+   intervalsOverlap(a: Interval, b: number | Interval): boolean;
 
    intersection(a: Interval, b: number | Interval): Interval;
 }
