@@ -1,59 +1,120 @@
-import Vue from 'vue';
-
+import { IAsyncDisposable, NotInitialisedError } from '@/data/database';
+import { MirrorCache, TableMirror } from '@/data/mirror';
+import { Server } from '@/data/objects';
+import { Table } from '@/data/table';
+import theStore, { EVENT_LIBRARY_CHANGED } from '@/ui/store';
 import PouchDB from 'pouchdb-core';
 import PouchFind from 'pouchdb-find';
-PouchDB.plugin(PouchFind);
-
+import Vue from 'vue';
 import SettingsManager from './settings';
+
+PouchDB.plugin(PouchFind);
 
 
 const DEFAULT_LIBRARY_NAME = 'default';
-const DB_PREFIX = 'library_';
+const SERVERS_PREFIX = 'servers_';
+const CREATURES_PREFIX = 'creatures_';
 
 
-class Library {
+class Library implements IAsyncDisposable {
+   initialised: boolean;
    id: string;
 
-   private db!: PouchDB.Database;
+   private serverMirror!: TableMirror<Server>;
+   private serverTable!: Table<Server>;
 
+   /** Create a library database interface with the given library ID */
    constructor(id: string) {
       this.id = id;
    }
 
-   async load() {
-      if (this.db) return;
-      this.db = new PouchDB(DB_PREFIX + this.id);
+   async initialise() {
+      if (this.initialised) return;
 
-      // TODO: Load all servers
+      // Setup the server database mirror
+      this.serverMirror = new TableMirror<Server>(SERVERS_PREFIX + this.id);
+      this.serverMirror.setSortOrder(['tag']);
+      await this.serverMirror.initialise();
+
+      // Initialise the server database interface
+      this.serverTable = new Table<Server>(SERVERS_PREFIX + this.id);
+      await this.serverTable.initialise();
+
+      // Ensure mirror is populated
+      await this.serverMirror.waitForInitialData();
 
       // TODO: Decide if we should load all creatures
+
+      this.initialised = true;
    }
 
-   async unload() {
-      if (!this.db) return;
-      await this.db.close();
-      this.db = undefined;
+   async dispose() {
+      if (!this.initialised) throw new NotInitialisedError();
+
+      if (this.serverMirror) await this.serverMirror.dispose();
+      this.serverMirror = undefined;
+
+      if (this.serverTable) await this.serverTable.dispose();
+      this.serverTable = undefined;
+
+      this.initialised = false;
+   }
+
+   /** Save a new server, giving it a new UUI in the process */
+   async addServer(server: Server) {
+      if (!this.initialised) throw new NotInitialisedError();
+
+      await this.serverTable.addWithRandomId(server);
+   }
+
+   /** Save changes to an existing server */
+   async saveServer(server: Server) {
+      if (!this.initialised) throw new NotInitialisedError();
+
+      await this.serverTable.update(server as PouchDB.Core.ExistingDocument<Server>);
+   }
+
+   /** Delete an existing server */
+   async deleteServer(server: Server) {
+      if (!this.initialised) throw new NotInitialisedError();
+
+      await this.serverTable.delete(server as PouchDB.Core.ExistingDocument<Server>);
+   }
+
+   getUserServersCache(): MirrorCache<Server> {
+      if (!this.initialised) throw new NotInitialisedError();
+
+      return this.serverMirror.cache;
    }
 }
 
-class LibraryManager {
-   current: Library;
 
-   constructor() {
-      // do nothing
-   }
+class LibraryManager implements IAsyncDisposable {
+   initialised: boolean;
+   current: Library;
 
    /** Initialise the library manager system */
    async initialise() {
       // Ensure Settings system is initialised
       await SettingsManager.initialise();
 
+      // Need to set this now so we can use our own methods
+      this.initialised = true;
+
       // Ensure a library exists, and make one active
       await this._ensureLibraryAndSelect();
    }
 
+   async dispose() {
+      if (this.current) await this.current.dispose();
+      this.current = null;
+      this.initialised = false;
+   }
+
    /** Create a new library with the given display name. Does not select the library for use */
    createNewLibrary(displayName: string): string {
+      if (!this.initialised) throw new NotInitialisedError();
+
       // Make an ID that will be used as a the database name
       let newId;
       do {
@@ -71,14 +132,16 @@ class LibraryManager {
 
    /** Select the specified library as the current one */
    async selectLibrary(id: string, force = false) {
+      if (!this.initialised) throw new NotInitialisedError();
+
       if (!force && SettingsManager.current.selectedLibrary === id) return;
 
       // Close existing library
-      if (this.current) this.current.unload();
+      if (this.current) await this.current.dispose();
 
       // Open the new one
       const library = new Library(id);
-      await library.load();
+      await library.initialise();
 
       // Save the selection
       if (SettingsManager.current.selectedLibrary !== id) {
@@ -86,19 +149,31 @@ class LibraryManager {
          SettingsManager.notifyChanged();
       }
       this.current = library;
+
+      // Notify the world
+      theStore.eventListener.emit(EVENT_LIBRARY_CHANGED);
    }
 
    /** Delete the specified library complately and without confirmation */
    async deleteLibrary(id: string) {
+      if (!this.initialised) throw new NotInitialisedError();
+
       // If we're deleting the current library, clear up first
       if (id === SettingsManager.current.selectedLibrary) {
-         await this.current.unload();
+         await this.current.dispose();
+         this.current = null;
       }
 
-      // Open and destroy the database
-      let tempDb: PouchDB.Database | undefined = new PouchDB(DB_PREFIX + id);
-      await tempDb.destroy();
-      tempDb = undefined;
+      // Open and destroy all of the databases for the library
+      for (const prefix of [CREATURES_PREFIX, SERVERS_PREFIX]) {
+         try {
+            let tempDb: PouchDB.Database | undefined = new PouchDB(prefix + id);
+            await tempDb.destroy();
+            tempDb = undefined;
+         } catch (ex) {
+            console.warn('Error when removing library database ' + (prefix + id), ex);
+         }
+      }
 
       // Remove the library from the list in settings
       Vue.delete(SettingsManager.current.libraryNames, id);
@@ -113,6 +188,8 @@ class LibraryManager {
 
    /** Change the display name of the specified library */
    async renameLibrary(id: string, newName: string) {
+      if (!this.initialised) throw new NotInitialisedError();
+
       if (!(id in SettingsManager.current.libraryNames)) throw Error("Attempt to rename library that doesn't exist");
 
       Vue.set(SettingsManager.current.libraryNames, id, newName);

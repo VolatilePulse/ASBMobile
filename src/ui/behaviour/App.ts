@@ -1,44 +1,90 @@
-import { Component } from 'vue-property-decorator';
-import Common from '@/ui/behaviour/Common';
-
-import theStore from '@/ui/store';
-import { AsyncFileRead, Delay } from '@/utils';
 import { ParseDatabase } from '@/ark/data';
-import { SettingsManager, LibraryManager } from '@/data';
-import { initialise as serversInitialise } from '@/servers';
+import { ID_OFFICIAL_SERVER } from '@/ark/servers_predef';
+import { LibraryManager, SettingsManager } from '@/data';
+import * as Servers from '@/servers';
+import Common, { catchAsyncErrors } from '@/ui/behaviour/Common';
+import theStore, { EVENT_LIBRARY_CHANGED } from '@/ui/store';
+import { AsyncFileRead, Delay } from '@/utils';
+import { Component } from 'vue-property-decorator';
 
 
 @Component
-export default class extends Common {
+export default class AppShell extends Common {
+   // Adding the store here makes it observable right from the start
+   store = theStore;
+
    showSidebar = true;
    tab = 'welcome';
 
+   @catchAsyncErrors
    async created() {
-      // Fire off some async behaviours that can complete later on
-      this.loadDataJson();
-      this.store.loadStatImages();
+      // Register handler for uncaught Promise rejections (i.e. exceptions in async functions)
+      window.addEventListener('unhandledrejection', event => this.catchUnhandledRejection(event));
 
-      // Initialise sub-systems
+      // Fire off some async behaviours that can complete later on
+      loadDataJson();
+
+      // Initialise the central store
+      await theStore.initialise();
+
+      // Initialise remaining subsystems
+      await Servers.initialise();
       await SettingsManager.initialise();
       await LibraryManager.initialise();
-      await serversInitialise(this.store.devMode);
 
-      // Create a creature to use for extraction, etc
-      theStore.currentServerName = 'Official Server';
+      // Activate last selected server
+      activateSelectedServer();
+
+      // Hook important changes
+      theStore.eventListener.on(EVENT_LIBRARY_CHANGED, activateSelectedServer);
+
    }
 
-   async loadDataJson() {
-      try {
-         // Let the app become responsive before doing anything
-         await Delay(100);
-
-         const json = await AsyncFileRead('data/data.json');
-         ParseDatabase(json);
-      }
-      catch (ex) {
-         theStore.dataLoadError = '' + ex;
-         return;
-      }
-      theStore.dataLoaded = true;
+   catchUnhandledRejection(event: any) {
+      console.error('Unhandled rejection (promise: ', event.promise, ', reason: ', event.reason, ').');
+      console.log(event);
+      if (theStore && theStore.devMode)
+         // tslint:disable-next-line:no-debugger
+         debugger;
    }
+}
+
+
+/** Set the last-selected server as active, or a good default */
+function activateSelectedServer() {
+   // FIXME: Move last selected server ID to the library's settings
+   const selectedServerId = SettingsManager.current.selectedServerId || ID_OFFICIAL_SERVER;
+   let selectedServer = Servers.getServerById(selectedServerId);
+   if (!selectedServer) {
+      console.log(`Last selected server "${selectedServerId}" not found. Defaulting to official.`);
+      selectedServer = Servers.getServerById(ID_OFFICIAL_SERVER);
+      SettingsManager.current.selectedServerId = ID_OFFICIAL_SERVER;
+      SettingsManager.notifyChanged();
+   }
+   theStore.setCurrentServer(selectedServer);
+}
+
+async function loadDataJson() {
+   // Let the app become responsive before doing anything
+   await Delay(100);
+
+   let json: string;
+
+   try {
+      json = await AsyncFileRead('data/data.json');
+   }
+   catch (ex) {
+      theStore.dataLoadError = 'Failed to fetch database: ' + ex;
+      return;
+   }
+
+   try {
+      ParseDatabase(json);
+   }
+   catch (ex) {
+      theStore.dataLoadError = 'Failed to parse database: ' + ex;
+      return;
+   }
+
+   theStore.dataLoaded = true;
 }

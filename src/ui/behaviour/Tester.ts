@@ -1,13 +1,12 @@
-import { Vue, Component } from 'vue-property-decorator';
-import Common from '@/ui/behaviour/Common';
-
-import * as Utils from '@/utils';
-import testData from '@/ark/test_data';
-import { statNames } from '@/consts';
-import { TestResult, PerformTest, PerformPerfTest } from '@/testing';
-import { FormatOption, FormatOptions, FormatAllOptions } from '@/ark';
+import { FormatAllOptions, FormatOption, FormatOptions } from '@/ark';
 import { TEProps } from '@/ark/extractor';
-import { Stat } from '@/ark/creature';
+import testData from '@/ark/test_data';
+import { Stat } from '@/ark/types';
+import { statNames } from '@/consts';
+import { PerformPerfTest, PerformTest, TestResult } from '@/testing';
+import Common, { catchAsyncErrors } from '@/ui/behaviour/Common';
+import * as Utils from '@/utils';
+import { Component, Vue } from 'vue-property-decorator';
 
 
 const ASYNC_RUN_TIME_MS = 200;
@@ -15,7 +14,7 @@ const ASYNC_DELAY_TIME_MS = 100;
 
 
 @Component
-export default class extends Common {
+export default class TesterTab extends Common {
    openTestIndex = 0;
    testData = testData;
    results: TestResult[] = [];
@@ -48,14 +47,14 @@ export default class extends Common {
    }
 
    findTEStat(testIndex: number, optionIndex: number): TEProps {
-      var results = this.results[testIndex];
-      var optionSet = results.options[optionIndex];
+      const results = this.results[testIndex];
+      const optionSet = results.options[optionIndex];
 
-      for (var statIndex in this.range(8)) {
-         var map = results.mapTE[statIndex];
-         var stat = optionSet[statIndex];
+      for (const statIndex in this.range(8)) {
+         const map = results.mapTE[statIndex];
+         const stat = optionSet[statIndex];
          if (!stat || !map) continue;
-         var teProp = map.get(stat);
+         const teProp = map.get(stat);
          if (teProp) return teProp;
       }
 
@@ -63,13 +62,13 @@ export default class extends Common {
    }
 
    optionWildLevel(testIndex: number, optionIndex: number): string {
-      var val = this.findTEStat(testIndex, optionIndex);
+      const val = this.findTEStat(testIndex, optionIndex);
       if (!val) return '';
       return val.wildLevel.toFixed();
    }
 
    optionTE(testIndex: number, optionIndex: number): string {
-      var val = this.findTEStat(testIndex, optionIndex);
+      const val = this.findTEStat(testIndex, optionIndex);
       if (!val) return '';
       return (val.TE * 100).toFixed(1) + '%';
    }
@@ -77,6 +76,7 @@ export default class extends Common {
    /**
     * Run a selection of tests without blocking the browser
     */
+   @catchAsyncErrors
    async runTestSelection(indices: number[]) {
       this.running = true;
       this.openTestIndex = null;
@@ -112,7 +112,7 @@ export default class extends Common {
 
    /** Run one test repeatedly to measure it's performance, blocking the browser */
    runPerfTest(index: number) {
-      const { duration, runs, exception } = PerformPerfTest(testData[index]);
+      const { duration, runs, exception } = PerformPerfTest(testData[index], undefined, true);
       if (exception) {
          this.results[index].duration = 'X';
       }
@@ -126,6 +126,7 @@ export default class extends Common {
    }
 
    /** Run just one test */
+   @catchAsyncErrors
    async runTest(index: number) {
       await this.runTestSelection([index]);
       if (this.results[index] === undefined || !this.results[index]['pass'])
@@ -135,16 +136,19 @@ export default class extends Common {
    }
 
    /** Run all of the tests */
+   @catchAsyncErrors
    async runAllTests() {
       await this.runTestSelection(Utils.Range(testData.length));
    }
 
    /** Re-run the passes */
+   @catchAsyncErrors
    async runPasses() {
       await this.runTestSelection(Utils.Range(testData.length).filter(i => this.results[i] && this.results[i].pass));
    }
 
    /** Re-run the failures */
+   @catchAsyncErrors
    async runFails() {
       await this.runTestSelection(Utils.Range(testData.length).filter(i => this.results[i] && !this.results[i].pass));
    }

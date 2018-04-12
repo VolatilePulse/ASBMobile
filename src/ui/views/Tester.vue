@@ -61,18 +61,19 @@
 
                   <!-- options -->
                   <b-tab v-if="results[index]['options']" :title="'Options'+(results[index] && results[index]['options'] && ' ('+results[index].options.length+')')">
-                     <div class="d-flex flex-row options-flex">
-                        <div class="flex-column font-weight-bold px-2 text-right">
-                           <div>Wild&nbsp;lvl</div>
-                           <div>Tame&nbsp;Eff</div>
-                           <div class="option-break"></div>
-                           <div v-for="statName in statNames" :key="statName">{{statName}}</div>
+                     <div class="options-grid">
+                        <div class="col">
+                           <div>WL</div>
+                           <div>TE</div>
+                           <b-img v-for="(statImage,i) in store.statImages" :key="i" :src="statImage"></b-img>
                         </div>
-                        <div v-for="(options,optionIndex) in results[index].options" :key="optionIndex" class="flex-column text-center px-2">
+                        <div class="col" v-for="(options,optionIndex) in results[index].options" :key="optionIndex">
                            <div>{{optionWildLevel(index,optionIndex)||'-'}}</div>
                            <div>{{optionTE(index,optionIndex)||'-'}}</div>
-                           <div class="option-break"></div>
-                           <div v-for="(stat,statIndex) in options" :key="optionIndex+','+statIndex">{{formattedStat(stat, true)}}</div>
+                           <div v-for="(stat,statIndex) in options" :key="optionIndex+','+statIndex">
+                              <!-- {{formattedStat(stat, true)}} -->
+                              {{results[index].options[optionIndex][statIndex].Lw}}<br/>{{results[index].options[optionIndex][statIndex].Ld}}
+                           </div>
                         </div>
                      </div>
                   </b-tab>
@@ -119,7 +120,7 @@
    </b-container>
 </template>
 
-<style lang="scss">
+<style lang="css" scoped>
 .testpill {
   width: 5.5em;
 }
@@ -128,13 +129,54 @@
   background-color: #ddd;
 }
 
-.options-flex {
+.options-grid {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  justify-content: start;
   overflow-x: scroll;
+  overflow-y: hidden;
 }
 
-.option-break {
-  height: 2px;
-  background-color: #555;
+.options-grid img {
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+}
+
+.options-grid .col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-left: 0.4rem;
+  padding-right: 0.4rem;
+  flex-wrap: nowrap;
+  text-align: center;
+}
+
+.options-grid .col:first-child {
+  font-weight: bold;
+}
+
+.options-grid .col * {
+  flex-basis: 4rem;
+  max-height: 2.5rem;
+  display: flex;
+  justify-items: stretch;
+  align-items: center;
+  line-height: 1rem;
+}
+
+.options-grid .col *:nth-child(1) {
+  flex-basis: 1.2rem;
+}
+
+.options-grid .col *:nth-child(2) {
+  flex-basis: 1.2rem;
+  font-size: 90%;
+  width: 100%;
+  text-align: center;
+  border-bottom: 1px solid rgb(29, 25, 26);
 }
 </style>
 

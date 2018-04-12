@@ -10,9 +10,9 @@
       "yzhang.markdown-all-in-one",
       "eg2.tslint",
       "streetsidesoftware.code-spell-checker",
-      "vector-of-bool.gitflow",
       "codezombiech.gitignore",
       "Zignd.html-css-class-completion",
+      "EditorConfig.editorconfig",
       // Totally optional but useful
       "anseki.vscode-color",
       "robertohuertasm.vscode-icons",

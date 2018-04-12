@@ -2,35 +2,35 @@
    <b-container fluid>
       <b-form-group label="Server:" class="col-md-6 m-0 p-0">
          <template slot="description">
-            <div v-if="!isEditable">
+            <div v-show="!store.isServerEditable">
                Pre-defined server.
                <b-link variant="link" @click="copyServer">Make a copy</b-link> to modify it.
             </div>
          </template>
 
          <b-input-group>
-            <b-form-select id="speciesInput" v-model="currentServerName" @change="onServerChange">
+            <b-form-select :value="store.server._id" @change="onServerChange">
                <template slot="first">
                   <option :value="newServerId">--new server--</option>
                </template>
-               <option v-for="(server, name) in userServers" :key="name">{{name}}</option>
+               <option v-for="server in store.userServersCache.content" :key="server._id" :value="server._id">{{server.name}}</option>
 
                <optgroup label="Pre-Defined">
-                  <option v-for="(server, name) in preDefinedServers" :key="name">{{server.serverName}} </option>
+                  <option v-for="server in preDefinedServers" :key="server._id" :value="server._id">{{server.name}} </option>
                </optgroup>
 
                <optgroup v-if="store.devMode" label="Test Servers">
-                  <option v-for="(server, name) in testServers" :key="name">{{server.serverName}} </option>
+                  <option v-for="server in testServers" :key="server._id" :value="server._id">{{server.name}} </option>
                </optgroup>
             </b-form-select>
 
             <div class="pl-2"></div>
 
-            <b-button v-if="isEditable" variant="link" v-b-modal.editNameModal>
+            <b-button v-if="store.isServerEditable" variant="link" v-b-modal.editNameModal>
                <b-img :src="require('@/assets/edit.svg')"></b-img>
             </b-button>
 
-            <b-button class="pl-2 pr-0" v-if="canDelete" variant="link" v-b-modal.deleteModal>
+            <b-button class="pl-2 pr-0" v-if="store.isServerEditable" variant="link" v-b-modal.deleteModal>
                <b-img :src="require('@/assets/delete.svg')"></b-img>
             </b-button>
          </b-input-group>
@@ -39,7 +39,7 @@
       <!-- Modal used for editing server name -->
       <b-modal id="editNameModal" ref="editNameModal" title="Edit server name" @ok.prevent="editNameSubmit" centered @shown="editNameShown">
          <b-form @submit.stop.prevent="editNameSubmit">
-            <b-form-input id="editNameInput" type="text" v-model.trim="editName" :state="editNameValidity"></b-form-input>
+            <b-form-input id="editNameInput" type="text" v-model.trim="editName" :state="isEditNameValid"></b-form-input>
             <b-form-invalid-feedback>
                Enter a server name
             </b-form-invalid-feedback>
@@ -53,8 +53,8 @@
       </b-modal>
 
       <b-form-group label="Options:">
-         <b-form-checkbox type="checkbox" v-model="server['singlePlayer']" :disabled="!isEditable">Single Player</b-form-checkbox>
-         <b-form-checkbox type="checkbox" v-model="server['classicFlyers']" disabled>Classic Flyers</b-form-checkbox>
+         <b-form-checkbox type="checkbox" v-model="store.server['singlePlayer']" :disabled="!store.isServerEditable">Single Player</b-form-checkbox>
+         <b-form-checkbox type="checkbox" v-model="store.server['classicFlyers']" disabled>Classic Flyers</b-form-checkbox>
       </b-form-group>
 
       <b-form-group label="Multipliers:" class="pt-0">
@@ -71,7 +71,7 @@
                   <b-img :src="store.statImages[stat]" style="max-width: 2rem;"></b-img>
                </b-col>
                <b-col v-for="param in paramIndices" class="px-1" :key="stat+','+param">
-                  <b-form-input type="number" class="text-center px-1 mx-0 text-primary" :placeholder="formatMult(store.officialServer[stat][param])" @change="setMult(stat,param,$event)" :value="server[stat][param]" :disabled="!isEditable">
+                  <b-form-input type="number" class="text-center px-1 mx-0 text-primary" :placeholder="formatMult(stat,param)" @change="setMult(stat,param,$event)" :value="userValue(stat,param)" :disabled="!store.isServerEditable">
                   </b-form-input>
                </b-col>
             </b-row>

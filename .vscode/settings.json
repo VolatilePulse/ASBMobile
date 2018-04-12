@@ -2,6 +2,7 @@
    "editor.detectIndentation": false,
    "editor.tabSize": 3,
    "editor.formatOnSave": true,
+   "files.insertFinalNewline": true,
    "html.format.wrapLineLength": 160,
    "javascript.implicitProjectConfig.checkJs": true,
    "vue-peek.supportedLanguages": [
@@ -47,14 +48,13 @@
       "Falsey",
       "GC'd",
       "Maxage",
-      "Melee",
       "Mult",
       "Stats",
       "TBHM",
-      "centered",
-      "color",
+      "UUIDs",
       "consts",
       "debounced",
+      "debouncer",
       "dismissible",
       "gigas",
       "linq",
@@ -74,8 +74,9 @@
       "**/vscode-extension/**",
       "**/.git/**",
       ".vscode",
-      "src/ark/servers_*.ts",
-      "src/ark/test_data.ts",
+      "**/src/ark/servers_*.ts",
+      "**/src/ark/test_data.ts",
+      "**/public/data/*.json",
    ],
    "cSpell.enabledLanguageIds": [
       "c",
@@ -105,4 +106,5 @@
       "yml",
       "vue"
    ],
+   "cSpell.language": "en,en-US,en-GB",
 }

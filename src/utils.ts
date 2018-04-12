@@ -2,8 +2,9 @@
  * @fileOverview Miscellaneous functions used throughout the app
  */
 
-import { isString } from 'util';
 import cloneDeepWith from 'lodash-es/cloneDeepWith';
+import { isString } from 'util';
+
 
 const EPSILON = 1E-10;
 
@@ -31,7 +32,7 @@ const formattersCache: Map<{ places: number, fixed: boolean }, Intl.NumberFormat
  * @param {number} places Number of decimal places, at most, to show
  * @param {boolean} fixed True to always show digits after the decimal place when they are zero
  */
-export function FormatNumber(value: number, places = 1, fixed = false) {
+export function FormatNumber(value: number, places: number = 1, fixed: boolean = false) {
    let formatter = formattersCache.get({ places, fixed });
    if (!formatter) {
       // @ts-ignore
@@ -89,7 +90,7 @@ export function DelayFunction(duration: number) {
  * @param {number} b B
  * @param {number} epsilon Difference limit
  */
-export function CompareFloat(a: number, b: number, epsilon = EPSILON) {
+export function CompareFloat(a: number, b: number, epsilon: number = EPSILON) {
    if (!Number.isFinite(a) || !Number.isFinite(b)) return undefined;
 
    const diff = Math.abs(a - b);
@@ -102,7 +103,7 @@ export function CompareFloat(a: number, b: number, epsilon = EPSILON) {
  * @param {number} places Number of decimals to be rounded to
  * @returns {number} Decimal rounded to the specified precision
  */
-export function RoundTo(num: number, places = 0) {
+export function RoundTo(num: number, places: number = 0): number {
    return +Number(num + EPSILON).toFixed(places);
 }
 
@@ -125,7 +126,7 @@ export function DeepCopy<T>(obj: T): T {
 
 function CloneCustomizer<T>(_: T, key: string | number): any | null {
    if (!key) return undefined;
-   if (isString(key) && key.startsWith('_')) return null;
+   if (isString(key) && key.startsWith('__')) return null;
 }
 
 /**
@@ -133,7 +134,7 @@ function CloneCustomizer<T>(_: T, key: string | number): any | null {
  * @param {object} target
  * @param {object[]} sources
  */
-export function DeepMerge(target: any, ...sources: any[]): any {
+export function DeepMerge<T extends Bag>(target: T, ...sources: Bag[]): T {
    if (!sources.length)
       return target;
 
@@ -154,12 +155,17 @@ export function DeepMerge(target: any, ...sources: any[]): any {
    return DeepMerge(target, ...sources);
 }
 
+interface Bag {
+   [key: string]: any;
+   [key: number]: any;
+}
+
 /**
  * Deep merge two objects, except don't overwrite a value with 'undefined' and don't touch anything starting with '_'.
  * @param {object} target
  * @param {object[]} sources
  */
-export function DeepMergeSoft(target: any, ...sources: any[]): any {
+export function DeepMergeSoft<T extends Bag>(target: T, ...sources: Bag[]): T {
    if (!sources.length)
       return target;
 
@@ -167,7 +173,7 @@ export function DeepMergeSoft(target: any, ...sources: any[]): any {
 
    if (IsObject(target) && IsObject(source)) {
       for (const key in source) {
-         if (key.startsWith('_')) continue;
+         if (typeof key === 'string' && key.startsWith('_')) continue;
          if (IsObject(source[key])) {
             if (!target[key])
                Object.assign(target, { [key]: {} });
@@ -179,4 +185,28 @@ export function DeepMergeSoft(target: any, ...sources: any[]): any {
    }
 
    return DeepMergeSoft(target, ...sources);
+}
+
+/**
+ * Decorator used to log method calls.
+ * @example
+ * class Thing {
+ *    @dbgLog
+ *    myMethod(arg1, arg2) {
+ *       // do stuff & things
+ *    }
+ * }
+ */
+export function dbgLog(_target: any, propertyKey: string, descriptor: PropertyDescriptor): any {
+   const oldValue = descriptor.value;
+
+   // tslint:disable-next-line:only-arrow-functions - required to use the correct `this`
+   descriptor.value = function () {
+      console.group(propertyKey, arguments);
+      const value = oldValue.apply(this, arguments);
+      console.groupEnd();
+      return value;
+   };
+
+   return descriptor;
 }

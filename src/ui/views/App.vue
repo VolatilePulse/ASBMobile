@@ -29,8 +29,19 @@
       <b-container fluid style="margin-top: 4rem" class="p-2 pt-0">
          <b-progress v-show="!store.dataLoaded && !store.dataLoadError" :value="100" striped :animated="true" variant="secondary" class="fixed-top" style="height: 0.4rem"></b-progress>
 
+         <!-- TODO: Replace: Temporary indicators for pending changes ready to be saved -->
+         <div class="statusbadge" style="margin-top: -0.8rem">
+            <b-badge v-if="store.changesPending.settings" variant="info" class="mx-1 my-0">Pending Settings Save</b-badge>
+            <b-badge v-if="store.changesPending.servers" variant="secondary" class="mx-1 my-0">Pending Server Save</b-badge>
+         </div>
+
+         <!-- TODO: Remove: Temporary indicator for current server -->
+         <!--p>Server ID:
+            <code>{{store.server ? store.server._id : "-"}}</code>
+         </p-->
+
          <!-- The update available notice -->
-         <b-alert :show="store.updateAvailable" dismissible>Update available! Reload to activate.</b-alert>
+         <b-alert :show="store.updateAvailable" dismissible variant="info">Update available! Reload to activate.</b-alert>
 
          <!-- The alert on data load failure -->
          <b-alert variant="danger" :show="store.dataLoadError">
@@ -47,6 +58,17 @@
       </b-container>
    </div>
 </template>
+
+
+<style scoped>
+.statusbadge {
+  z-index: 500;
+  position: fixed;
+  right: 0.3rem;
+}
+</style>
+
+
 
 <script lang="ts">
 import { Component } from 'vue-property-decorator';

@@ -1,6 +1,6 @@
 {
    "name": "asb-mobile",
-   "version": "0.1.0-preview1",
+   "version": "0.1.0-preview2",
    "description": "Ark Smart Breeding for Mobile",
    "author": "VolatilePulse",
    "private": true,
@@ -13,10 +13,12 @@
       "test": "vue-cli-service test",
       "lint": "vue-cli-service lint",
       "values": "node scripts/make_values.js",
-      "liveserver": "ws -c scripts/liveserver.conf.js"
+      "liveserver": "ws -c scripts/liveserver.conf.js",
+      "gencert": "bash scripts/generate-ssl.sh"
    },
    "dependencies": {
       "bootstrap-vue": "^2.0.0-rc.2",
+      "cuid": "^2.1.1",
       "lodash-es": "^4.17.7",
       "pouch-vue": "^0.1.35",
       "pouchdb-adapter-idb": "^6.4.3",

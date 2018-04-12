@@ -1,8 +1,9 @@
-import { TORPOR, FOOD, SPEED, HEALTH, STAMINA, OXYGEN, DAMAGE, WEIGHT } from '@/consts';
-import { Stat, VueCreature } from './creature';
 import * as Ark from '@/ark';
+import { StatMultipliers } from '@/ark/multipliers';
+import { Stat } from '@/ark/types';
+import { DAMAGE, FOOD, HEALTH, OXYGEN, SPEED, STAMINA, TORPOR, WEIGHT } from '@/consts';
+import { Creature, Server } from '@/data/objects';
 import * as Utils from '@/utils';
-import { CombinedMultipliers } from '@/ark/types';
 
 
 export class TEProps {
@@ -12,9 +13,9 @@ export class TEProps {
 
 export class Extractor {
    /** Stores all of the creature data */
-   c: VueCreature;
+   c: Creature;
    /** Stores all multipliers for stat calculations */
-   m: CombinedMultipliers = [];
+   m: StatMultipliers[] = [];
 
    /** A counter to see how many wild stat levels are unaccounted for */
    wildFreeMax = 0;
@@ -48,8 +49,8 @@ export class Extractor {
    /** Contains all of the TE properties for stats */
    statTEmaps: Array<Map<Stat, TEProps>> = [];
 
-   constructor(vueCreature: VueCreature) {
-      this.c = vueCreature;
+   constructor(creature: Creature, server: Server) {
+      this.c = creature;
       // TODO: Add consider wild levels
       // Only way to calculate wild levels is with a TE
       // Creatures like gigas are unaffected, just as if they were bred
@@ -60,7 +61,7 @@ export class Extractor {
 
       // considerWildLevelSteps = considerWildLevelSteps && !bred;
       // Make sure the multipliers haven't changed
-      this.m = Ark.GetMultipliers(this.c.serverName, this.c.species);
+      this.m = Ark.GetMultipliers(server, this.c.species);
 
       // Clear the checked property for future extractions (also clearing out any Vue observer)
       this.c.stats = Utils.FilledArray(8, () => []);
@@ -282,6 +283,7 @@ export class Extractor {
       if (tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild, this.c.TE, this.c.IB) > maxLd)
          return;
 
+      // FIXME: Performance needs to increase
       if (this.c.values[statIndex] === Utils.RoundTo(tempStat.calculateValue(this.m[statIndex], !this.c.wild, this.c.TE, this.c.IB), Ark.Precision(statIndex)))
          this.c.stats[statIndex].push(new Stat(tempStat));
 
@@ -290,6 +292,7 @@ export class Extractor {
          // TODO: Address this to apply proper logic as it makes mild assumptions
          // FIXME: Really not sure what assumptions it makes, but sure...
          // This is making sure that our previously calculated IB, rounded, is at least somewhat close to the IB the stat wants to use
+         // FIXME: Performance needs to increase
          if (Utils.RoundTo(tempStat.calculateIB(this.m[statIndex], this.c.values[statIndex]), 2) === Utils.RoundTo(this.c.IB, 2)) {
             const maxTempIB = tempStat.calculateIB(this.m[statIndex], this.c.values[statIndex] + (0.5 / Math.pow(10, Ark.Precision(statIndex))));
             const minTempIB = tempStat.calculateIB(this.m[statIndex], this.c.values[statIndex] - (0.5 / Math.pow(10, Ark.Precision(statIndex))));
@@ -361,6 +364,7 @@ export class Extractor {
       const localStats = this.c.stats[statIndex];
       this.statTEmaps[statIndex] = this.statTEmaps[statIndex] || new Map();
 
+      // FIXME: This needs cleaned up, badly
       map.forEach(statTE => {
          if (tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild, statTE.TE, this.c.IB) <= maxLd) {
 
@@ -385,7 +389,8 @@ export class Extractor {
       do {
          if (dbg) dbg.filterLoops += 1;
          removed = false;
-         this.minWild = 0, this.minDom = 0;
+         this.minWild = 0;
+         this.minDom = 0;
 
          // Find any stats that do not exist as a possible option
          if (this.options.length)
@@ -434,7 +439,7 @@ export class Extractor {
          removed = this.statRemover(dbg);
 
          if (!removed && this.options.length === 0)
-            removed = this.dynamicGenerator(dbg);
+            removed = this.generateOptions(dbg);
 
       } while (removed);
    }
@@ -453,49 +458,6 @@ export class Extractor {
          }
       }
       return true;
-   }
-
-   /**
-    * Recursively checks our results for only valid ones. If the results are valid, returns either an array or true
-    *
-    * @param {Stat[]} option An Array of Stat objects
-    * @param {*} [dbg = undefined] Debugger object
-    *
-    * @returns {boolean} Returns true if it's a valid options set, false otherwise
-    */
-   matchingStats(option: Stat[], dbg?: any) {
-      if (dbg) dbg.totalRecursion++;
-
-      let TE = -1;
-      let wildLevels = 0, domLevels = 0;
-
-      // If the TE of the stats we have don't match, they aren't valid
-      for (let i = 0; i < option.length; i++) {
-         // Only if there is more than 2 TE stats
-         if (this.statTEmaps.length > 1) {
-            const statTEs = this.statTEmaps[i];
-            if (TE === -1 && statTEs !== undefined)
-               TE = statTEs.get(option[i]).TE;
-            else if (statTEs !== undefined)
-               if (TE !== statTEs.get(option[i]).TE)
-                  return false;
-         }
-
-         if (!this.checkedStat[i]) {
-            if (option[i].Lw > 0)
-               wildLevels += option[i].Lw;
-            domLevels += option[i].Ld;
-
-            if ((!this.unusedStat && wildLevels > this.wildFreeMax) || domLevels > this.domFreeMax)
-               return false;
-         }
-      }
-      // check to see if the stat possibilities add up to the missing dom levels
-      // and wild levels as long as we don't have an unused stat
-      if ((this.unusedStat || wildLevels === this.wildFreeMax) && domLevels === this.domFreeMax)
-         return true;
-
-      return false;
    }
 
    statRemover(dbg?: any) {
@@ -524,41 +486,80 @@ export class Extractor {
     * @returns {boolean} False if a stat has 0 possibilities, True otherwise
     */
    generateOptions(dbg?: any): boolean {
+      const localCheckedStats = this.checkedStat;
+      const localMap = this.statTEmaps;
+      const localStats = this.c.stats;
+      const freeWild = this.wildFreeMax;
+      const freeDom = this.domFreeMax;
+
       /** Contains the indices used to generate the option array */
-      const tempOptions: number[] = [];
+      const statIndices: number[] = [];
+      const tempStatOption: Stat[] = [];
+      const indexMaxArray: number[] = [];
+      const indexMax = localStats.length - 1;
+      let runningWild = 0;
+      let runningDom = 0;
+      let runningTE = -1;
+      let currentTE = runningTE;
+      let statIndexTE = 0;
+      let statIndex = 0;
 
-      const localStats: Stat[][] = this.c.stats;
-
-      // The initial array for matchingStats
-      for (let stat = HEALTH; stat <= TORPOR; stat++) {
-         if (localStats[stat].length !== 0)
-            tempOptions.push(0);
-         else
-            return false;
+      for (let index = HEALTH; index <= TORPOR; index++) {
+         statIndices[index] = 0;
+         tempStatOption[index] = localStats[index][0];
+         indexMaxArray[index] = localStats[index].length;
       }
 
-      const indexMax = tempOptions.length - 1;
-      let selector = indexMax;
+      while (statIndex !== -1 && statIndices[statIndex] < indexMaxArray[statIndex]) {
+         if (dbg) dbg.totalIterations++;
+         // Get the stat at this index
+         let localStat = localStats[statIndex][statIndices[statIndex]];
+         // Assign the stat to the possible option array
+         tempStatOption[statIndex] = localStat;
 
-      do {
-         const tempStatOption: Stat[] = localStats.map((options, stat) => options[tempOptions[stat]]);
-
-         // Verify the option generated was valid and add it to options
-         if (this.matchingStats(tempStatOption, dbg))
-            this.options.push(tempStatOption.slice());
-
-         tempOptions[selector]++;
-
-         while (selector !== -1 && tempOptions[selector] === localStats[selector].length) {
-            tempOptions[selector] = 0;
-            selector--;
-            if (selector !== -1)
-               tempOptions[selector]++;
+         // Do some initial stat calculations
+         if (!localCheckedStats[statIndex]) {
+            runningWild += localStat.Lw;
+            runningDom += localStat.Ld;
+         }
+         if (localMap[statIndex] !== undefined) {
+            currentTE = localMap[statIndex].get(localStat).TE;
+            if (runningTE === -1) {
+               runningTE = currentTE;
+               statIndexTE = statIndex;
+            }
          }
 
-         if (selector !== -1)
-            selector = indexMax;
-      } while (selector !== -1);
+         // If we are at the last stat
+         if (statIndex === indexMax && (runningWild === freeWild || this.unusedStat) && runningDom === freeDom && currentTE === runningTE)
+            this.options.push(tempStatOption.slice());
+
+         // Otherwise we need to continue to the next stat index
+         if (statIndex !== indexMax && runningWild <= freeWild && runningDom <= freeDom && currentTE === runningTE) {
+            statIndex++;
+            continue;
+         }
+
+         // Either have a bad stat or need to rewind the stat
+         do {
+            if (statIndices[statIndex] === indexMaxArray[statIndex]) {
+               statIndices[statIndex] = 0;
+               statIndex--;
+               if (statIndex === -1)
+                  break;
+            }
+            localStat = localStats[statIndex][statIndices[statIndex]];
+            if (!localCheckedStats[statIndex]) {
+               runningWild -= localStat.Lw;
+               runningDom -= localStat.Ld;
+            }
+            if (statIndexTE === statIndex)
+               runningTE = -1;
+            currentTE = runningTE;
+            statIndices[statIndex]++;
+         } while (statIndices[statIndex] === indexMaxArray[statIndex]);
+      }
+
       return !!this.options.length;
    }
 
@@ -573,8 +574,8 @@ export class Extractor {
       let currentTE = -1;
       let statIndexTE = -1;
 
-      for (let health of localStats[HEALTH]) {
-         if (dbg) dbg.totalRecursion++;
+      for (const health of localStats[HEALTH]) {
+         if (dbg) dbg.totalIterations++;
          if (!localCheckedStats[HEALTH]) {
             runningWild += health.Lw;
             runningDom += health.Ld;
@@ -597,8 +598,8 @@ export class Extractor {
             continue;
          }
 
-         for (let stamina of localStats[STAMINA]) {
-            if (dbg) dbg.totalRecursion++;
+         for (const stamina of localStats[STAMINA]) {
+            if (dbg) dbg.totalIterations++;
             if (!localCheckedStats[STAMINA]) {
                runningWild += stamina.Lw;
                runningDom += stamina.Ld;
@@ -621,8 +622,8 @@ export class Extractor {
                continue;
             }
 
-            for (let oxygen of localStats[OXYGEN]) {
-               if (dbg) dbg.totalRecursion++;
+            for (const oxygen of localStats[OXYGEN]) {
+               if (dbg) dbg.totalIterations++;
                if (!localCheckedStats[OXYGEN]) {
                   runningWild += oxygen.Lw;
                   runningDom += oxygen.Ld;
@@ -645,8 +646,8 @@ export class Extractor {
                   continue;
                }
 
-               for (let food of localStats[FOOD]) {
-                  if (dbg) dbg.totalRecursion++;
+               for (const food of localStats[FOOD]) {
+                  if (dbg) dbg.totalIterations++;
                   if (!localCheckedStats[FOOD]) {
                      runningWild += food.Lw;
                      runningDom += food.Ld;
@@ -669,8 +670,8 @@ export class Extractor {
                      continue;
                   }
 
-                  for (let weight of localStats[WEIGHT]) {
-                     if (dbg) dbg.totalRecursion++;
+                  for (const weight of localStats[WEIGHT]) {
+                     if (dbg) dbg.totalIterations++;
                      if (!localCheckedStats[WEIGHT]) {
                         runningWild += weight.Lw;
                         runningDom += weight.Ld;
@@ -693,8 +694,8 @@ export class Extractor {
                         continue;
                      }
 
-                     for (let damage of localStats[DAMAGE]) {
-                        if (dbg) dbg.totalRecursion++;
+                     for (const damage of localStats[DAMAGE]) {
+                        if (dbg) dbg.totalIterations++;
                         if (!localCheckedStats[DAMAGE]) {
                            runningWild += damage.Lw;
                            runningDom += damage.Ld;
@@ -717,8 +718,8 @@ export class Extractor {
                            continue;
                         }
 
-                        for (let speed of localStats[SPEED]) {
-                           if (dbg) dbg.totalRecursion++;
+                        for (const speed of localStats[SPEED]) {
+                           if (dbg) dbg.totalIterations++;
                            if (!localCheckedStats[SPEED]) {
                               runningWild += speed.Lw;
                               runningDom += speed.Ld;
@@ -741,8 +742,8 @@ export class Extractor {
                               continue;
                            }
 
-                           for (let torpor of localStats[TORPOR]) {
-                              if (dbg) dbg.totalRecursion++;
+                           for (const torpor of localStats[TORPOR]) {
+                              if (dbg) dbg.totalIterations++;
                               if (!localCheckedStats[TORPOR]) {
                                  runningWild += torpor.Lw;
                                  runningDom += torpor.Ld;
@@ -766,18 +767,8 @@ export class Extractor {
                               }
                               // We finally got to a good stat combination
                               else if ((runningWild === this.wildFreeMax || this.unusedStat) && runningDom === this.domFreeMax && currentTE === runningTE) {
-                                 let option: Stat[] = [];
-                                 option.push(health);
-                                 option.push(stamina);
-                                 option.push(oxygen);
-                                 option.push(food);
-                                 option.push(weight);
-                                 option.push(damage)
-                                 option.push(speed);
-                                 option.push(torpor);
-                                 this.options.push(option);
+                                 this.options.push([health, stamina, oxygen, food, weight, damage, speed, torpor]);
                               }
-
 
                               if (!this.checkedStat[TORPOR]) {
                                  runningWild -= torpor.Lw;
