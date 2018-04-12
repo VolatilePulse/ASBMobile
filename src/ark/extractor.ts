@@ -8,6 +8,15 @@ import * as IA from 'interval-arithmetic';
 import * as compile from 'interval-arithmetic-eval';
 
 
+/**
+ * Create an interval from a number, accounting for variations beyond the specified number of decimal places.
+ * @example intervalFromDecimal(0.1, 1) == Interval().halfOpenRight(0.05, 0.15)
+ */
+export function intervalFromDecimal(value: number, places: number): Interval {
+   const offset = 5 * 10 ** -(places + 1);
+   return IA().halfOpenRight(value - offset, value + offset);
+}
+
 /** Return the average of an Interval */
 function intervalAverage(range: Interval): number {
    return (range.lo + range.hi) / 2;
@@ -120,7 +129,7 @@ export class Extractor {
       else {
          this.c.TE = 1;
          this.rangeVars.TE = IA(1);
-         this.rangeVars.IB = IA().halfOpenRight(this.c.IB - 0.005, this.c.IB + 0.005);
+         this.rangeVars.IB = intervalFromDecimal(this.c.IB, 2); // IA().halfOpenRight(this.c.IB - 0.005, this.c.IB + 0.005);
          this.rangeVars.IB = IA.intersection(this.rangeVars.IB, IA(0, Infinity));
       }
    }
