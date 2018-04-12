@@ -3,6 +3,8 @@ import { TEProps } from '@/ark/extractor';
 import testData from '@/ark/test_data';
 import { Stat } from '@/ark/types';
 import { statNames } from '@/consts';
+import { Server } from '@/data/objects';
+import { getServerById } from '@/servers';
 import { PerformPerfTest, PerformTest, TestResult } from '@/testing';
 import Common, { catchAsyncErrors } from '@/ui/behaviour/Common';
 import * as Utils from '@/utils';
@@ -18,6 +20,7 @@ export default class TesterTab extends Common {
    openTestIndex = 0;
    testData = testData;
    results: TestResult[] = [];
+   testServers: Server[] = [];
    passes = 0;
    fails = 0;
    running = false;
@@ -38,6 +41,11 @@ export default class TesterTab extends Common {
    dbgKeys(index: number) { return this.results[index]['dbg'] ? Object.keys(this.results[index].dbg).filter(key => key !== 'preFilterStats') : []; }
    scrollSync(event: any) { (event.target.nextElementSibling || event.target.previousElementSibling).scrollLeft = event.target.scrollLeft; }
    optionsForStat(testIndex: number, statIndex: number) { return this.results[testIndex].options.map(options => options[statIndex]); }
+
+   created() {
+      // Find server for each test
+      this.testServers = this.testData.map(test => getServerById(test.serverId));
+   }
 
    displayResults(statOptions: Stat[][]) {
       const json = JSON.stringify(statOptions);
