@@ -2,7 +2,7 @@
    <b-container fluid>
       <b-form-group label="Server:" class="col-md-6 m-0 p-0">
          <template slot="description">
-            <div v-if="!store.isServerEditable">
+            <div v-show="!store.isServerEditable">
                Pre-defined server.
                <b-link variant="link" @click="copyServer">Make a copy</b-link> to modify it.
             </div>

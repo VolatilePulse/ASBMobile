@@ -186,3 +186,27 @@ export function DeepMergeSoft<T extends Bag>(target: T, ...sources: Bag[]): T {
 
    return DeepMergeSoft(target, ...sources);
 }
+
+/**
+ * Decorator used to log method calls.
+ * @example
+ * class Thing {
+ *    @dbgLog
+ *    myMethod(arg1, arg2) {
+ *       // do stuff & things
+ *    }
+ * }
+ */
+export function dbgLog(_target: any, propertyKey: string, descriptor: PropertyDescriptor): any {
+   const oldValue = descriptor.value;
+
+   // tslint:disable-next-line:only-arrow-functions - required to use the correct `this`
+   descriptor.value = function () {
+      console.group(propertyKey, arguments);
+      const value = oldValue.apply(this, arguments);
+      console.groupEnd();
+      return value;
+   };
+
+   return descriptor;
+}

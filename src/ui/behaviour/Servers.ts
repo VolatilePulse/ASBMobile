@@ -47,6 +47,7 @@ export default class ServersTab extends Common {
    }
 
    editNameShown() { this.editName = this.store.server.name; }
+   @catchAsyncErrors
    async editNameSubmit() {
       if (this.isEditNameValid !== false) {
          this.store.server.name = this.editName;
@@ -155,6 +156,7 @@ export default class ServersTab extends Common {
    }
 
    /** Called by the debouncer to actually save changes to the database */
+   @catchAsyncErrors
    private async saveCurrentServer() {
       console.log(`Saving server ${this.store.server.name} (${this.store.server._id})`);
       this.store.changesPending.servers = false;

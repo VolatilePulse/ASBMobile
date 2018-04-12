@@ -10,6 +10,9 @@ import { Component } from 'vue-property-decorator';
 
 @Component
 export default class AppShell extends Common {
+   // Adding the store here makes it observable right from the start
+   store = theStore;
+
    showSidebar = true;
    tab = 'welcome';
 
