@@ -40,6 +40,7 @@ export default class ServersTab extends Common {
 
    created() {
       this.debouncedSave = debounce(this.saveCurrentServer.bind(this), SAVE_TIMEOUT, { maxWait: SAVE_MAX_TIMEOUT });
+      this.startWatcher();
    }
 
    beforeDestroy() {
@@ -78,8 +79,6 @@ export default class ServersTab extends Common {
    /** Called by the template's server <select> change handler */
    @catchAsyncErrors
    async onServerChange(newId: string) {
-      console.log('Server changing');
-
       // Stop watching for changes in the server
       this.cancelWatcher();
 
@@ -96,6 +95,7 @@ export default class ServersTab extends Common {
       }
    }
 
+   /** Called by the delete confirmation modal */
    deleteServer() {
       if (!theStore.isServerEditable) return;
       this.cancelWatcher();
@@ -141,8 +141,6 @@ export default class ServersTab extends Common {
    private startWatcher() {
       if (this.store.isServerEditable) {
          this.currentWatcher = this.$watch('store.server', this.onWatcherTriggered, { deep: true });
-
-         console.log('Registered watcher');
       }
    }
 
@@ -151,14 +149,12 @@ export default class ServersTab extends Common {
       if (this.currentWatcher) {
          this.currentWatcher(); // cancels it
          this.currentWatcher = undefined;
-         console.log('Cancelled server change watcher');
       }
    }
 
    /** Called by the debouncer to actually save changes to the database */
    @catchAsyncErrors
    private async saveCurrentServer() {
-      console.log(`Saving server ${this.store.server.name} (${this.store.server._id})`);
       this.store.changesPending.servers = false;
 
       // Tell the watcher to ignore changes while it saves (because _rev will be updated)
