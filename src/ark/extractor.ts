@@ -1,7 +1,7 @@
 import * as Ark from '@/ark';
 import { StatSpeciesMultipliers } from '@/ark/multipliers';
-import { Stat } from '@/ark/types';
-import { FOOD, HEALTH, SPEED, STAT_EPSILON, TORPOR } from '@/consts';
+import { Stat, StatLike } from '@/ark/types';
+import { FOOD, HEALTH, SPEED, TORPOR } from '@/consts';
 import { Creature, Server } from '@/data/objects';
 import * as Utils from '@/utils';
 import * as IA from 'interval-arithmetic';
@@ -61,6 +61,8 @@ export class Extractor {
    unusedStat = false;
    /** A flag signifying a successful extraction */
    success = true;
+   /** Stores the starting IB range */
+   originalIB = IA(0);
 
    /** Stores each stats minimum wild stat level */
    wildMin: number[] = [];
@@ -92,13 +94,13 @@ export class Extractor {
       calcWL: compile('tamedLevel/(1+0.5*TE)'),
       calcTEFromWL: compile('(tamedLevel/wildLevel-1)/0.5'),
       // Unoptimised
-      // calcValue: compile('(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)*(1+TE*Tm*TmM)*(1+Ld*Id*IdM)'),
+      // calcV: compile('(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)*(1+TE*Tm*TmM)*(1+Ld*Id*IdM)'),
       // calcLw: compile('((V/((1+Ld*Id*IdM)*(1+TE*Tm*TmM))-Ta*TaM)/(B*TBHM*(1+IB*0.2*IBM))-1)/(Iw*IwM)'),
       // calcLd: compile('((V/(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)/(1+TE*Tm*TmM))-1)/(Id*IdM)'),
       // calcTE: compile('(V/(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)/(1+Ld*Id*IdM)-1)/(Tm*TmM)'),
       // calcIB: compile('((V/(1+TE*Tm*TmM)/(1+Ld*Id*IdM)-Ta*TaM)/(B*(1+Lw*Iw*IwM)*TBHM)-1)/(0.2*IBM)'),
 
-      calcValue: compile('((1+Lw*Iw)*B*TBHM*(1+IB*IBM)+Ta)*(1+TE*Tm)*(1+Ld*Id)'),
+      calcV: compile('((1+Lw*Iw)*B*TBHM*(1+IB*IBM)+Ta)*(1+TE*Tm)*(1+Ld*Id)'),
       calcLw: compile('((V/((1+Ld*Id)*(1+TE*Tm))-Ta)/(B*TBHM*(1+IB*IBM))-1)/Iw'),
       calcLd: compile('((V/((1+Lw*Iw)*B*TBHM*(1+IB*IBM)+Ta)/(1+TE*Tm))-1)/Id'),
       calcTE: compile('(V/((1+Lw*Iw)*B*TBHM*(1+IB*IBM)+Ta)/(1+Ld*Id)-1)/Tm'),
@@ -137,7 +139,7 @@ export class Extractor {
          this.c.TE = 1;
          this.rangeVars.TE = IA(1);
          this.rangeVars.IB = intervalFromDecimal(this.c.IB, 2); // IA().halfOpenRight(this.c.IB - 0.005, this.c.IB + 0.005);
-         this.rangeVars.IB = IA.intersection(this.rangeVars.IB, IA(0, Infinity));
+         this.originalIB = this.rangeVars.IB = IA.intersection(this.rangeVars.IB, IA(0, Infinity));
       }
    }
 
@@ -159,10 +161,14 @@ export class Extractor {
       this.checkedStat[TORPOR] = true;
 
       for (this.c.stats[TORPOR][0].Lw of intFromRange(torporLwRange, Math.round)) {
+         this.rangeVars.Lw = 0;
+         this.rangeVars.Ld = 0;
          // Reset flag to test for failed cases
          this.success = true;
 
          // Reset arrays to handle multiple loops
+         this.options = [];
+
          for (let index = HEALTH; index <= SPEED; index++) {
             this.c.stats[index] = [];
             this.checkedStat[index] = false;
@@ -178,11 +184,14 @@ export class Extractor {
 
          // If it's bred, we need to do some magic with the IB
          if (this.c.bred)
-            this.dynamicIBCalculation();
+            if (!this.dynamicIBCalculation())
+               continue;
 
          // Loop all stats except for torpor
          for (let statIndex = HEALTH; statIndex <= SPEED && this.success; statIndex++) {
             tempStat = new Stat();
+            this.rangeVars.Lw = 0;
+            this.rangeVars.Ld = 0;
 
             // Covers unused stats like oxygen
             if (!this.uniqueStatSituation(tempStat, statIndex)) {
@@ -204,9 +213,8 @@ export class Extractor {
                      let rangeLd = this.rangeFuncs.calcLd.eval({ ...this.rangeVars, ...this.rangeStats[statIndex] });
                      rangeLd.lo = 0;
                      rangeLd = IA.intersection(rangeLd, IA(0, this.domFreeMax - this.minDom));
-                     const maxLd = Math.round(rangeLd.hi);
                      tempStat.Lw = this.rangeVars.Lw;
-                     this.nonTEStatCalculation(tempStat, statIndex, maxLd);
+                     this.nonTEStatCalculation(statIndex, rangeLd);
                   }
                }
 
@@ -258,6 +266,14 @@ export class Extractor {
             else
                this.success = false;
          }
+
+         // All creatures, even wild, need their stats filtered
+         if (dbg) dbg.preFilterStats = Utils.DeepCopy(this.c.stats);
+         if (this.success)
+            this.filterResults(dbg);
+
+         this.success = !!this.options.length;
+
          if (this.success)
             break;
       }
@@ -272,12 +288,6 @@ export class Extractor {
          }
       }
 
-      // All creatures, even wild, need their stats filtered
-      if (dbg) dbg.preFilterStats = Utils.DeepCopy(this.c.stats);
-      this.filterResults(dbg);
-
-      this.success = !!this.options.length;
-
       // Sort the options based on most likely (deviation from the expected average)
       this.options.sort((opt1, opt2) => this.optionDeviation(opt1, opt2));
    }
@@ -285,17 +295,14 @@ export class Extractor {
    init() {
       // rangeStats
       for (let statIndex = HEALTH; statIndex <= TORPOR; statIndex++) {
-         this.rangeStats[statIndex].V = IA().halfOpenRight(
-            this.c.values[statIndex] - STAT_EPSILON[statIndex],
-            this.c.values[statIndex] + STAT_EPSILON[statIndex]
-         );
+         this.rangeStats[statIndex].V = intervalFromDecimal(this.c.values[statIndex], Ark.Precision(statIndex));
 
          // Stat & Server Multipliers
          this.rangeStats[statIndex].B = this.m[statIndex].B;
          this.rangeStats[statIndex].Iw = this.m[statIndex].Iw;
          this.rangeStats[statIndex].Id = this.m[statIndex].Id;
-         this.rangeStats[statIndex].Ta = this.m[statIndex].Ta;
-         this.rangeStats[statIndex].Tm = this.m[statIndex].Tm;
+         this.rangeStats[statIndex].Ta = this.c.wild ? 0 : this.m[statIndex].Ta;
+         this.rangeStats[statIndex].Tm = this.c.wild ? 1 : this.m[statIndex].Tm;
 
          this.rangeStats[statIndex].TBHM = this.m[statIndex].TBHM;
          this.rangeStats[statIndex].IBM = this.m[statIndex].IBM;
@@ -319,7 +326,7 @@ export class Extractor {
     *
     *  @return {undefined} There is no returned value
     */
-   dynamicIBCalculation(): void {
+   dynamicIBCalculation(): boolean {
       const localRangeVars = this.rangeVars;
       const localRangeFood = this.rangeStats[FOOD];
       const localRangeTorpor = this.rangeStats[TORPOR];
@@ -331,25 +338,33 @@ export class Extractor {
 
       // Extract the IB from Torpor
       let tempIBRange = localRangeFuncs.calcIB.eval({ ...localRangeVars, ...localRangeTorpor, });
-      tempIBRange = IA.intersection(tempIBRange, localRangeVars.IB);
+      if (!IA.intervalsOverlap(tempIBRange, this.originalIB))
+         return false;
+
+      tempIBRange = localRangeVars.IB = IA.intersection(tempIBRange, this.originalIB);
 
       // Convert Intervals to numbers
-      this.c.IB = intervalAverage(tempIBRange);
+      this.c.IB = intervalAverage(localRangeVars.IB);
 
       // Check the food stat for the IB as well (Only works if food is un-levelled)
       localRangeVars.Lw = 0;
       localRangeVars.Ld = 0;
-      localRangeVars.Lw = Math.round(intervalAverage(localRangeFuncs.calcValue.eval({ ...localRangeVars, ...localRangeFood })));
+      localRangeVars.Lw = Math.round(intervalAverage(localRangeFuncs.calcV.eval({ ...localRangeVars, ...localRangeFood })));
       tempIBRange = localRangeFuncs.calcIB.eval({ ...localRangeVars, ...localRangeFood });
 
       // Check to see if the new IB still allows torpor to extract correctly
-      const newExpectedValue = localRangeFuncs.calcValue.eval({ ...localRangeVars, ...localRangeFood });
-      if (IA.hasValue(newExpectedValue, this.c.values[TORPOR]))
+      const newExpectedValue = localRangeFuncs.calcV.eval({ ...localRangeVars, ...localRangeFood });
+      if (IA.hasValue(newExpectedValue, this.c.values[TORPOR])) {
+         localRangeVars.IB = tempIBRange;
          this.c.IB = intervalAverage(tempIBRange);
+      }
 
       // IB can't be lower than 0
-      if (this.c.IB < 0)
+      if (this.c.IB < 0) {
          this.c.IB = 0;
+         localRangeVars.IB = IA(0);
+      }
+      return true;
    }
 
    uniqueStatSituation(tempStat: Stat, statIndex: number) {
@@ -380,30 +395,30 @@ export class Extractor {
       return false;
    }
 
-   nonTEStatCalculation(tempStat: Stat, statIndex: number, maxLd: number): void {
-      if (tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild, this.c.TE, this.c.IB) > maxLd)
+   nonTEStatCalculation(statIndex: number, maxLd: Interval): void {
+      const localVars = this.rangeVars;
+      const localStats = this.rangeStats[statIndex];
+      const localStatsTorpor = this.rangeStats[TORPOR];
+      localVars.Ld = Math.round(intervalAverage(this.rangeFuncs.calcLd.eval({ ...localVars, ...localStats })));
+
+      if (IA.hasInterval(maxLd, localVars.Ld))
          return;
 
-      this.rangeVars.Ld = tempStat.Ld;
-
-      // FIXME: Performance needs to increase
-      const calculatedValue = this.rangeFuncs.calcValue.eval({ ...this.rangeVars, ...this.rangeStats[statIndex] });
-      if (IA.intervalsOverlap(calculatedValue, this.rangeStats[statIndex].V))
-         this.c.stats[statIndex].push(new Stat(tempStat));
+      const calculatedValue = this.rangeFuncs.calcV.eval({ ...localVars, ...localStats });
+      if (IA.intervalsOverlap(calculatedValue, localStats.V))
+         this.c.stats[statIndex].push(new Stat(localVars.Lw, localVars.Ld));
 
       // If it doesn't calculate properly, it may have used a different IB (Mostly relevant for Food)
       else if (this.c.bred) {
-         const rangeIB = this.rangeFuncs.calcIB.eval({ ...this.rangeVars, ...this.rangeStats[statIndex] });
+         const rangeIB = this.rangeFuncs.calcIB.eval({ ...localVars, ...localStats });
 
-         if (IA.intervalsOverlap(rangeIB, this.rangeVars.IB)) {
-            const tempStat2: any = {};
-            tempStat2.Lw = this.c.stats[TORPOR][0].Lw;
-            tempStat2.Ld = this.c.stats[TORPOR][0].Ld;
-            const expectedTorpor = this.rangeFuncs.calcValue.eval({ ...this.rangeVars, ...this.rangeStats[TORPOR], ...tempStat2, ...{ IB: rangeIB } });
-            if (IA.intervalsOverlap(expectedTorpor, this.rangeStats[TORPOR].V)) {
-               this.rangeVars.IB = IA.intersection(rangeIB, this.rangeVars.IB);
-               this.c.IB = intervalAverage(this.rangeVars.IB);
-               this.c.stats[statIndex].push(new Stat(this.rangeVars.Lw, this.rangeVars.Ld));
+         if (IA.intervalsOverlap(rangeIB, this.originalIB)) {
+            const tempStat2: StatLike = new Stat(this.c.stats[TORPOR][0]);
+            const expectedTorpor = this.rangeFuncs.calcV.eval({ ...localVars, ...localStatsTorpor, ...tempStat2, ...{ IB: rangeIB } });
+            if (IA.intervalsOverlap(expectedTorpor, localStatsTorpor.V)) {
+               localVars.IB = IA.intersection(rangeIB, localVars.IB);
+               this.c.IB = intervalAverage(localVars.IB);
+               this.c.stats[statIndex].push(new Stat(localVars.Lw, localVars.Ld));
             }
          }
       }
