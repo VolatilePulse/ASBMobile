@@ -123,6 +123,21 @@
             </b-list-group-item>
          </b-list-group>
       </div>
+
+      <!-- file import -->
+      <div class="dropbox mt-3">
+         <input type="file" multiple class="input-file" @change="dropFilesChange($event.target.files)">
+         <ol class="py-4 pr-3">
+            <li>Choose the correct server in Servers.</li>
+            <li>Drag one or more exported creature's
+               <span class="text-warning">.ini</span> files to this box, or click to browse.
+            </li>
+            <li>Copy the generated tests to
+               <span class="text-warning">test_data.ts</span>.
+            </li>
+         </ol>
+      </div>
+      <pre v-if="exportedTestInfo" class="gen-text p-2 small" style="overflow-x:auto">{{exportedTestInfo}}</pre>
    </b-container>
 </template>
 
@@ -202,6 +217,31 @@
   font-size: 90%;
   text-align: center;
   border-bottom: 1px solid rgb(29, 25, 26);
+}
+
+.dropbox {
+  outline: 2px dashed grey; /* the dash box */
+  outline-offset: -10px;
+  background: #334;
+  m-in-height: 200px; /* minimum height */
+  position: relative;
+  cursor: pointer;
+}
+
+.dropbox .input-file {
+  opacity: 0; /* invisible but it's there! */
+  width: 100%;
+  height: 10rem;
+  position: absolute;
+  cursor: pointer;
+}
+
+.dropbox:hover {
+  background: #445; /* when mouse over to the drop zone, change color */
+}
+
+.gen-text {
+  background: rgb(51, 68, 51);
 }
 </style>
 
