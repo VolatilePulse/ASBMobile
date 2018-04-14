@@ -298,7 +298,77 @@ const testData: TestData[] = [
       species: 'Rex', level: 412, imprint: 6, mode: 'Bred',
       values: [16626.9, 1974.0, 1275.0, 22672.9, 1159.5, 489.1, 103.5, 41177.3],
       results: [],
-   }
+   },
+   {
+      tag: '',
+      species: 'Aberrant Spino', level: 20, imprint: 0, mode: 'Tamed',
+      values: [1075.449951, 455, 780, 3120, 371, 0.992305, 1819.5],
+      serverId: 'test:Coldino SP',
+      results: [],
+   },
+   {
+      tag: '',
+      species: 'Aberrant Spino', level: 21, imprint: 0, mode: 'Tamed',
+      values: [1075.449951, 455, 780, 3120, 371, 1.095436, 1819.5],
+      serverId: 'test:Coldino SP',
+      results: [],
+   },
+   {
+      tag: '',
+      species: 'Aberrant Spino', level: 22, imprint: 0, mode: 'Tamed',
+      values: [1075.449951, 455, 780, 3120, 371, 1.095436, 1819.5],
+      serverId: 'test:Coldino SP',
+      results: [],
+   },
+   {
+      tag: '',
+      species: 'Aberrant Spino', level: 23, imprint: 0, mode: 'Tamed',
+      values: [1198.857788, 455, 780, 3120, 371, 1.095436, 1819.5],
+      serverId: 'test:Coldino SP',
+      results: [],
+   },
+   {
+      tag: '',
+      species: 'Aberrant Spino', level: 206, imprint: 0, mode: 'Tamed',
+      values: [5376.25, 1435, 2795, 9360, 532, 2.321089, 11305.5],
+      serverId: 'test:Coldino SP',
+      results: [],
+   },
+   {
+      tag: '',
+      species: 'Aberrant Spino', level: 207, imprint: 0, mode: 'Tamed',
+      values: [5376.25, 1435, 2795, 9360, 744.799988, 2.321089, 11305.5],
+      serverId: 'test:Coldino SP',
+      results: [],
+   },
+   {
+      tag: '',
+      species: 'Aberrant Spino', level: 208, imprint: 0, mode: 'Tamed',
+      values: [5376.25, 1435, 2795, 9360, 744.799988, 2.493004, 11305.5],
+      serverId: 'test:Coldino SP',
+      results: [],
+   },
+   {
+      tag: '',
+      species: 'Aberrant Spino', level: 209, imprint: 0, mode: 'Tamed',
+      values: [5993.174805, 1435, 2795, 9360, 744.799988, 2.493004, 11305.5],
+      serverId: 'test:Coldino SP',
+      results: [],
+   },
+   {
+      tag: '',
+      species: 'Aberrant Spino', level: 225, imprint: 0, mode: 'Tamed',
+      values: [7227.024414, 2296, 3633.5, 10296, 957.599976, 3.180665, 11305.5],
+      serverId: 'test:Coldino SP',
+      results: [],
+   },
+   {
+      tag: 'Don\'t expect this to work!',
+      species: 'Aberrant Spino', level: 225, imprint: 85, mode: 'Bred',
+      values: [9069.829102, 2296, 3633.5, 12921.479492, 1201.787842, 4.097843, 14188.274414],
+      serverId: 'test:Coldino SP',
+      results: [],
+   },
 ];
 
 export default testData;
