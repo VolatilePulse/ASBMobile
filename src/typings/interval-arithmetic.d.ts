@@ -17,10 +17,10 @@ declare interface IntervalArithmeticStatic {
    isEmpty(range: Interval): boolean;
    isWhole(range: Interval): boolean;
    hasValue(range: Interval, value: number): boolean;
-   hasInterval(a: Interval, b: number | Interval): boolean;
-   intervalsOverlap(a: Interval, b: number | Interval): boolean;
+   hasInterval(a: Interval, b: Interval): boolean;
+   intervalsOverlap(a: Interval, b: Interval): boolean;
 
-   intersection(a: Interval, b: number | Interval): Interval;
+   intersection(a: Interval, b: Interval): Interval;
 }
 
 declare class Interval {
