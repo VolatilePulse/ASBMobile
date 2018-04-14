@@ -25,6 +25,7 @@ export default class TesterTab extends Common {
    fails = 0;
    running = false;
    accordionIndex?: number = null;
+   exportedTestInfo: string = null;
 
    statIndices = Utils.Range(8);
 
@@ -164,4 +165,79 @@ export default class TesterTab extends Common {
       this.passes = this.results.reduce((total: number, result: TestResult) => total + (result && result.pass === true && 1), 0);
       this.fails = this.results.reduce((total: number, result: TestResult) => total + (result && result.pass === false && 1), 0);
    }
+
+   /** Handle changes to the file-drop target */
+   @catchAsyncErrors
+   async dropFilesChange(files: FileList) {
+      this.exportedTestInfo = '';
+      const filesArray = Array.from(files);
+
+      // Get the Blobs out of the file list
+      const blobs = filesArray.map(data => data.slice());
+
+      // Start a FileReader for each Blob
+      const loadPromises = blobs.map(Utils.ReadDroppedBlob);
+
+      // Wait for all the FileReaders to complete
+      const fileData = await Promise.all(loadPromises);
+
+      // Convert to a test and output
+      this.exportedTestInfo = fileData.map(ini => generateTestFromExport(ini, this.store.server._id)).join('\n');
+   }
+}
+
+
+function generateTestFromExport(ini: string, serverId: string): string {
+   const data = parseExportedCreature(ini);
+   return `{
+   tag: '',
+   species: '${data.species}', level: ${data.level}, imprint: ${data.imprint || 0}, mode: '${data.mode}',
+   values: [${data.values.join(', ')}],
+   serverId: '${serverId}',
+   results: [],
+},`;
+}
+
+const iniStatIndexes = [0, 1, 3, 4, 7, 8, 2];
+
+function parseExportedCreature(iniText: string) {
+   const ini = parseIni(iniText);
+   return {
+      species: speciesFromClass(ini[0][2]),
+      level: ini[0][12],
+      imprint: parseFloat(ini[0][13]) * 100,
+      mode: parseFloat(ini[0][13]) > 0 ? 'Bred' : 'Tamed',
+      values: iniStatIndexes.map(i => parseFloat(ini[2][i])),
+   };
+}
+
+
+const speciesRe = /\/(\w+)\/\w+_Character_BP(?:_(Aberrant))?/;
+
+function speciesFromClass(cls: string): string {
+   const result = speciesRe.exec(cls);
+   if (!result) throw new Error('Creature species could not be calculated');
+   if (result[2])
+      return result[2] + ' ' + result[1];
+
+   return result[1];
+}
+
+const blockRe = /^\[(.*)\][\r\n]+(?:[ \w]+(?:\[\d+\])?=.*[\r\n]+)+/mg;
+const lineRe = /^([ \w]+(?:\[\d+\])?)=(.*)[\r\n]+/gm;
+
+function parseIni(content: string) {
+   const blocks = [];
+   for (const [block, name] of Utils.GenerateRegexMatches(blockRe, content)) {
+      if (!name) continue;
+
+      const blockLines: string[] = [];
+      (blockLines as any).label = name;
+
+      for (const [_, _label, value] of Utils.GenerateRegexMatches(lineRe, block)) {
+         blockLines.push(value);
+      }
+      blocks.push(blockLines);
+   }
+   return blocks;
 }
