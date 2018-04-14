@@ -198,7 +198,7 @@ function generateTestFromExport(ini: string, serverId: string): string {
 },`;
 }
 
-const iniStatIndexes = [0, 1, 3, 4, 7, 8, 2];
+const iniStatIndexes = [0, 1, 3, 4, 7, 8, 9, 2];
 
 function parseExportedCreature(iniText: string) {
    const ini = parseIni(iniText);
