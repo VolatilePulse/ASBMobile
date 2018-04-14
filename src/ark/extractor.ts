@@ -224,11 +224,12 @@ export class Extractor {
                   // If this stat has a Tm and is tamed, we need to manually loop through the Ld
                   if (localMap.size === 0) {
                      // Loop all possible Lws
-                     for (tempStat.Lw of intFromRangeReverse(rangeLw)) {
+                     for (this.rangeVars.Lw of intFromRangeReverse(rangeLw)) {
                         // Calculate the highest Ld could be
-                        const maxLd = Math.min(tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex],
-                           !this.c.wild), this.domFreeMax - this.minDom);
-                        this.findTEStats(tempStat, statIndex, maxLd, localMap);
+                        let rangeLd = this.rangeFuncs.calcLd.eval({ ...this.rangeVars, ...this.rangeStats[statIndex], ...{ TE: 0 } });
+                        rangeLd.lo = 0;
+                        rangeLd = IA.intersection(rangeLd, IA(0, this.domFreeMax - this.minDom));
+                        this.findTEStats(statIndex, rangeLd, localMap);
                      }
                   }
                   // Otherwise, we only need to compare the TEs that exist within the map already
@@ -395,13 +396,13 @@ export class Extractor {
       return false;
    }
 
-   nonTEStatCalculation(statIndex: number, maxLd: Interval): void {
+   nonTEStatCalculation(statIndex: number, rangeLd: Interval): void {
       const localVars = this.rangeVars;
       const localStats = this.rangeStats[statIndex];
       const localStatsTorpor = this.rangeStats[TORPOR];
       localVars.Ld = Math.round(intervalAverage(this.rangeFuncs.calcLd.eval({ ...localVars, ...localStats })));
 
-      if (IA.hasInterval(maxLd, localVars.Ld))
+      if (IA.hasInterval(rangeLd, localVars.Ld))
          return;
 
       const calculatedValue = this.rangeFuncs.calcV.eval({ ...localVars, ...localStats });
@@ -424,44 +425,39 @@ export class Extractor {
       }
    }
 
-   findTEStats(tempStat: Stat, statIndex: number, maxLd: number, map: Map<Stat, TEProps>) {
-      const localRangeStats = this.rangeStats[statIndex];
-      const localRangeVars = this.rangeVars;
-      const localRangeFuncs = this.rangeFuncs;
+   findTEStats(statIndex: number, rangeLd: Interval, map: Map<Stat, TEProps>) {
+      const localStats = this.rangeStats[statIndex];
+      const localVars = this.rangeVars;
+      const localFuncs = this.rangeFuncs;
 
-      for (tempStat.Ld = 0; tempStat.Ld <= maxLd; tempStat.Ld++) {
-         localRangeVars.Lw = tempStat.Lw;
-         localRangeVars.Ld = tempStat.Ld;
-         localRangeVars.TE = localRangeFuncs.calcTE.eval({ ...localRangeVars, ...localRangeStats });
+      for (localVars.Ld of intFromRange(rangeLd)) {
+         localVars.TE = localFuncs.calcTE.eval({ ...localVars, ...localStats });
 
          // If the range is greater than 1
-         if (localRangeVars.TE.lo > 1)
+         if (localVars.TE.lo > 1)
             continue;
 
          // If the range is less than 0, it will only continue to get smaller
-         if (localRangeVars.TE.hi < 0)
+         if (localVars.TE.hi < 0)
             break;
 
-         localRangeVars.TE = IA.intersection(localRangeVars.TE, IA(0, 1));
+         localVars.TE = IA.intersection(localVars.TE, IA(0, 1));
 
-         const rangeWL = localRangeFuncs.calcWL.eval(localRangeVars);
+         const rangeWL = localFuncs.calcWL.eval({ ...localVars });
 
-         const minWL = Math.ceil(rangeWL.lo);
-         const maxWL = Math.ceil(rangeWL.hi);
-
-         for (let i = minWL; i <= maxWL; i++) {
-            localRangeVars.wildLevel = IA(i);
-            let tempTERange = localRangeFuncs.calcTEFromWL.eval(localRangeVars);
-            tempTERange = IA.intersection(localRangeVars.TE, tempTERange);
+         for (const i of intFromRange(rangeWL, Math.ceil)) {
+            localVars.wildLevel = IA(i);
+            let tempTERange = localFuncs.calcTEFromWL.eval({ ...localVars });
+            tempTERange = IA.intersection(localVars.TE, tempTERange);
 
             // Valid range
             if (!IA.isEmpty(tempTERange) && !IA.isWhole(tempTERange)) {
                const TEStat = new TEProps();
                TEStat.wildLevel = i;
                // Get the average of the TE range
-               TEStat.TE = intervalAverage(localRangeVars.TE);
+               TEStat.TE = intervalAverage(localVars.TE);
 
-               const workingStat = new Stat(tempStat);
+               const workingStat = new Stat(localVars.Lw, localVars.Ld);
                this.c.stats[statIndex].push(workingStat);
 
                map.set(workingStat, TEStat);
@@ -535,7 +531,7 @@ export class Extractor {
                   }
                   if (stat.Lw + this.minWild - this.wildMin[statIndex] > this.wildFreeMax
                      || stat.Ld + this.minDom - this.domMin[statIndex] > this.domFreeMax
-                     || (this.isTEStat[statIndex] && this.statTEMap.size > 0 && !this.filterByTE(statIndex, stat, this.statTEMap))) {
+                     || (this.isTEStat[statIndex] && this.isTEStat.length > 1 && !this.filterByTE(statIndex, stat, this.statTEMap))) {
                      stat.removeMe = true;
                   }
                }
