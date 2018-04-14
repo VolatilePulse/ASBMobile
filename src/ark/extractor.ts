@@ -7,7 +7,6 @@ import * as Utils from '@/utils';
 import * as IA from 'interval-arithmetic';
 import * as compile from 'interval-arithmetic-eval';
 
-
 /**
  * Create an interval from a number, accounting for variations beyond the specified number of decimal places.
  * @example intervalFromDecimal(0.1, 1) == Interval().halfOpenRight(0.05, 0.15)
