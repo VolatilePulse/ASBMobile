@@ -1,5 +1,5 @@
 import * as Ark from '@/ark';
-import { StatMultipliers } from '@/ark/multipliers';
+import { StatSpeciesMultipliers } from '@/ark/multipliers';
 import { Stat } from '@/ark/types';
 import { FOOD, HEALTH, SPEED, STAT_EPSILON, TORPOR } from '@/consts';
 import { Creature, Server } from '@/data/objects';
@@ -45,7 +45,7 @@ export class Extractor {
    /** Stores all of the creature data */
    c: Creature;
    /** Stores all multipliers for stat calculations */
-   m: StatMultipliers[] = [];
+   m: StatSpeciesMultipliers[] = [];
 
    /** A counter to see how many wild stat levels are unaccounted for */
    wildFreeMax = 0;
@@ -91,11 +91,18 @@ export class Extractor {
    rangeFuncs = {
       calcWL: compile('tamedLevel/(1+0.5*TE)'),
       calcTEFromWL: compile('(tamedLevel/wildLevel-1)/0.5'),
-      calcValue: compile('(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)*(1+TE*Tm*TmM)*(1+Ld*Id*IdM)'),
-      calcLw: compile('((V/((1+Ld*Id*IdM)*(1+TE*Tm*TmM))-Ta*TaM)/(B*TBHM*(1+IB*0.2*IBM))-1)/(Iw*IwM)'),
-      calcLd: compile('((V/(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)/(1+TE*Tm*TmM))-1)/(Id*IdM)'),
-      calcTE: compile('(V/(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)/(1+Ld*Id*IdM)-1)/(Tm*TmM)'),
-      calcIB: compile('((V/(1+TE*Tm*TmM)/(1+Ld*Id*IdM)-Ta*TaM)/(B*(1+Lw*Iw*IwM)*TBHM)-1)/(0.2*IBM)'),
+      // Unoptimised
+      // calcValue: compile('(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)*(1+TE*Tm*TmM)*(1+Ld*Id*IdM)'),
+      // calcLw: compile('((V/((1+Ld*Id*IdM)*(1+TE*Tm*TmM))-Ta*TaM)/(B*TBHM*(1+IB*0.2*IBM))-1)/(Iw*IwM)'),
+      // calcLd: compile('((V/(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)/(1+TE*Tm*TmM))-1)/(Id*IdM)'),
+      // calcTE: compile('(V/(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)/(1+Ld*Id*IdM)-1)/(Tm*TmM)'),
+      // calcIB: compile('((V/(1+TE*Tm*TmM)/(1+Ld*Id*IdM)-Ta*TaM)/(B*(1+Lw*Iw*IwM)*TBHM)-1)/(0.2*IBM)'),
+
+      calcValue: compile('((1+Lw*Iw)*B*TBHM*(1+IB*IBM)+Ta)*(1+TE*Tm)*(1+Ld*Id)'),
+      calcLw: compile('((V/((1+Ld*Id)*(1+TE*Tm))-Ta)/(B*TBHM*(1+IB*IBM))-1)/Iw'),
+      calcLd: compile('((V/((1+Lw*Iw)*B*TBHM*(1+IB*IBM)+Ta)/(1+TE*Tm))-1)/Id'),
+      calcTE: compile('(V/((1+Lw*Iw)*B*TBHM*(1+IB*IBM)+Ta)/(1+Ld*Id)-1)/Tm'),
+      calcIB: compile('((V/(1+TE*Tm)/(1+Ld*Id)-Ta)/(B*(1+Lw*Iw)*TBHM)-1)/IBM'),
    };
 
    constructor(creature: Creature, server: Server) {
@@ -286,26 +293,18 @@ export class Extractor {
          // Stat & Server Multipliers
          this.rangeStats[statIndex].B = this.m[statIndex].B;
          this.rangeStats[statIndex].Iw = this.m[statIndex].Iw;
-         this.rangeStats[statIndex].IwM = this.m[statIndex].IwM;
          this.rangeStats[statIndex].Id = this.m[statIndex].Id;
-         this.rangeStats[statIndex].IdM = this.m[statIndex].IdM;
          this.rangeStats[statIndex].Ta = this.m[statIndex].Ta;
-         this.rangeStats[statIndex].TaM = this.m[statIndex].TaM;
          this.rangeStats[statIndex].Tm = this.m[statIndex].Tm;
-         this.rangeStats[statIndex].TmM = this.m[statIndex].TmM;
 
-         this.rangeStats[statIndex].TBHM = this.m[statIndex].TBHM || 1;
+         this.rangeStats[statIndex].TBHM = this.m[statIndex].TBHM;
          this.rangeStats[statIndex].IBM = this.m[statIndex].IBM;
 
          if (this.c.wild)
             this.rangeStats[statIndex].TBHM = 1;
          else {
             // Handle negative values
-            if (this.m[statIndex].Ta < 0)
-               this.rangeStats[statIndex].TaM = 1;
-
             if (this.m[statIndex].Tm < 0) {
-               this.rangeStats[statIndex].TmM = 1;
                this.rangeStats[statIndex].TE = 1;
             }
          }

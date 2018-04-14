@@ -1,6 +1,6 @@
-import { StatMultipliers, StatServerMultipliers } from '@/ark/multipliers';
+import { StatSpeciesMultipliers } from '@/ark/multipliers';
 import { Stat } from '@/ark/types';
-import { DAMAGE, HEALTH, NUM_STATS, PRE_IB, PRE_TE, SPEED, TORPOR } from '@/consts';
+import { DAMAGE, HEALTH, PRE_IB, PRE_TE, SPEED, TORPOR } from '@/consts';
 import { Server } from '@/data/objects';
 import theStore from '@/ui/store';
 import merge from 'lodash-es/merge';
@@ -69,27 +69,35 @@ export function ConvertValue(value: number, index: number) {
 }
 
 /** Gather combined multipliers for the given server and species */
-export function GetMultipliers(server: Server, speciesName: string): StatMultipliers[] {
+export function GetMultipliers(server: Server, speciesName: string): StatSpeciesMultipliers[] {
 
    // Gather raw multipliers first from the official server, overriding with settings from the given server
    const values = merge([], theStore.officialServer.multipliers, server.multipliers);
 
-   // Apply single-player multipliers
-   if (server.singlePlayer) {
-      for (let stat = HEALTH; stat <= TORPOR; stat++) {
-         for (const param in theStore.officialServerSP.multipliers[stat]) {
-            values[stat][param] = Utils.RoundTo(values[stat][param] * (theStore.officialServerSP.multipliers[stat][param] || 1), 6);
-         }
-      }
-   }
-
-   // Convert to objects
+   // Find the settings for the species
    const speciesValues = theStore.speciesMultipliers[speciesName];
-   const multipliers: StatMultipliers[] = values.map((v, i) => ({ ...new StatServerMultipliers(v[0], v[1], v[2], v[3]), ...speciesValues[i] }));
 
-   // Set IBM for each stat
-   for (let stat = 0; stat < NUM_STATS; stat++)
-      multipliers[stat].IBM = multipliers[stat].noImprint ? 0 : server.IBM;
+   const multipliers: StatSpeciesMultipliers[] = [];
+   for (let stat = HEALTH; stat <= TORPOR; stat++) {
+      // Make up a set of multipliers, based on the species values and server multipliers
+      multipliers[stat] = { ...speciesValues[stat] };
+      multipliers[stat].IBM = speciesValues[stat].noImprint ? 0 : server.IBM;
+
+      // Apply single-player multipliers
+      for (const param in theStore.officialServerSP.multipliers[stat]) {
+         if (server.singlePlayer)
+            values[stat][param] = Utils.RoundTo(values[stat][param] * (theStore.officialServerSP.multipliers[stat][param] || 1), 6);
+      }
+
+      // Pre-calculate what we can
+      const [TaM, TmM, IdM, IwM] = values[stat];
+      if (multipliers[stat].Ta > 0) multipliers[stat].Ta *= TaM;
+      if (multipliers[stat].Tm >= 0) multipliers[stat].Tm *= TmM;
+      multipliers[stat].Id *= IdM;
+      multipliers[stat].Iw *= IwM;
+      multipliers[stat].IBM /= 5; // * 0.2
+      multipliers[stat].TBHM = multipliers[stat].TBHM || 1;
+   }
 
    return multipliers;
 }
