@@ -16,6 +16,7 @@
                <b-nav-item @click="tab='welcome'">Welcome</b-nav-item>
                <b-nav-item @click="tab='servers'" :disabled="!store.dataLoaded">Servers</b-nav-item>
                <b-nav-item @click="tab='extractor'" :disabled="!store.dataLoaded">Extractor</b-nav-item>
+               <b-nav-item @click="tab='library'" :disabled="!store.dataLoaded">Library</b-nav-item>
             </b-navbar-nav>
 
             <!-- Right aligned nav items -->
@@ -53,6 +54,7 @@
          <settings v-else-if="tab=='settings'" class="w3-container w3-animate-opacity"></settings>
          <servers v-else-if="store.dataLoaded && tab=='servers'" class="w3-container w3-animate-opacity"></servers>
          <extractor v-else-if="store.dataLoaded && tab=='extractor'" class="w3-container w3-animate-opacity"></extractor>
+         <library v-else-if="store.dataLoaded && tab=='library'" class="w3-container w3-animate-opacity"></library>
          <tester v-else-if="store.dataLoaded && tab=='tester'" class="w3-container w3-animate-opacity"></tester>
          <about v-else-if="tab=='about'" class="w3-container w3-animate-opacity"></about>
       </b-container>

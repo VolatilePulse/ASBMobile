@@ -30,6 +30,7 @@ class Store {
    updateAvailable: boolean = false;
    changesPending = { settings: false, servers: false };
 
+   creaturesCache: MirrorCache<Creature> = { content: [] };
    userServersCache: MirrorCache<Server> = { content: [] };
    isServerEditable: boolean = true;
    tempCreature: Creature = new Creature();
@@ -76,7 +77,10 @@ class Store {
    }
 
    private onLibraryChange() {
-      if (LibraryManager.current) this.userServersCache = LibraryManager.current.getUserServersCache();
+      if (LibraryManager.current) {
+         this.userServersCache = LibraryManager.current.getUserServersCache();
+         this.creaturesCache = LibraryManager.current.getCreaturesCache();
+      }
    }
 }
 
