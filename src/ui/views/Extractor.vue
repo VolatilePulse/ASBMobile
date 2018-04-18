@@ -58,6 +58,6 @@
 <script lang="ts">
 import { Component } from 'vue-property-decorator';
 import Behaviour from '../behaviour/Extractor';
-@Component
+@Component({ name: 'Extractor' })
 export default class extends Behaviour { }
 </script>

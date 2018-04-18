@@ -249,6 +249,6 @@
 <script lang="ts">
 import { Component } from 'vue-property-decorator';
 import Behaviour from '../behaviour/Tester';
-@Component
+@Component({ name: 'Tester' })
 export default class extends Behaviour { }
 </script>

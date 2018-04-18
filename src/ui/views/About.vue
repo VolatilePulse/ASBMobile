@@ -71,6 +71,6 @@
 <script lang="ts">
 import { Component } from 'vue-property-decorator';
 import Behaviour from '../behaviour/Common';
-@Component
+@Component({ name: 'About' })
 export default class extends Behaviour { }
 </script>

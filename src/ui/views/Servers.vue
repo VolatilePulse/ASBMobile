@@ -90,6 +90,6 @@ input:focus::placeholder {
 <script lang="ts">
 import { Component } from 'vue-property-decorator';
 import Behaviour from '../behaviour/Servers';
-@Component
+@Component({ name: 'Servers' })
 export default class extends Behaviour { }
 </script>
