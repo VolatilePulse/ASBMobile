@@ -1,15 +1,34 @@
+const BASE_URL = "/ASBMobile/";
+
 module.exports = {
    // Basic options
-   "baseUrl": "/ASBMobile/",
-   "lintOnSave": true,
-   "outputDir": "docs",
-   "dll": false,
+   baseUrl: BASE_URL,
+   lintOnSave: true,
+   outputDir: "docs",
+   dll: false,
 
-   // These values mirror the manifest and are inserted into index.html
-   "pwa": {
-      "name": "ASB Mobile",
-      "themeColor": "#2e54a5",
-      "msTileColor": "#00aba9"
+   // Turn this off to remove the *large* debug source maps at the cost of unreadable stack traces in production
+   productionSourceMap: true,
+
+   pwa: {
+      // These values mirror the manifest and are inserted into index.html
+      name: "ASB Mobile",
+      themeColor: "#2e54a5",
+      msTileColor: "#00aba9",
+
+      workboxOptions: {
+         // If a new service worker is found, install and take over immediately
+         // This avoids the need to reload twice to get a new version
+         clientsClaim: true,
+         skipWaiting: true,
+
+         // Where workbox is located: 'local' to copy workbox locally, or 'cdn' to use Google's nosey cdn
+         importWorkboxFrom: 'cdn',
+
+         exclude: [
+            /js\/manifest\..*\.js$/, // remove this non-existent file from the pre-cache list (webpack/vue-cli bug?)
+         ],
+      },
    },
 
    // Extensions to vue-cli's internal webpack build process go here
