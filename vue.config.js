@@ -27,6 +27,7 @@ module.exports = {
 
          exclude: [
             /js\/manifest\..*\.js$/, // remove this non-existent file from the pre-cache list (webpack/vue-cli bug?)
+            /\.js\.map$/, // remove .js.map files from the cache as it is insane to always require fetching them
          ],
       },
    },
