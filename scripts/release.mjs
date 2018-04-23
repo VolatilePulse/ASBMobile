@@ -6,11 +6,11 @@ import child_process from 'child_process';
 import util from 'util';
 import crypto from 'crypto';
 
+import yargs from 'yargs';
 import semver from 'semver';
 import chalk from 'chalk';
 import marked from 'marked';
 import inquirer from 'inquirer';
-import program from 'commander';
 import Enumerable from 'linq';
 
 // Get with the times, Node
@@ -45,7 +45,7 @@ async function cmd(cmdline) {
 }
 
 async function actionCmd(cmdline) {
-   if (program.dryRun) {
+   if (options.dryRun) {
       console.log(" >", chalk.grey(cmdline + "  [not run]"));
    } else {
       await cmd(cmdline);
@@ -57,7 +57,7 @@ function announceStage(text) {
 }
 
 function logAction(msg) {
-   console.log(' *', chalk.green(msg), program.dryRun ? chalk.grey(" [not run]") : '');
+   console.log(' *', chalk.green(msg), options.dryRun ? chalk.grey(" [not run]") : '');
 }
 
 function log(...values) {
@@ -168,7 +168,7 @@ const stages = [
    async function branched() {
       announceStage("Release branch creation");
 
-      status.branch = program.branch || await getCurrentGitBranch();
+      status.branch = options.branch || await getCurrentGitBranch();
       log(chalk`Current branch: {cyan ${status.branch}}`);
 
       var [dir, name] = status.branch.split('/');
@@ -216,7 +216,7 @@ const stages = [
          logAction(chalk`Updating {bold package.json} version`);
          status.pkg.version = status.branch_version;
          status.package_version = status.branch_version;
-         if (!program.dryRun)
+         if (!options.dryRun)
             await writePackageJson(status.pkg);
       } else {
          log(chalk`Already updated`);
@@ -241,7 +241,7 @@ const stages = [
       // Not found or failed to open
       if (note === undefined) {
          logAction("Creating placeholder for new release note");
-         if (!program.dryRun)
+         if (!options.dryRun)
             await writeFileAsync(status.current_note_file, NOTE_PLACEHOLDER + "\n");
          console.log('\n' + chalk.magenta('Action Required'));
          console.log(chalk`A placeholder release note has created at: {grey ${status.current_note_file}}`);
@@ -269,8 +269,8 @@ const stages = [
       status.past_versions = await retrieveGitTags();
       status.past_versions.push(status.package_version);
       status.past_versions.sort((a, b) => -semver.compare(a, b));
-      let versions_list = Enumerable.from(status.past_versions).take(program.numNotes).toArray().join(', ');
-      if (status.past_versions.length > program.numNotes) versions_list += '...';
+      let versions_list = Enumerable.from(status.past_versions).take(options.numNotes).toArray().join(', ');
+      if (status.past_versions.length > options.numNotes) versions_list += '...';
       log(chalk`Past versions: {cyan ${versions_list}}`);
 
       // Gather notes from files and convert to HTML
@@ -299,7 +299,7 @@ const stages = [
          log('No changes required');
       } else {
          logAction(chalk`Writing release notes written to {grey ${WHATS_NEW_FILE}}`);
-         if (!program.dryRun)
+         if (!options.dryRun)
             await writeFileAsync(WHATS_NEW_FILE, newContents);
 
          console.log('\n' + chalk.magenta('Action Required'));
@@ -391,26 +391,42 @@ const questions = {
    },
 };
 
-function toInt(str) {
-   let int = parseInt(str);
-   if (Number.isNaN(int)) return undefined; // throw new Error("Not a number");
-   return int;
+
+function argIsNotNaN(field) {
+   return args => !Number.isNaN(args[field]) || "Not a number: " + field;
 }
 
-
-program
-   .version('0.1.0', '-v, --version')
-   .description(`Helper that automates most of the release process and guides you through the rest.`)
-   .option('--dry-run', "Make no changes, just say what would be done")
-   .option('-b, --branch <name>', "DEV: Pretend we're on the given branch")
-   .option('-n, --num-notes <n>', "The number of release notes to include in the What's New page", parseInt, 3)
+const options = yargs
+   .version('0.1')
+   .help()
+   .strict()
+   .option('n', {
+      alias: 'num-notes',
+      type: 'number',
+      default: 3,
+      requiresArg: true,
+      description: "Number of release notes to include in What's New"
+   })
+   .option('d', {
+      alias: 'dry-run',
+      type: 'boolean',
+      description: 'Dry run - do not change anything'
+   })
+   .option('b', {
+      alias: 'branch',
+      type: 'string',
+      requiresArg: true,
+      description: "DEV: Pretend we're on the specified branch"
+   })
+   .check(argIsNotNaN('num-notes'))
+   .check(args => (args._.length > 0) ? "Too many arguments" : true)
+   .argv;
 
 
 async function main() {
-   program.parse(process.argv);
-   program.dryRun = true;
+   options.dryRun = true;
 
-   if (program.dryRun)
+   if (options.dryRun)
       console.log(chalk`{gray [--dry-run mode active]}`);
 
    console.log('\n' + chalk`{cyanBright Release process:} Checking what stage we're at...`);
