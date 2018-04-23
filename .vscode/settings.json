@@ -51,6 +51,7 @@
       "Mult",
       "Stats",
       "TBHM",
+      "TMPL",
       "UUIDs",
       "consts",
       "debounced",
@@ -63,11 +64,13 @@
       "poss",
       "pouchdb",
       "predef",
+      "promisify",
       "refs",
       "stat",
       "stat's",
       "stringify",
-      "transpiler"
+      "transpiler",
+      "unstaged"
    ],
    "cSpell.ignorePaths": [
       "**/node_modules/**",

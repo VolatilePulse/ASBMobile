@@ -53,8 +53,7 @@ async function actionCmd(cmdline) {
 }
 
 function announceStage(text) {
-   console.log();
-   console.log(chalk.blueBright.bold(' ⇨ ') + chalk.yellow(text));
+   console.log('\n' + chalk.blueBright.bold(' ⇨ ') + chalk.yellow(text));
 }
 
 function logAction(msg) {
@@ -71,9 +70,12 @@ function error(msg) {
 }
 
 function abort() {
-   console.log();
-   console.log(chalk`{magenta Aborted}`);
+   console.log('\n' + chalk`{magenta Aborted}`);
    process.exit(0);
+}
+
+function noteFileFromVersion(version) {
+   return `versions/${version}.md`;
 }
 
 function hashString(text) {
@@ -82,6 +84,7 @@ function hashString(text) {
 
 function markdownToHtml(md) {
    return marked(md, {
+      // @ts-ignore
       baseUrl: '/ASBMobile/',
       gfm: true,
       breaks: true,
@@ -93,7 +96,7 @@ function markdownToHtml(md) {
 
 async function readPackageJson() {
    var content = await readFileAsync('package.json');
-   var pkg = JSON.parse(content);
+   var pkg = JSON.parse(content.toString());
    return pkg;
 }
 
@@ -147,6 +150,8 @@ const status = {
 };
 
 const stages = [
+   // Startup actions
+   //  1) Read version from package.json
    async function startup() {
       announceStage('Reading package.json');
 
@@ -155,6 +160,11 @@ const stages = [
       log(chalk`Version {gray from package.json}: {cyan ${status.package_version}}`);
    },
 
+   // Check/create release branch
+   //  1) Check current branch, finish if a release branch
+   //  2) Confirm go-ahead
+   //  3) User picks new version number
+   //  4) Use git flow to create branch
    async function branched() {
       announceStage("Release branch creation");
 
@@ -165,12 +175,15 @@ const stages = [
       if (dir === "release") {
          status.branch_version = name;
          log(chalk`Version {grey from branch}: {cyan ${status.branch_version}}`);
-      } else {
+      } else if (status.branch === 'develop') {
          // Are you sure?
+         console.log('\nYou are not on a release branch.');
+         console.log('To continue we need to begin a release branch.');
+         console.log(chalk`Please ensure the {cyan develop} branch is in a state you want to release.`);
          var result = await inquirer.prompt([questions.createReleaseBranch]);
          if (!result.answer) abort();
 
-         // New version?
+         // Choose new version?
          const options = [
             semver.inc(status.package_version, 'prerelease'),
             semver.inc(status.package_version, 'patch'),
@@ -188,9 +201,14 @@ const stages = [
          status.branch_version = result.version;
          logAction("Creating a release branch with git-flow");
          await actionCmd(`git flow release start "${status.branch_version}"`);
+      } else {
+         error(chalk`Releases should only be created from the {cyan develop} branch.`);
       }
    },
 
+   // Version in package.json
+   //  1) Check version, finish if already updated
+   //  2) Update version and save
    async function packageVersion() {
       announceStage(chalk`Checking {bold package.json} version`);
 
@@ -205,10 +223,14 @@ const stages = [
       }
    },
 
+   // New version release note
+   //  1) If exists and doesn't contain placeholder, finish
+   //  2) If doesn't exist, create placeholder
+   //  3) Abort, letting user edit release note
    async function checkCurrentNote() {
       announceStage(chalk`Checking release note for current version`);
 
-      status.current_note_file = `versions/${status.branch_version}.md`;
+      status.current_note_file = noteFileFromVersion(status.branch_version);
 
       let note = undefined;
       try {
@@ -221,8 +243,7 @@ const stages = [
          logAction("Creating placeholder for new release note");
          if (!program.dryRun)
             await writeFileAsync(status.current_note_file, NOTE_PLACEHOLDER + "\n");
-         console.log();
-         console.log(chalk.magenta('Action Required'));
+         console.log('\n' + chalk.magenta('Action Required'));
          console.log(chalk`A placeholder release note has created at: {grey ${status.current_note_file}}`);
          console.log(chalk`Edit it and re-run this script when you wish to continue.`);
          process.exit(0);
@@ -235,14 +256,21 @@ const stages = [
       log("Found");
    },
 
+   // Previous release notes
+   //  1) Work out most recent versions
+   //  2) Gather notes from file and convert to HTML
+   //  3) Generate whatsnew.ts file contents
+   //  4) If matches existing content, finish
+   //  5) Update whatsnew.ts
+   //  6) Abort, instructing user to build & test
    async function collateNotes() {
       announceStage(chalk`Collating recent release notes`);
 
       status.past_versions = await retrieveGitTags();
       status.past_versions.push(status.package_version);
       status.past_versions.sort((a, b) => -semver.compare(a, b));
-      let versions_list = Enumerable.from(status.past_versions).take(3).toArray().join(', ');
-      if (status.past_versions.length > 3) versions_list += '...';
+      let versions_list = Enumerable.from(status.past_versions).take(program.numNotes).toArray().join(', ');
+      if (status.past_versions.length > program.numNotes) versions_list += '...';
       log(chalk`Past versions: {cyan ${versions_list}}`);
 
       // Gather notes from files and convert to HTML
@@ -250,7 +278,7 @@ const stages = [
       for (const version of status.past_versions) {
          let note = '';
          try {
-            note = await readFileAsync(`versions/${version}.md`, 'utf8');
+            note = await readFileAsync(noteFileFromVersion(version), 'utf8');
          }
          catch (e) { }
 
@@ -274,22 +302,26 @@ const stages = [
          if (!program.dryRun)
             await writeFileAsync(WHATS_NEW_FILE, newContents);
 
-         console.log();
-         console.log(chalk.magenta('Action Required'));
+         console.log('\n' + chalk.magenta('Action Required'));
          console.log(chalk`The {cyan What's New} page has been updated.`);
          console.log(chalk`Build and test, then re-run this script to continue.`);
+         console.log(chalk`Make sure to to a production build!`);
          process.exit(0);
       }
    },
 
+   // Commit staged changes
+   //  1) If anything unstaged, abort
+   //  2) If nothing staged, finish
+   //  3) Confirm go ahead
+   //  4) Commit changes
    async function commitChanges() {
       announceStage(chalk`Preparing to commit`);
 
       // Check nothing is unstaged
       const [staged, unstaged] = await retrieveGitStatus();
       if (unstaged.length) {
-         console.log();
-         console.log(chalk.magenta('Action Required'));
+         console.log('\n' + chalk.magenta('Action Required'));
          console.log(chalk`You have unstaged changes in your working directory.`);
          console.log(chalk`Once you have built and tested, stage the relevant changes then re-run this script to continue.`);
          process.exit(0);
@@ -310,6 +342,10 @@ const stages = [
       }
    },
 
+   // Complete release with git-flow
+   //  1) Confirm go ahead
+   //  2) finish the release
+   //  3) Push the tag
    async function finishRelease() {
       announceStage(chalk`Completing release`);
 
@@ -318,8 +354,10 @@ const stages = [
 
       logAction('Using git-flow to complete the release');
       await actionCmd(`git flow release finish "${status.package_version}" --ff-master -p -f "${status.current_note_file}"`);
-      logAction('Pushing tag to origin');
+      logAction('Pushing release tag to origin');
       await actionCmd(`git push origin "${status.package_version}"`);
+
+      console.log(chalk`\n{magenta Release completed!}`);
    },
 ];
 
@@ -327,7 +365,7 @@ const questions = {
    createReleaseBranch: {
       type: 'confirm',
       name: 'answer',
-      message: 'You are not on a release branch. Do you wish to start the release process?',
+      message: 'Do you wish to create the release branch?',
       default: false,
    },
 
@@ -353,21 +391,29 @@ const questions = {
    },
 };
 
-
+function toInt(str) {
+   let int = parseInt(str);
+   if (Number.isNaN(int)) return undefined; // throw new Error("Not a number");
+   return int;
+}
 
 
 program
    .version('0.1.0', '-v, --version')
+   .description(`Helper that automates most of the release process and guides you through the rest.`)
    .option('--dry-run', "Make no changes, just say what would be done")
-   .option('-b, --branch [optional]', "DEV: Pretend we're on the given branch");
+   .option('-b, --branch <name>', "DEV: Pretend we're on the given branch")
+   .option('-n, --num-notes <n>', "The number of release notes to include in the What's New page", parseInt, 3)
 
 
 async function main() {
    program.parse(process.argv);
    program.dryRun = true;
 
-   console.log();
-   console.log(chalk`{cyanBright Release process:} Checking what stage we're at...`);
+   if (program.dryRun)
+      console.log(chalk`{gray [--dry-run mode active]}`);
+
+   console.log('\n' + chalk`{cyanBright Release process:} Checking what stage we're at...`);
 
    for (const stage of stages) {
       await stage();
