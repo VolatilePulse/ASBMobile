@@ -14,7 +14,8 @@
       "lint": "vue-cli-service lint",
       "values": "node scripts/make_values.js",
       "liveserver": "ws -c scripts/liveserver.conf.js",
-      "gencert": "bash scripts/generate-ssl.sh"
+      "gencert": "bash scripts/generate-ssl.sh",
+      "release": "node --experimental-modules scripts/release.mjs"
    },
    "dependencies": {
       "bootstrap-vue": "^2.0.0-rc.2",
@@ -45,11 +46,16 @@
       "@vue/cli-service": "^3.0.0-beta.6",
       "@vue/test-utils": "^1.0.0-beta.10",
       "chai": "^4.1.2",
+      "chalk": "^2.4.0",
+      "inquirer": "^5.2.0",
       "linq": "^3.1.0",
       "local-web-server": "^2.5.1",
+      "marked": "^0.3.19",
       "node-sass": "^4.7.2",
       "sass-loader": "^6.0.6",
-      "vue-template-compiler": "^2.5.13"
+      "semver": "^5.5.0",
+      "vue-template-compiler": "^2.5.13",
+      "yargs": "^11.0.0"
    },
    "babel": {
       "presets": [

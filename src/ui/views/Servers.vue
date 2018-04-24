@@ -84,24 +84,12 @@
 input:focus::placeholder {
   color: transparent;
 }
-input:focus::-webkit-input-placeholder {
-  color: transparent;
-}
-input:focus:-moz-placeholder {
-  color: transparent;
-} /* FF 4-18 */
-input:focus::-moz-placeholder {
-  color: transparent;
-} /* FF 19+ */
-input:focus:-ms-input-placeholder {
-  color: transparent;
-} /* IE 10+ */
 </style>
 
 
 <script lang="ts">
 import { Component } from 'vue-property-decorator';
 import Behaviour from '../behaviour/Servers';
-@Component
+@Component({ name: 'Servers' })
 export default class extends Behaviour { }
 </script>

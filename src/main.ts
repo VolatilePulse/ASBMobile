@@ -17,6 +17,7 @@ import Welcome from '@/ui/views/Welcome.vue';
 import Settings from '@/ui/views/Settings.vue';
 import Servers from '@/ui/views/Servers.vue';
 import Extractor from '@/ui/views/Extractor.vue';
+import Library from '@/ui/views/Library.vue';
 import Tester from '@/ui/views/Tester.vue';
 
 
@@ -36,6 +37,7 @@ Vue.component('Welcome', Welcome);
 Vue.component('Settings', Settings);
 Vue.component('Servers', Servers);
 Vue.component('Extractor', Extractor);
+Vue.component('Library', Library);
 Vue.component('Tester', Tester);
 
 new App().$mount('#app');

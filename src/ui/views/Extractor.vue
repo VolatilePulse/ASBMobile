@@ -39,10 +39,11 @@
          </b-row>
          <b-button @click="extract">Extract</b-button>
          <b-button v-b-modal.optionPicker v-if="success && options.length > 1">Options</b-button>
+         <b-button :disabled="!options || !options.length" @click="addCreature">Save</b-button>
       </b-form-group>
 
       <b-form-group v-if="store.devMode" label="Test Data:">
-         <b-button v-for="data in testData" variant="link" @click.prevent="insertTestData(data)" :key="data.tag">{{data.tag}}</b-button>
+         <b-button v-for="data in testData" variant="link" @click.prevent="insertTestData(data)" :key="data._id">{{data.tag}}</b-button>
       </b-form-group>
 
       <!-- Option Picker Modal -->
@@ -58,6 +59,6 @@
 <script lang="ts">
 import { Component } from 'vue-property-decorator';
 import Behaviour from '../behaviour/Extractor';
-@Component
+@Component({ name: 'Extractor' })
 export default class extends Behaviour { }
 </script>
