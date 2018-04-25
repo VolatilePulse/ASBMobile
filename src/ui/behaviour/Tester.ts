@@ -204,13 +204,16 @@ const iniStatIndexes = [0, 1, 3, 4, 7, 8, 9, 2];
 
 function parseExportedCreature(iniText: string) {
    const ini = parseIni(iniText);
-   return {
+   const output = {
       species: speciesFromClass(ini[0][2]),
       level: ini[0][12],
       imprint: parseFloat(ini[0][13]) * 100,
       mode: parseFloat(ini[0][13]) > 0 ? 'Bred' : 'Tamed',
       values: iniStatIndexes.map(i => parseFloat(ini[2][i])),
    };
+   output.values[5] = (output.values[5] + 1) * 100;
+   output.values[6] = (output.values[6] + 1) * 100;
+   return output;
 }
 
 
