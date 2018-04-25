@@ -197,9 +197,11 @@ export class Extractor {
                // Calculate the highest Lw could be
                this.rangeVars.Ld = 0;
                let rangeLw = this.rangeFuncs.calcLw.eval({ ...this.rangeVars, ...this.rangeStats[statIndex], ...{ TE: 0 } });
+               if (this.rangeStats[statIndex].Tm <= 0)
+                  rangeLw = this.rangeFuncs.calcLw.eval({ ...this.rangeVars, ...this.rangeStats[statIndex], ...{ TE: 1 } });
                rangeLw.lo = 0;
 
-               if (this.rangeStats[statIndex].Iw === 0)
+               if (IA.isEmpty(rangeLw))
                   rangeLw.hi = this.wildFreeMax - this.minWild;
 
                rangeLw = IA.intersection(rangeLw, IA(0, this.wildFreeMax - this.minWild));
@@ -404,7 +406,7 @@ export class Extractor {
       const localStatsTorpor = this.rangeStats[TORPOR];
       localVars.Ld = Math.round(intervalAverage(this.rangeFuncs.calcLd.eval({ ...localVars, ...localStats })));
 
-      if (IA.hasInterval(rangeLd, localVars.Ld))
+      if (!IA.hasValue(rangeLd, localVars.Ld))
          return;
 
       const calculatedValue = this.rangeFuncs.calcV.eval({ ...localVars, ...localStats });
