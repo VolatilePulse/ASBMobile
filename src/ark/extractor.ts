@@ -410,7 +410,7 @@ export class Extractor {
          return;
 
       const calculatedValue = this.rangeFuncs.calcV.eval({ ...localVars, ...localStats });
-      if (IA.intervalsOverlap(calculatedValue, localStats.V))
+      if (IA.intervalsOverlap(calculatedValue, localStats.V as Interval))
          this.c.stats[statIndex].push(new Stat(localVars.Lw, localVars.Ld));
 
       // If it doesn't calculate properly, it may have used a different IB (Mostly relevant for Food)
@@ -420,7 +420,7 @@ export class Extractor {
          if (IA.intervalsOverlap(rangeIB, this.originalIB)) {
             const tempStat2: StatLike = new Stat(this.c.stats[TORPOR][0]);
             const expectedTorpor = this.rangeFuncs.calcV.eval({ ...localVars, ...localStatsTorpor, ...tempStat2, ...{ IB: rangeIB } });
-            if (IA.intervalsOverlap(expectedTorpor, localStatsTorpor.V)) {
+            if (IA.intervalsOverlap(expectedTorpor, localStatsTorpor.V as Interval)) {
                localVars.IB = IA.intersection(rangeIB, localVars.IB);
                this.c.IB = intervalAverage(localVars.IB);
                this.c.stats[statIndex].push(new Stat(localVars.Lw, localVars.Ld));
