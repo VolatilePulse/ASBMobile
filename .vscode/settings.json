@@ -26,6 +26,7 @@
       "**/.next/**",
       "**/docs/**"
    ],
+   "vetur.format.defaultFormatter.js": "vscode-typescript",
    "vetur.format.defaultFormatter.ts": "vscode-typescript",
    "vetur.format.defaultFormatter.scss": "none",
    "vetur.format.defaultFormatter.html": "js-beautify-html",
@@ -65,12 +66,14 @@
       "pouchdb",
       "predef",
       "promisify",
+      "rect",
       "refs",
       "stat",
       "stat's",
       "stringify",
       "transpiler",
-      "unstaged"
+      "unstaged",
+      "vue's"
    ],
    "cSpell.ignorePaths": [
       "**/node_modules/**",
