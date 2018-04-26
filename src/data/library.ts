@@ -140,6 +140,8 @@ class LibraryManager implements IAsyncDisposable {
 
       // Ensure a library exists, and make one active
       await this._ensureLibraryAndSelect();
+
+      theStore.libraryReady = true;
    }
 
    async dispose() {

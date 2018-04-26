@@ -64,6 +64,8 @@ class SettingsManager {
          // No existing settings : save the defaults
          await this.save();
       }
+
+      theStore.settingsReady = true;
    }
 
    /** Mark settings as changed (they will be saved later) */
