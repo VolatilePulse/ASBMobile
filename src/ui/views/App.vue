@@ -1,5 +1,5 @@
 <template>
-   <div id="app">
+   <div id="app" style="overflow-x:hidden">
       <!-- <router-link to="/">Home</router-link> -->
       <!-- <router-view/> -->
 
@@ -27,7 +27,7 @@
          </b-collapse>
       </b-navbar>
 
-      <b-container fluid style="margin-top: 4rem" class="p-2 pt-0">
+      <b-container fluid style="margin-top: 4rem" class="p-0">
          <b-progress v-show="!store.dataLoaded && !store.dataLoadError" :value="100" striped :animated="true" variant="secondary" class="fixed-top" style="height: 0.4rem"></b-progress>
 
          <!-- TODO: Replace: Temporary indicators for pending changes ready to be saved -->
@@ -35,11 +35,6 @@
             <b-badge v-if="store.changesPending.settings" variant="info" class="mx-1 my-0">Pending Settings Save</b-badge>
             <b-badge v-if="store.changesPending.servers" variant="secondary" class="mx-1 my-0">Pending Server Save</b-badge>
          </div>
-
-         <!-- TODO: Remove: Temporary indicator for current server -->
-         <!--p>Server ID:
-            <code>{{store.server ? store.server._id : "-"}}</code>
-         </p-->
 
          <!-- The update available notice -->
          <b-alert :show="store.updateAvailable" dismissible variant="info">Update available! Reload to activate.</b-alert>
@@ -50,13 +45,20 @@
             <div>Most of this application will be disabled until access to the database is restored.</div>
          </b-alert>
 
-         <welcome v-if="tab=='welcome'" class="w3-container w3-animate-opacity"></welcome>
-         <settings v-else-if="tab=='settings'" class="w3-container w3-animate-opacity"></settings>
-         <servers v-else-if="store.dataLoaded && tab=='servers'" class="w3-container w3-animate-opacity"></servers>
-         <extractor v-else-if="store.dataLoaded && tab=='extractor'" class="w3-container w3-animate-opacity"></extractor>
-         <library v-else-if="store.dataLoaded && tab=='library'" class="w3-container w3-animate-opacity"></library>
-         <tester v-else-if="store.dataLoaded && tab=='tester'" class="w3-container w3-animate-opacity"></tester>
-         <about v-else-if="tab=='about'" class="w3-container w3-animate-opacity"></about>
+         <transition name="fade">
+            <transition-group v-if="store.dataLoaded && store.libraryReady && store.settingsReady" name="slidefade" tag="div" class="tabcont">
+               <welcome v-show="tab=='welcome'" key="welcome"></welcome>
+               <settings v-show="tab=='settings'" key="settings"></settings>
+               <servers v-show="tab=='servers'" key="servers"></servers>
+               <extractor v-show="tab=='extractor'" key="extractor"></extractor>
+               <library v-show="tab=='library'" key="library"></library>
+               <tester v-show="tab=='tester'" key="tester"></tester>
+               <about v-show="tab=='about'" key="about"></about>
+            </transition-group>
+            <div v-else class="spinner-holder">
+               <spinner size="4rem" background="#49649C" style="display:block"></spinner>
+            </div>
+         </transition>
       </b-container>
    </div>
 </template>
@@ -68,6 +70,45 @@
   position: fixed;
   right: 0.3rem;
 }
+
+.tabcont > * {
+  position: absolute;
+}
+
+.spinner-holder {
+  margin-top: 8rem;
+  left: 50%;
+  right: 50%;
+  margin-left: -3rem;
+  margin-right: -3rem;
+  display: block;
+  position: absolute;
+}
+
+.slidefade-enter-active,
+.slidefade-leave-active {
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.slidefade-enter {
+  transform: translateX(-2rem);
+  opacity: 0;
+}
+
+.slidefade-leave-to {
+  transform: translateX(2rem);
+  opacity: 0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>
 
 
@@ -75,6 +116,7 @@
 <script lang="ts">
 import { Component } from 'vue-property-decorator';
 import Behaviour from '../behaviour/App';
-@Component({ name: 'App' })
+import Spinner from '@/ui/components/Spinner.vue';
+@Component({ name: 'App', components: { spinner: Spinner } })
 export default class extends Behaviour { }
 </script>
