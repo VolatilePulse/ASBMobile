@@ -223,7 +223,6 @@
   outline: 2px dashed grey; /* the dash box */
   outline-offset: -10px;
   background: #334;
-  m-in-height: 200px; /* minimum height */
   position: relative;
   cursor: pointer;
 }
