@@ -20,7 +20,7 @@ export interface TestResult {
    runs?: number;
 }
 
-export function PerformTest(testData: TestData): TestResult {
+export function PerformTest(testData: TestData, timingFn?: () => number): TestResult {
    const testCreature = new Creature();
 
    // Set the properties to prepare for extraction
@@ -46,9 +46,9 @@ export function PerformTest(testData: TestData): TestResult {
    let exception: Error;
 
    try {
-      t1 = performance.now();
+      if (timingFn) t1 = timingFn();
       extractObject.extract(dbg);
-      t2 = performance.now();
+      if (timingFn) t2 = timingFn();
    }
    catch (ex) {
       exception = ex;
@@ -82,7 +82,7 @@ export function PerformTest(testData: TestData): TestResult {
 /**
  * Run a test in performance mode, repeating it until `duration` is up and reporting on the average run time.
  */
-export function PerformPerfTest(testData: TestData, duration = 5000, generateProfiler = false): TestResult {
+export function PerformPerfTest(testData: TestData, timingFn: () => number, duration = 5000, generateProfiler = false): TestResult {
    let runs = 0;
    let t1, t2;
    const cutoffTime = Date.now() + duration;
@@ -90,7 +90,7 @@ export function PerformPerfTest(testData: TestData, duration = 5000, generatePro
    try {
       if (generateProfiler && window.console && window.console.profile)
          console.profile(testData.tag);
-      t1 = performance.now();
+      t1 = timingFn();
 
       const server = getServerById(testData.serverId);
       if (!server) return { exception: 'Unable to locate server' };
@@ -115,7 +115,7 @@ export function PerformPerfTest(testData: TestData, duration = 5000, generatePro
       }
       while (Date.now() < cutoffTime);
 
-      t2 = performance.now();
+      t2 = timingFn();
       if (generateProfiler && window.console && window.console.profile)
          console.profileEnd();
 

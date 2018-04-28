@@ -103,7 +103,7 @@ export default class TesterTab extends Common {
             await Utils.Delay(ASYNC_DELAY_TIME_MS);
          }
 
-         const result = PerformTest(testData[index]);
+         const result = PerformTest(testData[index], performance.now.bind(performance));
          Vue.set(this.results, index, result);
 
          // Open the first failed case only
@@ -119,7 +119,7 @@ export default class TesterTab extends Common {
 
    /** Run one test repeatedly to measure it's performance, blocking the browser */
    runPerfTest(index: number) {
-      const { duration, runs, exception } = PerformPerfTest(testData[index], undefined, true);
+      const { duration, runs, exception } = PerformPerfTest(testData[index], performance.now, undefined, true);
       if (exception) {
          this.results[index].duration = 'X';
       }

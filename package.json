@@ -53,6 +53,7 @@
       "local-web-server": "^2.5.1",
       "marked": "^0.3.19",
       "node-sass": "^4.9.0",
+      "performance-now": "^2.1.0",
       "sass-loader": "^6.0.6",
       "semver": "^5.5.0",
       "vue-template-compiler": "^2.5.13",
