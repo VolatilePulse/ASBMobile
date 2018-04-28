@@ -369,6 +369,20 @@ const testData: TestData[] = [
       serverId: 'test:Coldino SP',
       results: [],
    },
+   {
+      tag: 'from BlackPanther36 with IB ~99.36%',
+      species: 'Baryonyx', level: 275, imprint: 99, mode: 'Bred',
+      values: [9334.5, 1332.5, 0, 10788.5, 662.3, 564.2, 139.9, 6866.8],
+      serverId: 'predef:Official Server',
+      results: [[{ Lw: 31, Ld: 27 }], [{ Lw: 31, Ld: 0 }], [{ Lw: -1, Ld: 0 }], [{ Lw: 30, Ld: 0 }], [{ Lw: 35, Ld: 0 }], [{ Lw: 35, Ld: 25 }], [{ Lw: -1, Ld: 0 }], [{ Lw: 222, Ld: 0 }]],
+   },
+   {
+      tag: 'from BlackPanther36',
+      species: 'Rex', level: 249, imprint: 78, mode: 'Bred',
+      values: [21626.2, 1722.0, 525.0, 12826.3, 982.2, 436.3, 115.6, 26830.5],
+      serverId: 'predef:Official Server',
+      results: [[{ Lw: 42, Ld: 15 }], [{ Lw: 31, Ld: 0 }], [{ Lw: 25, Ld: 0 }], [{ Lw: 27, Ld: 0 }], [{ Lw: 35, Ld: 0 }], [{ Lw: 43, Ld: 0 }], [{ Lw: 30, Ld: 0 }], [{ Lw: 233, Ld: 0 }]],
+   },
 ];
 
 export default testData;
