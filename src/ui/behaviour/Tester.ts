@@ -77,7 +77,7 @@ export default class TesterTab extends Common {
    optionTE(testIndex: number, optionIndex: number): string {
       const val = this.findTEStat(testIndex, optionIndex);
       if (!val) return '';
-      return (val.TE * 100).toFixed(1) + '%';
+      return (val.TE.lo * 100).toFixed(2) + '-' + (val.TE.hi * 100).toFixed(2) + '%';
    }
 
    /**

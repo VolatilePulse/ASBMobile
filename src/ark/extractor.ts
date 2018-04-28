@@ -17,7 +17,7 @@ export function intervalFromDecimal(value: number, places: number): Interval {
 }
 
 /** Return the average of an Interval */
-function intervalAverage(range: Interval): number {
+export function intervalAverage(range: Interval): number {
    return (range.lo + range.hi) / 2;
 }
 
@@ -36,8 +36,20 @@ function* intFromRangeReverse(interval: Interval, fn?: (value: number) => number
 }
 
 export class TEProps {
-   TE = 0;
+   TE = IA(0);
    wildLevel = 0;
+}
+class RangeStat {
+   V: Interval;
+
+   B: number;
+   Iw: number;
+   Id: number;
+   Ta: number;
+   Tm: number;
+   TBHM: number;
+   IBM: number;
+   TE?: number;
 }
 
 export class Extractor {
@@ -78,7 +90,7 @@ export class Extractor {
 
    // Variables for IA ranges
    /** Contains all stat-specific variables for intervals */
-   rangeStats: Array<{ [name: string]: number | Interval }> = Utils.FilledArray(8, () => ({}));
+   rangeStats: RangeStat[] = Utils.FilledArray(8, () => (new RangeStat()));
    /** Contains all variables for intervals */
    rangeVars = {
       Lw: 0,
@@ -99,11 +111,12 @@ export class Extractor {
       // calcTE: compile('(V/(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)/(1+Ld*Id*IdM)-1)/(Tm*TmM)'),
       // calcIB: compile('((V/(1+TE*Tm*TmM)/(1+Ld*Id*IdM)-Ta*TaM)/(B*(1+Lw*Iw*IwM)*TBHM)-1)/(0.2*IBM)'),
 
-      calcV: compile('((1+Lw*Iw)*B*TBHM*(1+IB*IBM)+Ta)*(1+TE*Tm)*(1+Ld*Id)'),
-      calcLw: compile('((V/((1+Ld*Id)*(1+TE*Tm))-Ta)/(B*TBHM*(1+IB*IBM))-1)/Iw'),
-      calcLd: compile('((V/((1+Lw*Iw)*B*TBHM*(1+IB*IBM)+Ta)/(1+TE*Tm))-1)/Id'),
-      calcTE: compile('(V/((1+Lw*Iw)*B*TBHM*(1+IB*IBM)+Ta)/(1+Ld*Id)-1)/Tm'),
-      calcIB: compile('((V/(1+TE*Tm)/(1+Ld*Id)-Ta)/(B*(1+Lw*Iw)*TBHM)-1)/IBM'),
+      // V = (B * (1 + Lw * Iw) * TBHM * (1 + IB * IBM) + Ta) * (1 + TE * Tm) * (1 + Ld * Id)
+      calcV: compile('((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) * (1 + TE * Tm) * (1 + Ld * Id)'),
+      calcLw: compile('((V / ((1 + Ld * Id) * (1 + TE * Tm)) - Ta) / (B * TBHM * (1 + IB * IBM)) - 1) / Iw'),
+      calcLd: compile('((V / ((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) / (1 + TE * Tm)) - 1) / Id'),
+      calcTE: compile('(V / ((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) / (1 + Ld * Id) - 1) / Tm'),
+      calcIB: compile('((V / (1 + TE * Tm) / (1 + Ld * Id) - Ta) / (B * (1 + Lw * Iw) * TBHM) - 1) / IBM'),
    };
 
    constructor(creature: Creature, server: Server) {
@@ -193,7 +206,7 @@ export class Extractor {
             this.rangeVars.Ld = 0;
 
             // Covers unused stats like oxygen
-            if (!this.uniqueStatSituation(tempStat, statIndex)) {
+            if (!this.uniqueStatSituation(statIndex)) {
                // Calculate the highest Lw could be
                this.rangeVars.Ld = 0;
                let rangeLw = this.rangeFuncs.calcLw.eval({ ...this.rangeVars, ...this.rangeStats[statIndex], ...{ TE: 0 } });
@@ -222,26 +235,15 @@ export class Extractor {
                else {
                   const localMap = this.statTEMap;
                   this.isTEStat[statIndex] = true;
-                  // If this stat has a Tm and is tamed, we need to manually loop through the Ld
-                  if (localMap.size === 0) {
-                     // Loop all possible Lws
-                     for (this.rangeVars.Lw of intFromRangeReverse(rangeLw)) {
-                        // Calculate the highest Ld could be
-                        let rangeLd = this.rangeFuncs.calcLd.eval({ ...this.rangeVars, ...this.rangeStats[statIndex], ...{ TE: 0 } });
-                        rangeLd.lo = 0;
-                        rangeLd = IA.intersection(rangeLd, IA(0, this.domFreeMax - this.minDom));
-                        this.findTEStats(statIndex, rangeLd, localMap);
-                     }
-                  }
-                  // Otherwise, we only need to compare the TEs that exist within the map already
-                  else {
-                     // Loop all possible Lws
-                     for (tempStat.Lw of intFromRangeReverse(rangeLw)) {
-                        // Calculate the highest Ld could be
-                        const maxLd = Math.min(tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex],
-                           !this.c.wild), this.domFreeMax - this.minDom);
-                        this.findMultiTEStat(tempStat, statIndex, maxLd, localMap);
-                     }
+                  // Call a different function if we already added some TE stats
+                  const methToCall = (localMap.size === 0) ? this.findTEStats.bind(this) : this.findMultiTEStat.bind(this);
+                  // Loop all possible Lws
+                  for (this.rangeVars.Lw of intFromRangeReverse(rangeLw)) {
+                     // Calculate the highest Ld could be
+                     let rangeLd = this.rangeFuncs.calcLd.eval({ ...this.rangeVars, ...this.rangeStats[statIndex], ...{ TE: 0 } });
+                     rangeLd.lo = 0;
+                     rangeLd = IA.intersection(rangeLd, IA(0, this.domFreeMax - this.minDom));
+                     methToCall(statIndex, rangeLd, localMap);
                   }
                }
             }
@@ -372,32 +374,30 @@ export class Extractor {
       return true;
    }
 
-   uniqueStatSituation(tempStat: Stat, statIndex: number) {
+   uniqueStatSituation(statIndex: number): boolean {
+      const localStats = this.rangeStats[statIndex];
+      if (!this.m[statIndex].notUsed && (!this.unusedStat || localStats.Iw) && localStats.Id)
+         return false;
+
+      const tempStat2 = new Stat(0, 0);
       // IF a stat isn't used, set it to -1 and continue
       if (this.m[statIndex].notUsed) {
-         this.c.values[statIndex] = Utils.RoundTo(tempStat.calculateValue(this.m[statIndex], !this.c.wild, this.c.TE, this.c.IB), Ark.Precision(statIndex));
          this.unusedStat = true;
-         this.c.stats[statIndex] = [new Stat(-1, 0)];
-         return true;
+         tempStat2.Lw = -1;
       }
 
       // We can't calculate stats that don't allow wild Increasees if a stat is unused
-      else if (this.unusedStat && !this.m[statIndex].Iw) {
+      else if (this.unusedStat && !localStats.Iw) {
          // Calculate DOM for speed
-         this.c.stats[statIndex] = [new Stat(-1, tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild, 0, this.c.IB))];
-         this.domFreeMax -= this.c.stats[statIndex][0].Ld;
-         this.checkedStat[statIndex] = true;
-         return true;
+         tempStat2.Ld = Math.round(intervalAverage(this.rangeFuncs.calcLd.eval({ ...this.rangeVars, ...localStats })));
+         tempStat2.Lw = -1;
       }
 
       // Creatures that don't allow speed to increase domestically also don't allow wild levels
-      else if (!this.m[statIndex].Id) {
-         this.c.stats[statIndex] = [new Stat(0, 0)];
-         this.checkedStat[statIndex] = true;
-         return true;
-      }
-
-      return false;
+      this.c.stats[statIndex] = [tempStat2];
+      this.domFreeMax -= tempStat2.Ld;
+      this.checkedStat[statIndex] = true;
+      return true;
    }
 
    nonTEStatCalculation(statIndex: number, rangeLd: Interval): void {
@@ -459,7 +459,7 @@ export class Extractor {
                const TEStat = new TEProps();
                TEStat.wildLevel = i;
                // Get the average of the TE range
-               TEStat.TE = intervalAverage(localVars.TE);
+               TEStat.TE = localVars.TE;
 
                const workingStat = new Stat(localVars.Lw, localVars.Ld);
                this.c.stats[statIndex].push(workingStat);
@@ -470,22 +470,28 @@ export class Extractor {
       }
    }
 
-   findMultiTEStat(tempStat: Stat, statIndex: number, maxLd: number, map: Map<Stat, TEProps>): void {
-      const localEPSILON = 0.0005;
+   findMultiTEStat(statIndex: number, rangeLd: Interval, map: Map<Stat, TEProps>) {
       const localStats = this.c.stats[statIndex];
+      const localVars = this.rangeVars;
+      const tempStat = new Stat(localVars.Lw, 0);
 
-      // FIXME: This needs cleaned up, badly
       map.forEach(statTE => {
-         if (tempStat.calculateDomLevel(this.m[statIndex], this.c.values[statIndex], !this.c.wild, statTE.TE, this.c.IB) <= maxLd) {
+         // Calculate the Ld range based on known good TE values
+         const rangeForLd = this.rangeFuncs.calcLd.eval({ ...localVars, ...this.rangeStats[statIndex], ...{ TE: statTE.TE } });
 
-            if (Math.abs(this.c.values[statIndex] - tempStat.calculateValue(this.m[statIndex], !this.c.wild, statTE.TE, this.c.IB)) >= localEPSILON)
-               return;
+         // Loop Ld range
+         for (tempStat.Ld of intFromRange(rangeForLd)) {
+            // Makes sure the Ld is within range
+            if (!IA.hasValue(rangeLd, tempStat.Ld))
+               continue;
+
+            // Makes sure duplicate stats aren't being added
             if (localStats.find(stat => tempStat.isEqual(stat)))
-               return;
+               continue;
 
-            const workingStat = new Stat(tempStat);
-            localStats.push(workingStat);
-            map.set(workingStat, statTE);
+            // Add stat
+            localStats.push(tempStat);
+            map.set(tempStat, statTE);
          }
       });
    }
@@ -631,7 +637,7 @@ export class Extractor {
          if (localMap.size > 0) {
             const tempTE = localMap.get(localStat);
             if (tempTE !== undefined) {
-               currentTE = tempTE.TE;
+               currentTE = intervalAverage(tempTE.TE);
                if (runningTE === -1) {
                   runningTE = currentTE;
                   statIndexTE = statIndex;
