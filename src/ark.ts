@@ -3,7 +3,7 @@ import { Stat } from '@/ark/types';
 import { DAMAGE, HEALTH, PRE_IB, PRE_TE, SPEED, TORPOR } from '@/consts';
 import { Server } from '@/data/objects';
 import theStore from '@/ui/store';
-import merge from 'lodash-es/merge';
+import merge from 'lodash/merge';
 import * as Utils from './utils';
 
 
