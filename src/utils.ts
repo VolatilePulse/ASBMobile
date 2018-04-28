@@ -2,7 +2,7 @@
  * @fileOverview Miscellaneous functions used throughout the app
  */
 
-import cloneDeepWith from 'lodash-es/cloneDeepWith';
+import cloneDeepWith from 'lodash/cloneDeepWith';
 import { isString } from 'util';
 
 

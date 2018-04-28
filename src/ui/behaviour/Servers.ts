@@ -8,7 +8,7 @@ import theStore from '@/ui/store';
 import * as Utils from '@/utils';
 // @ts-ignore
 import { Modal } from 'bootstrap-vue/es/components';
-import debounce from 'lodash-es/debounce';
+import debounce from 'lodash/debounce';
 import { Component, Vue } from 'vue-property-decorator';
 
 
