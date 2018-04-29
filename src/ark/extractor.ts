@@ -11,25 +11,24 @@ import * as compile from 'interval-arithmetic-eval';
 const RangeFuncs = {
    calcWL: compile('tamedLevel/(1+0.5*TE)').eval,
    calcTEFromWL: compile('(tamedLevel/wildLevel-1)/0.5').eval,
-
-   // calcV: compile('((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) * (1 + TE * Tm) * (1 + Ld * Id)').eval,
-   // calcLd: compile('((V / ((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) / (1 + TE * Tm)) - 1) / Id').eval,
-   // calcLw: compile('((V / ((1 + Ld * Id) * (1 + TE * Tm)) - Ta) / (B * TBHM * (1 + IB * IBM)) - 1) / Iw').eval,
    calcTE: compile('(V / ((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) / (1 + Ld * Id) - 1) / Tm').eval,
    calcIB: compile('((V / (1 + TE * Tm) / (1 + Ld * Id) - Ta) / (B * (1 + Lw * Iw) * TBHM) - 1) / IBM').eval,
 
+   // calcV: compile('((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) * (1 + TE * Tm) * (1 + Ld * Id)').eval,
    calcV(Lw: number, Ld: number, TE: Interval, IB: Interval, stat: RangeStat) {
       return IA.mul(IA.mul((IA.add(IA.mul(IA.mul(IA.mul((IA.add(IA.ONE, IA.mul(IA(Lw), stat.Iw))), stat.B), stat.TBHM),
          (IA.add(IA.ONE, IA.mul(IB, stat.IBM)))), stat.Ta)), (IA.add(IA.ONE, IA.mul(TE, stat.Tm)))),
          (IA.add(IA.ONE, IA.mul(IA(Ld), stat.Id))));
    },
 
+   // calcLw: compile('((V / ((1 + Ld * Id) * (1 + TE * Tm)) - Ta) / (B * TBHM * (1 + IB * IBM)) - 1) / Iw').eval,
    calcLw(Ld: number, TE: Interval, IB: Interval, stat: RangeStat) {
       return IA.div((IA.sub(IA.div((IA.sub(IA.div(stat.V, (IA.mul((IA.add(IA.ONE, IA.mul(IA(Ld), stat.Id))),
          (IA.add(IA.ONE, IA.mul(TE, stat.Tm)))))), stat.Ta)), (IA.mul(IA.mul(stat.B, stat.TBHM),
             (IA.add(IA.ONE, IA.mul(IB, stat.IBM)))))), IA.ONE)), stat.Iw);
    },
 
+   // calcLd: compile('((V / ((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) / (1 + TE * Tm)) - 1) / Id').eval,
    calcLd(Lw: number, TE: Interval, IB: Interval, stat: RangeStat) {
       return IA.div((IA.sub((IA.div(IA.div(stat.V, (IA.add(IA.mul(IA.mul(IA.mul((IA.add(IA.ONE, IA.mul(IA(Lw), stat.Iw))), stat.B), stat.TBHM),
          (IA.add(IA.ONE, IA.mul(IB, stat.IBM)))), stat.Ta))), (IA.add(IA.ONE, IA.mul(TE, stat.Tm))))), IA.ONE)), stat.Id);
