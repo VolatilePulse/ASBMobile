@@ -11,13 +11,16 @@
  * See https://goo.gl/2aRDsh
  */
 
-importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.0.1/workbox-sw.js");
+importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.1.0/workbox-sw.js");
 
 importScripts(
-  "/ASBMobile/precache-manifest.9b1a9aaf12e3370b6bba5fcadc2594b7.js"
+  "/ASBMobile/precache-manifest.4f591502120c7a225886e48c472522c8.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "asb-mobile"});
+
+workbox.skipWaiting();
+workbox.clientsClaim();
 
 /**
  * The workboxSW.precacheAndRoute() method efficiently caches and responds to

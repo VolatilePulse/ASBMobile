@@ -424,7 +424,7 @@ const options = yargs
 
 
 async function main() {
-   options.dryRun = true;
+   // options.dryRun = true;
 
    if (options.dryRun)
       console.log(chalk`{gray [--dry-run mode active]}`);
