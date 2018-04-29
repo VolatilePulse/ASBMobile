@@ -278,9 +278,6 @@ export class Extractor {
             break;
       }
 
-      // Turn Interval Arithmetic rounding back on
-      IA.round.enable();
-
       if (dbg) dbg.levelFromTorpor = this.c.stats[TORPOR][0].Lw;
 
       // Only filter results if we have a result for every stat
