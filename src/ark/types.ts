@@ -1,4 +1,6 @@
 import { StatSpeciesMultipliers } from '@/ark/multipliers';
+import * as IA from 'interval-arithmetic';
+import { intervalAverage } from '@/ark/extractor';
 
 
 /** Server multiplier overrides */
@@ -44,37 +46,36 @@ export class Stat implements StatLike {
 
    calculateValue(m: StatSpeciesMultipliers, tamed = false, TE = 0, IB = 0) {
       // V = (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) * (1 + TE * Tm * TmM) * (1 + Ld * Id * IdM)
+
       const TBHM = (tamed && m.TBHM) || 1;
-      let v = m.B * TBHM;
 
-      if (this.Lw > 0)
-         v *= (1 + this.Lw * m.Iw);
+      const multLw =
+         IA.mul(
+            IA.mul(
+               IA.add(IA.ONE, IA.mul(IA(this.Lw), IA(m.Iw))),
+               IA(m.B)),
+            IA(TBHM));
 
-      v *= (1 + IB * m.IBM);
-      v += this.calculateTa(tamed, m.Ta);
-      v *= (1 + this.calculateTm(tamed, m.Tm, TE));
-      v *= (1 + this.Ld * m.Id);
-      return v;
-   }
+      const multLd = IA.add(IA.ONE, IA.mul(IA(this.Ld), IA(m.Id)));
+      const multTE =
+         IA.add(
+            IA(1),
+            !tamed ? IA.ZERO : IA.mul(
+               IA.lt(IA(m.Tm), IA.ZERO) ? IA.ONE : IA(TE),
+               IA(m.Tm)
+            )
+         );
 
-   calculateTm(tamed: boolean, Tm: number, TE = 1) {
-      // If not tamed, the Tame Multiplier doesn't apply to the value
-      if (!tamed)
-         return 0;
-
-      // If Tm is a negative value, TE doesn't change the value of the multiplier
-      if (Tm < 0)
-         return (Tm);
-      else
-         return (TE * Tm);
-   }
-
-   calculateTa(tamed: boolean, Ta: number) {
-      // If not tamed, the Tame Additive doesn't apply to the value
-      if (!tamed)
-         return 0;
-
-      return Ta;
+      return intervalAverage(IA.mul(
+         IA.mul(
+            IA.add(
+               IA.mul(
+                  multLw,
+                  IA.add(IA.ONE, IA.mul(IA(IB), IA(m.IBM)))
+               ),
+               tamed ? IA(m.Ta) : IA.ZERO),
+            multTE),
+         multLd));
    }
 
    isEqual(stat: Stat) {
