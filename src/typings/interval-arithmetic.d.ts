@@ -28,8 +28,12 @@ declare interface IntervalArithmeticStatic {
    add(a: Interval, b: Interval): Interval;
    sub(a: Interval, b: Interval): Interval;
 
-   lt(a: Interval, b: Interval): boolean;
+   equal(a: Interval, b: Interval): boolean;
    gt(a: Interval, b: Interval): boolean;
+   geq(a: Interval, b: Interval): boolean;
+   lt(a: Interval, b: Interval): boolean;
+   leq(a: Interval, b: Interval): boolean;
+   notEqual(a: Interval, b: Interval): boolean;
 
    ONE: Interval;
    ZERO: Interval;

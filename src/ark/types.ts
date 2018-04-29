@@ -1,4 +1,4 @@
-import { StatSpeciesMultipliers } from '@/ark/multipliers';
+import { StatMultipliers } from '@/ark/multipliers';
 import * as IA from 'interval-arithmetic';
 import { intervalAverage } from '@/ark/extractor';
 
@@ -44,25 +44,25 @@ export class Stat implements StatLike {
       }
    }
 
-   calculateValue(m: StatSpeciesMultipliers, tamed = false, TE = 0, IB = 0) {
+   calculateValue(m: StatMultipliers, tamed = false, TE = 0, IB = 0) {
       // V = (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) * (1 + TE * Tm * TmM) * (1 + Ld * Id * IdM)
 
-      const TBHM = (tamed && m.TBHM) || 1;
+      const TBHM = (tamed && m.TBHM) || IA.ONE;
 
       const multLw =
          IA.mul(
             IA.mul(
-               IA.add(IA.ONE, IA.mul(IA(this.Lw), IA(m.Iw))),
-               IA(m.B)),
-            IA(TBHM));
+               IA.add(IA.ONE, IA.mul(IA(this.Lw), m.Iw)),
+               m.B),
+            TBHM);
 
-      const multLd = IA.add(IA.ONE, IA.mul(IA(this.Ld), IA(m.Id)));
+      const multLd = IA.add(IA.ONE, IA.mul(IA(this.Ld), m.Id));
       const multTE =
          IA.add(
-            IA(1),
+            IA.ONE,
             !tamed ? IA.ZERO : IA.mul(
-               IA.lt(IA(m.Tm), IA.ZERO) ? IA.ONE : IA(TE),
-               IA(m.Tm)
+               IA.lt(m.Tm, IA.ZERO) ? IA.ONE : IA(TE),
+               m.Tm
             )
          );
 
@@ -71,9 +71,9 @@ export class Stat implements StatLike {
             IA.add(
                IA.mul(
                   multLw,
-                  IA.add(IA.ONE, IA.mul(IA(IB), IA(m.IBM)))
+                  IA.add(IA.ONE, IA.mul(IA(IB), m.IBM))
                ),
-               tamed ? IA(m.Ta) : IA.ZERO),
+               tamed ? m.Ta : IA.ZERO),
             multTE),
          multLd));
    }

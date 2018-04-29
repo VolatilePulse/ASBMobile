@@ -1,5 +1,5 @@
 import * as Ark from '@/ark';
-import { StatSpeciesMultipliers } from '@/ark/multipliers';
+import { StatMultipliers } from '@/ark/multipliers';
 import { Stat, StatLike } from '@/ark/types';
 import { FOOD, HEALTH, SPEED, TORPOR } from '@/consts';
 import { Creature, Server } from '@/data/objects';
@@ -23,6 +23,7 @@ export function intervalAverage(range: Interval): number {
 
 // Generator that yields the inner int range from the interval
 function* intFromRange(interval: Interval, fn?: (value: number) => number) {
+   interval = IA.intersection(IA(0, Infinity), interval);
    const min = fn ? fn(interval.lo) : Math.ceil(interval.lo);
    const max = fn ? fn(interval.hi) : Math.floor(interval.hi);
    for (let i = min; i <= max; i++) yield i;
@@ -30,6 +31,7 @@ function* intFromRange(interval: Interval, fn?: (value: number) => number) {
 
 // Generator that yields the inner int range from the interval
 function* intFromRangeReverse(interval: Interval, fn?: (value: number) => number) {
+   interval = IA.intersection(IA(0, Infinity), interval);
    const min = fn ? fn(interval.lo) : Math.ceil(interval.lo);
    const max = fn ? fn(interval.hi) : Math.floor(interval.hi);
    for (let i = max; i >= min; i--) yield i;
@@ -42,21 +44,21 @@ export class TEProps {
 class RangeStat {
    V: Interval;
 
-   B: number;
-   Iw: number;
-   Id: number;
-   Ta: number;
-   Tm: number;
-   TBHM: number;
-   IBM: number;
-   TE?: number;
+   B: Interval;
+   Iw: Interval;
+   Id: Interval;
+   Ta: Interval;
+   Tm: Interval;
+   TBHM: Interval;
+   IBM: Interval;
+   TE?: Interval;
 }
 
 export class Extractor {
    /** Stores all of the creature data */
    c: Creature;
    /** Stores all multipliers for stat calculations */
-   m: StatSpeciesMultipliers[] = [];
+   m: StatMultipliers[] = [];
 
    /** A counter to see how many wild stat levels are unaccounted for */
    wildFreeMax = 0;
@@ -104,12 +106,6 @@ export class Extractor {
    rangeFuncs = {
       calcWL: compile('tamedLevel/(1+0.5*TE)'),
       calcTEFromWL: compile('(tamedLevel/wildLevel-1)/0.5'),
-      // Unoptimised
-      // calcV: compile('(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)*(1+TE*Tm*TmM)*(1+Ld*Id*IdM)'),
-      // calcLw: compile('((V/((1+Ld*Id*IdM)*(1+TE*Tm*TmM))-Ta*TaM)/(B*TBHM*(1+IB*0.2*IBM))-1)/(Iw*IwM)'),
-      // calcLd: compile('((V/(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)/(1+TE*Tm*TmM))-1)/(Id*IdM)'),
-      // calcTE: compile('(V/(B*(1+Lw*Iw*IwM)*TBHM*(1+IB*0.2*IBM)+Ta*TaM)/(1+Ld*Id*IdM)-1)/(Tm*TmM)'),
-      // calcIB: compile('((V/(1+TE*Tm*TmM)/(1+Ld*Id*IdM)-Ta*TaM)/(B*(1+Lw*Iw*IwM)*TBHM)-1)/(0.2*IBM)'),
 
       // V = (B * (1 + Lw * Iw) * TBHM * (1 + IB * IBM) + Ta) * (1 + TE * Tm) * (1 + Ld * Id)
       calcV: compile('((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) * (1 + TE * Tm) * (1 + Ld * Id)'),
@@ -210,7 +206,7 @@ export class Extractor {
                // Calculate the highest Lw could be
                this.rangeVars.Ld = 0;
                let rangeLw = this.rangeFuncs.calcLw.eval({ ...this.rangeVars, ...this.rangeStats[statIndex], ...{ TE: 0 } });
-               if (this.rangeStats[statIndex].Tm <= 0)
+               if (IA.lt(this.rangeStats[statIndex].Tm, IA.ZERO))
                   rangeLw = this.rangeFuncs.calcLw.eval({ ...this.rangeVars, ...this.rangeStats[statIndex], ...{ TE: 1 } });
                rangeLw.lo = 0;
 
@@ -220,7 +216,7 @@ export class Extractor {
                rangeLw = IA.intersection(rangeLw, IA(0, this.wildFreeMax - this.minWild));
 
                // We don't need to calculate TE to extract the levels
-               if (!this.c.tamed || this.rangeStats[statIndex].Tm <= 0) {
+               if (!this.c.tamed || IA.leq(this.rangeStats[statIndex].Tm, IA.ZERO)) {
                   // Loop all possible Lws
                   for (this.rangeVars.Lw of intFromRangeReverse(rangeLw)) {
                      // Calculate the highest Ld could be
@@ -308,18 +304,18 @@ export class Extractor {
          this.rangeStats[statIndex].B = this.m[statIndex].B;
          this.rangeStats[statIndex].Iw = this.m[statIndex].Iw;
          this.rangeStats[statIndex].Id = this.m[statIndex].Id;
-         this.rangeStats[statIndex].Ta = this.c.wild ? 0 : this.m[statIndex].Ta;
-         this.rangeStats[statIndex].Tm = this.c.wild ? 1 : this.m[statIndex].Tm;
+         this.rangeStats[statIndex].Ta = this.c.wild ? IA.ZERO : this.m[statIndex].Ta;
+         this.rangeStats[statIndex].Tm = this.c.wild ? IA.ONE : this.m[statIndex].Tm;
 
          this.rangeStats[statIndex].TBHM = this.m[statIndex].TBHM;
          this.rangeStats[statIndex].IBM = this.m[statIndex].IBM;
 
          if (this.c.wild)
-            this.rangeStats[statIndex].TBHM = 1;
+            this.rangeStats[statIndex].TBHM = IA.ONE;
          else {
             // Handle negative values
-            if (this.m[statIndex].Tm < 0) {
-               this.rangeStats[statIndex].TE = 1;
+            if (IA.lt(this.m[statIndex].Tm, IA.ZERO)) {
+               this.rangeStats[statIndex].TE = IA.ONE;
             }
          }
       }
@@ -376,7 +372,7 @@ export class Extractor {
 
    uniqueStatSituation(statIndex: number): boolean {
       const localStats = this.rangeStats[statIndex];
-      if (!this.m[statIndex].notUsed && (!this.unusedStat || localStats.Iw) && localStats.Id)
+      if (!this.m[statIndex].notUsed && (!this.unusedStat || IA.notEqual(localStats.Iw, IA.ZERO)) && IA.notEqual(localStats.Id, IA.ZERO))
          return false;
 
       const tempStat2 = new Stat(0, 0);
@@ -387,7 +383,7 @@ export class Extractor {
       }
 
       // We can't calculate stats that don't allow wild Increasees if a stat is unused
-      else if (this.unusedStat && !localStats.Iw) {
+      else if (this.unusedStat && IA.equal(localStats.Iw, IA.ZERO)) {
          // Calculate DOM for speed
          tempStat2.Ld = Math.round(intervalAverage(this.rangeFuncs.calcLd.eval({ ...this.rangeVars, ...localStats })));
          tempStat2.Lw = -1;
@@ -410,7 +406,7 @@ export class Extractor {
          return;
 
       const calculatedValue = this.rangeFuncs.calcV.eval({ ...localVars, ...localStats });
-      if (IA.intervalsOverlap(calculatedValue, localStats.V as Interval))
+      if (IA.intervalsOverlap(calculatedValue, localStats.V))
          this.c.stats[statIndex].push(new Stat(localVars.Lw, localVars.Ld));
 
       // If it doesn't calculate properly, it may have used a different IB (Mostly relevant for Food)

@@ -1,10 +1,11 @@
-import { StatSpeciesMultipliers } from '@/ark/multipliers';
+import { StatMultipliers } from '@/ark/multipliers';
 import { Stat } from '@/ark/types';
-import { DAMAGE, HEALTH, PRE_IB, PRE_TE, SPEED, TORPOR } from '@/consts';
+import { DAMAGE, HEALTH, PRE_IB, PRE_TE, SPEED, TORPOR, SERVER_IWM, SERVER_IDM, SERVER_TAM, SERVER_TMM } from '@/consts';
 import { Server } from '@/data/objects';
 import theStore from '@/ui/store';
 import merge from 'lodash/merge';
 import * as Utils from './utils';
+import * as IA from 'interval-arithmetic';
 
 
 export function FormatAllOptions(stats: Stat[][]) {
@@ -69,7 +70,7 @@ export function ConvertValue(value: number, index: number) {
 }
 
 /** Gather combined multipliers for the given server and species */
-export function GetMultipliers(server: Server, speciesName: string): StatSpeciesMultipliers[] {
+export function GetMultipliers(server: Server, speciesName: string): StatMultipliers[] {
 
    // Gather raw multipliers first from the official server, overriding with settings from the given server
    const values = merge([], theStore.officialServer.multipliers, server.multipliers);
@@ -77,26 +78,37 @@ export function GetMultipliers(server: Server, speciesName: string): StatSpecies
    // Find the settings for the species
    const speciesValues = theStore.speciesMultipliers[speciesName];
 
-   const multipliers: StatSpeciesMultipliers[] = [];
+   const multipliers: StatMultipliers[] = [];
    for (let stat = HEALTH; stat <= TORPOR; stat++) {
       // Make up a set of multipliers, based on the species values and server multipliers
-      multipliers[stat] = { ...speciesValues[stat] };
-      multipliers[stat].IBM = speciesValues[stat].noImprint ? 0 : server.IBM;
+      multipliers[stat] = new StatMultipliers(speciesValues[stat]);
+      multipliers[stat].IBM = speciesValues[stat].noImprint ? IA.ZERO : IA(server.IBM);
 
       // Apply single-player multipliers
-      for (const param in theStore.officialServerSP.multipliers[stat]) {
-         if (server.singlePlayer)
-            values[stat][param] = Utils.RoundTo(values[stat][param] * (theStore.officialServerSP.multipliers[stat][param] || 1), 6);
+      if (server.singlePlayer && theStore.officialServerSP.multipliers[stat]) {
+         multipliers[stat].Iw = IA.mul(multipliers[stat].Iw, IA(theStore.officialServerSP.multipliers[stat][SERVER_IWM] || 1));
+         multipliers[stat].Id = IA.mul(multipliers[stat].Id, IA(theStore.officialServerSP.multipliers[stat][SERVER_IDM] || 1));
+
+         if (IA.gt(multipliers[stat].Ta, IA.ZERO))
+            multipliers[stat].Ta = IA.mul(multipliers[stat].Ta, IA(theStore.officialServerSP.multipliers[stat][SERVER_TAM] || 1));
+         if (IA.gt(multipliers[stat].Tm, IA.ZERO))
+            multipliers[stat].Tm = IA.mul(multipliers[stat].Tm, IA(theStore.officialServerSP.multipliers[stat][SERVER_TMM] || 1));
       }
 
       // Pre-calculate what we can
       const [TaM, TmM, IdM, IwM] = values[stat];
-      if (multipliers[stat].Ta > 0) multipliers[stat].Ta *= TaM;
-      if (multipliers[stat].Tm >= 0) multipliers[stat].Tm *= TmM;
-      multipliers[stat].Id *= IdM;
-      multipliers[stat].Iw *= IwM;
-      multipliers[stat].IBM /= 5; // * 0.2
-      multipliers[stat].TBHM = multipliers[stat].TBHM || 1;
+      if (IA.gt(multipliers[stat].Ta, IA.ZERO))
+         multipliers[stat].Ta = IA.mul(multipliers[stat].Ta, IA(TaM));
+      if (IA.gt(multipliers[stat].Tm, IA.ZERO))
+         multipliers[stat].Tm = IA.mul(multipliers[stat].Tm, IA(TmM));
+
+      multipliers[stat].Id = IA.mul(multipliers[stat].Id, IA(IdM));
+      multipliers[stat].Iw = IA.mul(multipliers[stat].Iw, IA(IwM));
+
+      if (multipliers[stat].IBM !== IA.ZERO)
+         multipliers[stat].IBM = IA.div(multipliers[stat].IBM, IA(5)); // * 0.2
+
+      multipliers[stat].TBHM = multipliers[stat].TBHM || IA.ONE;
    }
 
    return multipliers;
