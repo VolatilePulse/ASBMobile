@@ -7,7 +7,7 @@ import { readFileSync } from 'fs';
 import now from 'performance-now';
 
 
-const PERF_TEST_DURATION = 2000;
+const PERF_TEST_DURATION = 5000;
 
 
 const STRESS_GIGA: TestData = {
