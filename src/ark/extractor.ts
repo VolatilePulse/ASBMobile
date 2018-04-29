@@ -12,11 +12,17 @@ const RangeFuncs = {
    calcWL: compile('tamedLevel/(1+0.5*TE)').eval,
    calcTEFromWL: compile('(tamedLevel/wildLevel-1)/0.5').eval,
 
-   calcV: compile('((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) * (1 + TE * Tm) * (1 + Ld * Id)').eval,
+   // calcV: compile('((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) * (1 + TE * Tm) * (1 + Ld * Id)').eval,
    // calcLd: compile('((V / ((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) / (1 + TE * Tm)) - 1) / Id').eval,
    // calcLw: compile('((V / ((1 + Ld * Id) * (1 + TE * Tm)) - Ta) / (B * TBHM * (1 + IB * IBM)) - 1) / Iw').eval,
    calcTE: compile('(V / ((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) / (1 + Ld * Id) - 1) / Tm').eval,
    calcIB: compile('((V / (1 + TE * Tm) / (1 + Ld * Id) - Ta) / (B * (1 + Lw * Iw) * TBHM) - 1) / IBM').eval,
+
+   calcV(scope: any) {
+      return IA.mul(IA.mul((IA.add(IA.mul(IA.mul(IA.mul((IA.add(IA.ONE, IA.mul(IA(scope.Lw), scope.Iw))), scope.B), scope.TBHM),
+         (IA.add(IA.ONE, IA.mul(scope.IB, scope.IBM)))), scope.Ta)), (IA.add(IA.ONE, IA.mul(scope.TE, scope.Tm)))),
+         (IA.add(IA.ONE, IA.mul(IA(scope.Ld), scope.Id))));
+   },
 
    calcLw(Ld: number, TE: Interval, IB: Interval, stat: RangeStat) {
       return IA.div((IA.sub(IA.div((IA.sub(IA.div(stat.V, (IA.mul((IA.add(IA.ONE, IA.mul(IA(Ld), stat.Id))),
