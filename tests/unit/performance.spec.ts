@@ -1,7 +1,7 @@
 import { ParseDatabase } from '@/ark/data';
 import { TestData } from '@/ark/types';
 import * as Servers from '@/servers';
-import { PerformPerfTest, TestResult } from '@/testing';
+import { PerformPerfTest, TestResult, PerformTest } from '@/testing';
 import { expect } from 'chai';
 import { readFileSync } from 'fs';
 import now from 'performance-now';
@@ -27,10 +27,20 @@ before('load values', () => {
 });
 
 describe('performance', () => {
-   it('should extract Stress Giga in under 250ms', () => {
+   it('should extract Stress Giga in under 250ms (first run)', () => {
+      let result: TestResult;
+      result = PerformTest(STRESS_GIGA, now);
+      expect(result).to.be.a('object');
+      expect(result.pass).to.equal(true);
+      expect(result.duration, 'is duration less than 250').to.be.a('number').and.lt(250);
+      console.log(`      duration (first run) : ${Number(result.duration).toFixed(2)} ms`);
+   });
+
+   it('should extract Stress Giga in under 250ms (repeated)', () => {
       let result: TestResult;
       result = PerformPerfTest(STRESS_GIGA, now, PERF_TEST_DURATION, false);
-      console.log(`      duration : ${Number(result.duration).toFixed(2)} ms`);
       expect(result).to.be.a('object');
-   }).timeout(PERF_TEST_DURATION * 5);
+      expect(result.duration, 'is duration less than 250').to.be.a('number').and.lt(250);
+      console.log(`      duration (repeated) : ${Number(result.duration).toFixed(2)} ms`);
+   }).timeout(PERF_TEST_DURATION * 2);
 });
