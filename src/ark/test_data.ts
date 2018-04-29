@@ -328,23 +328,23 @@ const testData: TestData[] = [
       results: [],
    },
    {
-      tag: '',
+      tag: 'Extracted with HP:5376.25',
       species: 'Aberrant Spino', level: 206, imprint: 0, mode: 'Tamed',
-      values: [5376.25, 1435, 2795, 9360, 532, 332.1089, 100, 11305.5],
+      values: [5376.24, 1435, 2795, 9360, 532, 332.1089, 100, 11305.5],
       serverId: 'test:Coldino SP',
       results: [],
    },
    {
-      tag: '',
+      tag: 'Extracted with HP:5376.25',
       species: 'Aberrant Spino', level: 207, imprint: 0, mode: 'Tamed',
-      values: [5376.25, 1435, 2795, 9360, 744.799988, 332.1089, 100, 11305.5],
+      values: [5376.24, 1435, 2795, 9360, 744.799988, 332.1089, 100, 11305.5],
       serverId: 'test:Coldino SP',
       results: [],
    },
    {
-      tag: '',
+      tag: 'Extracted with HP:5376.25',
       species: 'Aberrant Spino', level: 208, imprint: 0, mode: 'Tamed',
-      values: [5376.25, 1435, 2795, 9360, 744.799988, 349.3004, 100, 11305.5],
+      values: [5376.24, 1435, 2795, 9360, 744.799988, 349.3004, 100, 11305.5],
       serverId: 'test:Coldino SP',
       results: [],
    },
@@ -355,13 +355,13 @@ const testData: TestData[] = [
       serverId: 'test:Coldino SP',
       results: [[{ Lw: 35, Ld: 1 }], [{ Lw: 31, Ld: 0 }], [{ Lw: 33, Ld: 0 }], [{ Lw: 26, Ld: 0 }], [{ Lw: 26, Ld: 1 }], [{ Lw: 39, Ld: 1 }, { Lw: 38, Ld: 1 }, { Lw: 37, Ld: 1 }, { Lw: 36, Ld: 1 }, { Lw: 35, Ld: 1 }, { Lw: 34, Ld: 1 }, { Lw: 33, Ld: 1 }, { Lw: 32, Ld: 1 }, { Lw: 31, Ld: 1 }, { Lw: 30, Ld: 1 }, { Lw: 29, Ld: 1 }, { Lw: 27, Ld: 1 }, { Lw: 26, Ld: 1 }, { Lw: 25, Ld: 1 }, { Lw: 24, Ld: 1 }, { Lw: 23, Ld: 1 }, { Lw: 21, Ld: 1 }], [{ Lw: 33, Ld: 0 }, { Lw: 31, Ld: 0 }, { Lw: 30, Ld: 0 }, { Lw: 29, Ld: 0 }, { Lw: 28, Ld: 0 }, { Lw: 27, Ld: 0 }, { Lw: 25, Ld: 0 }, { Lw: 24, Ld: 0 }, { Lw: 23, Ld: 0 }, { Lw: 22, Ld: 0 }, { Lw: 21, Ld: 0 }, { Lw: 20, Ld: 0 }, { Lw: 19, Ld: 0 }, { Lw: 18, Ld: 0 }, { Lw: 17, Ld: 0 }, { Lw: 16, Ld: 0 }, { Lw: 15, Ld: 0 }], [{ Lw: 205, Ld: 0 }]],
    },
-   {
+   /*{
       tag: 'Don\'t expect this one to work!',
       species: 'Aberrant Spino', level: 225, imprint: 85, mode: 'Bred',
       values: [9069.829102, 2296, 3633.5, 12921.479492, 1201.787842, 509.7843, 133.03, 14188.274414],
       serverId: 'test:Coldino SP',
       results: [],
-   },
+   },*/
    {
       tag: '',
       species: 'Aberrant Spino', level: 225, imprint: 0, mode: 'Tamed',
