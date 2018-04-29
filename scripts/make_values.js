@@ -1,6 +1,7 @@
 const fs = require('fs');
 const https = require("https");
-const cloneDeep = require('lodash.clonedeep');
+const cloneDeep = require('lodash/clonedeep');
+const merge = require('lodash/merge');
 
 
 const URL = "https://raw.githubusercontent.com/cadon/ARKStatsExtractor/master/ARKBreedingStats/json/values.json";
@@ -18,6 +19,23 @@ const SETTINGS_FIELDS = {
    'imprintingMultiplier': 'imprintingMultiplier',
    'statMultipliers': 'officialMultipliers',
    'statMultipliersSP': 'officialMultipliersSP',
+};
+
+const OVERRIDES = {
+   settings: {
+      // More accurate SP multipliers
+      officialMultipliersSP: {
+         0: {
+            0: 25 / 7, // 0.5 / 0.14,
+            1: 25 / 11, // 1.0 / 0.44,
+         },
+         5: {
+            0: 25 / 7, // 0.5 / 0.14,
+            1: 25 / 11, // 1.0 / 0.44,
+            2: 40 / 17,
+         },
+      }
+   },
 };
 
 
@@ -69,6 +87,10 @@ https.get(URL, res => {
          let newName = SETTINGS_FIELDS[field];
          output.settings[newName] = json[field];
       }
+
+      // Apply overrides
+      console.log("Applying overrides...");
+      output = merge(output, OVERRIDES);
 
       console.log("Writing output to: " + OUTPUT);
       var data = JSON.stringify(output);

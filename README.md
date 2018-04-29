@@ -16,28 +16,28 @@ For reference: <https://github.com/petervanderdoes/gitflow-avh>
 ## TODO
 
 ### High Priority
-- Add server selector
-- Add last selected server to library settings
-- Write servers to the DB
-- Write creatures to the DB
-
+- Add server selector globally?
+- Move last selected server setting from user settings to library settings
 - Implement a real Extractor UI
 - Begin implementation of Stat Tester - UI and backing code
 - Begin implementation of Expert Mode - UI and backing code
 - Begin implementation of library view, optimised for mobile but expandable to tablet size
-
 - Figure out how library selection & management is going to be presented
+- Add IBM value to server settings page
 
 ### Medium Priority
+- Add ability to load extra configs, such as ClassicFlyers
 - Verify caching and update mechanism
 - Verify app compatibility with iOS
-- Import/export library
+- Add class-species mappings to data.json
+- Import/export ASB library
 - Disable devMode by default and provide a mechanism to turn it back on (store in settings)
+- Create continuous tester using random creatures and random server parameters
+- Store last app & data versions in settings and use to display generated What's New page
+- Investigate internationalisation via [i18-next](i18next.com) and [panter/vue-i18next](https://github.com/panter/vue-i18next)
 
 ### Low Priority
-- Store app & data versions in settings and use to display short changelog
 - Consider Implementation of "Expert" Mode to automatically calculate Server Settings
-- Add ClassicFlyers compatibility
 
 ### Size Reduction
 - Take only the components we use from bootstrap-vue
@@ -49,7 +49,5 @@ For reference: <https://github.com/petervanderdoes/gitflow-avh>
 
 
 These need updating...
-- Add IBM value to server settings
-- Implement Auto extract on wild tames
-- Future implementations include Creature values for Xbox/Win10 and Ps4, as well as mods like Classic Flyers (framework is almost in place to support both features)
-- Change Extractor tab to Calculator and have a radio button to switch from Extractor/Tester(or edit)/Expert Mode
+- Implement Auto extract on wild tames?
+- Change Extractor tab to Calculator and add ability to switch from Extractor/Tester(or edit)/Expert Mode?

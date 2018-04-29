@@ -1,10 +1,11 @@
-import { StatMultipliers, StatServerMultipliers } from '@/ark/multipliers';
+import { StatMultipliers } from '@/ark/multipliers';
 import { Stat } from '@/ark/types';
-import { DAMAGE, HEALTH, NUM_STATS, PRE_IB, PRE_TE, SPEED, TORPOR } from '@/consts';
+import { DAMAGE, HEALTH, PRE_IB, PRE_TE, SPEED, TORPOR, SERVER_IWM, SERVER_IDM, SERVER_TAM, SERVER_TMM } from '@/consts';
 import { Server } from '@/data/objects';
 import theStore from '@/ui/store';
-import merge from 'lodash-es/merge';
+import merge from 'lodash/merge';
 import * as Utils from './utils';
+import * as IA from 'interval-arithmetic';
 
 
 export function FormatAllOptions(stats: Stat[][]) {
@@ -74,22 +75,41 @@ export function GetMultipliers(server: Server, speciesName: string): StatMultipl
    // Gather raw multipliers first from the official server, overriding with settings from the given server
    const values = merge([], theStore.officialServer.multipliers, server.multipliers);
 
-   // Apply single-player multipliers
-   if (server.singlePlayer) {
-      for (let stat = HEALTH; stat <= TORPOR; stat++) {
-         for (const param in theStore.officialServerSP.multipliers[stat]) {
-            values[stat][param] *= theStore.officialServerSP.multipliers[stat][param] || 1;
-         }
-      }
-   }
-
-   // Convert to objects
+   // Find the settings for the species
    const speciesValues = theStore.speciesMultipliers[speciesName];
-   const multipliers: StatMultipliers[] = values.map((v, i) => ({ ...new StatServerMultipliers(v[0], v[1], v[2], v[3]), ...speciesValues[i] }));
 
-   // Set IBM for each stat
-   for (let stat = 0; stat < NUM_STATS; stat++)
-      multipliers[stat].IBM = multipliers[stat].noImprint ? 0 : server.IBM;
+   const multipliers: StatMultipliers[] = [];
+   for (let stat = HEALTH; stat <= TORPOR; stat++) {
+      // Make up a set of multipliers, based on the species values and server multipliers
+      multipliers[stat] = new StatMultipliers(speciesValues[stat]);
+      multipliers[stat].IBM = speciesValues[stat].noImprint ? IA.ZERO : IA(server.IBM);
+
+      // Apply single-player multipliers
+      if (server.singlePlayer && theStore.officialServerSP.multipliers[stat]) {
+         multipliers[stat].Iw = IA.mul(multipliers[stat].Iw, IA(theStore.officialServerSP.multipliers[stat][SERVER_IWM] || 1));
+         multipliers[stat].Id = IA.mul(multipliers[stat].Id, IA(theStore.officialServerSP.multipliers[stat][SERVER_IDM] || 1));
+
+         if (IA.gt(multipliers[stat].Ta, IA.ZERO))
+            multipliers[stat].Ta = IA.mul(multipliers[stat].Ta, IA(theStore.officialServerSP.multipliers[stat][SERVER_TAM] || 1));
+         if (IA.gt(multipliers[stat].Tm, IA.ZERO))
+            multipliers[stat].Tm = IA.mul(multipliers[stat].Tm, IA(theStore.officialServerSP.multipliers[stat][SERVER_TMM] || 1));
+      }
+
+      // Pre-calculate what we can
+      const [TaM, TmM, IdM, IwM] = values[stat];
+      if (IA.gt(multipliers[stat].Ta, IA.ZERO))
+         multipliers[stat].Ta = IA.mul(multipliers[stat].Ta, IA(TaM));
+      if (IA.gt(multipliers[stat].Tm, IA.ZERO))
+         multipliers[stat].Tm = IA.mul(multipliers[stat].Tm, IA(TmM));
+
+      multipliers[stat].Id = IA.mul(multipliers[stat].Id, IA(IdM));
+      multipliers[stat].Iw = IA.mul(multipliers[stat].Iw, IA(IwM));
+
+      if (!IA.equal(multipliers[stat].IBM, IA.ZERO))
+         multipliers[stat].IBM = IA.div(multipliers[stat].IBM, IA(5)); // * 0.2
+
+      multipliers[stat].TBHM = multipliers[stat].TBHM || IA.ONE;
+   }
 
    return multipliers;
 }

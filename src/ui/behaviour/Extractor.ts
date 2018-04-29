@@ -1,12 +1,14 @@
 import * as Ark from '@/ark';
-import { Extractor } from '@/ark/extractor';
+import { Extractor, intervalAverage } from '@/ark/extractor';
 import testData from '@/ark/test_data';
 import { Stat, TestData } from '@/ark/types';
 import { PRE_IB } from '@/consts';
+import { LibraryManager } from '@/data';
 import { getServerById } from '@/servers';
 import Common from '@/ui/behaviour/Common';
 import theStore from '@/ui/store';
 import { DeepCopy, Delay, FilledArray } from '@/utils';
+import cuid from 'cuid';
 import { Component } from 'vue-property-decorator';
 
 
@@ -68,6 +70,16 @@ export default class ExtractorTab extends Common {
       this.store.setCurrentServer(getServerById(test.serverId));
    }
 
+   addCreature() {
+      // 2) give the creature an ID
+      // 2) gather the stat options from this.extractor.options[this.selectedOption]
+      // 3) save the creature using LibraryManager.current.saveCreature
+
+      const c = this.extractor.c;
+      if (!c._id) c._id = generateInputId();
+      LibraryManager.current.saveCreature(c);
+   }
+
    // Nasty debug-only methods to show stats and their options
    debugShowOptions(options: Stat[]) {
       return (options && options['length']) ? options.map(stat => `(${stat.Lw}+${stat.Ld})`).join(', ') : '-none-';
@@ -85,11 +97,11 @@ export default class ExtractorTab extends Common {
       for (const option of options) {
          let tempString = '';
 
-         if (this.extractor.statTEmaps.length) {
-            this.extractor.statTEmaps.find(index => index !== undefined).forEach((propTE, stat) => {
+         if (this.extractor.statTEMap.size) {
+            this.extractor.statTEMap.forEach((propTE, stat) => {
                if (option.includes(stat)) {
                   tempString += propTE.wildLevel + ' ';
-                  tempString += (propTE.TE * 100).toFixed(2) + '% - ';
+                  tempString += (intervalAverage(propTE.TE) * 100).toFixed(2) + '% - ';
                }
             });
          }
@@ -100,4 +112,11 @@ export default class ExtractorTab extends Common {
 
       return optionStrings;
    }
+}
+
+
+/** Generate a new unique ID for a user-input creature */
+function generateInputId() {
+   // Adds input tag, for differentiation
+   return 'input:' + cuid();
 }

@@ -1,6 +1,6 @@
 import { IAsyncDisposable, NotInitialisedError } from '@/data/database';
 import { MirrorCache, TableMirror } from '@/data/mirror';
-import { Server } from '@/data/objects';
+import { Creature, Server } from '@/data/objects';
 import { Table } from '@/data/table';
 import theStore, { EVENT_LIBRARY_CHANGED } from '@/ui/store';
 import PouchDB from 'pouchdb-core';
@@ -22,6 +22,8 @@ class Library implements IAsyncDisposable {
 
    private serverMirror!: TableMirror<Server>;
    private serverTable!: Table<Server>;
+   private creaturesMirror!: TableMirror<Creature>;
+   private creaturesTable!: Table<Creature>;
 
    /** Create a library database interface with the given library ID */
    constructor(id: string) {
@@ -35,15 +37,21 @@ class Library implements IAsyncDisposable {
       this.serverMirror = new TableMirror<Server>(SERVERS_PREFIX + this.id);
       this.serverMirror.setSortOrder(['tag']);
       await this.serverMirror.initialise();
+      await this.serverMirror.waitForInitialData();
 
       // Initialise the server database interface
       this.serverTable = new Table<Server>(SERVERS_PREFIX + this.id);
       await this.serverTable.initialise();
 
-      // Ensure mirror is populated
-      await this.serverMirror.waitForInitialData();
+      // Setup the creature database mirror
+      this.creaturesMirror = new TableMirror<Creature>(CREATURES_PREFIX + this.id);
+      // this.creaturesMirror.setSortOrder(['name']);
+      await this.creaturesMirror.initialise();
+      await this.creaturesMirror.waitForInitialData();
 
-      // TODO: Decide if we should load all creatures
+      // Initialise the creature database interface
+      this.creaturesTable = new Table<Creature>(CREATURES_PREFIX + this.id);
+      await this.creaturesTable.initialise();
 
       this.initialised = true;
    }
@@ -57,34 +65,63 @@ class Library implements IAsyncDisposable {
       if (this.serverTable) await this.serverTable.dispose();
       this.serverTable = undefined;
 
+      if (this.creaturesMirror) await this.creaturesMirror.dispose();
+      this.creaturesMirror = undefined;
+
+      if (this.creaturesTable) await this.creaturesTable.dispose();
+      this.creaturesTable = undefined;
+
       this.initialised = false;
    }
 
-   /** Save a new server, giving it a new UUI in the process */
-   async addServer(server: Server) {
-      if (!this.initialised) throw new NotInitialisedError();
-
-      await this.serverTable.addWithRandomId(server);
-   }
-
-   /** Save changes to an existing server */
+   /**
+    * Save a server.
+    * New servers must have _id set.
+    * Existing servers must have both _id and _rev set.
+    */
    async saveServer(server: Server) {
       if (!this.initialised) throw new NotInitialisedError();
-
       await this.serverTable.update(server as PouchDB.Core.ExistingDocument<Server>);
    }
 
    /** Delete an existing server */
    async deleteServer(server: Server) {
       if (!this.initialised) throw new NotInitialisedError();
-
       await this.serverTable.delete(server as PouchDB.Core.ExistingDocument<Server>);
    }
 
+   /**
+    * Returns a MirrorCache wrapper around a list of the user's servers.
+    * This cache object may be observed without impacting the library.
+    */
    getUserServersCache(): MirrorCache<Server> {
       if (!this.initialised) throw new NotInitialisedError();
-
       return this.serverMirror.cache;
+   }
+
+   /**
+    * Save a creature.
+    * New creatures must have _id set.
+    * Existing creatures must have both _id and _rev set.
+    */
+   async saveCreature(creature: Creature) {
+      if (!this.initialised) throw new NotInitialisedError();
+      await this.creaturesTable.update(creature as PouchDB.Core.ExistingDocument<Creature>);
+   }
+
+   /** Delete an existing creature */
+   async deleteCreature(creature: Creature) {
+      if (!this.initialised) throw new NotInitialisedError();
+      await this.creaturesTable.delete(creature as PouchDB.Core.ExistingDocument<Creature>);
+   }
+
+   /**
+    * Returns a MirrorCache wrapper around a list of creatures.
+    * This cache object may be observed without impacting the library.
+    */
+   getCreaturesCache(): MirrorCache<Creature> {
+      if (!this.initialised) throw new NotInitialisedError();
+      return this.creaturesMirror.cache;
    }
 }
 
@@ -103,6 +140,8 @@ class LibraryManager implements IAsyncDisposable {
 
       // Ensure a library exists, and make one active
       await this._ensureLibraryAndSelect();
+
+      theStore.libraryReady = true;
    }
 
    async dispose() {

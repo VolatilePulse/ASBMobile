@@ -2,7 +2,7 @@
  * @fileOverview Miscellaneous functions used throughout the app
  */
 
-import cloneDeepWith from 'lodash-es/cloneDeepWith';
+import cloneDeepWith from 'lodash/cloneDeepWith';
 import { isString } from 'util';
 
 
@@ -209,4 +209,24 @@ export function dbgLog(_target: any, propertyKey: string, descriptor: PropertyDe
    };
 
    return descriptor;
+}
+
+/** Load text from a drag-and-dropped file blob */
+export function ReadDroppedBlob(blob: Blob): Promise<string> {
+   return new Promise<string>((resolve, reject) => {
+      const fr = new FileReader();
+      fr.addEventListener('loadend', () => resolve(fr.result));
+      fr.addEventListener('error', () => reject(fr.error));
+      fr.readAsText(blob);
+   });
+}
+
+/** Generator that returns regex matches from the supplied string */
+export function* GenerateRegexMatches(re: RegExp, str: string) {
+   let m;
+   // tslint:disable-next-line:no-conditional-assignment
+   while ((m = re.exec(str)) !== null) {
+      if (m.index === re.lastIndex) re.lastIndex++;
+      yield m;
+   }
 }

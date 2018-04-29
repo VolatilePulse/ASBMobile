@@ -1,5 +1,5 @@
 import { IAsyncDisposable, NotInitialisedError } from '@/data/database';
-import debounce from 'lodash-es/debounce';
+import debounce from 'lodash/debounce';
 import PouchDB from 'pouchdb-core';
 
 

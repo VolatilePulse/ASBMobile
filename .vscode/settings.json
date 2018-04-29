@@ -26,6 +26,7 @@
       "**/.next/**",
       "**/docs/**"
    ],
+   "vetur.format.defaultFormatter.js": "vscode-typescript",
    "vetur.format.defaultFormatter.ts": "vscode-typescript",
    "vetur.format.defaultFormatter.scss": "none",
    "vetur.format.defaultFormatter.html": "js-beautify-html",
@@ -51,6 +52,7 @@
       "Mult",
       "Stats",
       "TBHM",
+      "TMPL",
       "UUIDs",
       "consts",
       "debounced",
@@ -63,11 +65,15 @@
       "poss",
       "pouchdb",
       "predef",
+      "promisify",
+      "rect",
       "refs",
       "stat",
       "stat's",
       "stringify",
-      "transpiler"
+      "transpiler",
+      "unstaged",
+      "vue's"
    ],
    "cSpell.ignorePaths": [
       "**/node_modules/**",
@@ -107,4 +113,7 @@
       "vue"
    ],
    "cSpell.language": "en,en-US,en-GB",
+   "[json]": {
+      "editor.formatOnSave": false
+   },
 }

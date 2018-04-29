@@ -8,7 +8,7 @@ import theStore from '@/ui/store';
 import * as Utils from '@/utils';
 // @ts-ignore
 import { Modal } from 'bootstrap-vue/es/components';
-import debounce from 'lodash-es/debounce';
+import debounce from 'lodash/debounce';
 import { Component, Vue } from 'vue-property-decorator';
 
 
@@ -131,7 +131,7 @@ export default class ServersTab extends Common {
    /** Called by the watcher when the contents of the current server change */
    private onWatcherTriggered() {
       if (this.disableWatcher) return;
-      if (!this.store.isServerEditable) console.error('Watch triggered on read-only server!');
+      if (!this.store.isServerEditable) return;
 
       this.debouncedSave();
       this.store.changesPending.servers = true;

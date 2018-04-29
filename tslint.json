@@ -74,6 +74,7 @@
          "allow-leading-underscore",
          "allow-snake-case",
          "allow-pascal-case"
-      ]
+      ],
+      "unified-signatures": false
    }
 }

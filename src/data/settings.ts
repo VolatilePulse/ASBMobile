@@ -1,7 +1,7 @@
 import { SAVE_MAX_TIMEOUT, SAVE_TIMEOUT } from '@/consts';
 import { DatabaseObject } from '@/data/database';
 import theStore from '@/ui/store';
-import debounce from 'lodash-es/debounce';
+import debounce from 'lodash/debounce';
 import PouchDB from 'pouchdb-core';
 
 
@@ -64,6 +64,8 @@ class SettingsManager {
          // No existing settings : save the defaults
          await this.save();
       }
+
+      theStore.settingsReady = true;
    }
 
    /** Mark settings as changed (they will be saved later) */

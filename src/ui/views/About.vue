@@ -4,7 +4,13 @@
          <div>Application version: {{store.applicationVersion || 'n/a'}}</div>
          <div>Database version: {{store.dataLoaded ? store.valuesVersion : "n/a"}}</div>
       </section>
+      <hr/>
       <section>
+         <div>
+            ASBMobile was inspired by
+            <a href="https://github.com/cadon/ARKStatsExtractor">ARK Smart Breeding</a>.<br/> Many thanks to Cadon for the inspiration and continued support.
+         </div>
+         <hr/>
          <div>ASBMobile is possible with help from:</div>
          <div class="madewith d-flex flex-wrap justify-content-center align-items-stretch">
             <div>
@@ -71,6 +77,6 @@
 <script lang="ts">
 import { Component } from 'vue-property-decorator';
 import Behaviour from '../behaviour/Common';
-@Component
+@Component({ name: 'About' })
 export default class extends Behaviour { }
 </script>
