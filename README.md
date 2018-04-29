@@ -34,6 +34,7 @@ For reference: <https://github.com/petervanderdoes/gitflow-avh>
 - Disable devMode by default and provide a mechanism to turn it back on (store in settings)
 - Create continuous tester using random creatures and random server parameters
 - Store last app & data versions in settings and use to display generated What's New page
+- Investigate internationalisation via [i18-next](i18next.com) and [panter/vue-i18next](https://github.com/panter/vue-i18next)
 
 ### Low Priority
 - Consider Implementation of "Expert" Mode to automatically calculate Server Settings
