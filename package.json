@@ -16,7 +16,7 @@
       "values": "node scripts/make_values.js",
       "liveserver": "ws -c scripts/liveserver.conf.js",
       "gencert": "bash scripts/generate-ssl.sh",
-      "release": "node --experimental-modules scripts/release.mjs"
+      "release": "node --experimental-modules scripts/release.mjs -l"
    },
    "dependencies": {
       "bootstrap": "^4.1.0",

@@ -39,8 +39,36 @@ function* splitLines(text) {
 }
 
 async function cmd(cmdline) {
-   var result = await execAsync(cmdline);
-   if (result.stderr) error("Failed to execute '" + cmdline + "'");
+   var result = {};
+   var failed = false;
+   try {
+      result = await execAsync(cmdline);
+   } catch (ex) {
+      result = ex;
+      failed = true;
+   }
+
+   if (result.stderr && result.stderr.trim())
+      failed = true;
+
+   if (options.logOutput || failed) {
+      try {
+         fs.writeFileSync('release.log', "\n\n> " + cmdline + "\n" + result.stdout, { flag: 'a' });
+      } catch (_) {
+         console.log(chalk.red('Failed to write release.log'));
+      }
+   }
+
+   if (failed) {
+      try {
+         fs.writeFileSync('release.err', "\n\n> " + cmdline + "\n" + result.stderr, { flag: 'a' });
+      } catch (_) {
+         console.log(chalk.red('Failed to write release.err'));
+      }
+
+      error("Failed to execute '" + cmdline + "'\nLogs can be found in release.log and release.err.");
+   }
+
    return result.stdout.trim();
 }
 
@@ -411,6 +439,11 @@ const options = yargs
       alias: 'dry-run',
       type: 'boolean',
       description: 'Dry run - do not change anything'
+   })
+   .option('l', {
+      alias: 'log-output',
+      type: 'boolean',
+      description: 'Log output of commands to release.log'
    })
    .option('b', {
       alias: 'branch',
