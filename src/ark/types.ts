@@ -1,4 +1,6 @@
 import { StatMultipliers } from '@/ark/multipliers';
+import * as IA from 'interval-arithmetic';
+import { intervalAverage } from '@/ark/extractor';
 
 
 /** Server multiplier overrides */
@@ -44,109 +46,36 @@ export class Stat implements StatLike {
 
    calculateValue(m: StatMultipliers, tamed = false, TE = 0, IB = 0) {
       // V = (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) * (1 + TE * Tm * TmM) * (1 + Ld * Id * IdM)
-      const TBHM = (tamed && m.TBHM) || 1;
-      let v = m.B * TBHM;
 
-      if (this.Lw > 0)
-         v *= (1 + this.Lw * m.Iw * m.IwM);
+      const TBHM = (tamed && m.TBHM) || IA.ONE;
 
-      v *= (1 + IB * 0.2 * m.IBM);
-      v += this.calculateTa(tamed, m.Ta, m.TaM);
-      v *= (1 + this.calculateTm(tamed, m.Tm, m.TmM, TE));
-      v *= (1 + this.Ld * m.Id * m.IdM);
-      return v;
-   }
+      const multLw =
+         IA.mul(
+            IA.mul(
+               IA.add(IA.ONE, IA.mul(IA(this.Lw), m.Iw)),
+               m.B),
+            TBHM);
 
-   calculateWildLevel(m: StatMultipliers, v: number, tamed = false, TE = 0, IB = 0) {
-      // Lw = ((V / ((1 + Ld * Id * IdM) * (1 + TE * Tm * TmM)) - Ta * TaM) / (B * TBHM * (1 + IB * 0.2 * IBM)) - 1) / (Iw * IwM)
-      const TBHM = (tamed && m.TBHM) || 1;
+      const multLd = IA.add(IA.ONE, IA.mul(IA(this.Ld), m.Id));
+      const multTE =
+         IA.add(
+            IA.ONE,
+            !tamed ? IA.ZERO : IA.mul(
+               IA.lt(m.Tm, IA.ZERO) ? IA.ONE : IA(TE),
+               m.Tm
+            )
+         );
 
-      // Prevents division by 0
-      if (m.Iw === 0)
-         return this.Lw = 0;
-
-      let wildLevel = (1 + this.Ld * m.Id * m.IdM);
-      wildLevel *= (1 + this.calculateTm(tamed, m.Tm, m.TmM, TE));
-      wildLevel = v / wildLevel;
-
-      if (tamed)
-         wildLevel -= this.calculateTa(tamed, m.Ta, m.TaM);
-
-      wildLevel /= (m.B * TBHM);
-      wildLevel /= (1 + IB * 0.2 * m.IBM);
-      this.Lw = Math.max(Math.round((wildLevel - 1) / (m.Iw * m.IwM)), 0);
-      return this.Lw;
-   }
-
-   calculateDomLevel(m: StatMultipliers, v: number, tamed = false, TE = 0, IB = 0) {
-      //  Ld = ((V / (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) / (1 + TE * Tm * TmM)) - 1) / (Id * IdM)
-
-      // Prevents division by 0
-      if (m.Id === 0 || !tamed)
-         return this.Ld = 0;
-
-      const TBHM = m.TBHM ? m.TBHM : 1;
-      let domLevel = m.B * TBHM;
-      domLevel *= (1 + this.Lw * m.Iw * m.IwM);
-      domLevel *= (1 + IB * 0.2 * m.IBM);
-      domLevel = v / (domLevel + this.calculateTa(tamed, m.Ta, m.TaM));
-      domLevel /= (1 + this.calculateTm(tamed, m.Tm, m.TmM, TE));
-      this.Ld = Math.max(Math.round((domLevel - 1) / (m.Id * m.IdM)), 0);
-      return this.Ld;
-   }
-
-   calculateTE(m: StatMultipliers, v: number, tamed = true, IB = 0) {
-      // TE = (V / (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) / (1 + Ld * Id * IdM) - 1) / (Tm * TmM)
-
-      if (!tamed)
-         return -1;
-
-      const TBHM = m.TBHM ? m.TBHM : 1;
-      let TE = m.B * TBHM;
-      TE *= (1 + this.Lw * m.Iw * m.IwM);
-      TE *= (1 + IB * 0.2 * m.IBM);
-      TE = v / (TE + this.calculateTa(tamed, m.Ta, m.TaM));
-      TE /= (1 + this.Ld * m.Id * m.IdM);
-      return ((TE - 1) / this.calculateTm(tamed, m.Tm, m.TmM));
-   }
-
-   calculateIB(m: StatMultipliers, v: number, tamed = true, TE = 1) {
-      // IB = ((V / (1 + TE * Tm * TmM) / (1 + Ld * Id * IdM) - Ta * TaM) / (B * (1 + Lw * Iw * IwM) * TBHM) - 1)  / (0.2 * IBM)
-
-      if (!tamed)
-         return 0;
-
-      const TBHM = m.TBHM ? m.TBHM : 1;
-      let IB = v;
-      IB /= (1 + this.calculateTm(tamed, m.Tm, m.TmM, TE));
-      IB /= (1 + this.Ld * m.Id * m.IdM);
-      IB = (IB - this.calculateTa(tamed, m.Ta, m.TaM)) / (m.B * TBHM);
-      IB /= (1 + this.Lw * m.Iw * m.IwM);
-      return ((IB - 1) / (0.2 * m.IBM));
-   }
-
-   calculateTm(tamed: boolean, Tm: number, TmM: number, TE = 1) {
-      // If not tamed, the Tame Multiplier doesn't apply to the value
-      if (!tamed)
-         return 0;
-
-      // If Tm is a negative value, TE doesn't change the value of the multiplier
-      if (Tm < 0)
-         return (Tm);
-      else
-         return (TE * Tm * TmM);
-   }
-
-   calculateTa(tamed: boolean, Ta: number, TaM: number) {
-      // If not tamed, the Tame Additive doesn't apply to the value
-      if (!tamed)
-         return 0;
-
-      // If Ta is a negative value, TaM doesn't change the value of the multiplier
-      if (Ta < 0)
-         return Ta;
-      else
-         return (Ta * TaM);
+      return intervalAverage(IA.mul(
+         IA.mul(
+            IA.add(
+               IA.mul(
+                  multLw,
+                  IA.add(IA.ONE, IA.mul(IA(IB), m.IBM))
+               ),
+               tamed ? m.Ta : IA.ZERO),
+            multTE),
+         multLd));
    }
 
    isEqual(stat: Stat) {

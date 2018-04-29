@@ -1,5 +1,5 @@
 import * as Ark from '@/ark';
-import { Extractor } from '@/ark/extractor';
+import { Extractor, intervalAverage } from '@/ark/extractor';
 import testData from '@/ark/test_data';
 import { Stat, TestData } from '@/ark/types';
 import { PRE_IB } from '@/consts';
@@ -97,11 +97,11 @@ export default class ExtractorTab extends Common {
       for (const option of options) {
          let tempString = '';
 
-         if (this.extractor.statTEmaps.length) {
-            this.extractor.statTEmaps.find(index => index !== undefined).forEach((propTE, stat) => {
+         if (this.extractor.statTEMap.size) {
+            this.extractor.statTEMap.forEach((propTE, stat) => {
                if (option.includes(stat)) {
                   tempString += propTE.wildLevel + ' ';
-                  tempString += (propTE.TE * 100).toFixed(2) + '% - ';
+                  tempString += (intervalAverage(propTE.TE) * 100).toFixed(2) + '% - ';
                }
             });
          }

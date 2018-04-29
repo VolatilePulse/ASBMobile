@@ -60,11 +60,9 @@ export default class TesterTab extends Common {
       const optionSet = results.options[optionIndex];
 
       for (const statIndex in this.range(8)) {
-         const map = results.mapTE[statIndex];
-         const stat = optionSet[statIndex];
-         if (!stat || !map) continue;
-         const teProp = map.get(stat);
-         if (teProp) return teProp;
+         const stat: Stat = optionSet[statIndex];
+         const TE = results.mapTE.get(stat);
+         if (TE) return TE;
       }
 
       return undefined;
@@ -79,7 +77,7 @@ export default class TesterTab extends Common {
    optionTE(testIndex: number, optionIndex: number): string {
       const val = this.findTEStat(testIndex, optionIndex);
       if (!val) return '';
-      return (val.TE * 100).toFixed(1) + '%';
+      return (val.TE.lo * 100).toFixed(2) + '-' + (val.TE.hi * 100).toFixed(2) + '%';
    }
 
    /**
@@ -105,7 +103,7 @@ export default class TesterTab extends Common {
             await Utils.Delay(ASYNC_DELAY_TIME_MS);
          }
 
-         const result = PerformTest(testData[index]);
+         const result = PerformTest(testData[index], performance.now.bind(performance));
          Vue.set(this.results, index, result);
 
          // Open the first failed case only
@@ -121,7 +119,7 @@ export default class TesterTab extends Common {
 
    /** Run one test repeatedly to measure it's performance, blocking the browser */
    runPerfTest(index: number) {
-      const { duration, runs, exception } = PerformPerfTest(testData[index], undefined, true);
+      const { duration, runs, exception } = PerformPerfTest(testData[index], performance.now.bind(performance), undefined, true);
       if (exception) {
          this.results[index].duration = 'X';
       }

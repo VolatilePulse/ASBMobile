@@ -213,7 +213,7 @@
 }
 
 .options-grid .col *:nth-child(2) {
-  flex-basis: 1.2rem;
+  flex-basis: 3em;
   font-size: 90%;
   text-align: center;
   border-bottom: 1px solid rgb(29, 25, 26);
@@ -223,7 +223,6 @@
   outline: 2px dashed grey; /* the dash box */
   outline-offset: -10px;
   background: #334;
-  m-in-height: 200px; /* minimum height */
   position: relative;
   cursor: pointer;
 }

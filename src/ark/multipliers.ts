@@ -1,7 +1,30 @@
 import * as consts from '@/consts';
+import * as IA from 'interval-arithmetic';
 
+export class StatMultipliers {
+   B: Interval;
+   Id: Interval;
+   Iw: Interval;
+   Ta: Interval;
+   Tm: Interval;
 
-export type StatMultipliers = StatServerMultipliers & StatSpeciesMultipliers;
+   TBHM?: Interval;
+   IBM?: Interval;
+
+   notUsed: boolean = false;
+
+   constructor(mult: StatSpeciesMultipliers) {
+      this.B = IA(mult.B);
+      this.Id = IA(mult.Id);
+      this.Iw = IA(mult.Iw);
+      this.Ta = IA(mult.Ta);
+      this.Tm = IA(mult.Tm);
+
+      this.TBHM = IA(mult.TBHM || 1);
+
+      this.notUsed = mult.notUsed;
+   }
+}
 
 export class StatServerMultipliers {
    constructor(public TaM: number, public TmM: number, public IdM: number, public IwM: number) { }
