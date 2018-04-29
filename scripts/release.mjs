@@ -353,7 +353,7 @@ const stages = [
       if (!result.answer) abort();
 
       logAction('Using git-flow to complete the release');
-      await actionCmd(`git flow release finish "${status.package_version}" --ff-master -p -f "${status.current_note_file}"`);
+      await actionCmd(`git flow release finish "${status.package_version}" -p -f "${status.current_note_file}"`);
       logAction('Pushing release tag to origin');
       await actionCmd(`git push origin "${status.package_version}"`);
 
@@ -424,7 +424,7 @@ const options = yargs
 
 
 async function main() {
-   options.dryRun = true;
+   // options.dryRun = true;
 
    if (options.dryRun)
       console.log(chalk`{gray [--dry-run mode active]}`);
