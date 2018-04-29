@@ -105,7 +105,7 @@ export function GetMultipliers(server: Server, speciesName: string): StatMultipl
       multipliers[stat].Id = IA.mul(multipliers[stat].Id, IA(IdM));
       multipliers[stat].Iw = IA.mul(multipliers[stat].Iw, IA(IwM));
 
-      if (multipliers[stat].IBM !== IA.ZERO)
+      if (!IA.equal(multipliers[stat].IBM, IA.ZERO))
          multipliers[stat].IBM = IA.div(multipliers[stat].IBM, IA(5)); // * 0.2
 
       multipliers[stat].TBHM = multipliers[stat].TBHM || IA.ONE;
