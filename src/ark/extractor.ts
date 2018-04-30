@@ -371,7 +371,7 @@ export class Extractor {
       // IB can't be lower than 0
       if (this.c.IB.lo < 0) {
          this.c.IB = IA.intersection(this.c.IB, IA(0, Infinity));
-         localRangeVars.IB = IA(this.c.IB);
+         localRangeVars.IB = this.c.IB;
       }
       return true;
    }
@@ -424,7 +424,7 @@ export class Extractor {
             const expectedTorpor = RangeFuncs.calcV(tempStat2.Lw, tempStat2.Ld, localVars.TE, rangeIB, localStats);
             if (IA.intervalsOverlap(expectedTorpor, localStatsTorpor.V as Interval)) {
                localVars.IB = IA.intersection(rangeIB, localVars.IB);
-               this.c.IB = IA(localVars.IB);
+               this.c.IB = localVars.IB;
                this.stats[statIndex].push(new Stat(localVars.Lw, localVars.Ld));
             }
          }
