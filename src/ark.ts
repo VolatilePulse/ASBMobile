@@ -6,6 +6,10 @@ import theStore from '@/ui/store';
 import merge from 'lodash/merge';
 import * as Utils from './utils';
 import * as IA from 'interval-arithmetic';
+import { intervalFromDecimal } from '@/number_utils';
+
+
+export type CreatureDataSource = 'ui' | 'ark_export';
 
 
 export function FormatAllOptions(stats: Stat[][]) {
@@ -56,17 +60,22 @@ export function DisplayValue(value: number, index: number): number {
    return returnValue;
 }
 
-// Converts a value (from the UI) to a working value for ASBM
-export function ConvertValue(value: number, index: number) {
-   let returnValue = value;
+/**
+ * Convert an input value into an Interval representing it's value and precision.
+ */
+export function ConvertValue(value: number, index: number, source: CreatureDataSource) {
+   let precision: number;
+
+   if (source === 'ui') precision = 1;
+   else if (source === 'ark_export') precision = 6;
+   else throw new Error('Invalid data source');
+
+   let range = intervalFromDecimal(value, precision);
 
    if (index === DAMAGE || index === SPEED || index === PRE_TE || index === PRE_IB)
-      returnValue /= 100;
+      range = IA.div(range, IA(100));
 
-   // We want to convert it to Use in ASBM
-   returnValue = Utils.RoundTo(returnValue, Precision(index));
-
-   return returnValue;
+   return range;
 }
 
 /** Gather combined multipliers for the given server and species */

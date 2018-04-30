@@ -1,13 +1,13 @@
 import * as Ark from '@/ark';
-import { Extractor, intervalAverage } from '@/ark/extractor';
+import { Extractor, ExtractorInput } from '@/ark/extractor';
 import testData from '@/ark/test_data';
 import { Stat, TestData } from '@/ark/types';
 import { PRE_IB } from '@/consts';
-import { LibraryManager } from '@/data';
+import { intervalAverage } from '@/number_utils';
 import { getServerById } from '@/servers';
 import Common from '@/ui/behaviour/Common';
 import theStore from '@/ui/store';
-import { DeepCopy, Delay, FilledArray } from '@/utils';
+import { Delay, FilledArray } from '@/utils';
 import cuid from 'cuid';
 import { Component } from 'vue-property-decorator';
 
@@ -32,22 +32,26 @@ export default class ExtractorTab extends Common {
       if (this.disableExtract) return;
       this.disableExtract = true;
 
-      const creature = this.store.tempCreature;
+      const inputs: ExtractorInput = {
+         wild: (this.mode === 'Wild'),
+         tamed: (this.mode === 'Tamed'),
+         bred: (this.mode === 'Bred'),
+         IB: Ark.ConvertValue(this.imprint, PRE_IB, 'ui'),
+         level: theStore.tempCreature.level,
+         values: this.values.map((v, i) => Ark.ConvertValue(v, i, 'ui')),
+         server: theStore.server,
+         species: theStore.tempCreature.species,
+      };
 
-      // Convert properties that couldn't be bound directly to creature
-      creature.wild = (this.mode === 'Wild');
-      creature.tamed = (this.mode === 'Tamed');
-      creature.bred = (this.mode === 'Bred');
-      creature.IB = Ark.ConvertValue(this.imprint, PRE_IB);
-      creature.values = DeepCopy(this.values.map(Ark.ConvertValue)); // convert values, then create a clean un-observed copy
+      this.extractor = new Extractor(inputs);
+      const output = this.extractor.extract();
 
-      this.extractor = new Extractor(creature, theStore.server);
-      this.extractor.extract();
+      this.success = output.options && output.options.length > 0;
 
-      this.success = this.extractor.success;
+      // TODO: Don't forget to set IB in the creature before it's saved
 
       if (this.success)
-         this.options = this.formatOptions(this.extractor.options);
+         this.options = this.formatOptions(output.options);
 
       // Force the option picker to show if this.options.length > 1
 
@@ -75,9 +79,12 @@ export default class ExtractorTab extends Common {
       // 2) gather the stat options from this.extractor.options[this.selectedOption]
       // 3) save the creature using LibraryManager.current.saveCreature
 
+      // FIXME: Disabled temporarily due to Interval integration
+      /*
       const c = this.extractor.c;
       if (!c._id) c._id = generateInputId();
       LibraryManager.current.saveCreature(c);
+      */
    }
 
    // Nasty debug-only methods to show stats and their options
@@ -116,7 +123,7 @@ export default class ExtractorTab extends Common {
 
 
 /** Generate a new unique ID for a user-input creature */
-function generateInputId() {
+export function generateInputId() {
    // Adds input tag, for differentiation
    return 'input:' + cuid();
 }

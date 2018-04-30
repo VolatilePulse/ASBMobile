@@ -1,10 +1,10 @@
 import { Stat, TestData } from '@/ark/types';
-import { Creature } from '@/data/objects';
+import { PRE_IB } from '@/consts';
 import { getServerById } from '@/servers';
+import { CompareFloat } from '@/utils';
 import { isArray, isFunction, isNumber, isObject, isString } from 'util';
 import * as Ark from './ark';
-import { Extractor, TEProps } from './ark/extractor';
-import * as Utils from './utils';
+import { Extractor, ExtractorInput, TEProps } from './ark/extractor';
 
 
 export interface TestResult {
@@ -21,21 +21,23 @@ export interface TestResult {
 }
 
 export function PerformTest(testData: TestData, timingFn?: () => number): TestResult {
-   const testCreature = new Creature();
+   const server = getServerById(testData.serverId);
+   if (!server) return { pass: false, exception: 'Unable to locate server' };
 
    // Set the properties to prepare for extraction
-   testCreature.wild = (testData.mode === 'Wild');
-   testCreature.tamed = (testData.mode === 'Tamed');
-   testCreature.bred = (testData.mode === 'Bred');
-   testCreature.IB = testData.imprint / 100;
-   testCreature.values = testData.values.map(Ark.ConvertValue);
-   testCreature.serverId = testData.serverId;
-   testCreature.level = testData.level;
-   testCreature.species = testData.species;
+   const source = testData.source || 'ui';
+   const inputs: ExtractorInput = {
+      wild: (testData.mode === 'Wild'),
+      tamed: (testData.mode === 'Tamed'),
+      bred: (testData.mode === 'Bred'),
+      IB: Ark.ConvertValue(testData.imprint, PRE_IB, source),
+      level: testData.level,
+      values: testData.values.map((v, i) => Ark.ConvertValue(v, i, source)),
+      server: server,
+      species: testData.species,
+   };
 
-   const server = getServerById(testCreature.serverId);
-   if (!server) return { pass: false, exception: 'Unable to locate server' };
-   const extractObject = new Extractor(testCreature, server);
+   const extractObject = new Extractor(inputs);
 
    const dbg: any = {
       totalIterations: 0,
@@ -44,10 +46,11 @@ export function PerformTest(testData: TestData, timingFn?: () => number): TestRe
 
    let t1: number, t2: number;
    let exception: Error;
+   let output: { stats: Stat[][], options: Stat[][], TEs: Map<Stat, TEProps> };
 
    try {
       if (timingFn) t1 = timingFn();
-      extractObject.extract(dbg);
+      output = extractObject.extract(dbg);
       if (timingFn) t2 = timingFn();
    }
    catch (ex) {
@@ -56,13 +59,13 @@ export function PerformTest(testData: TestData, timingFn?: () => number): TestRe
 
    const result: TestResult = {
       pass: false,
-      stats: testCreature['stats'],
-      options: extractObject['options'],
-      mapTE: extractObject['statTEMap'],
+      stats: output.stats, // testCreature['stats'],
+      options: output.options, // extractObject['options'],
+      mapTE: output.TEs, // extractObject['statTEMap'],
       dbg: dbg,
       extra: {},
    };
-   if (testCreature.bred) result.extra.IB = testCreature.IB * 100;
+   // if (inputs.bred) result.extra.IB = inputs.IB * 100; // TODO: Get the exact IB out of the extractor
 
    if (exception) {
       result.exception = exception;
@@ -72,7 +75,7 @@ export function PerformTest(testData: TestData, timingFn?: () => number): TestRe
       result.failReason = dbg.failReason;
    }
    else {
-      result.pass = IsPass(testData['results'], testCreature.stats);
+      result.pass = IsPass(testData['results'], output.stats);
       result.duration = t2 - t1;
    }
 
@@ -96,20 +99,20 @@ export function PerformPerfTest(testData: TestData, timingFn: () => number, dura
       if (!server) return { exception: 'Unable to locate server' };
 
       do {
-         const testCreature = new Creature();
-
          // Set the properties to prepare for extraction
-         testCreature.wild = (testData.mode === 'Wild');
-         testCreature.tamed = (testData.mode === 'Tamed');
-         testCreature.bred = (testData.mode === 'Bred');
-         testCreature.IB = testData.imprint / 100;
-         testCreature.values = testData.values.map(Ark.ConvertValue);
-         testCreature.serverId = testData.serverId;
-         testCreature.level = testData.level;
-         testCreature.species = testData.species;
+         const source = testData.source || 'ui';
+         const inputs: ExtractorInput = {
+            wild: (testData.mode === 'Wild'),
+            tamed: (testData.mode === 'Tamed'),
+            bred: (testData.mode === 'Bred'),
+            IB: Ark.ConvertValue(testData.imprint, PRE_IB, source),
+            level: testData.level,
+            values: testData.values.map((v, i) => Ark.ConvertValue(v, i, source)),
+            server: server,
+            species: testData.species,
+         };
 
-         const extractObject = new Extractor(testCreature, server);
-
+         const extractObject = new Extractor(inputs);
          extractObject.extract();
          runs += 1;
       }
@@ -135,7 +138,7 @@ export function PerformPerfTest(testData: TestData, timingFn: () => number, dura
  */
 function IsPass(result: any, expected: any): boolean {
    if (isNumber(result))
-      return isNumber(expected) && Utils.CompareFloat(result, expected);
+      return isNumber(expected) && CompareFloat(result, expected);
 
    if (isString(result))
       return isString(expected) && expected === result;

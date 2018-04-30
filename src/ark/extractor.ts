@@ -2,10 +2,24 @@ import * as Ark from '@/ark';
 import { StatMultipliers } from '@/ark/multipliers';
 import { Stat, StatLike } from '@/ark/types';
 import { FOOD, HEALTH, SPEED, TORPOR } from '@/consts';
-import { Creature, Server } from '@/data/objects';
+import { Server } from '@/data/objects';
+import { intervalAverage, intFromRange, intFromRangeReverse } from '@/number_utils';
 import * as Utils from '@/utils';
 import * as IA from 'interval-arithmetic';
 import * as compile from 'interval-arithmetic-eval';
+
+
+export interface ExtractorInput {
+   server: Server;
+   species: string;
+   level: number;
+   wild: boolean;
+   tamed: boolean;
+   bred: boolean;
+   IB: Interval;
+   TE?: Interval;
+   values: Interval[];
+}
 
 /** Contains all functions for intervals */
 const RangeFuncs = {
@@ -35,36 +49,6 @@ const RangeFuncs = {
    },
 };
 
-/**
- * Create an interval from a number, accounting for variations beyond the specified number of decimal places.
- * @example intervalFromDecimal(0.1, 1) == Interval().halfOpenRight(0.05, 0.15)
- */
-export function intervalFromDecimal(value: number, places: number): Interval {
-   const offset = 5 * 10 ** -(places + 1);
-   return IA().halfOpenRight(value - offset, value + offset);
-}
-
-/** Return the average of an Interval */
-export function intervalAverage(range: Interval): number {
-   return (range.lo + range.hi) / 2;
-}
-
-// Generator that yields the inner int range from the interval
-function* intFromRange(interval: Interval, fn?: (value: number) => number) {
-   interval = IA.intersection(IA(0, Infinity), interval);
-   const min = fn ? fn(interval.lo) : Math.ceil(interval.lo);
-   const max = fn ? fn(interval.hi) : Math.floor(interval.hi);
-   for (let i = min; i <= max; i++) yield i;
-}
-
-// Generator that yields the inner int range from the interval
-function* intFromRangeReverse(interval: Interval, fn?: (value: number) => number) {
-   interval = IA.intersection(IA(0, Infinity), interval);
-   const min = fn ? fn(interval.lo) : Math.ceil(interval.lo);
-   const max = fn ? fn(interval.hi) : Math.floor(interval.hi);
-   for (let i = max; i >= min; i--) yield i;
-}
-
 export class TEProps {
    TE = IA(0);
    wildLevel = 0;
@@ -83,8 +67,9 @@ class RangeStat {
 }
 
 export class Extractor {
-   /** Stores all of the creature data */
-   c: Creature;
+   /** Inputs to the extractor */
+   c: ExtractorInput;
+
    /** Stores all multipliers for stat calculations */
    m: StatMultipliers[] = [];
 
@@ -105,6 +90,8 @@ export class Extractor {
    /** Stores the starting IB range */
    originalIB = IA(0);
 
+   /** Possible values for each stat */
+   stats: Stat[][];
    /** Stores each stats minimum wild stat level */
    wildMin: number[] = [];
    /** Stores each stats minimum dom stat level */
@@ -131,8 +118,7 @@ export class Extractor {
       wildLevel: IA(0),
    };
 
-   constructor(creature: Creature, server: Server) {
-      this.c = creature;
+   constructor(inputs: ExtractorInput) {
       // TODO: Add consider wild levels
       // Only way to calculate wild levels is with a TE
       // Creatures like gigas are unaffected, just as if they were bred
@@ -141,28 +127,34 @@ export class Extractor {
       //    It's likely it was force tamed anyways (possibly spawned + tamed)
       // Should not rely on wild level steps as, it will speed up extraction, but not everyone may set it :(
 
+      this.c = inputs;
+
       // considerWildLevelSteps = considerWildLevelSteps && !bred;
       // Make sure the multipliers haven't changed
-      this.m = Ark.GetMultipliers(server, this.c.species);
+      this.m = Ark.GetMultipliers(inputs.server, inputs.species);
 
       // Clear the checked property for future extractions (also clearing out any Vue observer)
-      this.c.stats = Utils.FilledArray(8, () => []);
+      this.stats = Utils.FilledArray(8, () => []);
+
+      // TE is as specified or the whole range
+      this.c.TE = inputs.TE || IA(0, Infinity);
 
       // Change variables based on wild, tamed, bred
       if (this.c.wild) {
-         this.c.TE = this.c.IB = 0;
+         this.c.TE = IA(0);
+         this.c.IB = IA(0);
          this.rangeVars.TE = IA(0);
          this.rangeVars.IB = IA(0);
       }
       else if (this.c.tamed) {
-         this.c.IB = 0;
+         this.c.IB = IA(0);
          this.rangeVars.TE = IA(0, 1);
          this.rangeVars.IB = IA(0);
       }
       else {
-         this.c.TE = 1;
+         this.c.TE = IA(1);
          this.rangeVars.TE = IA(1);
-         this.rangeVars.IB = intervalFromDecimal(this.c.IB, 2); // IA().halfOpenRight(this.c.IB - 0.005, this.c.IB + 0.005);
+         this.rangeVars.IB = this.c.IB;
          this.originalIB = this.rangeVars.IB = IA.intersection(this.rangeVars.IB, IA(0, Infinity));
       }
    }
@@ -178,13 +170,13 @@ export class Extractor {
       this.rangeVars.Lw = 0;
       this.rangeVars.Ld = 0;
 
-      this.c.stats[TORPOR].push(new Stat());
+      this.stats[TORPOR].push(new Stat());
       let torporLwRange: Interval = IA();
 
       torporLwRange = RangeFuncs.calcLw(this.rangeVars.Ld, this.rangeVars.TE, this.rangeVars.IB, this.rangeStats[TORPOR]);
       this.checkedStat[TORPOR] = true;
 
-      for (this.c.stats[TORPOR][0].Lw of intFromRange(torporLwRange, Math.round)) {
+      for (this.stats[TORPOR][0].Lw of intFromRange(torporLwRange, Math.round)) {
          this.rangeVars.Lw = 0;
          this.rangeVars.Ld = 0;
          // Reset flag to test for failed cases
@@ -194,13 +186,13 @@ export class Extractor {
          this.options = [];
 
          for (let index = HEALTH; index <= SPEED; index++) {
-            this.c.stats[index] = [];
+            this.stats[index] = [];
             this.checkedStat[index] = false;
          }
 
          // Calculate the max number of levels based on level and torpor
-         this.wildFreeMax = this.c.stats[TORPOR][0].Lw;
-         this.levelBeforeDom = this.c.stats[TORPOR][0].Lw + 1;
+         this.wildFreeMax = this.stats[TORPOR][0].Lw;
+         this.levelBeforeDom = this.stats[TORPOR][0].Lw + 1;
          this.domFreeMax = Math.max(this.c.level - this.wildFreeMax - 1, 0);
 
          // Set range to be used for TE calculations
@@ -260,14 +252,14 @@ export class Extractor {
                }
             }
 
-            if (this.c.stats[statIndex].length === 1) {
-               this.wildFreeMax -= this.c.stats[statIndex][0].Lw;
-               this.domFreeMax -= this.c.stats[statIndex][0].Ld;
+            if (this.stats[statIndex].length === 1) {
+               this.wildFreeMax -= this.stats[statIndex][0].Lw;
+               this.domFreeMax -= this.stats[statIndex][0].Ld;
                this.checkedStat[statIndex] = true;
             }
-            else if (this.c.stats[statIndex].length > 1) {
+            else if (this.stats[statIndex].length > 1) {
                let tempWM = this.wildFreeMax, tempDM = this.domFreeMax;
-               for (const stat of this.c.stats[statIndex]) {
+               for (const stat of this.stats[statIndex]) {
                   if (tempWM > stat.Lw)
                      tempWM = stat.Lw;
                   if (tempDM > stat.Ld)
@@ -284,7 +276,7 @@ export class Extractor {
          }
 
          // All creatures, even wild, need their stats filtered
-         if (dbg) dbg.preFilterStats = Utils.DeepCopy(this.c.stats);
+         if (dbg) dbg.preFilterStats = Utils.DeepCopy(this.stats);
          if (this.success)
             this.filterResults(dbg);
 
@@ -294,24 +286,26 @@ export class Extractor {
             break;
       }
 
-      if (dbg) dbg.levelFromTorpor = this.c.stats[TORPOR][0].Lw;
+      if (dbg) dbg.levelFromTorpor = this.stats[TORPOR][0].Lw;
 
       // Only filter results if we have a result for every stat
       for (let stat = HEALTH; stat <= SPEED; stat++) {
-         if (this.c.stats[stat].length === 0) {
+         if (this.stats[stat].length === 0) {
             if (dbg) dbg.failReason = 'No options found for stat ' + stat;
-            return;
+            return { stats: this.stats, options: this.options, TEs: this.statTEMap };
          }
       }
 
       // Sort the options based on most likely (deviation from the expected average)
       this.options.sort((opt1, opt2) => this.optionDeviation(opt1, opt2));
+
+      return { stats: this.stats, options: this.options, TEs: this.statTEMap };
    }
 
    init() {
       // rangeStats
       for (let statIndex = HEALTH; statIndex <= TORPOR; statIndex++) {
-         this.rangeStats[statIndex].V = intervalFromDecimal(this.c.values[statIndex], Ark.Precision(statIndex));
+         this.rangeStats[statIndex].V = this.c.values[statIndex];
 
          // Stat & Server Multipliers
          this.rangeStats[statIndex].B = this.m[statIndex].B;
@@ -348,8 +342,8 @@ export class Extractor {
       const localRangeTorpor = this.rangeStats[TORPOR];
 
       // Get stat levels from torpor
-      localRangeVars.Lw = this.c.stats[TORPOR][0].Lw;
-      localRangeVars.Ld = this.c.stats[TORPOR][0].Ld;
+      localRangeVars.Lw = this.stats[TORPOR][0].Lw;
+      localRangeVars.Ld = this.stats[TORPOR][0].Ld;
 
       // Extract the IB from Torpor
       let tempIBRange = RangeFuncs.calcIB({ ...localRangeVars, ...localRangeTorpor, });
@@ -359,7 +353,7 @@ export class Extractor {
       tempIBRange = localRangeVars.IB = IA.intersection(tempIBRange, this.originalIB);
 
       // Convert Intervals to numbers
-      this.c.IB = intervalAverage(localRangeVars.IB);
+      this.c.IB = localRangeVars.IB;
 
       // Check the food stat for the IB as well (Only works if food is un-levelled)
       localRangeVars.Lw = 0;
@@ -369,15 +363,15 @@ export class Extractor {
 
       // Check to see if the new IB still allows torpor to extract correctly
       const newExpectedValue = RangeFuncs.calcV(localRangeVars.Lw, 0, localRangeVars.TE, localRangeVars.IB, localRangeFood);
-      if (IA.hasValue(newExpectedValue, this.c.values[TORPOR])) {
+      if (IA.intervalsOverlap(newExpectedValue, this.c.values[TORPOR])) {
          localRangeVars.IB = tempIBRange;
-         this.c.IB = intervalAverage(tempIBRange);
+         this.c.IB = tempIBRange;
       }
 
       // IB can't be lower than 0
-      if (this.c.IB < 0) {
-         this.c.IB = 0;
-         localRangeVars.IB = IA(0);
+      if (this.c.IB.lo < 0) {
+         this.c.IB = IA.intersection(this.c.IB, IA(0, Infinity));
+         localRangeVars.IB = IA(this.c.IB);
       }
       return true;
    }
@@ -402,7 +396,7 @@ export class Extractor {
       }
 
       // Creatures that don't allow speed to increase domestically also don't allow wild levels
-      this.c.stats[statIndex] = [tempStat2];
+      this.stats[statIndex] = [tempStat2];
       this.domFreeMax -= tempStat2.Ld;
       this.checkedStat[statIndex] = true;
       return true;
@@ -419,19 +413,19 @@ export class Extractor {
 
       const calculatedValue = RangeFuncs.calcV(localVars.Lw, localVars.Ld, localStats.TE || localVars.TE, localVars.IB, localStats);
       if (IA.intervalsOverlap(calculatedValue, localStats.V))
-         this.c.stats[statIndex].push(new Stat(localVars.Lw, localVars.Ld));
+         this.stats[statIndex].push(new Stat(localVars.Lw, localVars.Ld));
 
       // If it doesn't calculate properly, it may have used a different IB (Mostly relevant for Food)
       else if (this.c.bred) {
          const rangeIB = RangeFuncs.calcIB({ ...localVars, ...localStats });
 
          if (IA.intervalsOverlap(rangeIB, this.originalIB)) {
-            const tempStat2: StatLike = new Stat(this.c.stats[TORPOR][0]);
+            const tempStat2: StatLike = new Stat(this.stats[TORPOR][0]);
             const expectedTorpor = RangeFuncs.calcV(tempStat2.Lw, tempStat2.Ld, localVars.TE, rangeIB, localStats);
             if (IA.intervalsOverlap(expectedTorpor, localStatsTorpor.V as Interval)) {
                localVars.IB = IA.intersection(rangeIB, localVars.IB);
-               this.c.IB = intervalAverage(localVars.IB);
-               this.c.stats[statIndex].push(new Stat(localVars.Lw, localVars.Ld));
+               this.c.IB = IA(localVars.IB);
+               this.stats[statIndex].push(new Stat(localVars.Lw, localVars.Ld));
             }
          }
       }
@@ -469,7 +463,7 @@ export class Extractor {
                TEStat.TE = localVars.TE;
 
                const workingStat = new Stat(localVars.Lw, localVars.Ld);
-               this.c.stats[statIndex].push(workingStat);
+               this.stats[statIndex].push(workingStat);
 
                map.set(workingStat, TEStat);
             }
@@ -478,7 +472,7 @@ export class Extractor {
    }
 
    findMultiTEStat(statIndex: number, rangeLd: Interval, map: Map<Stat, TEProps>) {
-      const localStats = this.c.stats[statIndex];
+      const localStats = this.stats[statIndex];
       const localVars = this.rangeVars;
       const tempStat = new Stat(localVars.Lw, 0);
 
@@ -507,7 +501,7 @@ export class Extractor {
       if (dbg && !dbg['filterLoops']) dbg.filterLoops = 0;
 
       let removed = false;
-      const localStats = this.c.stats;
+      const localStats = this.stats;
 
       do {
          if (dbg) dbg.filterLoops += 1;
@@ -567,7 +561,7 @@ export class Extractor {
    filterByTE(index: number, TEstat: Stat, map: Map<Stat, TEProps>) {
       for (let statIndex = 0; statIndex < 7; statIndex++) {
          if (statIndex !== index && this.isTEStat[statIndex]) {
-            for (const stat of this.c.stats[statIndex]) {
+            for (const stat of this.stats[statIndex]) {
                const currentTEstat = map.get(stat);
                const testingTEstat = map.get(TEstat);
                if (testingTEstat !== undefined && currentTEstat.TE === testingTEstat.TE)
@@ -584,10 +578,10 @@ export class Extractor {
       let removed = false;
 
       for (let i = 0; i < 7; i++) {
-         initialStatsLength = this.c.stats[i].length;
-         this.c.stats[i] = this.c.stats[i].filter(stat => !stat['removeMe']);
-         if (dbg) dbg.numberRemoved += initialStatsLength - this.c.stats[i].length;
-         if (!removed && initialStatsLength > this.c.stats[i].length)
+         initialStatsLength = this.stats[i].length;
+         this.stats[i] = this.stats[i].filter(stat => !stat['removeMe']);
+         if (dbg) dbg.numberRemoved += initialStatsLength - this.stats[i].length;
+         if (!removed && initialStatsLength > this.stats[i].length)
             removed = true;
       }
 
@@ -607,7 +601,7 @@ export class Extractor {
    generateOptions(dbg?: any): boolean {
       const localCheckedStats = this.checkedStat;
       const localMap = this.statTEMap;
-      const localStats = this.c.stats;
+      const localStats = this.stats;
       const freeWild = this.wildFreeMax;
       const freeDom = this.domFreeMax;
 

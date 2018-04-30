@@ -11,6 +11,7 @@ declare interface IntervalArithmeticStatic {
    };
 
    (): Interval;
+   (toCopy: Interval): Interval;
    (value: number): Interval;
    (lo: number, hi: number): Interval;
 

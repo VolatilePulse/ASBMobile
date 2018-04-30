@@ -1,6 +1,7 @@
 import { StatMultipliers } from '@/ark/multipliers';
+import { intervalAverage } from '@/number_utils';
 import * as IA from 'interval-arithmetic';
-import { intervalAverage } from '@/ark/extractor';
+import { CreatureDataSource } from '@/ark';
 
 
 /** Server multiplier overrides */
@@ -13,6 +14,7 @@ export interface TestData {
    level: number;
    imprint: number;
    mode: 'Wild' | 'Tamed' | 'Bred';
+   source?: CreatureDataSource;
    values: number[];
    serverId: string;
    results: StatLike[][];
