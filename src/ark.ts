@@ -66,9 +66,17 @@ export function DisplayValue(value: number, index: number): number {
 export function ConvertValue(value: number, index: number, source: CreatureDataSource) {
    let precision: number;
 
-   if (source === 'ui') precision = 1;
-   else if (source === 'ark_export') precision = 6;
-   else throw new Error('Invalid data source');
+   if (source === 'ui') {
+      precision = 1;
+      if (index === PRE_IB)
+         precision = 0;
+   }
+   else if (source === 'ark_export') {
+      precision = 6;
+   }
+   else {
+      throw new Error('Invalid data source');
+   }
 
    let range = intervalFromDecimal(value, precision);
 
