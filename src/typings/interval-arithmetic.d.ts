@@ -11,7 +11,6 @@ declare interface IntervalArithmeticStatic {
    };
 
    (): Interval;
-   (toCopy: Interval): Interval;
    (value: number): Interval;
    (lo: number, hi: number): Interval;
 
@@ -43,8 +42,8 @@ declare interface IntervalArithmeticStatic {
 }
 
 declare class Interval {
-   lo: number;
-   hi: number;
+   readonly lo: number;
+   readonly hi: number;
 
    open(lo: number, hi: number): Interval;
    halfOpenRight(lo: number, hi: number): Interval;
