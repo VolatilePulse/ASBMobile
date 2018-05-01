@@ -16,7 +16,6 @@ export interface ExtractorInput {
    tamed: boolean;
    bred: boolean;
    IB: Interval;
-   TE?: Interval;
    values: Interval[];
 }
 
@@ -118,7 +117,7 @@ export class Extractor {
       Lw: 0,
       Ld: 0,
       IB: IA(0),
-      TE: IA(0),
+      TE: Utils.FilledArray(8, () => IA(0)),
       tamedLevel: IA(0),
       wildLevel: IA(0),
    };
@@ -141,24 +140,21 @@ export class Extractor {
       // Clear the checked property for future extractions (also clearing out any Vue observer)
       this.stats = Utils.FilledArray(8, () => []);
 
-      // TE is as specified or the whole range
       this.c.TE = inputs.TE || IA(0, Infinity);
 
       // Change variables based on wild, tamed, bred
       if (this.c.wild) {
-         this.c.TE = IA(0);
          this.c.IB = IA(0);
-         this.rangeVars.TE = IA(0);
+         this.rangeVars.TE = Utils.FilledArray(8, () => IA.ZERO);
          this.rangeVars.IB = IA(0);
       }
       else if (this.c.tamed) {
          this.c.IB = IA(0);
-         this.rangeVars.TE = IA(0, 1);
+         this.rangeVars.TE = Utils.FilledArray(8, () => IA(0, 1));
          this.rangeVars.IB = IA(0);
       }
       else {
-         this.c.TE = IA(1);
-         this.rangeVars.TE = IA(1);
+         this.rangeVars.TE = Utils.FilledArray(8, () => IA.ONE);
          this.rangeVars.IB = this.c.IB;
          this.originalIB = this.rangeVars.IB = IA.intersection(this.rangeVars.IB, IA(0, Infinity));
       }
@@ -169,8 +165,8 @@ export class Extractor {
          this.m[statIndex].TBHM = this.c.wild ? IA.ONE : this.m[statIndex].TBHM;
 
          // FIXME: Add this code elsewhere
-         if (IA.lt(this.m[statIndex].Tm, IA.ZERO))
-            this.m[statIndex].TE = IA.ONE;
+         if (this.c.tamed && IA.lt(this.m[statIndex].Tm, IA.ZERO))
+            this.rangeVars.TE[statIndex] = IA.ONE;
       }
    }
 
@@ -187,7 +183,7 @@ export class Extractor {
       this.stats[TORPOR].push(new Stat());
       let torporLwRange: Interval = IA();
 
-      torporLwRange = RangeFuncs.calcLw(this.values[TORPOR], this.rangeVars.Ld, this.rangeVars.TE, this.rangeVars.IB, this.m[TORPOR]);
+      torporLwRange = RangeFuncs.calcLw(this.values[TORPOR], this.rangeVars.Ld, this.rangeVars.TE[TORPOR], this.rangeVars.IB, this.m[TORPOR]);
       this.checkedStat[TORPOR] = true;
 
       for (this.stats[TORPOR][0].Lw of intFromRange(torporLwRange, Math.round)) {
@@ -242,7 +238,7 @@ export class Extractor {
                   // Loop all possible Lws
                   for (this.rangeVars.Lw of intFromRangeReverse(rangeLw)) {
                      // Calculate the highest Ld could be
-                     let rangeLd = RangeFuncs.calcLd(this.values[statIndex], this.rangeVars.Lw, this.rangeVars.TE, this.rangeVars.IB, this.m[statIndex]);
+                     let rangeLd = RangeFuncs.calcLd(this.values[statIndex], this.rangeVars.Lw, this.rangeVars.TE[statIndex], this.rangeVars.IB, this.m[statIndex]);
                      rangeLd.lo = 0;
                      rangeLd = IA.intersection(rangeLd, IA(0, this.domFreeMax - this.minDom));
                      tempStat.Lw = this.rangeVars.Lw;
@@ -334,7 +330,7 @@ export class Extractor {
       localRangeVars.Ld = this.stats[TORPOR][0].Ld;
 
       // Extract the IB from Torpor
-      let tempIBRange = RangeFuncs.calcIB(this.values[TORPOR], localRangeVars.Lw, localRangeVars.Ld, localRangeVars.TE || localStatTorpor.TE, localStatTorpor);
+      let tempIBRange = RangeFuncs.calcIB(this.values[TORPOR], localRangeVars.Lw, localRangeVars.Ld, localRangeVars.TE[TORPOR], localStatTorpor);
       if (!IA.intervalsOverlap(tempIBRange, this.originalIB))
          return false;
 
@@ -346,11 +342,11 @@ export class Extractor {
       // Check the food stat for the IB as well (Only works if food is un-levelled)
       localRangeVars.Lw = 0;
       localRangeVars.Ld = 0;
-      localRangeVars.Lw = Math.round(intervalAverage(RangeFuncs.calcV(0, 0, localRangeVars.TE, localRangeVars.IB, localStatFood)));
-      tempIBRange = RangeFuncs.calcIB(this.values[FOOD], localRangeVars.Lw, localRangeVars.Ld, localRangeVars.TE || localStatFood.TE, localStatFood);
+      localRangeVars.Lw = Math.round(intervalAverage(RangeFuncs.calcV(0, 0, localRangeVars.TE[FOOD], localRangeVars.IB, localStatFood)));
+      tempIBRange = RangeFuncs.calcIB(this.values[FOOD], localRangeVars.Lw, localRangeVars.Ld, localRangeVars.TE[FOOD], localStatFood);
 
       // Check to see if the new IB still allows torpor to extract correctly
-      const newExpectedValue = RangeFuncs.calcV(localRangeVars.Lw, 0, localRangeVars.TE, localRangeVars.IB, localStatFood);
+      const newExpectedValue = RangeFuncs.calcV(localRangeVars.Lw, 0, localRangeVars.TE[FOOD], localRangeVars.IB, localStatFood);
       if (IA.intervalsOverlap(newExpectedValue, this.c.values[TORPOR])) {
          localRangeVars.IB = tempIBRange;
          this.c.IB = tempIBRange;
@@ -379,7 +375,7 @@ export class Extractor {
       // We can't calculate stats that don't allow wild Increasees if a stat is unused
       else if (this.unusedStat && IA.equal(localStats.Iw, IA.ZERO)) {
          // Calculate DOM for speed
-         tempStat2.Ld = Math.round(intervalAverage(RangeFuncs.calcLd(this.values[statIndex], this.rangeVars.Lw, this.rangeVars.TE, this.rangeVars.IB, localStats)));
+         tempStat2.Ld = Math.round(intervalAverage(RangeFuncs.calcLd(this.values[statIndex], this.rangeVars.Lw, this.rangeVars.TE[statIndex], this.rangeVars.IB, localStats)));
          tempStat2.Lw = -1;
       }
 
@@ -393,22 +389,22 @@ export class Extractor {
    nonTEStatCalculation(statIndex: number, rangeLd: Interval): void {
       const localVars = this.rangeVars;
       const localStats = this.m[statIndex];
-      localVars.Ld = Math.round(intervalAverage(RangeFuncs.calcLd(this.values[statIndex], this.rangeVars.Lw, this.rangeVars.TE, this.rangeVars.IB, localStats)));
+      localVars.Ld = Math.round(intervalAverage(RangeFuncs.calcLd(this.values[statIndex], this.rangeVars.Lw, this.rangeVars.TE[statIndex], this.rangeVars.IB, localStats)));
 
       if (!IA.hasValue(rangeLd, localVars.Ld))
          return;
 
-      const calculatedValue = RangeFuncs.calcV(localVars.Lw, localVars.Ld, localStats.TE || localVars.TE, localVars.IB, localStats);
+      const calculatedValue = RangeFuncs.calcV(localVars.Lw, localVars.Ld, localVars.TE[statIndex], localVars.IB, localStats);
       if (IA.intervalsOverlap(calculatedValue, this.values[statIndex]))
          this.stats[statIndex].push(new Stat(localVars.Lw, localVars.Ld));
 
       // If it doesn't calculate properly, it may have used a different IB (Mostly relevant for Food)
       else if (this.c.bred) {
-         const rangeIB = RangeFuncs.calcIB(this.values[statIndex], localVars.Lw, localVars.Ld, localVars.TE || localStats.TE, localStats);
+         const rangeIB = RangeFuncs.calcIB(this.values[statIndex], localVars.Lw, localVars.Ld, localVars.TE[statIndex], localStats);
 
          if (IA.intervalsOverlap(rangeIB, this.originalIB)) {
             const tempStat2: StatLike = new Stat(this.stats[TORPOR][0]);
-            const expectedTorpor = RangeFuncs.calcV(tempStat2.Lw, tempStat2.Ld, localVars.TE, rangeIB, localStats);
+            const expectedTorpor = RangeFuncs.calcV(tempStat2.Lw, tempStat2.Ld, localVars.TE[statIndex], rangeIB, localStats);
             if (IA.intervalsOverlap(expectedTorpor, this.values[TORPOR])) {
                localVars.IB = IA.intersection(rangeIB, localVars.IB);
                this.c.IB = localVars.IB;
@@ -423,7 +419,8 @@ export class Extractor {
       const localVars = this.rangeVars;
 
       for (localVars.Ld of intFromRange(rangeLd)) {
-         localVars.TE = RangeFuncs.calcTE(this.values[statIndex], localVars.Lw, localVars.Ld, localVars.IB, localStats);
+         // FIXME: shouldn't be modifying the TE
+         localVars.TE[statIndex] = RangeFuncs.calcTE(this.values[statIndex], localVars.Lw, localVars.Ld, localVars.IB, localStats);
 
          // If the range is greater than 1
          if (localVars.TE.lo > 1)
@@ -433,21 +430,21 @@ export class Extractor {
          if (localVars.TE.hi < 0)
             break;
 
-         localVars.TE = IA.intersection(localVars.TE, IA(0, 1));
+         localVars.TE[statIndex] = IA.intersection(localVars.TE[statIndex], IA(0, 1));
 
-         const rangeWL = RangeFuncs.calcWL(localVars.tamedLevel, localVars.TE);
+         const rangeWL = RangeFuncs.calcWL(localVars.tamedLevel, localVars.TE[statIndex]);
 
          for (const i of intFromRange(rangeWL, Math.ceil)) {
             localVars.wildLevel = IA(i);
             let tempTERange = RangeFuncs.calcTEFromWL(localVars.tamedLevel, localVars.wildLevel);
-            tempTERange = IA.intersection(localVars.TE, tempTERange);
+            tempTERange = IA.intersection(localVars.TE[statIndex], tempTERange);
 
             // Valid range
             if (!IA.isEmpty(tempTERange) && !IA.isWhole(tempTERange)) {
                const TEStat = new TEProps();
                TEStat.wildLevel = i;
                // Get the average of the TE range
-               TEStat.TE = localVars.TE;
+               TEStat.TE = localVars.TE[statIndex];
 
                const workingStat = new Stat(localVars.Lw, localVars.Ld);
                this.stats[statIndex].push(workingStat);
