@@ -47,10 +47,16 @@ const servers: ServerDef[] = [
       multipliers: [[0.5, 0.5, 0.5, 1.3], [2.5, 2.5, 0.5], [1.3, 1.3], [1.3, 1.3, 1.3], [6, 6, 6, 6], [0.5, 0.4, 0.4], [1.6, 1.6, 1.6, 1.3], [1.3, 1.3, 1.3]],
    },
    {
-      name: 'ARK PVE Community Server',
+      name: 'ARK PVE Community Server (test)',
       IBM: 1,
       singlePlayer: false,
       multipliers: [[], [], [], [], [, , 3, 1.5]],
+   },
+   {
+      name: 'ARK PVE Community Server',
+      IBM: 1,
+      singlePlayer: false,
+      multipliers: [[], [], [], [], [, , 1.5, 3], [], [2]],
    },
    {
       name: 'Dusty.P',
