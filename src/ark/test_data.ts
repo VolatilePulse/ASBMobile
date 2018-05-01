@@ -388,7 +388,7 @@ const testData: TestData[] = [
       species: 'Aberrant Spino', level: 224, imprint: 0, mode: 'Tamed',
       values: [4032.1, 1645.0, 2470.0, 11700.0, 1106.0, 296.3, 100.0, 12223.5],
       serverId: 'test:ARK PVE Community Server',
-      results: [[{ Lw: 25, Ld: 0 }], [{ Lw: 37, Ld: 0 }], [{ Lw: 28, Ld: 0 }], [{ Lw: 35, Ld: 0 }], [{ Lw: 36, Ld: 0 }], [{ Lw: 29, Ld: 0 }], [{ Lw: 33, Ld: 0 }], [{ Lw: 223, Ld: 0 }]],
+      results: [[{ Lw: 25, Ld: 0 }], [{ Lw: 37, Ld: 0 }], [{ Lw: 28, Ld: 0 }], [{ Lw: 35, Ld: 0 }], [{ Lw: 36, Ld: 0 }], [{ Lw: 37, Ld: 0 }, { Lw: 37, Ld: 0 }, { Lw: 36, Ld: 0 }, { Lw: 35, Ld: 0 }, { Lw: 34, Ld: 0 }, { Lw: 33, Ld: 0 }, { Lw: 32, Ld: 0 }, { Lw: 31, Ld: 0 }, { Lw: 29, Ld: 0 }], [{ Lw: 33, Ld: 0 }, { Lw: 31, Ld: 0 }, { Lw: 30, Ld: 0 }, { Lw: 29, Ld: 0 }, { Lw: 28, Ld: 0 }, { Lw: 27, Ld: 0 }, { Lw: 26, Ld: 0 }, { Lw: 25, Ld: 0 }], [{ Lw: 223, Ld: 0 }]],
    },
 ];
 
