@@ -65,7 +65,7 @@ const RangeFuncs = {
 };
 
 export class TEProps {
-   TE = IA(0);
+   TE = IA.ZERO;
    wildLevel = 0;
 }
 
@@ -93,8 +93,6 @@ export class Extractor {
    unusedStat = false;
    /** A flag signifying a successful extraction */
    success = true;
-   /** Stores the starting IB range */
-   originalIB = IA(0);
 
    /** Possible values for each stat */
    stats: Stat[][];
@@ -116,10 +114,10 @@ export class Extractor {
    rangeVars = {
       Lw: 0,
       Ld: 0,
-      IB: IA(0),
-      TE: Utils.FilledArray(8, () => IA(0)),
-      tamedLevel: IA(0),
-      wildLevel: IA(0),
+      IB: IA.ZERO,
+      TE: Utils.FilledArray(8, () => IA.ZERO),
+      tamedLevel: IA.ZERO,
+      wildLevel: IA.ZERO,
    };
 
    constructor(inputs: ExtractorInput) {
@@ -140,23 +138,18 @@ export class Extractor {
       // Clear the checked property for future extractions (also clearing out any Vue observer)
       this.stats = Utils.FilledArray(8, () => []);
 
-      this.c.TE = inputs.TE || IA(0, Infinity);
-
       // Change variables based on wild, tamed, bred
       if (this.c.wild) {
-         this.c.IB = IA(0);
          this.rangeVars.TE = Utils.FilledArray(8, () => IA.ZERO);
-         this.rangeVars.IB = IA(0);
+         this.rangeVars.IB = this.c.IB = IA.ZERO;
       }
       else if (this.c.tamed) {
-         this.c.IB = IA(0);
          this.rangeVars.TE = Utils.FilledArray(8, () => IA(0, 1));
-         this.rangeVars.IB = IA(0);
+         this.rangeVars.IB = this.c.IB = IA.ZERO;
       }
       else {
          this.rangeVars.TE = Utils.FilledArray(8, () => IA.ONE);
          this.rangeVars.IB = this.c.IB;
-         this.originalIB = this.rangeVars.IB = IA.intersection(this.rangeVars.IB, IA(0, Infinity));
       }
 
       for (const statIndex in this.m) {
@@ -331,13 +324,10 @@ export class Extractor {
 
       // Extract the IB from Torpor
       let tempIBRange = RangeFuncs.calcIB(this.values[TORPOR], localRangeVars.Lw, localRangeVars.Ld, localRangeVars.TE[TORPOR], localStatTorpor);
-      if (!IA.intervalsOverlap(tempIBRange, this.originalIB))
+      if (!IA.intervalsOverlap(tempIBRange, this.c.IB))
          return false;
 
-      tempIBRange = localRangeVars.IB = IA.intersection(tempIBRange, this.originalIB);
-
-      // Convert Intervals to numbers
-      this.c.IB = localRangeVars.IB;
+      tempIBRange = localRangeVars.IB = IA.intersection(tempIBRange, this.c.IB);
 
       // Check the food stat for the IB as well (Only works if food is un-levelled)
       localRangeVars.Lw = 0;
@@ -349,13 +339,11 @@ export class Extractor {
       const newExpectedValue = RangeFuncs.calcV(localRangeVars.Lw, 0, localRangeVars.TE[FOOD], localRangeVars.IB, localStatFood);
       if (IA.intervalsOverlap(newExpectedValue, this.c.values[TORPOR])) {
          localRangeVars.IB = tempIBRange;
-         this.c.IB = tempIBRange;
       }
 
       // IB can't be lower than 0
-      if (this.c.IB.lo < 0) {
-         this.c.IB = IA.intersection(this.c.IB, IA(0, Infinity));
-         localRangeVars.IB = this.c.IB;
+      if (localRangeVars.IB.lo < 0) {
+         localRangeVars.IB = IA.intersection(localRangeVars.IB, IA(0, Infinity));
       }
       return true;
    }
@@ -402,12 +390,11 @@ export class Extractor {
       else if (this.c.bred) {
          const rangeIB = RangeFuncs.calcIB(this.values[statIndex], localVars.Lw, localVars.Ld, localVars.TE[statIndex], localStats);
 
-         if (IA.intervalsOverlap(rangeIB, this.originalIB)) {
+         if (IA.intervalsOverlap(rangeIB, this.c.IB)) {
             const tempStat2: StatLike = new Stat(this.stats[TORPOR][0]);
             const expectedTorpor = RangeFuncs.calcV(tempStat2.Lw, tempStat2.Ld, localVars.TE[statIndex], rangeIB, localStats);
             if (IA.intervalsOverlap(expectedTorpor, this.values[TORPOR])) {
                localVars.IB = IA.intersection(rangeIB, localVars.IB);
-               this.c.IB = localVars.IB;
                this.stats[statIndex].push(new Stat(localVars.Lw, localVars.Ld));
             }
          }
