@@ -19,43 +19,43 @@ export interface ExtractorInput {
    values: Interval[];
 }
 
-// calcWL: compile('tamedLevel/(1+0.5*TE)').eval,
+// tamedLevel / (1 + 0.5 * TE)
 function calcWL(tamedLevel: Interval, TE: Interval) {
    return IA.div(tamedLevel, (IA.add(IA.ONE, IA.mul(IA(0.5), TE))));
 }
 
-// calcTEFromWL: compile('(tamedLevel/wildLevel-1)/0.5').eval,
+// (tamedLevel / wildLevel - 1) / 0.5
 function calcTEFromWL(tamedLevel: Interval, wildLevel: Interval) {
    return IA.div((IA.sub(IA.div(tamedLevel, wildLevel), IA.ONE)), IA(0.5));
 }
 
-// calcIB: compile('((V / (1 + TE * Tm) / (1 + Ld * Id) - Ta) / (B * (1 + Lw * Iw) * TBHM) - 1) / IBM').eval,
+// ((V / (1 + TE * Tm) / (1 + Ld * Id) - Ta) / (B * (1 + Lw * Iw) * TBHM) - 1) / IBM
 function calcIB(V: Interval, Lw: number, Ld: number, TE: Interval, mult: StatMultipliers) {
    return IA.div((IA.sub(IA.div((IA.sub(IA.div(IA.div(V, (IA.add(IA.ONE, IA.mul(TE, mult.Tm)))),
       (IA.add(IA.ONE, IA.mul(IA(Ld), mult.Id)))), mult.Ta)), (IA.mul(IA.mul(mult.B,
          (IA.add(IA.ONE, IA.mul(IA(Lw), mult.Iw)))), mult.TBHM))), IA.ONE)), mult.IBM);
 }
 
-// calcTE: compile('(V / ((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) / (1 + Ld * Id) - 1) / Tm').eval,
+// (V / ((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) / (1 + Ld * Id) - 1) / Tm
 function calcTE(V: Interval, Lw: number, Ld: number, IB: Interval, mult: StatMultipliers) {
    return IA.div((IA.sub(IA.div(IA.div(V, (IA.add(IA.mul(IA.mul(IA.mul((IA.add(IA.ONE, IA.mul(IA(Lw), mult.Iw))), mult.B),
       mult.TBHM), (IA.add(IA.ONE, IA.mul(IB, mult.IBM)))), mult.Ta))), (IA.add(IA.ONE, IA.mul(IA(Ld), mult.Id)))), IA.ONE)), mult.Tm);
 }
 
-// calcV: compile('((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) * (1 + TE * Tm) * (1 + Ld * Id)').eval,
+// ((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) * (1 + TE * Tm) * (1 + Ld * Id)
 function calcV(Lw: number, Ld: number, TE: Interval, IB: Interval, mult: StatMultipliers) {
    return IA.mul(IA.mul((IA.add(IA.mul(IA.mul(IA.mul((IA.add(IA.ONE, IA.mul(IA(Lw), mult.Iw))), mult.B), mult.TBHM),
       (IA.add(IA.ONE, IA.mul(IB, mult.IBM)))), mult.Ta)), (IA.add(IA.ONE, IA.mul(TE, mult.Tm)))), (IA.add(IA.ONE, IA.mul(IA(Ld), mult.Id))));
 }
 
-// calcLw: compile('((V / ((1 + Ld * Id) * (1 + TE * Tm)) - Ta) / (B * TBHM * (1 + IB * IBM)) - 1) / Iw').eval,
+// ((V / ((1 + Ld * Id) * (1 + TE * Tm)) - Ta) / (B * TBHM * (1 + IB * IBM)) - 1) / Iw
 function calcLw(V: Interval, Ld: number, TE: Interval, IB: Interval, mult: StatMultipliers) {
    return IA.div((IA.sub(IA.div((IA.sub(IA.div(V, (IA.mul((IA.add(IA.ONE, IA.mul(IA(Ld), mult.Id))),
       (IA.add(IA.ONE, IA.mul(TE, mult.Tm)))))), mult.Ta)), (IA.mul(IA.mul(mult.B, mult.TBHM),
          (IA.add(IA.ONE, IA.mul(IB, mult.IBM)))))), IA.ONE)), mult.Iw);
 }
 
-// calcLd: compile('((V / ((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) / (1 + TE * Tm)) - 1) / Id').eval,
+// ((V / ((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) / (1 + TE * Tm)) - 1) / Id
 function calcLd(V: Interval, Lw: number, TE: Interval, IB: Interval, mult: StatMultipliers) {
    return IA.div((IA.sub((IA.div(IA.div(V, (IA.add(IA.mul(IA.mul(IA.mul((IA.add(IA.ONE, IA.mul(IA(Lw), mult.Iw))), mult.B), mult.TBHM),
       (IA.add(IA.ONE, IA.mul(IB, mult.IBM)))), mult.Ta))), (IA.add(IA.ONE, IA.mul(TE, mult.Tm))))), IA.ONE)), mult.Id);
