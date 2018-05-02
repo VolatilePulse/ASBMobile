@@ -1,3 +1,4 @@
+/** Everything object in the database needs these fields */
 export class DatabaseObject {
    public _id: string;
    public _rev?: string;

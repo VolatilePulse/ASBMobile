@@ -16,6 +16,7 @@ const SERVERS_PREFIX = 'servers_';
 const CREATURES_PREFIX = 'creatures_';
 
 
+/** User's library, container creatures, server definitions and library-specific settings */
 class Library implements IAsyncDisposable {
    initialised: boolean;
    id: string;
@@ -126,6 +127,7 @@ class Library implements IAsyncDisposable {
 }
 
 
+/** Manager for libraries, their lifecycles and selection */
 class LibraryManager implements IAsyncDisposable {
    initialised: boolean;
    current: Library;

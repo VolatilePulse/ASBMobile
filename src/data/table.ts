@@ -5,6 +5,7 @@ import PouchFind from 'pouchdb-find';
 PouchDB.plugin(PouchFind);
 
 
+/** A simple interface to a PouchDB database (acting as a single table) */
 export class Table<ContentType extends {}> {
    name: string;
 

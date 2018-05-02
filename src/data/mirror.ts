@@ -3,10 +3,12 @@ import debounce from 'lodash/debounce';
 import PouchDB from 'pouchdb-core';
 
 
+/** Container for a TableMirror's cache, separated into an object so it may be observed by Vue */
 export interface MirrorCache<ContentType extends {}> {
    content: Array<PouchDB.Core.ExistingDocument<ContentType>>;
 }
 
+/** In-memory mirror of a database table that updates when the database changes */
 export class TableMirror<ContentType extends {}> implements IAsyncDisposable {
    public name: string;
    public ready: boolean = false;

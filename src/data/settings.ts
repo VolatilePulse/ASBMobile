@@ -9,6 +9,7 @@ const DB_SETTINGS = 'settings';
 const ID_SETTINGS = 'the';
 
 
+/** Represents application-wide settings that are persisted in the database */
 class Settings extends DatabaseObject {
    dbVersion = 1;
    libraryNames: { [id: string]: string } = {};
@@ -27,6 +28,7 @@ class Settings extends DatabaseObject {
 // TODO: Register a database change handler to pick up the latest settings in case the user opens the app in two tabs?
 
 
+/** Manage access to the settings in the database */
 class SettingsManager {
    current: Settings;
 
