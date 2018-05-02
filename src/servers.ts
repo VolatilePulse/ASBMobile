@@ -6,6 +6,8 @@ import preDefinedServersData, { SERVER_PREFIX_PREDEF } from './ark/servers_prede
 import testServersData, { SERVER_PREFIX_TEST } from './ark/servers_test';
 import { Server } from './data/objects';
 
+/** @fileOverview Server management and manipulation. Does not include persisting to the database. */
+
 
 export const preDefinedServers: Server[] = [];
 export const testServers: Server[] = [];

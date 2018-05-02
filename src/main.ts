@@ -1,3 +1,5 @@
+/** @fileOverview Application entry point */
+
 import 'bootstrap-vue/dist/bootstrap-vue.min.css';
 import '@/assets/scss/app.scss';
 import './registerServiceWorker';
@@ -32,6 +34,7 @@ Vue.use(PouchVue, {
    pouch: PouchDB,
 });
 
+// TODO: There's no need to register our main tabs as global components
 Vue.component('About', About);
 Vue.component('Welcome', Welcome);
 Vue.component('Settings', Settings);

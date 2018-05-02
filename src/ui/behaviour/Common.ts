@@ -4,6 +4,8 @@ import { FormatNumber, Range } from '@/utils';
 import { isString } from 'util';
 import { Component, Vue } from 'vue-property-decorator';
 
+/** @fileOverview Vue component that all pages inherit from, containing common data and functionality. */
+
 
 /**
  * Decorator to wrap async functions, catching their exceptions and passing them to `this.globalError`.

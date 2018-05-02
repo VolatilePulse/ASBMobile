@@ -1,6 +1,8 @@
 import * as consts from '@/consts';
 import * as IA from 'interval-arithmetic';
 
+
+/** A container for pre-processed multipliers for a single stat, combined from server and species values */
 export class StatMultipliers {
    B: Interval;
    Id: Interval;
@@ -26,10 +28,12 @@ export class StatMultipliers {
    }
 }
 
+/** A simple class representing a server's multipliers for a single stat */
 export class StatServerMultipliers {
    constructor(public TaM: number, public TmM: number, public IdM: number, public IwM: number) { }
 }
 
+/** A simple class representing a species's multipliers for a single stat */
 export class StatSpeciesMultipliers {
    B: number;
    Id: number;
@@ -52,6 +56,7 @@ export class StatSpeciesMultipliers {
    }
 }
 
+/** Groups together the multipliers for each stat for a species */
 export class SpeciesParameters {
    /**
     * Creates an array of StatSpeciesParameters from raw server config values.

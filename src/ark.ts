@@ -8,7 +8,10 @@ import * as Utils from './utils';
 import * as IA from 'interval-arithmetic';
 import { intervalFromDecimal } from '@/number_utils';
 
+/** @fileOverview Ark-related utility functions */
 
+
+/** The source of the data dictates its precision */
 export type CreatureDataSource = 'ui' | 'ark_export';
 
 

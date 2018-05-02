@@ -1,6 +1,11 @@
 export const SERVER_PREFIX_TEST = 'test:';
 
-// Server, without ID
+/** @fileOverview Servers that are only referenced by tests */
+
+// TODO: Move this data out of the app and only load it along with the tests in dev mode.
+
+
+/** A Server, but without an ID (as these are auto-generated) */
 interface ServerDef {
    name: string;
    IBM: number;

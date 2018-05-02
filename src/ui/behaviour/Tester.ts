@@ -10,6 +10,8 @@ import Common, { catchAsyncErrors } from '@/ui/behaviour/Common';
 import * as Utils from '@/utils';
 import { Component, Vue } from 'vue-property-decorator';
 
+/** @fileOverview Tab containing the UI for the dev-mode tester */
+
 
 const ASYNC_RUN_TIME_MS = 200;
 const ASYNC_DELAY_TIME_MS = 100;

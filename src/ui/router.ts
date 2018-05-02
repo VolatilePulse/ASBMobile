@@ -1,3 +1,5 @@
+// TODO: Kept here as a reminder to use vue-router for navigation
+
 /*
 import Vue from 'vue';
 import Router from 'vue-router';

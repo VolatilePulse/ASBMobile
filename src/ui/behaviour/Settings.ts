@@ -2,6 +2,8 @@ import { LibraryManager, SettingsManager } from '@/data';
 import Common from '@/ui/behaviour/Common';
 import { Component, Vue } from 'vue-property-decorator';
 
+/** @fileOverview Tab containing the UI for settings */
+
 
 @Component
 export default class SettingsTab extends Common {

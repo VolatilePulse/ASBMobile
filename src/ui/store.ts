@@ -8,11 +8,13 @@ import { Delay } from '@/utils';
 import { EventEmitter } from 'events';
 import Vue from 'vue';
 
+/** @fileOverview The central data store */
+
 
 export const EVENT_SERVER_CHANGED = 'server-changed';
 export const EVENT_LIBRARY_CHANGED = 'library-changed';
 
-// Everything public in this class should be initialised to a non-undefined value to enable observation
+// !!! Everything public in this class should be initialised to a non-undefined value such as null to enable Vue observation !!!
 class Store {
    eventListener: EventEmitter = new EventEmitter();
 

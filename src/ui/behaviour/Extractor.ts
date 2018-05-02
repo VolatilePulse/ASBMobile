@@ -11,6 +11,8 @@ import { Delay, FilledArray } from '@/utils';
 import cuid from 'cuid';
 import { Component } from 'vue-property-decorator';
 
+/** @fileOverview Tab containing the UI for the extractor */
+
 
 @Component
 export default class ExtractorTab extends Common {

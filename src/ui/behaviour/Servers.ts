@@ -11,6 +11,8 @@ import { Modal } from 'bootstrap-vue/es/components';
 import debounce from 'lodash/debounce';
 import { Component, Vue } from 'vue-property-decorator';
 
+/** @fileOverview Tab containing the UI for server management */
+
 
 const NEW_SERVER_ID = '___NEW___SERVER___';
 

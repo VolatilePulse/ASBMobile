@@ -66,6 +66,8 @@ export class TEProps {
    wildLevel = 0;
 }
 
+
+/** The Extractor tries to work out possible stat levels from a given creature's details */
 export class Extractor {
    /** Inputs to the extractor */
    input: Readonly<ExtractorInput>;

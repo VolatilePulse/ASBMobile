@@ -1,5 +1,7 @@
 import { Server } from '@/data/objects';
 
+/** @fileOverview Pre-defined servers that can always be referenced or copied (then modifed) */
+
 
 export const SERVER_PREFIX_PREDEF = 'predef:';
 export const ID_OFFICIAL_SERVER = SERVER_PREFIX_PREDEF + 'Official Server';

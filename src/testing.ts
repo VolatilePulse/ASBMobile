@@ -7,6 +7,7 @@ import * as Ark from './ark';
 import { Extractor, ExtractorInput, TEProps } from './ark/extractor';
 
 
+/** Flexible object to hold test results */
 export interface TestResult {
    pass?: boolean;
    stats?: Stat[][];
@@ -20,6 +21,11 @@ export interface TestResult {
    runs?: number;
 }
 
+/**
+ * Perform a single test, timing it and checking the results if applicable.
+ * Fields set in the output vary based on the result.
+ * @example PerformTest(test_data, performance.now.bind(performance));
+ */
 export function PerformTest(testData: TestData, timingFn?: () => number): TestResult {
    const server = getServerById(testData.serverId);
    if (!server) return { pass: false, exception: 'Unable to locate server' };

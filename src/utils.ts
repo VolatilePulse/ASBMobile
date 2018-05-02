@@ -1,9 +1,7 @@
-/**
- * @fileOverview Miscellaneous functions used throughout the app
- */
-
 import cloneDeepWith from 'lodash/cloneDeepWith';
 import { isString } from 'util';
+
+/** @fileOverview Miscellaneous functions used throughout the app */
 
 
 const EPSILON = 1E-10;
@@ -28,6 +26,7 @@ const formattersCache: Map<{ places: number, fixed: boolean }, Intl.NumberFormat
 
 /**
  * Format a number neatly for presentation to the user.
+ * This method uses a cached Intl.NumberFormat object for each combination of places and fixed.
  * @param {number} value The value to format
  * @param {number} places Number of decimal places, at most, to show
  * @param {boolean} fixed True to always show digits after the decimal place when they are zero

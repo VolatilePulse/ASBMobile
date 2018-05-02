@@ -1,5 +1,8 @@
 import * as IA from 'interval-arithmetic';
 
+/** @fileOverview Number and Interval arithmetic helper functions */
+
+
 /**
  * Create an interval from a number, accounting for variations beyond the specified number of decimal places.
  * @example intervalFromDecimal(0.1, 1) == Interval().halfOpenRight(0.05, 0.15)

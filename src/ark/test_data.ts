@@ -2,6 +2,10 @@ import { TestData } from '@/ark/types';
 
 // tslint:disable:max-line-length
 
+/** @fileOverview Test data, intended for dev mode use only */
+
+// TODO: Move this data out of the app and only load it along with the test servers in dev mode.
+
 
 // Some test data
 const testData: TestData[] = [

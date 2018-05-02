@@ -21,12 +21,13 @@ export interface TestData {
 }
 
 
-/** Simple representation of a stat's value */
+/** Simple representation of a stat's levels */
 export interface StatLike {
    Lw: number;
    Ld: number;
 }
 
+/** A stat's current state inside the extractor */
 export class Stat implements StatLike {
    Lw: number;
    Ld: number;
@@ -46,6 +47,7 @@ export class Stat implements StatLike {
       }
    }
 
+   /** Calculate the actual stat value given the supplied parameters */
    calculateValue(m: StatMultipliers, tamed = false, TE = 0, IB = 0) {
       // V = (B * (1 + Lw * Iw * IwM) * TBHM * (1 + IB * 0.2 * IBM) + Ta * TaM) * (1 + TE * Tm * TmM) * (1 + Ld * Id * IdM)
 
