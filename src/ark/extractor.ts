@@ -19,50 +19,47 @@ export interface ExtractorInput {
    values: Interval[];
 }
 
-/** Contains all functions for intervals */
-const RangeFuncs = {
-   // calcWL: compile('tamedLevel/(1+0.5*TE)').eval,
-   calcWL(tamedLevel: Interval, TE: Interval) {
-      return IA.div(tamedLevel, (IA.add(IA.ONE, IA.mul(IA(0.5), TE))));
-   },
+// calcWL: compile('tamedLevel/(1+0.5*TE)').eval,
+function calcWL(tamedLevel: Interval, TE: Interval) {
+   return IA.div(tamedLevel, (IA.add(IA.ONE, IA.mul(IA(0.5), TE))));
+}
 
-   // calcTEFromWL: compile('(tamedLevel/wildLevel-1)/0.5').eval,
-   calcTEFromWL(tamedLevel: Interval, wildLevel: Interval) {
-      return IA.div((IA.sub(IA.div(tamedLevel, wildLevel), IA.ONE)), IA(0.5));
-   },
+// calcTEFromWL: compile('(tamedLevel/wildLevel-1)/0.5').eval,
+function calcTEFromWL(tamedLevel: Interval, wildLevel: Interval) {
+   return IA.div((IA.sub(IA.div(tamedLevel, wildLevel), IA.ONE)), IA(0.5));
+}
 
-   // calcIB: compile('((V / (1 + TE * Tm) / (1 + Ld * Id) - Ta) / (B * (1 + Lw * Iw) * TBHM) - 1) / IBM').eval,
-   calcIB(V: Interval, Lw: number, Ld: number, TE: Interval, mult: StatMultipliers) {
-      return IA.div((IA.sub(IA.div((IA.sub(IA.div(IA.div(V, (IA.add(IA.ONE, IA.mul(TE, mult.Tm)))),
-         (IA.add(IA.ONE, IA.mul(IA(Ld), mult.Id)))), mult.Ta)), (IA.mul(IA.mul(mult.B,
-            (IA.add(IA.ONE, IA.mul(IA(Lw), mult.Iw)))), mult.TBHM))), IA.ONE)), mult.IBM);
-   },
+// calcIB: compile('((V / (1 + TE * Tm) / (1 + Ld * Id) - Ta) / (B * (1 + Lw * Iw) * TBHM) - 1) / IBM').eval,
+function calcIB(V: Interval, Lw: number, Ld: number, TE: Interval, mult: StatMultipliers) {
+   return IA.div((IA.sub(IA.div((IA.sub(IA.div(IA.div(V, (IA.add(IA.ONE, IA.mul(TE, mult.Tm)))),
+      (IA.add(IA.ONE, IA.mul(IA(Ld), mult.Id)))), mult.Ta)), (IA.mul(IA.mul(mult.B,
+         (IA.add(IA.ONE, IA.mul(IA(Lw), mult.Iw)))), mult.TBHM))), IA.ONE)), mult.IBM);
+}
 
-   // calcTE: compile('(V / ((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) / (1 + Ld * Id) - 1) / Tm').eval,
-   calcTE(V: Interval, Lw: number, Ld: number, IB: Interval, mult: StatMultipliers) {
-      return IA.div((IA.sub(IA.div(IA.div(V, (IA.add(IA.mul(IA.mul(IA.mul((IA.add(IA.ONE, IA.mul(IA(Lw), mult.Iw))), mult.B),
-         mult.TBHM), (IA.add(IA.ONE, IA.mul(IB, mult.IBM)))), mult.Ta))), (IA.add(IA.ONE, IA.mul(IA(Ld), mult.Id)))), IA.ONE)), mult.Tm);
-   },
+// calcTE: compile('(V / ((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) / (1 + Ld * Id) - 1) / Tm').eval,
+function calcTE(V: Interval, Lw: number, Ld: number, IB: Interval, mult: StatMultipliers) {
+   return IA.div((IA.sub(IA.div(IA.div(V, (IA.add(IA.mul(IA.mul(IA.mul((IA.add(IA.ONE, IA.mul(IA(Lw), mult.Iw))), mult.B),
+      mult.TBHM), (IA.add(IA.ONE, IA.mul(IB, mult.IBM)))), mult.Ta))), (IA.add(IA.ONE, IA.mul(IA(Ld), mult.Id)))), IA.ONE)), mult.Tm);
+}
 
-   // calcV: compile('((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) * (1 + TE * Tm) * (1 + Ld * Id)').eval,
-   calcV(Lw: number, Ld: number, TE: Interval, IB: Interval, mult: StatMultipliers) {
-      return IA.mul(IA.mul((IA.add(IA.mul(IA.mul(IA.mul((IA.add(IA.ONE, IA.mul(IA(Lw), mult.Iw))), mult.B), mult.TBHM),
-         (IA.add(IA.ONE, IA.mul(IB, mult.IBM)))), mult.Ta)), (IA.add(IA.ONE, IA.mul(TE, mult.Tm)))), (IA.add(IA.ONE, IA.mul(IA(Ld), mult.Id))));
-   },
+// calcV: compile('((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) * (1 + TE * Tm) * (1 + Ld * Id)').eval,
+function calcV(Lw: number, Ld: number, TE: Interval, IB: Interval, mult: StatMultipliers) {
+   return IA.mul(IA.mul((IA.add(IA.mul(IA.mul(IA.mul((IA.add(IA.ONE, IA.mul(IA(Lw), mult.Iw))), mult.B), mult.TBHM),
+      (IA.add(IA.ONE, IA.mul(IB, mult.IBM)))), mult.Ta)), (IA.add(IA.ONE, IA.mul(TE, mult.Tm)))), (IA.add(IA.ONE, IA.mul(IA(Ld), mult.Id))));
+}
 
-   // calcLw: compile('((V / ((1 + Ld * Id) * (1 + TE * Tm)) - Ta) / (B * TBHM * (1 + IB * IBM)) - 1) / Iw').eval,
-   calcLw(V: Interval, Ld: number, TE: Interval, IB: Interval, mult: StatMultipliers) {
-      return IA.div((IA.sub(IA.div((IA.sub(IA.div(V, (IA.mul((IA.add(IA.ONE, IA.mul(IA(Ld), mult.Id))),
-         (IA.add(IA.ONE, IA.mul(TE, mult.Tm)))))), mult.Ta)), (IA.mul(IA.mul(mult.B, mult.TBHM),
-            (IA.add(IA.ONE, IA.mul(IB, mult.IBM)))))), IA.ONE)), mult.Iw);
-   },
+// calcLw: compile('((V / ((1 + Ld * Id) * (1 + TE * Tm)) - Ta) / (B * TBHM * (1 + IB * IBM)) - 1) / Iw').eval,
+function calcLw(V: Interval, Ld: number, TE: Interval, IB: Interval, mult: StatMultipliers) {
+   return IA.div((IA.sub(IA.div((IA.sub(IA.div(V, (IA.mul((IA.add(IA.ONE, IA.mul(IA(Ld), mult.Id))),
+      (IA.add(IA.ONE, IA.mul(TE, mult.Tm)))))), mult.Ta)), (IA.mul(IA.mul(mult.B, mult.TBHM),
+         (IA.add(IA.ONE, IA.mul(IB, mult.IBM)))))), IA.ONE)), mult.Iw);
+}
 
-   // calcLd: compile('((V / ((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) / (1 + TE * Tm)) - 1) / Id').eval,
-   calcLd(V: Interval, Lw: number, TE: Interval, IB: Interval, mult: StatMultipliers) {
-      return IA.div((IA.sub((IA.div(IA.div(V, (IA.add(IA.mul(IA.mul(IA.mul((IA.add(IA.ONE, IA.mul(IA(Lw), mult.Iw))), mult.B), mult.TBHM),
-         (IA.add(IA.ONE, IA.mul(IB, mult.IBM)))), mult.Ta))), (IA.add(IA.ONE, IA.mul(TE, mult.Tm))))), IA.ONE)), mult.Id);
-   },
-};
+// calcLd: compile('((V / ((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) / (1 + TE * Tm)) - 1) / Id').eval,
+function calcLd(V: Interval, Lw: number, TE: Interval, IB: Interval, mult: StatMultipliers) {
+   return IA.div((IA.sub((IA.div(IA.div(V, (IA.add(IA.mul(IA.mul(IA.mul((IA.add(IA.ONE, IA.mul(IA(Lw), mult.Iw))), mult.B), mult.TBHM),
+      (IA.add(IA.ONE, IA.mul(IB, mult.IBM)))), mult.Ta))), (IA.add(IA.ONE, IA.mul(TE, mult.Tm))))), IA.ONE)), mult.Id);
+}
 
 export class TEProps {
    TE = IA.ZERO;
@@ -71,13 +68,13 @@ export class TEProps {
 
 export class Extractor {
    /** Inputs to the extractor */
-   c: ExtractorInput;
+   input: Readonly<ExtractorInput>;
 
    /** Contains the stat Values */
-   values: Interval[];
+   values: ReadonlyArray<Readonly<Interval>>;
 
    /** Stores all multipliers for stat calculations */
-   m: StatMultipliers[] = [];
+   m: ReadonlyArray<StatMultipliers> = [];
 
    /** A counter to see how many wild stat levels are unaccounted for */
    wildFreeMax = 0;
@@ -129,38 +126,42 @@ export class Extractor {
       //    It's likely it was force tamed anyways (possibly spawned + tamed)
       // Should not rely on wild level steps as, it will speed up extraction, but not everyone may set it :(
 
-      this.c = inputs;
+      this.input = inputs;
       this.values = inputs.values;
 
       // considerWildLevelSteps = considerWildLevelSteps && !bred;
-      this.m = Ark.GetMultipliers(inputs.server, inputs.species);
+      const incomingM = Ark.GetMultipliers(inputs.server, inputs.species);
 
       // Clear the checked property for future extractions (also clearing out any Vue observer)
       this.stats = Utils.FilledArray(8, () => []);
 
       // Change variables based on wild, tamed, bred
-      if (this.c.wild) {
+      if (this.input.wild) {
          this.rangeVars.TE = Utils.FilledArray(8, () => IA.ZERO);
-         this.rangeVars.IB = this.c.IB = IA.ZERO;
+         this.rangeVars.IB = /*this.input.IB = */IA.ZERO;  // TODO: Check you're happy with this
       }
-      else if (this.c.tamed) {
+      else if (this.input.tamed) {
          this.rangeVars.TE = Utils.FilledArray(8, () => IA(0, 1));
-         this.rangeVars.IB = this.c.IB = IA.ZERO;
+         this.rangeVars.IB = /*this.input.IB = */IA.ZERO;  // TODO: Check you're happy with this
       }
       else {
          this.rangeVars.TE = Utils.FilledArray(8, () => IA.ONE);
-         this.rangeVars.IB = this.c.IB;
+         this.rangeVars.IB = this.input.IB;
       }
 
-      for (const statIndex in this.m) {
-         this.m[statIndex].Ta = this.c.wild ? IA.ZERO : this.m[statIndex].Ta;
-         this.m[statIndex].Tm = this.c.wild ? IA.ZERO : this.m[statIndex].Tm;
-         this.m[statIndex].TBHM = this.c.wild ? IA.ONE : this.m[statIndex].TBHM;
+      for (const statIndex in incomingM) {
+         incomingM[statIndex].Ta = this.input.wild ? IA.ZERO : incomingM[statIndex].Ta;
+         incomingM[statIndex].Tm = this.input.wild ? IA.ZERO : incomingM[statIndex].Tm;
+         incomingM[statIndex].TBHM = this.input.wild ? IA.ONE : incomingM[statIndex].TBHM;
 
-         // FIXME: This seems very wrong
-         if (IA.lt(this.m[statIndex].Tm, IA.ZERO))
-            this.rangeVars.TE[statIndex] = IA(0.999, 1);
+         if (IA.lt(incomingM[statIndex].Tm, IA.ZERO)) {
+            this.rangeVars.TE[statIndex] = IA(0.999, 1); // FIXME: This seems very wrong
+            // this.rangeVars.TE[statIndex] = IA(1);
+         }
       }
+
+      // Set the modifiers into this, making them read-only
+      this.m = incomingM;
    }
 
    extract(dbg?: any) {
@@ -168,7 +169,7 @@ export class Extractor {
       //    Or provide an alternative method (returning under bad situations is acceptable for now)
 
       // Generate the possible Torpor Lw values based on the IB range
-      const torporLwRange = RangeFuncs.calcLw(this.values[TORPOR], this.rangeVars.Ld, this.rangeVars.TE[TORPOR], this.rangeVars.IB, this.m[TORPOR]);
+      const torporLwRange = calcLw(this.values[TORPOR], this.rangeVars.Ld, this.rangeVars.TE[TORPOR], this.rangeVars.IB, this.m[TORPOR]);
       this.checkedStat[TORPOR] = true;
 
       // Set an empty stat for Torpor
@@ -190,13 +191,13 @@ export class Extractor {
          // Calculate the max number of levels based on level and torpor
          this.wildFreeMax = this.stats[TORPOR][0].Lw;
          this.levelBeforeDom = this.stats[TORPOR][0].Lw + 1;
-         this.domFreeMax = Math.max(this.c.level - this.wildFreeMax - 1, 0);
+         this.domFreeMax = Math.max(this.input.level - this.wildFreeMax - 1, 0);
 
          // Set range to be used for TE calculations
          this.rangeVars.tamedLevel = IA().halfOpenRight(this.levelBeforeDom, this.levelBeforeDom + 1);
 
          // If it's bred, we need to do some magic with the IB
-         if (this.c.bred)
+         if (this.input.bred)
             if (!this.dynamicIBCalculation())
                continue;
 
@@ -209,7 +210,7 @@ export class Extractor {
             if (!this.uniqueStatSituation(statIndex)) {
                // Calculate the highest Lw could be
                this.rangeVars.Ld = 0;
-               let rangeLw = RangeFuncs.calcLw(this.values[statIndex], 0, this.rangeVars.TE[statIndex], this.rangeVars.IB, this.m[statIndex]);
+               let rangeLw = calcLw(this.values[statIndex], 0, this.rangeVars.TE[statIndex], this.rangeVars.IB, this.m[statIndex]);
                rangeLw = IA(0, rangeLw.hi);
 
                if (IA.isEmpty(rangeLw))
@@ -218,11 +219,11 @@ export class Extractor {
                rangeLw = IA.intersection(rangeLw, IA(0, this.wildFreeMax - this.minWild));
 
                // We don't need to calculate TE to extract the levels
-               if (!this.c.tamed || IA.leq(this.m[statIndex].Tm, IA.ZERO)) {
+               if (!this.input.tamed || IA.leq(this.m[statIndex].Tm, IA.ZERO)) {
                   // Loop all possible Lws
                   for (this.rangeVars.Lw of intFromRangeReverse(rangeLw)) {
                      // Calculate the highest Ld could be
-                     let rangeLd = RangeFuncs.calcLd(this.values[statIndex], this.rangeVars.Lw, this.rangeVars.TE[statIndex], this.rangeVars.IB, this.m[statIndex]);
+                     let rangeLd = calcLd(this.values[statIndex], this.rangeVars.Lw, this.rangeVars.TE[statIndex], this.rangeVars.IB, this.m[statIndex]);
                      rangeLd = IA(0, rangeLd.hi);
                      rangeLd = IA.intersection(rangeLd, IA(0, this.domFreeMax - this.minDom));
                      this.nonTEStatCalculation(statIndex, rangeLd);
@@ -237,7 +238,7 @@ export class Extractor {
                   // Loop all possible Lws
                   for (this.rangeVars.Lw of intFromRangeReverse(rangeLw)) {
                      // Calculate the highest Ld could be
-                     let rangeLd = RangeFuncs.calcLd(this.values[statIndex], this.rangeVars.Lw, this.rangeVars.TE[statIndex], this.rangeVars.IB, this.m[statIndex]);
+                     let rangeLd = calcLd(this.values[statIndex], this.rangeVars.Lw, this.rangeVars.TE[statIndex], this.rangeVars.IB, this.m[statIndex]);
                      rangeLd = IA(0, rangeLd.hi);
                      rangeLd = IA.intersection(rangeLd, IA(0, this.domFreeMax - this.minDom));
                      methToCall(statIndex, rangeLd, localMap);
@@ -313,21 +314,21 @@ export class Extractor {
       localRangeVars.Ld = this.stats[TORPOR][0].Ld;
 
       // Extract the IB from Torpor
-      let tempIBRange = RangeFuncs.calcIB(this.values[TORPOR], localRangeVars.Lw, localRangeVars.Ld, localRangeVars.TE[TORPOR], localStatTorpor);
-      if (!IA.intervalsOverlap(tempIBRange, this.c.IB))
+      let tempIBRange = calcIB(this.values[TORPOR], localRangeVars.Lw, localRangeVars.Ld, localRangeVars.TE[TORPOR], localStatTorpor);
+      if (!IA.intervalsOverlap(tempIBRange, this.input.IB))
          return false;
 
-      tempIBRange = localRangeVars.IB = IA.intersection(tempIBRange, this.c.IB);
+      tempIBRange = localRangeVars.IB = IA.intersection(tempIBRange, this.input.IB);
 
       // Check the food stat for the IB as well (Only works if food is un-levelled)
       localRangeVars.Lw = 0;
       localRangeVars.Ld = 0;
-      localRangeVars.Lw = Math.round(intervalAverage(RangeFuncs.calcV(0, 0, localRangeVars.TE[FOOD], localRangeVars.IB, localStatFood)));
-      tempIBRange = RangeFuncs.calcIB(this.values[FOOD], localRangeVars.Lw, localRangeVars.Ld, localRangeVars.TE[FOOD], localStatFood);
+      localRangeVars.Lw = Math.round(intervalAverage(calcV(0, 0, localRangeVars.TE[FOOD], localRangeVars.IB, localStatFood)));
+      tempIBRange = calcIB(this.values[FOOD], localRangeVars.Lw, localRangeVars.Ld, localRangeVars.TE[FOOD], localStatFood);
 
       // Check to see if the new IB still allows torpor to extract correctly
-      const newExpectedValue = RangeFuncs.calcV(localRangeVars.Lw, 0, localRangeVars.TE[FOOD], localRangeVars.IB, localStatFood);
-      if (IA.intervalsOverlap(newExpectedValue, this.c.values[TORPOR])) {
+      const newExpectedValue = calcV(localRangeVars.Lw, 0, localRangeVars.TE[FOOD], localRangeVars.IB, localStatFood);
+      if (IA.intervalsOverlap(newExpectedValue, this.input.values[TORPOR])) {
          localRangeVars.IB = tempIBRange;
       }
 
@@ -353,7 +354,8 @@ export class Extractor {
       // We can't calculate stats that don't allow wild Increasees if a stat is unused
       else if (this.unusedStat && IA.equal(localStats.Iw, IA.ZERO)) {
          // Calculate DOM for speed
-         tempStat2.Ld = Math.round(intervalAverage(RangeFuncs.calcLd(this.values[statIndex], this.rangeVars.Lw, this.rangeVars.TE[statIndex], this.rangeVars.IB, localStats)));
+         tempStat2.Ld = Math.round(intervalAverage(
+            calcLd(this.values[statIndex], this.rangeVars.Lw, this.rangeVars.TE[statIndex], this.rangeVars.IB, localStats)));
          tempStat2.Lw = -1;
       }
 
@@ -367,22 +369,23 @@ export class Extractor {
    nonTEStatCalculation(statIndex: number, rangeLd: Interval): void {
       const localVars = this.rangeVars;
       const localStats = this.m[statIndex];
-      localVars.Ld = Math.round(intervalAverage(RangeFuncs.calcLd(this.values[statIndex], this.rangeVars.Lw, this.rangeVars.TE[statIndex], this.rangeVars.IB, localStats)));
+      localVars.Ld = Math.round(intervalAverage(
+         calcLd(this.values[statIndex], this.rangeVars.Lw, this.rangeVars.TE[statIndex], this.rangeVars.IB, localStats)));
 
       if (!IA.hasValue(rangeLd, localVars.Ld))
          return;
 
-      const calculatedValue = RangeFuncs.calcV(localVars.Lw, localVars.Ld, localVars.TE[statIndex], localVars.IB, localStats);
+      const calculatedValue = calcV(localVars.Lw, localVars.Ld, localVars.TE[statIndex], localVars.IB, localStats);
       if (IA.intervalsOverlap(calculatedValue, this.values[statIndex]))
          this.stats[statIndex].push(new Stat(localVars.Lw, localVars.Ld));
 
       // If it doesn't calculate properly, it may have used a different IB (Mostly relevant for Food)
-      else if (this.c.bred) {
-         const rangeIB = RangeFuncs.calcIB(this.values[statIndex], localVars.Lw, localVars.Ld, localVars.TE[statIndex], localStats);
+      else if (this.input.bred) {
+         const rangeIB = calcIB(this.values[statIndex], localVars.Lw, localVars.Ld, localVars.TE[statIndex], localStats);
 
-         if (IA.intervalsOverlap(rangeIB, this.c.IB)) {
+         if (IA.intervalsOverlap(rangeIB, this.input.IB)) {
             const tempStat2: StatLike = new Stat(this.stats[TORPOR][0]);
-            const expectedTorpor = RangeFuncs.calcV(tempStat2.Lw, tempStat2.Ld, localVars.TE[statIndex], rangeIB, localStats);
+            const expectedTorpor = calcV(tempStat2.Lw, tempStat2.Ld, localVars.TE[statIndex], rangeIB, localStats);
             if (IA.intervalsOverlap(expectedTorpor, this.values[TORPOR])) {
                localVars.IB = IA.intersection(rangeIB, localVars.IB);
                this.stats[statIndex].push(new Stat(localVars.Lw, localVars.Ld));
@@ -397,7 +400,7 @@ export class Extractor {
 
       for (localVars.Ld of intFromRange(rangeLd)) {
          // FIXME: shouldn't be modifying the TE
-         let tempTE = RangeFuncs.calcTE(this.values[statIndex], localVars.Lw, localVars.Ld, localVars.IB, localStats);
+         let tempTE = calcTE(this.values[statIndex], localVars.Lw, localVars.Ld, localVars.IB, localStats);
 
          // If the range is greater than 1
          if (IA.gt(tempTE, IA.ONE))
@@ -409,11 +412,11 @@ export class Extractor {
 
          tempTE = IA.intersection(tempTE, IA(0, 1));
 
-         const rangeWL = RangeFuncs.calcWL(localVars.tamedLevel, tempTE);
+         const rangeWL = calcWL(localVars.tamedLevel, tempTE);
 
          for (const i of intFromRange(rangeWL, Math.ceil)) {
             localVars.wildLevel = IA(i);
-            let tempTERange = RangeFuncs.calcTEFromWL(localVars.tamedLevel, localVars.wildLevel);
+            let tempTERange = calcTEFromWL(localVars.tamedLevel, localVars.wildLevel);
             tempTERange = IA.intersection(tempTE, tempTERange);
 
             // Valid range
@@ -439,7 +442,7 @@ export class Extractor {
 
       map.forEach(statTE => {
          // Calculate the Ld range based on known good TE values
-         const rangeForLd = RangeFuncs.calcLd(this.values[statIndex], this.rangeVars.Lw, statTE.TE, this.rangeVars.IB, this.m[statIndex]);
+         const rangeForLd = calcLd(this.values[statIndex], this.rangeVars.Lw, statTE.TE, this.rangeVars.IB, this.m[statIndex]);
 
          // Loop Ld range
          for (tempStat.Ld of intFromRange(rangeForLd)) {
