@@ -7,12 +7,8 @@ import { SpeciesParameters } from './multipliers';
 /**
  * Load the data file containing creature multipliers and official server settings.
  * This is done synchronously so needs to be relatively fast.
- * @param {string} json JSON-encoded string with the contents of data.json
  */
-export function ParseDatabase(json: string) {
-   // Parse the received JSON file
-   const jsonObject = JSON.parse(json);
-
+export function ParseDatabase(jsonObject: any) {
    // Local stores for constructing the data (unobserved until read)
    const speciesNames = [];
    const speciesMultipliers: { [species: string]: SpeciesParameters } = {};

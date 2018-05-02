@@ -40,7 +40,7 @@
          <b-alert :show="store.updateAvailable" dismissible variant="info">Update available! Reload to activate.</b-alert>
 
          <!-- The alert on data load failure -->
-         <b-alert variant="danger" :show="store.dataLoadError">
+         <b-alert variant="danger" :show="!!store.dataLoadError">
             <strong>Failed to load the Ark database!</strong>
             <div>Most of this application will be disabled until access to the database is restored.</div>
          </b-alert>

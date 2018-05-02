@@ -4,8 +4,16 @@ import { LibraryManager, SettingsManager } from '@/data';
 import * as Servers from '@/servers';
 import Common, { catchAsyncErrors } from '@/ui/behaviour/Common';
 import theStore, { EVENT_LIBRARY_CHANGED } from '@/ui/store';
-import { AsyncFileRead, Delay } from '@/utils';
+import { Delay } from '@/utils';
 import { Component } from 'vue-property-decorator';
+
+/**
+ * @fileOverview Vue component that represents the outer app shell.
+ * This component also handles initialising the rest of the system and controls
+ * which tab is currently displayed.
+ */
+
+// TODO: Change over to vue-router for more capability
 
 
 @Component
@@ -68,20 +76,23 @@ async function loadDataJson() {
    // Let the app become responsive before doing anything
    await Delay(100);
 
-   let json: string;
+   let response: Response;
 
    try {
-      json = await AsyncFileRead('data/data.json');
+      response = await fetch('data/data.json');
    }
    catch (ex) {
+      console.error(ex);
       theStore.dataLoadError = 'Failed to fetch database: ' + ex;
       return;
    }
 
    try {
+      const json = await response.json();
       ParseDatabase(json);
    }
    catch (ex) {
+      console.error(ex);
       theStore.dataLoadError = 'Failed to parse database: ' + ex;
       return;
    }
