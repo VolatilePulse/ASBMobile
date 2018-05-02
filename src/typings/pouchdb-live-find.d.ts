@@ -1,15 +1,14 @@
-// This file is where we declare types for external modules that don't have their own TypeScript type definitions
-
+// Custom type definitions for pouchdb-live-find as none are available
 
 // Cheap fix: these just resolve as 'any' so they act like untyped Javascript
-declare module 'bootstrap-vue';
-declare module 'pouch-vue';
-declare module 'pouchdb-live-find';
+declare module 'pouchdb-live-find' {
+   const plugin: PouchDB.Plugin;
+   export = plugin;
+}
 
 // Common for PouchDB
 declare interface DeletedMeta { _deleted: boolean; }
 
-// Home-made type completion for pouchdb-live-find
 // tslint:disable-next-line:no-namespace
 declare namespace PouchDB {
    namespace LiveFind {
@@ -46,10 +45,4 @@ declare namespace PouchDB {
    interface Database<Content extends {}= {}> {
       liveFind(options: LiveFind.CreateOptions<Content>): LiveFind.Controller<Content>;
    }
-}
-
-// Vue shim to support *.vue imports
-declare module '*.vue' {
-   import Vue from 'vue';
-   export default Vue;
 }
