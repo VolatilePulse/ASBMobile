@@ -17,10 +17,10 @@ const L1_REX: TestData = {
 };
 
 
-before('load values', () => {
+before('load values', async () => {
+   await Servers.initialise();
    const valuesJson = readFileSync('public/data/data.json').toString();
-   ParseDatabase(valuesJson);
-   Servers.initialise();
+   ParseDatabase(JSON.parse(valuesJson));
 });
 
 describe('values.json', () => {
