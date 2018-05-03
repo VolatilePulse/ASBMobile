@@ -5,6 +5,13 @@
    "version": "0.2.0",
    "configurations": [
       {
+         "type": "chrome",
+         "request": "launch",
+         "name": "Launch Chrome against localhost",
+         "url": "http://localhost:8080",
+         "webRoot": "${workspaceFolder}"
+      },
+      {
          "type": "node",
          "request": "launch",
          "name": "Launch Release",
@@ -20,21 +27,9 @@
       },
       {
          "type": "node",
-         "request": "launch",
-         "name": "Launch Node tests",
-         "runtimeExecutable": "npm",
-         "runtimeArgs": [
-            "run-script",
-            "test"
-         ],
-         "port": 9229
+         "request": "attach",
+         "name": "Attach by Process ID",
+         "processId": "${command:PickProcess}"
       },
-      {
-         "type": "chrome",
-         "request": "launch",
-         "name": "Launch Chrome against localhost",
-         "url": "http://localhost:8080",
-         "webRoot": "${workspaceFolder}"
-      }
    ]
 }
