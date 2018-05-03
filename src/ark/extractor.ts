@@ -3,7 +3,7 @@ import { StatMultipliers } from '@/ark/multipliers';
 import { Stat, StatLike } from '@/ark/types';
 import { FOOD, HEALTH, SPEED, TORPOR } from '@/consts';
 import { Server } from '@/data/objects';
-import { intervalAverage, intFromRange, intFromRangeReverse } from '@/number_utils';
+import { intervalAverage, intFromRangeReverse, intFromRange } from '@/number_utils';
 import * as Utils from '@/utils';
 import * as IA from 'interval-arithmetic';
 
@@ -18,6 +18,7 @@ export interface ExtractorInput {
    IB: Interval;
    values: Interval[];
 }
+
 
 // tamedLevel / (1 + 0.5 * TE)
 function calcWL(tamedLevel: Interval, TE: Interval) {
@@ -178,7 +179,7 @@ export class Extractor {
       this.stats[TORPOR].push(new Stat());
 
       // Loop across the possible Torpor Lw values
-      for (this.stats[TORPOR][0].Lw of intFromRange(torporLwRange)) {
+      for (this.stats[TORPOR][0].Lw of intFromRange(IA.intersection(IA(0, Infinity), torporLwRange))) {
          // Reset variables for next iteration
          this.rangeVars.Lw = 0;
          this.rangeVars.Ld = 0;
@@ -288,14 +289,14 @@ export class Extractor {
       for (let stat = HEALTH; stat <= SPEED; stat++) {
          if (this.stats[stat].length === 0) {
             if (dbg) dbg.failReason = 'No options found for stat ' + stat;
-            return { stats: this.stats, options: this.options, TEs: this.statTEMap };
+            return { stats: this.stats, options: this.options, TEs: this.statTEMap, IB: this.rangeVars.IB };
          }
       }
 
       // Sort the options based on most likely (deviation from the expected average)
       this.options.sort((opt1, opt2) => this.optionDeviation(opt1, opt2));
 
-      return { stats: this.stats, options: this.options, TEs: this.statTEMap };
+      return { stats: this.stats, options: this.options, TEs: this.statTEMap, IB: this.rangeVars.IB };
    }
 
    /**
@@ -400,7 +401,7 @@ export class Extractor {
       const localStats = this.m[statIndex];
       const localVars = this.rangeVars;
 
-      for (localVars.Ld of intFromRange(rangeLd)) {
+      for (localVars.Ld of intFromRange(IA.intersection(IA(0, Infinity), rangeLd))) {
          // FIXME: shouldn't be modifying the TE
          let tempTE = calcTE(this.values[statIndex], localVars.Lw, localVars.Ld, localVars.IB, localStats);
 
@@ -416,7 +417,7 @@ export class Extractor {
 
          const rangeWL = calcWL(localVars.tamedLevel, tempTE);
 
-         for (const i of intFromRange(rangeWL, Math.ceil)) {
+         for (const i of intFromRange(IA.intersection(IA(0, Infinity), rangeWL), Math.ceil)) {
             localVars.wildLevel = IA(i);
             let tempTERange = calcTEFromWL(localVars.tamedLevel, localVars.wildLevel);
             tempTERange = IA.intersection(tempTE, tempTERange);
@@ -447,7 +448,7 @@ export class Extractor {
          const rangeForLd = calcLd(this.values[statIndex], this.rangeVars.Lw, statTE.TE, this.rangeVars.IB, this.m[statIndex]);
 
          // Loop Ld range
-         for (tempStat.Ld of intFromRange(rangeForLd)) {
+         for (tempStat.Ld of intFromRange(IA.intersection(IA(0, Infinity), rangeForLd))) {
             // Makes sure the Ld is within range
             if (!IA.hasValue(rangeLd, tempStat.Ld))
                continue;
