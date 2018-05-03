@@ -73,7 +73,6 @@ export function PerformTest(testData: TestData, timingFn?: () => number): TestRe
       dbg: dbg,
       extra: {},
    };
-   // if (inputs.bred) result.extra.IB = inputs.IB * 100; // TODO: Get the exact IB out of the extractor
 
    if (exception) {
       result.exception = exception;

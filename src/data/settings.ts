@@ -25,9 +25,6 @@ class Settings extends DatabaseObject {
 }
 
 
-// TODO: Register a database change handler to pick up the latest settings in case the user opens the app in two tabs?
-
-
 /** Manage access to the settings in the database */
 class SettingsManager {
    current: Settings;

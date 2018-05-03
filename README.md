@@ -16,38 +16,37 @@ For reference: <https://github.com/petervanderdoes/gitflow-avh>
 ## TODO
 
 ### High Priority
-- Add server selector globally?
-- Move last selected server setting from user settings to library settings
+- Ability to import Ark Exports into extractor
+- Implement library-specific settings
+- Move last selected server setting from app settings to library settings
 - Implement a real Extractor UI
 - Begin implementation of Stat Tester - UI and backing code
 - Begin implementation of Expert Mode - UI and backing code
 - Begin implementation of library view, optimised for mobile but expandable to tablet size
-- Figure out how library selection & management is going to be presented
-- Add IBM value to server settings page
+- Add IBM value to server editing UI
+- Store last app & data versions in app settings
+- Display generated What's New page when app version changes
+- Display notification when data version changes
 
 ### Medium Priority
-- Add ability to load extra configs, such as ClassicFlyers
-- Verify caching and update mechanism
+- Add server selector either globally or in extractor
+- Figure out how library selection & management is going to be presented
+- Add ability to load extra configs, such as ClassicFlyers, in a generic way
+- Verify caching and update mechanism works
 - Verify app compatibility with iOS
-- Add class-species mappings to data.json
+- Add vanilla class-species mappings to data.json (to be used in importer)
 - Import/export ASB library
-- Disable devMode by default and provide a mechanism to turn it back on (store in settings)
+- Disable devMode by default and provide a mechanism to turn it back on (store in app settings)
 - Create continuous tester using random creatures and random server parameters
-- Store last app & data versions in settings and use to display generated What's New page
-- Investigate internationalisation via [i18-next](i18next.com) and [panter/vue-i18next](https://github.com/panter/vue-i18next)
-
-### Low Priority
-- Consider Implementation of "Expert" Mode to automatically calculate Server Settings
+- Implement internationalisation via [i18-next](i18next.com) and [panter/vue-i18next](https://github.com/panter/vue-i18next)
+- Change Extractor tab to Calculator and add ability to switch from Extractor/Tester(or edit)/Expert Mode?
+- Switch navigation to vue-router to get more capability
 
 ### Size Reduction
 - Take only the components we use from bootstrap-vue
+- Investigate the recent 100Kb bump in size
 
 ### Continuous
 - Add extra test cases
 - Address TODOs and FIXMEs in code
 - Improve the extractor : handle more cases and produce less options in as little time as possible
-
-
-These need updating...
-- Implement Auto extract on wild tames?
-- Change Extractor tab to Calculator and add ability to switch from Extractor/Tester(or edit)/Expert Mode?

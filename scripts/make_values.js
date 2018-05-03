@@ -72,9 +72,6 @@ https.get(URL, res => {
             let newName = SPECIES_FIELDS[field];
             result[newName] = cloneDeep(speciesData[field]);
          }
-
-         // TODO: Alter the stats in any way you want here...
-         // ...use `result.stats`
       }
 
       console.log("Species: " + speciesCount);

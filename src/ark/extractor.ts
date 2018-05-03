@@ -121,7 +121,6 @@ export class Extractor {
    };
 
    constructor(inputs: ExtractorInput) {
-      // TODO: Add consider wild levels
       // Only way to calculate wild levels is with a TE
       // Creatures like gigas are unaffected, just as if they were bred
       // The code is already laid out to handle support for considerWildLevelSteps
@@ -158,7 +157,7 @@ export class Extractor {
          incomingM[statIndex].TBHM = this.input.wild ? IA.ONE : incomingM[statIndex].TBHM;
 
          if (IA.lt(incomingM[statIndex].Tm, IA.ZERO)) {
-            this.rangeVars.TE[statIndex] = IA(0.999, 1); // FIXME: This seems very wrong
+            this.rangeVars.TE[statIndex] = IA(0.999, 1); // FIXME: This seems very wrong   - Yes, it is!
             // this.rangeVars.TE[statIndex] = IA(1);
          }
       }
