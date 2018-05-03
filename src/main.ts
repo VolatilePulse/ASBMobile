@@ -34,13 +34,14 @@ Vue.use(PouchVue, {
    pouch: PouchDB,
 });
 
-// TODO: There's no need to register our main tabs as global components
-Vue.component('About', About);
-Vue.component('Welcome', Welcome);
-Vue.component('Settings', Settings);
-Vue.component('Servers', Servers);
-Vue.component('Extractor', Extractor);
-Vue.component('Library', Library);
-Vue.component('Tester', Tester);
-
-new App().$mount('#app');
+new App({
+   components: {
+      About: About,
+      Welcome: Welcome,
+      Settings: Settings,
+      Servers: Servers,
+      Extractor: Extractor,
+      Library: Library,
+      Tester: Tester,
+   },
+}).$mount('#app');
