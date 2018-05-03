@@ -52,7 +52,7 @@ export function PerformTest(testData: TestData, timingFn?: () => number): TestRe
 
    let t1: number, t2: number;
    let exception: Error;
-   let output: { stats: Stat[][], options: Stat[][], TEs: Map<Stat, TEProps> };
+   let output: { stats: Stat[][], options: Stat[][], TEs: Map<Stat, TEProps>, IB: Interval };
 
    try {
       if (timingFn) t1 = timingFn();
@@ -63,11 +63,13 @@ export function PerformTest(testData: TestData, timingFn?: () => number): TestRe
       exception = ex;
    }
 
+   if (output && output.IB) dbg.IB = output.IB;
+
    const result: TestResult = {
       pass: false,
-      stats: output.stats, // testCreature['stats'],
-      options: output.options, // extractObject['options'],
-      mapTE: output.TEs, // extractObject['statTEMap'],
+      stats: output ? output.stats : undefined,
+      options: output ? output.options : undefined,
+      mapTE: output ? output.TEs : undefined,
       dbg: dbg,
       extra: {},
    };
