@@ -1,12 +1,12 @@
 import { StatMultipliers } from '@/ark/multipliers';
 import { Stat } from '@/ark/types';
-import { DAMAGE, HEALTH, PRE_IB, PRE_TE, SPEED, TORPOR, SERVER_IWM, SERVER_IDM, SERVER_TAM, SERVER_TMM } from '@/consts';
+import { DAMAGE, HEALTH, PRE_IB, PRE_TE, SERVER_IDM, SERVER_IWM, SERVER_TAM, SERVER_TMM, SPEED, TORPOR } from '@/consts';
 import { Server } from '@/data/objects';
+import { intervalFromDecimal } from '@/number_utils';
 import theStore from '@/ui/store';
+import * as IA from 'interval-arithmetic';
 import merge from 'lodash/merge';
 import * as Utils from './utils';
-import * as IA from 'interval-arithmetic';
-import { intervalFromDecimal } from '@/number_utils';
 
 /** @fileOverview Ark-related utility functions */
 

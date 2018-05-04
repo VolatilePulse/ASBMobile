@@ -1,7 +1,7 @@
+import { CreatureDataSource } from '@/ark';
 import { StatMultipliers } from '@/ark/multipliers';
 import { intervalAverage } from '@/number_utils';
 import * as IA from 'interval-arithmetic';
-import { CreatureDataSource } from '@/ark';
 
 
 /** Server multiplier overrides */

@@ -1,7 +1,7 @@
 import { ParseDatabase } from '@/ark/data';
 import { TestData } from '@/ark/types';
 import * as Servers from '@/servers';
-import { PerformPerfTest, TestResult, PerformTest } from '@/testing';
+import { PerformPerfTest, PerformTest, TestResult } from '@/testing';
 import { expect } from 'chai';
 import { readFileSync } from 'fs';
 import now from 'performance-now';
