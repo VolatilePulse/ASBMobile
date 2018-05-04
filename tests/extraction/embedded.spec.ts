@@ -12,7 +12,7 @@ before('load values', async () => {
    ParseDatabase(JSON.parse(valuesJson));
 });
 
-describe('test_data', () => {
+describe('verify extractor using embedded test data', () => {
    testData.forEach((data, i) =>
       it(`should extract L${data.level} ${data.mode.toLowerCase()} ${data.species} [index ${i}]`, () => {
          const result = PerformTest(data);
