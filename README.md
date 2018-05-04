@@ -41,6 +41,7 @@ For reference: <https://github.com/petervanderdoes/gitflow-avh>
 - Implement internationalisation via [i18-next](i18next.com) and [panter/vue-i18next](https://github.com/panter/vue-i18next)
 - Change Extractor tab to Calculator and add ability to switch from Extractor/Tester(or edit)/Expert Mode?
 - Switch navigation to vue-router to get more capability
+- Add an event fired on tab change, so pending DB changes can be flushed (possibly tied to vue-router work)
 
 ### Size Reduction
 - Take only the components we use from bootstrap-vue
