@@ -1,5 +1,6 @@
 import { FormatAllOptions, FormatOption, FormatOptions } from '@/ark';
 import { TEProps } from '@/ark/extractor';
+import { parseExportedCreature } from '@/ark/import/ark_export';
 import testData from '@/ark/test_data';
 import { Stat } from '@/ark/types';
 import { statNames } from '@/consts';
@@ -200,49 +201,3 @@ function generateTestFromExport(ini: string, serverId: string): string {
 },`;
 }
 
-const iniStatIndexes = [0, 1, 3, 4, 7, 8, 9, 2];
-
-function parseExportedCreature(iniText: string) {
-   const ini = parseIni(iniText);
-   const output = {
-      species: speciesFromClass(ini[0][2]),
-      level: ini[0][12],
-      imprint: parseFloat(ini[0][13]) * 100,
-      mode: parseFloat(ini[0][13]) > 0 ? 'Bred' : 'Tamed',
-      values: iniStatIndexes.map(i => parseFloat(ini[2][i])),
-   };
-   output.values[5] = (output.values[5] + 1) * 100;
-   output.values[6] = (output.values[6] + 1) * 100;
-   return output;
-}
-
-
-const speciesRe = /\/(\w+)\/\w+_Character_BP(?:_(Aberrant))?/;
-
-function speciesFromClass(cls: string): string {
-   const result = speciesRe.exec(cls);
-   if (!result) throw new Error('Creature species could not be calculated');
-   if (result[2])
-      return result[2] + ' ' + result[1];
-
-   return result[1];
-}
-
-const blockRe = /^\[(.*)\][\r\n]+(?:[ \w]+(?:\[\d+\])?=.*[\r\n]+)+/mg;
-const lineRe = /^([ \w]+(?:\[\d+\])?)=(.*)[\r\n]+/gm;
-
-function parseIni(content: string) {
-   const blocks = [];
-   for (const [block, name] of Utils.GenerateRegexMatches(blockRe, content)) {
-      if (!name) continue;
-
-      const blockLines: string[] = [];
-      (blockLines as any).label = name;
-
-      for (const [_, _label, value] of Utils.GenerateRegexMatches(lineRe, block)) {
-         blockLines.push(value);
-      }
-      blocks.push(blockLines);
-   }
-   return blocks;
-}

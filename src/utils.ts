@@ -229,3 +229,29 @@ export function* GenerateRegexMatches(re: RegExp, str: string) {
       yield m;
    }
 }
+
+const blockRe = /^\[(.*)\][\r\n]+(?:[ \w]+(?:\[\d+\])?=.*[\r\n]+)+/mg;
+const lineRe = /^([ \w]+(?:\[\d+\])?)=(.*)[\r\n]+/gm;
+
+/** Parse an ini file */
+export function ParseIni(content: string) {
+   const byIndex = [];
+   const byName: { [name: string]: { [name: string]: string } } = {};
+
+   for (const [block, name] of GenerateRegexMatches(blockRe, content)) {
+      if (!name) continue;
+
+      const blockByIndex: string[] = [];
+      (blockByIndex as any).label = name;
+
+      const blockByName: { [name: string]: string } = {};
+
+      for (const [_, _label, value] of GenerateRegexMatches(lineRe, block)) {
+         blockByIndex.push(value);
+         blockByName[_label] = value;
+      }
+      byIndex.push(blockByIndex);
+      byName[name] = blockByName;
+   }
+   return { byIndex, byName };
+}
