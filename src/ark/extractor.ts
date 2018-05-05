@@ -7,7 +7,6 @@ import { intFromRange, intFromRangeReverse, intervalAverage } from '@/number_uti
 import * as Utils from '@/utils';
 import * as IA from 'interval-arithmetic';
 
-
 export interface ExtractorInput {
    server: Server;
    species: string;
@@ -18,7 +17,6 @@ export interface ExtractorInput {
    IB: Interval;
    values: Interval[];
 }
-
 
 // tamedLevel / (1 + 0.5 * TE)
 function calcWL(tamedLevel: Interval, TE: Interval) {
@@ -50,8 +48,8 @@ function calcV(Lw: number, Ld: number, TE: Interval, IB: Interval, mult: StatMul
 }
 
 // ((V / ((1 + Ld * Id) * (1 + TE * Tm)) - Ta) / (B * TBHM * (1 + IB * IBM)) - 1) / Iw
-function calcLw(V: Interval, Ld: number, TE: Interval, IB: Interval, mult: StatMultipliers) {
-   return IA.div((IA.sub(IA.div((IA.sub(IA.div(V, (IA.mul((IA.add(IA.ONE, IA.mul(IA(Ld), mult.Id))),
+function calcLw(V: Interval, rangeLd: Interval, TE: Interval, IB: Interval, mult: StatMultipliers) {
+   return IA.div((IA.sub(IA.div((IA.sub(IA.div(V, (IA.mul((IA.add(IA.ONE, IA.mul(rangeLd, mult.Id))),
       (IA.add(IA.ONE, IA.mul(TE, mult.Tm)))))), mult.Ta)), (IA.mul(IA.mul(mult.B, mult.TBHM),
          (IA.add(IA.ONE, IA.mul(IB, mult.IBM)))))), IA.ONE)), mult.Iw);
 }
@@ -60,6 +58,11 @@ function calcLw(V: Interval, Ld: number, TE: Interval, IB: Interval, mult: StatM
 function calcLd(V: Interval, Lw: number, TE: Interval, IB: Interval, mult: StatMultipliers) {
    return IA.div((IA.sub((IA.div(IA.div(V, (IA.add(IA.mul(IA.mul(IA.mul((IA.add(IA.ONE, IA.mul(IA(Lw), mult.Iw))), mult.B), mult.TBHM),
       (IA.add(IA.ONE, IA.mul(IB, mult.IBM)))), mult.Ta))), (IA.add(IA.ONE, IA.mul(TE, mult.Tm))))), IA.ONE)), mult.Id);
+}
+
+// ((V / ((1 + Lw * Iw) * B * TBHM * (1 + IB * IBM) + Ta) / (1 + TE * Tm)) - 1) / Id
+function calcLd2(preCalcValue: Interval, TE: Interval, mult: StatMultipliers) {
+   return IA.div((IA.sub((IA.div(preCalcValue, (IA.add(IA.ONE, IA.mul(TE, mult.Tm))))), IA.ONE)), mult.Id);
 }
 
 export class TEProps {
@@ -158,7 +161,7 @@ export class Extractor {
 
          if (IA.lt(incomingM[statIndex].Tm, IA.ZERO)) {
             this.rangeVars.TE[statIndex] = IA(0.999, 1); // FIXME: This seems very wrong   - Yes, it is!
-            // this.rangeVars.TE[statIndex] = IA(1);
+            this.rangeVars.TE[statIndex] = IA(1);
          }
       }
 
@@ -171,7 +174,7 @@ export class Extractor {
       //    Or provide an alternative method (returning under bad situations is acceptable for now)
 
       // Generate the possible Torpor Lw values based on the IB range
-      const torporLwRange = calcLw(this.values[TORPOR], this.rangeVars.Ld, this.rangeVars.TE[TORPOR], this.rangeVars.IB, this.m[TORPOR]);
+      const torporLwRange = calcLw(this.values[TORPOR], IA(this.rangeVars.Ld), this.rangeVars.TE[TORPOR], this.rangeVars.IB, this.m[TORPOR]);
       this.checkedStat[TORPOR] = true;
 
       // Set an empty stat for Torpor
@@ -195,6 +198,10 @@ export class Extractor {
          this.levelBeforeDom = this.stats[TORPOR][0].Lw + 1;
          this.domFreeMax = Math.max(this.input.level - this.wildFreeMax - 1, 0);
 
+         // Ranges to restrict Lw and Ld to
+         const boundRangeLw = IA(0, this.wildFreeMax - this.minWild);
+         const boundRangeLd = IA(0, this.domFreeMax - this.minDom);
+
          // Set range to be used for TE calculations
          this.rangeVars.tamedLevel = IA().halfOpenRight(this.levelBeforeDom, this.levelBeforeDom + 1);
 
@@ -205,46 +212,42 @@ export class Extractor {
 
          // Loop all stats except for torpor
          for (let statIndex = HEALTH; statIndex <= SPEED && this.success; statIndex++) {
-            this.rangeVars.Lw = 0;
-            this.rangeVars.Ld = 0;
+            /** Pre-calculated value of B * TBHM */
+            const preCalcBaseValue = IA.mul(this.m[statIndex].B, this.m[statIndex].TBHM);
+
+            /** Pre-calculated value (1 + IB * IBM) */
+            const preCalcIBValue = IA.add(IA.ONE, IA.mul(this.rangeVars.IB, this.m[statIndex].IBM));
 
             // Covers unused stats like oxygen
             if (!this.uniqueStatSituation(statIndex)) {
                // Calculate the highest Lw could be
-               this.rangeVars.Ld = 0;
-               let rangeLw = calcLw(this.values[statIndex], 0, this.rangeVars.TE[statIndex], this.rangeVars.IB, this.m[statIndex]);
-               rangeLw = IA(0, rangeLw.hi);
+               let rangeLw = calcLw(this.values[statIndex], boundRangeLd, this.rangeVars.TE[statIndex], this.rangeVars.IB, this.m[statIndex]);
 
                if (IA.isEmpty(rangeLw))
-                  rangeLw = IA(0, this.wildFreeMax - this.minWild);
+                  rangeLw = boundRangeLw;
 
-               rangeLw = IA.intersection(rangeLw, IA(0, this.wildFreeMax - this.minWild));
+               rangeLw = IA.intersection(rangeLw, boundRangeLw);
 
-               // We don't need to calculate TE to extract the levels
-               if (!this.input.tamed || IA.leq(this.m[statIndex].Tm, IA.ZERO)) {
-                  // Loop all possible Lws
-                  for (this.rangeVars.Lw of intFromRangeReverse(rangeLw)) {
-                     // Calculate the highest Ld could be
-                     let rangeLd = calcLd(this.values[statIndex], this.rangeVars.Lw, this.rangeVars.TE[statIndex], this.rangeVars.IB, this.m[statIndex]);
-                     rangeLd = IA(0, rangeLd.hi);
-                     rangeLd = IA.intersection(rangeLd, IA(0, this.domFreeMax - this.minDom));
-                     this.nonTEStatCalculation(statIndex, rangeLd);
-                  }
-               }
-
-               else {
-                  const localMap = this.statTEMap;
-                  this.isTEStat[statIndex] = true;
+               const localMap = this.statTEMap;
+               let methToCall = (!this.input.tamed || IA.leq(this.m[statIndex].Tm, IA.ZERO)) ? this.nonTEStatCalculation.bind(this) : undefined;
+               if (!methToCall) {
                   // Call a different function if we already added some TE stats
-                  const methToCall = (localMap.size === 0) ? this.findTEStats.bind(this) : this.findMultiTEStat.bind(this);
-                  // Loop all possible Lws
-                  for (this.rangeVars.Lw of intFromRangeReverse(rangeLw)) {
-                     // Calculate the highest Ld could be
-                     let rangeLd = calcLd(this.values[statIndex], this.rangeVars.Lw, this.rangeVars.TE[statIndex], this.rangeVars.IB, this.m[statIndex]);
-                     rangeLd = IA(0, rangeLd.hi);
-                     rangeLd = IA.intersection(rangeLd, IA(0, this.domFreeMax - this.minDom));
-                     methToCall(statIndex, rangeLd, localMap);
-                  }
+                  methToCall = (localMap.size === 0) ? this.findTEStats.bind(this) : this.findMultiTEStat.bind(this);
+                  this.isTEStat[statIndex] = true;
+               }
+               // Loop all possible Lws
+               for (this.rangeVars.Lw of intFromRangeReverse(rangeLw)) {
+                  /** Pre-calculated value of (1 + Lw * IW) */
+                  const preCalcWildValue = IA.add(IA.ONE, IA.mul(IA(this.rangeVars.Lw), this.m[statIndex].Iw));
+
+                  /** Pre-calculated value of B * TBHM * (1 + Lw * Iw) * (1 + IB * IBM) + Ta */
+                  const preCalcValue = IA.div(this.values[statIndex], IA.add(IA.mul(IA.mul(preCalcBaseValue, preCalcWildValue), preCalcIBValue), this.m[statIndex].Ta));
+
+                  // Calculate the highest Ld could be
+                  let rangeLd = calcLd2(preCalcValue, this.rangeVars.TE[statIndex], this.m[statIndex]);
+                  rangeLd = IA.intersection(rangeLd, boundRangeLd);
+                  if (!IA.isEmpty(rangeLd))
+                     methToCall(statIndex, rangeLd, localMap, preCalcValue);
                }
             }
 
@@ -372,21 +375,14 @@ export class Extractor {
       const localVars = this.rangeVars;
       const localStats = this.m[statIndex];
       const localValue = this.values[statIndex];
-      localVars.Ld = Math.round(intervalAverage(
-         calcLd(localValue, localVars.Lw, localVars.TE[statIndex], localVars.IB, localStats)));
 
-      if (!IA.hasValue(rangeLd, localVars.Ld))
-         return;
-
-      const calculatedValue = calcV(localVars.Lw, localVars.Ld, localVars.TE[statIndex], localVars.IB, localStats);
-      if (IA.intervalsOverlap(calculatedValue, localValue)) {
+      for (localVars.Ld of intFromRange(rangeLd)) {
+         this.stats[statIndex].push(new Stat(localVars.Lw, localVars.Ld));
 
          // Increase IB accuracy
-         this.stats[statIndex].push(new Stat(localVars.Lw, localVars.Ld));
-         if (this.input.bred) {
+         if (this.input.bred && IA.notEqual(localStats.IBM, IA.ZERO)) {
             const rangeIB = calcIB(localValue, localVars.Lw, localVars.Ld, localVars.TE[statIndex], localStats);
-            if (!IA.isEmpty(rangeIB))
-               localVars.IB = IA.intersection(rangeIB, localVars.IB);
+            localVars.IB = IA.intersection(rangeIB, localVars.IB);
          }
       }
    }
@@ -395,7 +391,7 @@ export class Extractor {
       const localStats = this.m[statIndex];
       const localVars = this.rangeVars;
 
-      for (localVars.Ld of intFromRange(IA.intersection(IA(0, Infinity), rangeLd))) {
+      for (localVars.Ld of intFromRange(rangeLd)) {
          // FIXME: shouldn't be modifying the TE
          let tempTE = calcTE(this.values[statIndex], localVars.Lw, localVars.Ld, localVars.IB, localStats);
 
@@ -411,15 +407,15 @@ export class Extractor {
 
          const rangeWL = calcWL(localVars.tamedLevel, tempTE);
 
-         for (const i of intFromRange(IA.intersection(IA(0, Infinity), rangeWL), Math.ceil)) {
-            localVars.wildLevel = IA(i);
+         for (const wildLevel of intFromRange(rangeWL, Math.ceil)) {
+            localVars.wildLevel = IA(wildLevel);
             let tempTERange = calcTEFromWL(localVars.tamedLevel, localVars.wildLevel);
             tempTERange = IA.intersection(tempTE, tempTERange);
 
             // Valid range
-            if (!IA.isEmpty(tempTERange) && !IA.isWhole(tempTERange)) {
+            if (!IA.isEmpty(tempTERange)) {
                const TEStat = new TEProps();
-               TEStat.wildLevel = i;
+               TEStat.wildLevel = wildLevel;
                // Get the average of the TE range
                TEStat.TE = tempTERange;
 
@@ -432,21 +428,17 @@ export class Extractor {
       }
    }
 
-   findMultiTEStat(statIndex: number, rangeLd: Interval, map: Map<Stat, TEProps>) {
+   findMultiTEStat(statIndex: number, rangeLd: Interval, map: Map<Stat, TEProps>, preCalcValue: Interval) {
       const localStats = this.stats[statIndex];
       const localVars = this.rangeVars;
       const tempStat = new Stat(localVars.Lw, 0);
 
       map.forEach(statTE => {
          // Calculate the Ld range based on known good TE values
-         const rangeForLd = calcLd(this.values[statIndex], this.rangeVars.Lw, statTE.TE, this.rangeVars.IB, this.m[statIndex]);
+         const rangeForLd = calcLd2(preCalcValue, statTE.TE, this.m[statIndex]);
 
          // Loop Ld range
-         for (tempStat.Ld of intFromRange(IA.intersection(IA(0, Infinity), rangeForLd))) {
-            // Makes sure the Ld is within range
-            if (!IA.hasValue(rangeLd, tempStat.Ld))
-               continue;
-
+         for (tempStat.Ld of intFromRange(IA.intersection(rangeLd, rangeForLd))) {
             // Makes sure duplicate stats aren't being added
             if (localStats.find(stat => tempStat.isEqual(stat)))
                continue;
