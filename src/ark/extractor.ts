@@ -1,6 +1,6 @@
 import * as Ark from '@/ark';
 import { StatMultipliers } from '@/ark/multipliers';
-import { Stat, StatLike } from '@/ark/types';
+import { Stat } from '@/ark/types';
 import { FOOD, HEALTH, SPEED, TORPOR } from '@/consts';
 import { Server } from '@/data/objects';
 import { intFromRange, intFromRangeReverse, intervalAverage } from '@/number_utils';
@@ -371,27 +371,22 @@ export class Extractor {
    nonTEStatCalculation(statIndex: number, rangeLd: Interval): void {
       const localVars = this.rangeVars;
       const localStats = this.m[statIndex];
+      const localValue = this.values[statIndex];
       localVars.Ld = Math.round(intervalAverage(
-         calcLd(this.values[statIndex], this.rangeVars.Lw, this.rangeVars.TE[statIndex], this.rangeVars.IB, localStats)));
+         calcLd(localValue, localVars.Lw, localVars.TE[statIndex], localVars.IB, localStats)));
 
       if (!IA.hasValue(rangeLd, localVars.Ld))
          return;
 
       const calculatedValue = calcV(localVars.Lw, localVars.Ld, localVars.TE[statIndex], localVars.IB, localStats);
-      if (IA.intervalsOverlap(calculatedValue, this.values[statIndex]))
+      if (IA.intervalsOverlap(calculatedValue, localValue)) {
+
+         // Increase IB accuracy
          this.stats[statIndex].push(new Stat(localVars.Lw, localVars.Ld));
-
-      // If it doesn't calculate properly, it may have used a different IB (Mostly relevant for Food)
-      else if (this.input.bred) {
-         const rangeIB = calcIB(this.values[statIndex], localVars.Lw, localVars.Ld, localVars.TE[statIndex], localStats);
-
-         if (IA.intervalsOverlap(rangeIB, this.input.IB)) {
-            const tempStat2: StatLike = new Stat(this.stats[TORPOR][0]);
-            const expectedTorpor = calcV(tempStat2.Lw, tempStat2.Ld, localVars.TE[statIndex], rangeIB, localStats);
-            if (IA.intervalsOverlap(expectedTorpor, this.values[TORPOR])) {
+         if (this.input.bred) {
+            const rangeIB = calcIB(localValue, localVars.Lw, localVars.Ld, localVars.TE[statIndex], localStats);
+            if (!IA.isEmpty(rangeIB))
                localVars.IB = IA.intersection(rangeIB, localVars.IB);
-               this.stats[statIndex].push(new Stat(localVars.Lw, localVars.Ld));
-            }
          }
       }
    }
