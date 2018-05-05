@@ -11,14 +11,11 @@
       "serve": "vue-cli-service serve",
       "build": "vue-cli-service build",
       "liveserver": "ws -c scripts/liveserver.conf.js",
-
       "test:unit": "vue-cli-service test",
       "test:perf": "vue-cli-service test --slow 6000 tests/perf/*.spec.ts",
       "test:data": "vue-cli-service test tests/extraction/embedded*.spec.ts",
       "test:archive": "vue-cli-service test tests/extraction/archive*.spec.ts",
-
       "lint": "vue-cli-service lint",
-
       "values": "node scripts/make_values.js",
       "gencert": "bash scripts/generate-ssl.sh",
       "release": "node --experimental-modules scripts/release.mjs -l"
