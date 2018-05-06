@@ -57,6 +57,15 @@ https.get(URL, res => {
          settings: {},
       };
 
+      // Copy over mapped settings fields
+      for (let field in SETTINGS_FIELDS) {
+         // Falsey values don't need to be present
+         if (!json[field]) continue;
+
+         let newName = SETTINGS_FIELDS[field];
+         output.settings[newName] = json[field];
+      }
+
       // Convert species
       let speciesCount = 0;
       for (let speciesData of json.species) {
@@ -72,18 +81,18 @@ https.get(URL, res => {
             let newName = SPECIES_FIELDS[field];
             result[newName] = cloneDeep(speciesData[field]);
          }
+
+         // FIXME: Remove this when input data is corrected
+         // Temporary fix for Aberrant variety:
+         //     TBHM being 96% of regular TBHM
+         //     Negative Health Tm is zero
+         if (speciesData.name.startsWith('Aberrant')) {
+            result['TBHM'] = (result['TBHM'] || 1) * 0.96;
+            result['stats'][0][4] = 0; // set Health Tm to zero
+         }
       }
 
       console.log("Species: " + speciesCount);
-
-      // Copy over mapped settings fields
-      for (let field in SETTINGS_FIELDS) {
-         // Falsey values don't need to be present
-         if (!json[field]) continue;
-
-         let newName = SETTINGS_FIELDS[field];
-         output.settings[newName] = json[field];
-      }
 
       // Apply overrides
       console.log("Applying overrides...");
