@@ -7,7 +7,9 @@ import { CompareFloat, FilledArray, ParseIni } from '@/utils';
 /** @fileOverview Handle importing server settings from game.ini */
 
 
-const BLOCK_SHOOTERGAMEMODE = '/Script/ShooterGame.ShooterGameMode';
+const BLOCK_SHOOTERGAMEMODE = '/Script/ShooterGame.ShooterGameMode'.toLowerCase();
+const FIELD_IBM = 'BabyImprintingStatScaleMultiplier'.toLowerCase();
+const FIELD_SINGLE_PLAYER = 'bUseSingleplayerSettings'.toLowerCase();
 
 
 export function parseGameIni(iniText: string) {
@@ -15,22 +17,22 @@ export function parseGameIni(iniText: string) {
    const main = ini[BLOCK_SHOOTERGAMEMODE];
 
    let ibm: number;
-   const ibmValue = main['BabyImprintingStatScaleMultiplier'];
+   const ibmValue = main[FIELD_IBM];
    if (ibmValue !== undefined)
       ibm = parseFloat(ibmValue);
 
    let singlePlayer: boolean = false;
-   const singlePlayerValue = main['bUseSingleplayerSettings'];
+   const singlePlayerValue = main[FIELD_SINGLE_PLAYER];
    if (singlePlayerValue !== undefined && singlePlayerValue.toLowerCase() === 'true')
       singlePlayer = true;
 
    // Set all multipliers straight from the given values
    const mults: number[][] = FilledArray(8, () => []);
    INI_STAT_INDEXES.forEach((iniIndex, statIndex) => {
-      mults[statIndex][SERVER_TMM] = parseFloat(main[`PerLevelStatsMultiplier_DinoTamed_Affinity[${iniIndex}]`]);
-      mults[statIndex][SERVER_TAM] = parseFloat(main[`PerLevelStatsMultiplier_DinoTamed_Add[${iniIndex}]`]);
-      mults[statIndex][SERVER_IWM] = parseFloat(main[`PerLevelStatsMultiplier_DinoWild[${iniIndex}]`]);
-      mults[statIndex][SERVER_IDM] = parseFloat(main[`PerLevelStatsMultiplier_DinoTamed[${iniIndex}]`]);
+      mults[statIndex][SERVER_TMM] = parseFloat(main[`PerLevelStatsMultiplier_DinoTamed_Affinity[${iniIndex}]`.toLowerCase()]);
+      mults[statIndex][SERVER_TAM] = parseFloat(main[`PerLevelStatsMultiplier_DinoTamed_Add[${iniIndex}]`.toLowerCase()]);
+      mults[statIndex][SERVER_IWM] = parseFloat(main[`PerLevelStatsMultiplier_DinoWild[${iniIndex}]`.toLowerCase()]);
+      mults[statIndex][SERVER_IDM] = parseFloat(main[`PerLevelStatsMultiplier_DinoTamed[${iniIndex}]`.toLowerCase()]);
    });
 
    // Remove entries that match Official

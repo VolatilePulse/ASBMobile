@@ -233,7 +233,10 @@ export function* GenerateRegexMatches(re: RegExp, str: string) {
 const blockRe = /^\[(.*)\][\r\n]+(?:[ \w]+(?:\[\d+\])?=.*[\r\n]+)+/mg;
 const lineRe = /^([ \w]+(?:\[\d+\])?)=(.*)[\r\n]+/gm;
 
-/** Parse an ini file */
+/**
+ * Parse an ini file.
+ * Note that all block and field names are converted to lower-case.
+ */
 export function ParseIni(content: string) {
    const byIndex = [];
    const byName: { [name: string]: { [name: string]: string } } = {};
@@ -241,17 +244,17 @@ export function ParseIni(content: string) {
    for (const [block, name] of GenerateRegexMatches(blockRe, content)) {
       if (!name) continue;
 
+      const blockByName: { [name: string]: string } = {};
       const blockByIndex: string[] = [];
       (blockByIndex as any).label = name;
 
-      const blockByName: { [name: string]: string } = {};
-
-      for (const [_, _label, value] of GenerateRegexMatches(lineRe, block)) {
+      for (const [_, label, value] of GenerateRegexMatches(lineRe, block)) {
          blockByIndex.push(value);
-         blockByName[_label] = value;
+         blockByName[label.toLowerCase()] = value;
       }
+
       byIndex.push(blockByIndex);
-      byName[name] = blockByName;
+      byName[name.toLowerCase()] = blockByName;
    }
    return { byIndex, byName };
 }
