@@ -1,10 +1,9 @@
-import { ParseDatabase } from '@/ark/data';
 import { parseGameIni } from '@/ark/import/game_ini';
 import { FOOD, HEALTH, OXYGEN, SERVER_IDM, SERVER_IWM, SERVER_TAM, SERVER_TMM, SPEED, STAMINA, TORPOR, WEIGHT } from '@/consts';
 import { Server } from '@/data/objects';
-import * as Servers from '@/servers';
 import { expect } from 'chai';
 import { readFileSync } from 'fs';
+import { initForExtraction } from '../common/init';
 
 // tslint:disable:no-unused-expression
 
@@ -12,9 +11,7 @@ import { readFileSync } from 'fs';
 let parseOutput: Server;
 
 before('initialise servers', async () => {
-   await Servers.initialise();
-   const valuesJson = readFileSync('public/data/data.json').toString();
-   ParseDatabase(JSON.parse(valuesJson));
+   await initForExtraction();
 
    const content = readFileSync('testdata/coldino/sp/Game.ini').toString();
    parseOutput = parseGameIni(content);

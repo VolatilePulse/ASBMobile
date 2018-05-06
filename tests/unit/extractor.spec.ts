@@ -1,10 +1,8 @@
-import { ParseDatabase } from '@/ark/data';
 import { TestData } from '@/ark/types';
-import * as Servers from '@/servers';
 import { PerformTest } from '@/testing';
 import theStore from '@/ui/store';
 import { expect } from 'chai';
-import { readFileSync } from 'fs';
+import { initForExtraction } from '../common/init';
 
 
 const L1_REX: TestData = {
@@ -18,9 +16,7 @@ const L1_REX: TestData = {
 
 
 before('load values', async () => {
-   await Servers.initialise();
-   const valuesJson = readFileSync('public/data/data.json').toString();
-   ParseDatabase(JSON.parse(valuesJson));
+   await initForExtraction();
 });
 
 describe('values.json', () => {

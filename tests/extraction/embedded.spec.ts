@@ -1,15 +1,11 @@
-import { ParseDatabase } from '@/ark/data';
 import testData from '@/ark/test_data';
-import * as Servers from '@/servers';
 import { PerformTest } from '@/testing';
 import { expect } from 'chai';
-import { readFileSync } from 'fs';
+import { initForExtraction } from '../common/init';
 
 
 before('load values', async () => {
-   await Servers.initialise();
-   const valuesJson = readFileSync('public/data/data.json').toString();
-   ParseDatabase(JSON.parse(valuesJson));
+   await initForExtraction();
 });
 
 describe('verify extractor using embedded test data', () => {

@@ -1,10 +1,8 @@
-import { ParseDatabase } from '@/ark/data';
 import { TestData } from '@/ark/types';
-import * as Servers from '@/servers';
 import { PerformPerfTest, PerformTest, TestResult } from '@/testing';
 import { expect } from 'chai';
-import { readFileSync } from 'fs';
 import now from 'performance-now';
+import { initForExtraction } from '../common/init';
 
 
 const PERF_TEST_DURATION = 5000;
@@ -21,9 +19,7 @@ const STRESS_GIGA: TestData = {
 
 
 before('load values', async () => {
-   await Servers.initialise();
-   const valuesJson = readFileSync('public/data/data.json').toString();
-   ParseDatabase(JSON.parse(valuesJson));
+   await initForExtraction();
 });
 
 describe('performance', () => {
