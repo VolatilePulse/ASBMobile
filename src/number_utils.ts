@@ -1,4 +1,4 @@
-import * as IA from 'interval-arithmetic';
+import IA from 'interval-arithmetic';
 
 /** @fileOverview Number and Interval arithmetic helper functions */
 

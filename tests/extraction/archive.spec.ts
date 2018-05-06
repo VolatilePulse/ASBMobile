@@ -24,7 +24,7 @@ const readFileAsync = util.promisify(readFile);
 // let parseOutput: Server;
 let gameIniList: string[];
 
-before('init', async () => {
+beforeAll(async () => {
    // Initialise required subsystems
    await Servers.initialise();
    const valuesJson = readFileSync('public/data/data.json').toString();

@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import { initForExtraction } from '../common/init';
 
 
-before('load values', async () => {
+beforeAll(async () => {
    await initForExtraction();
 });
 

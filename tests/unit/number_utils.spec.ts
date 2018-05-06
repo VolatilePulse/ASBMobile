@@ -1,6 +1,6 @@
 import { intFromRange, intFromRangeReverse } from '@/number_utils';
 import { expect } from 'chai';
-import * as IA from 'interval-arithmetic';
+import IA from 'interval-arithmetic';
 
 // tslint:disable:no-unused-expression
 

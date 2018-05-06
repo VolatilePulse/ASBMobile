@@ -4,7 +4,6 @@ import theStore from '@/ui/store';
 import { expect } from 'chai';
 import { initForExtraction } from '../common/init';
 
-
 const L1_REX: TestData = {
    tag: 'TE 100%',
    species: 'Rex', level: 1, imprint: 0, mode: 'Tamed',
@@ -15,16 +14,16 @@ const L1_REX: TestData = {
 };
 
 
-before('load values', async () => {
+beforeAll(async () => {
    await initForExtraction();
 });
 
 describe('values.json', () => {
-   it('values.json should include Rex', () => {
+   it('should include Rex', () => {
       expect(theStore.speciesMultipliers).to.include.keys('Rex');
    });
 
-   it('values.json Rex has multipliers', () => {
+   it('Rex has multipliers', () => {
       expect(theStore.speciesMultipliers['Rex'][0]).to.be.a('object').with.property('TBHM');
    });
 });

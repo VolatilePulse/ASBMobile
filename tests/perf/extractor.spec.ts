@@ -18,7 +18,7 @@ const STRESS_GIGA: TestData = {
 };
 
 
-before('load values', async () => {
+beforeAll(async () => {
    await initForExtraction();
 });
 
@@ -30,7 +30,7 @@ describe('performance', () => {
       expect(result.pass).to.equal(true);
       expect(result.duration, 'is duration less than 250').to.be.a('number').and.lt(250);
       console.log(`      duration (first run) : ${Number(result.duration).toFixed(2)} ms`);
-   });
+   }, 250);
 
    it('should extract Stress Giga in under 250ms (repeated)', () => {
       let result: TestResult;
@@ -38,5 +38,5 @@ describe('performance', () => {
       expect(result).to.be.a('object');
       expect(result.duration, 'is duration less than 250').to.be.a('number').and.lt(250);
       console.log(`      duration (repeated) : ${Number(result.duration).toFixed(2)} ms`);
-   }).timeout(PERF_TEST_DURATION * 2);
+   }, PERF_TEST_DURATION * 2);
 });

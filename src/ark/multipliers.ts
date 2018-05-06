@@ -1,5 +1,5 @@
 import * as consts from '@/consts';
-import * as IA from 'interval-arithmetic';
+import IA from 'interval-arithmetic';
 
 
 /** A container for pre-processed multipliers for a single stat, combined from server and species values */

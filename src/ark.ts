@@ -4,7 +4,7 @@ import { DAMAGE, HEALTH, PRE_IB, PRE_TE, SERVER_IDM, SERVER_IWM, SERVER_TAM, SER
 import { Server } from '@/data/objects';
 import { intervalFromDecimal } from '@/number_utils';
 import theStore from '@/ui/store';
-import * as IA from 'interval-arithmetic';
+import IA from 'interval-arithmetic';
 import merge from 'lodash/merge';
 import * as Utils from './utils';
 

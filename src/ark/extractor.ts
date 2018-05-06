@@ -5,7 +5,7 @@ import { FOOD, HEALTH, SPEED, TORPOR } from '@/consts';
 import { Server } from '@/data/objects';
 import { intFromRange, intFromRangeReverse, intervalAverage } from '@/number_utils';
 import * as Utils from '@/utils';
-import * as IA from 'interval-arithmetic';
+import IA from 'interval-arithmetic';
 
 export interface ExtractorInput {
    server: Server;

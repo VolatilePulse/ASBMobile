@@ -24,8 +24,9 @@
       ],
       "types": [
          "node",
-         "mocha",
-         "chai"
+         "jest",
+         // "mocha",
+         // "chai"
       ],
       "paths": {
          "@/*": [
@@ -39,6 +40,12 @@
       "tests/**/*.ts"
    ],
    "exclude": [
-      "node_modules"
+      "node_modules",
+      "scripts",
+      "docs",
+      "ref",
+      "public",
+      "versions",
+      "testdata",
    ]
 }
