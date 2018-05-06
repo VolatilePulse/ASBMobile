@@ -229,25 +229,42 @@ export class Extractor {
                rangeLw = IA.intersection(rangeLw, boundRangeLw);
 
                const localMap = this.statTEMap;
+
+               let calcStatsFn: (i: number, Ld: Interval, map?: Map<Stat, TEProps>, v?: Interval) => void;
+               if (!this.input.tamed || IA.leq(this.m[statIndex].Tm, IA.ZERO))
+                  calcStatsFn = this.nonTEStatCalculation.bind(this);
+               else if (localMap.size === 0) {
+                  calcStatsFn = this.findTEStats.bind(this);
+                  this.isTEStat[statIndex] = true;
+               }
+               else {
+                  calcStatsFn = this.findMultiTEStat.bind(this);
+                  this.isTEStat[statIndex] = true;
+               }
+
+               /*
                let methToCall = (!this.input.tamed || IA.leq(this.m[statIndex].Tm, IA.ZERO)) ? this.nonTEStatCalculation.bind(this) : undefined;
                if (!methToCall) {
                   // Call a different function if we already added some TE stats
                   methToCall = (localMap.size === 0) ? this.findTEStats.bind(this) : this.findMultiTEStat.bind(this);
                   this.isTEStat[statIndex] = true;
                }
+               */
+
                // Loop all possible Lws
                for (this.rangeVars.Lw of intFromRangeReverse(rangeLw)) {
                   /** Pre-calculated value of (1 + Lw * IW) */
                   const preCalcWildValue = IA.add(IA.ONE, IA.mul(IA(this.rangeVars.Lw), this.m[statIndex].Iw));
 
                   /** Pre-calculated value of B * TBHM * (1 + Lw * Iw) * (1 + IB * IBM) + Ta */
-                  const preCalcValue = IA.div(this.values[statIndex], IA.add(IA.mul(IA.mul(preCalcBaseValue, preCalcWildValue), preCalcIBValue), this.m[statIndex].Ta));
+                  const preCalcValue = IA.div(this.values[statIndex], IA.add(
+                     IA.mul(IA.mul(preCalcBaseValue, preCalcWildValue), preCalcIBValue), this.m[statIndex].Ta));
 
                   // Calculate the highest Ld could be
                   let rangeLd = calcLd2(preCalcValue, this.rangeVars.TE[statIndex], this.m[statIndex]);
                   rangeLd = IA.intersection(rangeLd, boundRangeLd);
                   if (!IA.isEmpty(rangeLd))
-                     methToCall(statIndex, rangeLd, localMap, preCalcValue);
+                     calcStatsFn(statIndex, rangeLd, localMap, preCalcValue);
                }
             }
 
@@ -430,15 +447,16 @@ export class Extractor {
 
    findMultiTEStat(statIndex: number, rangeLd: Interval, map: Map<Stat, TEProps>, preCalcValue: Interval) {
       const localStats = this.stats[statIndex];
+      const localMult = this.m[statIndex];
       const localVars = this.rangeVars;
       const tempStat = new Stat(localVars.Lw, 0);
 
       map.forEach(statTE => {
          // Calculate the Ld range based on known good TE values
-         const rangeForLd = calcLd2(preCalcValue, statTE.TE, this.m[statIndex]);
+         const rangeForLd = IA.intersection(rangeLd, calcLd2(preCalcValue, statTE.TE, localMult));
 
          // Loop Ld range
-         for (tempStat.Ld of intFromRange(IA.intersection(rangeLd, rangeForLd))) {
+         for (tempStat.Ld of intFromRange(rangeForLd)) {
             // Makes sure duplicate stats aren't being added
             if (localStats.find(stat => tempStat.isEqual(stat)))
                continue;
