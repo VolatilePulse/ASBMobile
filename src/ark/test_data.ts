@@ -394,6 +394,13 @@ const testData: TestData[] = [
       serverId: 'test:ARK PVE Community Server',
       results: [[{ Lw: 25, Ld: 0 }], [{ Lw: 37, Ld: 0 }], [{ Lw: 28, Ld: 0 }], [{ Lw: 35, Ld: 0 }], [{ Lw: 36, Ld: 0 }], [{ Lw: 37, Ld: 0 }, { Lw: 37, Ld: 0 }, { Lw: 36, Ld: 0 }, { Lw: 35, Ld: 0 }, { Lw: 34, Ld: 0 }, { Lw: 33, Ld: 0 }, { Lw: 32, Ld: 0 }, { Lw: 31, Ld: 0 }, { Lw: 29, Ld: 0 }], [{ Lw: 33, Ld: 0 }, { Lw: 31, Ld: 0 }, { Lw: 30, Ld: 0 }, { Lw: 29, Ld: 0 }, { Lw: 28, Ld: 0 }, { Lw: 27, Ld: 0 }, { Lw: 26, Ld: 0 }, { Lw: 25, Ld: 0 }], [{ Lw: 223, Ld: 0 }]],
    },
+   {
+      tag: 'from Sandmann',
+      species: 'Rex', level: 442, imprint: 3, mode: 'Bred',
+      values: [16820.390625, 3066, 1155, 21385.201172, 1014.040039, 486.4171, 100.4, 42733.75],
+      serverId: 'predef:Official Server',
+      results: [],
+   },
 ];
 
 export default testData;
