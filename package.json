@@ -11,6 +11,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "liveserver": "ws -c scripts/liveserver.conf.js",
+    "test:all": "vue-cli-service test tests/.*\\.spec\\.ts --testPathIgnorePatterns /perf/",
     "test:unit": "vue-cli-service test tests/unit/.*\\.spec\\.ts",
     "test:perf": "vue-cli-service test tests/perf/.*\\.spec\\.ts",
     "test:data": "vue-cli-service test tests/extraction/embedded.*\\.spec\\.ts",
