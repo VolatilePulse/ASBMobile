@@ -8,6 +8,7 @@ const URL = "https://raw.githubusercontent.com/cadon/ARKStatsExtractor/master/AR
 const OUTPUT = "public/data/data.json";
 
 const SPECIES_FIELDS = {
+   'blueprintPath': 'bp',
    'statsRaw': 'stats',
    'NoImprintingForSpeed': 'noImprint',
    'TamedBaseHealthMultiplier': 'TBHM',
