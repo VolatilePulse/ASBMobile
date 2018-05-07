@@ -21,7 +21,8 @@ export function ParseDatabase(jsonObject: any) {
          speciesData.stats,
          speciesData.TBHM,
          speciesData.noOxygen,
-         speciesData.noImprint);
+         speciesData.noImprint,
+         speciesData.bp);
    }
 
    // Sort species names for nicer display

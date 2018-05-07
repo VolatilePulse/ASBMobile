@@ -85,6 +85,7 @@
       ".vscode",
       "**/src/ark/servers_*.ts",
       "**/src/ark/test_data.ts",
+      "**/tests/unit/species.spec.ts",
       "**/public/data/*.json",
    ],
    "cSpell.enabledLanguageIds": [

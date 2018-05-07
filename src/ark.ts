@@ -97,6 +97,7 @@ export function GetMultipliers(server: Server, speciesName: string): StatMultipl
 
    // Find the settings for the species
    const speciesValues = theStore.speciesMultipliers[speciesName];
+   if (!speciesValues) throw new Error(`Unknown species '${speciesName}'`);
 
    const multipliers: StatMultipliers[] = [];
    for (let stat = HEALTH; stat <= TORPOR; stat++) {

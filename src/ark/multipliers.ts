@@ -58,10 +58,13 @@ export class StatSpeciesMultipliers {
 
 /** Groups together the multipliers for each stat for a species */
 export class SpeciesParameters {
+   blueprint: string;
    /**
     * Creates an array of StatSpeciesParameters from raw server config values.
     */
-   constructor(stats: number[][], TBHM = 1, oxygenNotUsed = false, speedImprintIgnored = false) {
+   constructor(stats: number[][], TBHM = 1, oxygenNotUsed = false, speedImprintIgnored = false, blueprint?: string) {
+      this.blueprint = blueprint;
+
       for (let i = consts.HEALTH; i <= consts.TORPOR; i++)
          this[i] = new StatSpeciesMultipliers(stats[i]);
 
