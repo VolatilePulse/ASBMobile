@@ -12,23 +12,17 @@
          "webRoot": "${workspaceFolder}"
       },
       {
-         "type": "node",
+         "type": "chrome",
          "request": "launch",
-         "name": "Launch Release",
-         // "runtimeExecutable": "node",
-         "program": "${workspaceFolder}/scripts/release.mjs",
-         "runtimeArgs": [
-            "--experimental-modules",
-         ],
-         "args": [
-            "-b",
-            "release/0.1.1-preview.0",
-         ],
+         "name": "Launch Canary against localhost",
+         "url": "http://localhost:8080",
+         "webRoot": "${workspaceFolder}",
+         "runtimeExecutable": "C:/Users/Zach/AppData/Local/Google/Chrome SxS/Application/chrome.exe"
       },
       {
          "type": "node",
          "request": "attach",
-         "name": "Attach by Process ID",
+         "name": "Attach to Node process",
          "processId": "${command:PickProcess}"
       },
    ]
