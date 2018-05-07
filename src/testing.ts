@@ -1,5 +1,6 @@
 import { Stat, TestData } from '@/ark/types';
 import { PRE_IB } from '@/consts';
+import { Server } from '@/data/objects';
 import { getServerById } from '@/servers';
 import { CompareFloat } from '@/utils';
 import { isArray, isFunction, isNumber, isObject, isString } from 'util';
@@ -26,8 +27,8 @@ export interface TestResult {
  * Fields set in the output vary based on the result.
  * @example PerformTest(test_data, performance.now.bind(performance));
  */
-export function PerformTest(testData: TestData, timingFn?: () => number): TestResult {
-   const server = getServerById(testData.serverId);
+export function PerformTest(testData: TestData, timingFn?: () => number, overrideServer?: Server): TestResult {
+   const server = overrideServer || getServerById(testData.serverId);
    if (!server) return { pass: false, exception: 'Unable to locate server' };
 
    // Set the properties to prepare for extraction
@@ -92,7 +93,7 @@ export function PerformTest(testData: TestData, timingFn?: () => number): TestRe
 /**
  * Run a test in performance mode, repeating it until `duration` is up and reporting on the average run time.
  */
-export function PerformPerfTest(testData: TestData, timingFn: () => number, duration = 5000, generateProfiler = false): TestResult {
+export function PerformPerfTest(testData: TestData, timingFn: () => number, duration = 5000, generateProfiler = false, overrideServer?: Server): TestResult {
    let runs = 0;
    let t1, t2;
    const cutoffTime = Date.now() + duration;
@@ -102,7 +103,7 @@ export function PerformPerfTest(testData: TestData, timingFn: () => number, dura
          console.profile(testData.tag);
       t1 = timingFn();
 
-      const server = getServerById(testData.serverId);
+      const server = overrideServer || getServerById(testData.serverId);
       if (!server) return { exception: 'Unable to locate server' };
 
       do {
