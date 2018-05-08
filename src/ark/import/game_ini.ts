@@ -24,6 +24,7 @@ function parseAndStoreField(main: { [name: string]: string }, mults: number[][],
 export function parseGameIni(iniText: string) {
    const ini = ParseIni(iniText).byName;
    const main = ini[BLOCK_SHOOTERGAMEMODE];
+   if (!main) return new Server(FilledArray(8, () => new Array(4)));
 
    let ibm: number;
    const ibmValue = main[FIELD_IBM];
@@ -43,16 +44,6 @@ export function parseGameIni(iniText: string) {
       parseAndStoreField(main, mults, iniI, statI, SERVER_IWM);
       parseAndStoreField(main, mults, iniI, statI, SERVER_IDM);
    });
-
-   // Remove entries that match Official
-   // TODO: Decide if this is the right thing to do.
-   // const officialMults = theStore.officialServer.multipliers;
-   // for (let statIndex = HEALTH; statIndex <= TORPOR; statIndex++) {
-   //    for (let paramIndex = 0; paramIndex < 4; paramIndex++) {
-   //       if (CompareFloat(mults[statIndex][paramIndex], officialMults[statIndex][paramIndex]))
-   //          delete mults[statIndex][paramIndex];
-   //    }
-   // }
 
    const server = new Server(mults, ibm, singlePlayer);
    return server;

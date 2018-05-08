@@ -91,7 +91,9 @@ function generateTests(node: Node) {
             expect(input).to.exist;
             const results = PerformTest(input, undefined, serverDef);
             expect(results).to.exist;
-            expect(results.options, 'no valid extraction options found').to.be.instanceof(Array).and.not.be.empty;
+            expect(results.options,
+               `no options for L${input.level} ${input.mode.toLowerCase()} ${input.species} \
+at ${creatureFile}`).to.be.instanceof(Array).and.not.be.empty;
          });
       });
 
