@@ -21,7 +21,7 @@
       <!-- tests list -->
       <div class="">
          <b-list-group class="m-0 p-0" dark>
-            <b-list-group-item v-for="(data,testIndex) in testData" class="p-0" :class="{'bg-dark':!results[testIndex]}" :key="testIndex">
+            <b-list-group-item v-for="(data,testIndex) in testData" class="p-0" :class="{'bg-dark':!results[testIndex],'bg-temp':data.temporary}" :key="testIndex">
                <div class="px-0 p-0 m-0">
                   <b-row class="p-1">
                      <b-col class="col">
@@ -151,6 +151,10 @@
 
 .bg-grey {
   background-color: #ddd;
+}
+
+.bg-temp {
+  background-color: rgb(68, 58, 58) !important;
 }
 
 .test-info {

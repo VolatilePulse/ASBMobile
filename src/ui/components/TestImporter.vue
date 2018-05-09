@@ -50,6 +50,8 @@ import { Component } from 'vue-property-decorator';
 import Common, { catchAsyncErrors } from '@/ui/behaviour/Common';
 import { parseExportedCreature } from '@/ark/import/ark_export';
 import { ReadDroppedBlob } from '@/utils';
+import test_data from '@/ark/test_data';
+import { TestData } from '@/ark/types';
 
 
 @Component({ name: 'TestImporter' })
@@ -71,8 +73,12 @@ export default class Testimporter extends Common {
       // Wait for all the FileReaders to complete
       const fileData = await Promise.all(loadPromises);
 
-      // Convert to a test and output
-      this.exportedTestInfo = fileData.map(ini => generateTestFromExport(ini, this.store.server._id)).join('\n');
+      // Convert to copy/pastable test data, then output it
+      this.exportedTestInfo = fileData.map(ini => generateTestData(ini, this.store.server._id)).join('\n');
+
+      // Convert to a test_data and add them as temporary tests
+      const newTests = fileData.map(ini => generateTest(ini, this.store.server._id));
+      test_data.splice(test_data.length, 0, ...newTests);
 
       // Scroll down once the DOM is updated
       await this.$nextTick();
@@ -81,7 +87,7 @@ export default class Testimporter extends Common {
 }
 
 
-function generateTestFromExport(ini: string, serverId: string): string {
+function generateTestData(ini: string, serverId: string): string {
    const data = parseExportedCreature(ini);
    return `{
    tag: '',
@@ -90,5 +96,21 @@ function generateTestFromExport(ini: string, serverId: string): string {
    serverId: '${serverId}',
    results: [],
 },`;
+}
+
+
+function generateTest(ini: string, serverId: string): TestData {
+   const data = parseExportedCreature(ini);
+   return {
+      tag: '',
+      species: data.species,
+      level: data.level,
+      imprint: data.imprint || 0,
+      mode: data.mode as any,
+      values: [...data.values],
+      serverId: serverId,
+      temporary: true,
+      results: [],
+   };
 }
 </script>

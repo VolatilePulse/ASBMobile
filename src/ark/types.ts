@@ -18,6 +18,7 @@ export interface TestData {
    values: number[];
    serverId: string;
    results: StatLike[][];
+   temporary?: boolean;
 }
 
 
