@@ -87,6 +87,12 @@ const servers: ServerDef[] = [
       singlePlayer: false,
       multipliers: [[], [, , 2], [], [], [, , 150], [, , 2], [, , 4]],
    },
+   {
+      name: 'High Ta (HP+DMG)',
+      IBM: 1,
+      singlePlayer: false,
+      multipliers: [[10_000], [], [], [], [], [10_000]],
+   },
 ];
 
 export default servers;
