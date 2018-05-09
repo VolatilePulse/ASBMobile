@@ -1,6 +1,5 @@
 import { FormatAllOptions, FormatOption, FormatOptions } from '@/ark';
 import { TEProps } from '@/ark/extractor';
-import { parseExportedCreature } from '@/ark/import/ark_export';
 import testData from '@/ark/test_data';
 import { Stat } from '@/ark/types';
 import { statNames } from '@/consts';
@@ -28,7 +27,6 @@ export default class TesterTab extends Common {
    fails = 0;
    running = false;
    accordionIndex?: number = null;
-   exportedTestInfo: string = null;
 
    statIndices = Utils.Range(8);
 
@@ -168,36 +166,4 @@ export default class TesterTab extends Common {
       this.passes = this.results.reduce((total: number, result: TestResult) => total + (result && result.pass === true && 1), 0);
       this.fails = this.results.reduce((total: number, result: TestResult) => total + (result && result.pass === false && 1), 0);
    }
-
-   /** Handle changes to the file-drop target */
-   @catchAsyncErrors
-   async dropFilesChange(files: FileList) {
-      this.exportedTestInfo = '';
-      const filesArray = Array.from(files);
-
-      // Get the Blobs out of the file list
-      const blobs = filesArray.map(data => data.slice());
-
-      // Start a FileReader for each Blob
-      const loadPromises = blobs.map(Utils.ReadDroppedBlob);
-
-      // Wait for all the FileReaders to complete
-      const fileData = await Promise.all(loadPromises);
-
-      // Convert to a test and output
-      this.exportedTestInfo = fileData.map(ini => generateTestFromExport(ini, this.store.server._id)).join('\n');
-   }
 }
-
-
-function generateTestFromExport(ini: string, serverId: string): string {
-   const data = parseExportedCreature(ini);
-   return `{
-   tag: '',
-   species: '${data.species}', level: ${data.level}, imprint: ${data.imprint || 0}, mode: '${data.mode}',
-   values: [${data.values.join(', ')}],
-   serverId: '${serverId}',
-   results: [],
-},`;
-}
-
