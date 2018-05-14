@@ -91,7 +91,7 @@ const servers: ServerDef[] = [
       name: 'High Ta (HP+DMG)',
       IBM: 1,
       singlePlayer: false,
-      multipliers: [[10_000], [], [], [], [], [10_000]],
+      multipliers: [[100_000], [], [], [], [], [100_000]],
    },
 ];
 
