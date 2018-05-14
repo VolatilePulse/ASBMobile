@@ -27,3 +27,4 @@ release.err
 [Dd]esktop.ini
 Thumbs.db
 tags
+*.tmp

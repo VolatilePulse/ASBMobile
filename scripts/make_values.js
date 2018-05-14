@@ -99,9 +99,13 @@ https.get(URL, res => {
       console.log("Applying overrides...");
       output = merge(output, OVERRIDES);
 
+      console.log("Saving old data...");
+      var oldData = JSON.parse(fs.readFileSync(OUTPUT).toString());
+
       console.log("Writing output to: " + OUTPUT);
-      var data = JSON.stringify(output);
-      fs.writeFileSync(OUTPUT, data);
+      fs.writeFileSync(OUTPUT, JSON.stringify(output));
+      fs.writeFileSync('new-data.json.tmp', nicelyStringify(output));
+      fs.writeFileSync('old-data.json.tmp', nicelyStringify(oldData));
 
       console.log("Completed.");
       console.log("");
@@ -109,11 +113,46 @@ https.get(URL, res => {
       var outputSize = fileSize(OUTPUT);
       var pct = Math.round((outputSize / valuesSize) * 10000) / 100;
       console.log(valuesSize + " bytes => " + outputSize + " bytes = " + pct + "%");
+
+      if (process.argv.findIndex(v => v === '--no-diff') == -1) {
+         var execFileSync = require('child_process').execFileSync;
+
+         for (let [exe, args] of DIFF_TOOLS) {
+            if (fs.existsSync(exe)) {
+               args = args.concat('old-data.json.tmp', 'new-data.json.tmp');
+               try {
+                  console.log(`Diff: ${exe} ${args.join(' ')}`);
+                  execFileSync(exe, args, { stdio: ['ignore', 'inherit', 'inherit', 'pipe'] });
+               }
+               catch (_) { }
+               return;
+            }
+         }
+
+         console.warn("Diff command not found (this does not affect the generated files)");
+      }
    });
 });
+
+
+const COMPRESS_ARRAYS_RE = /\[[ \t\r\n]+([ \t\r\n]+[-.0-9]+,)*([ \t\r\n]+[.0-9]+)[ \t\r\n]+\]/gm;
+
+const DIFF_TOOLS = [
+   ['C:\\Program Files\\Microsoft VS Code\\bin\\code.cmd', ['--diff']],
+   ['C:\\Program Files (x86)\\Microsoft VS Code\\bin\\code.cmd', ['--diff']],
+   ['C:\\Program Files (x86)\\WinMerge\\WinMergeU.exe', ['/e', '/x', '/u', '/wl', '/wr']],
+   ['C:\\Program Files\\Git\\usr\\bin\\diff.exe', ['-aBdub', '-F', '\": \"', '--color']],
+];
 
 
 function fileSize(path) {
    const stats = fs.statSync(path);
    return stats.size;
+}
+
+function nicelyStringify(data) {
+   var output = JSON.stringify(data, undefined, 2);
+   // compress numeric arrays down to one line
+   output = output.replace(COMPRESS_ARRAYS_RE, match => match.replace(/\s*\r?\n\s*/g, ' '));
+   return output;
 }

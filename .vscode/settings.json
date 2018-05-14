@@ -87,6 +87,7 @@
       "**/src/ark/test_data.ts",
       "**/tests/unit/species.spec.ts",
       "**/public/data/*.json",
+      "**/*data.json*",
    ],
    "cSpell.enabledLanguageIds": [
       "c",
