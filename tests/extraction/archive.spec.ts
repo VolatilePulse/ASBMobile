@@ -9,6 +9,7 @@ import fs from 'fs';
 import glob from 'glob';
 import path from 'path';
 import util from 'util';
+import { decodeBuffer } from '../common/decoding';
 import { initForExtraction } from '../common/init';
 
 /**
@@ -55,14 +56,14 @@ function discoverTestNodes(pathSegments: string[] = []): Node {
 
 /** Load and parse a Game.ini */
 async function loadGameIni(filename: string): Promise<Server> {
-   const content = await fsAsync.readFile(filename).then(buf => buf.toString());
+   const content = await fsAsync.readFile(filename).then(buf => decodeBuffer(buf));
    const server = parseGameIni(content);
    return server;
 }
 
 /** Load and parse an exported creature */
 async function loadCreature(filename: string): Promise<TestData> {
-   const content = await fsAsync.readFile(filename).then(buf => buf.toString());
+   const content = await fsAsync.readFile(filename).then(buf => decodeBuffer(buf));
    const input: any = parseExportedCreature(content);
    return input;
 }
