@@ -12,14 +12,6 @@
          "webRoot": "${workspaceFolder}"
       },
       {
-         "type": "chrome",
-         "request": "launch",
-         "name": "Launch Canary against localhost",
-         "url": "http://localhost:8080",
-         "webRoot": "${workspaceFolder}",
-         "runtimeExecutable": "C:/Users/Zach/AppData/Local/Google/Chrome SxS/Application/chrome.exe"
-      },
-      {
          "type": "node",
          "request": "attach",
          "name": "Attach to Node process",

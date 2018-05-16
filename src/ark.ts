@@ -103,7 +103,7 @@ export function GetMultipliers(server: Server, speciesName: string): StatMultipl
    for (let stat = HEALTH; stat <= TORPOR; stat++) {
       // Make up a set of multipliers, based on the species values and server multipliers
       multipliers[stat] = new StatMultipliers(speciesValues[stat]);
-      multipliers[stat].IBM = speciesValues[stat].noImprint ? IA.ZERO : IA(server.IBM);
+      multipliers[stat].IBM = speciesValues[stat].noImprint ? IA.ZERO : Number.isInteger(server.IBM) ? IA(server.IBM) : IA().boundedSingleton(server.IBM);
 
       // Apply single-player multipliers
       if (server.singlePlayer && theStore.officialServerSP.multipliers[stat]) {
