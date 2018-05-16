@@ -28,3 +28,4 @@ release.err
 Thumbs.db
 tags
 *.tmp
+*.log

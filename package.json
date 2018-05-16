@@ -5,6 +5,10 @@
   "author": "VolatilePulse",
   "private": true,
   "repository": "github:VolatilePulse/ASBMobile",
+  "bugs": {
+    "url": "https://github.com/VolatilePulse/ASBMobile/issues"
+  },
+  "homepage": "https://github.com/VolatilePulse/ASBMobile#readme",
   "main": "src/main.ts",
   "scripts": {
     "dev": "vue-cli-service serve",
@@ -15,7 +19,7 @@
     "test:unit": "vue-cli-service test tests/unit/.*\\.spec\\.ts",
     "test:perf": "vue-cli-service test tests/perf/.*\\.spec\\.ts",
     "test:data": "vue-cli-service test tests/extraction/embedded.*\\.spec\\.ts",
-    "test:archive": "vue-cli-service test tests/extraction/archive.*\\.spec\\.ts",
+    "test:archive": "vue-cli-service test tests/extraction/archive.*\\.spec\\.ts --reporters ./scripts/jest-dino-test-reporter.js",
     "lint": "vue-cli-service lint",
     "values": "node scripts/make_values.js",
     "gencert": "bash scripts/generate-ssl.sh",
@@ -60,6 +64,7 @@
     "linq": "^3.1.0",
     "local-web-server": "^2.5.1",
     "marked": "^0.3.19",
+    "moment": "^2.22.1",
     "node-sass": "^4.9.0",
     "performance-now": "^2.1.0",
     "sass-loader": "^6.0.6",

@@ -42,7 +42,7 @@ interface Node {
 function discoverTestNodes(pathSegments: string[] = []): Node {
    const name = pathSegments.length ? pathSegments[pathSegments.length - 1] : 'archive test data';
    const pathname = path.join(BASEPATH, ...pathSegments);
-   const subdirs = glob.sync('*/', { cwd: pathname });
+   const subdirs = glob.sync('*/', { cwd: pathname }).map(name => name.substring(0, name.length - 1));
    const gameIni = glob.sync('game.ini', { cwd: pathname, nocase: true });
    const creatureInis = glob.sync('*.ini', { cwd: pathname, nocase: true, ignore: '[Gg]ame.ini' });
    return {
@@ -91,10 +91,9 @@ function generateTests(node: Node) {
             const input = await loadCreature(creatureFile);
             expect(input).to.exist;
             const results = PerformTest(input, undefined, serverDef);
+            const detailsReport = ` [Lvl ${input.level} ${input.mode.toLowerCase()} ${input.species} at ${creatureFile}]`;
             expect(results).to.exist;
-            expect(results.options,
-               `no options for L${input.level} ${input.mode.toLowerCase()} ${input.species} \
-at ${creatureFile}`).to.be.instanceof(Array).and.not.be.empty;
+            expect(results.options, 'no options' + detailsReport).to.be.instanceof(Array).and.not.be.empty;
          });
       });
 
