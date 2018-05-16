@@ -42,7 +42,7 @@ interface Node {
 function discoverTestNodes(pathSegments: string[] = []): Node {
    const name = pathSegments.length ? pathSegments[pathSegments.length - 1] : 'archive test data';
    const pathname = path.join(BASEPATH, ...pathSegments);
-   const subdirs = glob.sync('*/', { cwd: pathname }).map(name => name.substring(0, name.length - 1));
+   const subdirs = glob.sync('*/', { cwd: pathname }).map(dirname => dirname.substring(0, dirname.length - 1));
    const gameIni = glob.sync('game.ini', { cwd: pathname, nocase: true });
    const creatureInis = glob.sync('*.ini', { cwd: pathname, nocase: true, ignore: '[Gg]ame.ini' });
    return {
