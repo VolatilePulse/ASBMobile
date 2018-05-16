@@ -88,6 +88,8 @@ export class Extractor {
    domFreeMax = 0;
    /** What level the creature was born/tamed at */
    levelBeforeDom = 0;
+   /** Contains the level the creature was tamed at */
+   tamedLevel = IA.ZERO;
    /** A running total of each stat's minimum wild stat levels */
    minWild = 0;
    /** A running total of each stat's minimum dom stat levels */
@@ -119,8 +121,6 @@ export class Extractor {
       Ld: 0,
       IB: IA.ZERO,
       TE: Utils.FilledArray(8, () => IA.ZERO),
-      tamedLevel: IA.ZERO,
-      wildLevel: IA.ZERO,
    };
 
    constructor(inputs: ExtractorInput) {
@@ -143,11 +143,11 @@ export class Extractor {
       // Change variables based on wild, tamed, bred
       if (this.input.wild) {
          this.rangeVars.TE = Utils.FilledArray(8, () => IA.ZERO);
-         this.rangeVars.IB = /*this.input.IB = */IA.ZERO;  // TODO: Check you're happy with this
+         this.rangeVars.IB = IA.ZERO;
       }
       else if (this.input.tamed) {
          this.rangeVars.TE = Utils.FilledArray(8, () => IA(0, 1));
-         this.rangeVars.IB = /*this.input.IB = */IA.ZERO;  // TODO: Check you're happy with this
+         this.rangeVars.IB = IA.ZERO;
       }
       else {
          this.rangeVars.TE = Utils.FilledArray(8, () => IA.ONE);
@@ -159,10 +159,8 @@ export class Extractor {
          incomingM[statIndex].Tm = this.input.wild ? IA.ZERO : incomingM[statIndex].Tm;
          incomingM[statIndex].TBHM = this.input.wild ? IA.ONE : incomingM[statIndex].TBHM;
 
-         if (IA.lt(incomingM[statIndex].Tm, IA.ZERO)) {
-            this.rangeVars.TE[statIndex] = IA(0.999, 1); // FIXME: This seems very wrong   - Yes, it is!
+         if (IA.lt(incomingM[statIndex].Tm, IA.ZERO))
             this.rangeVars.TE[statIndex] = IA(1);
-         }
       }
 
       // Set the modifiers into this, making them read-only
@@ -203,7 +201,7 @@ export class Extractor {
          const boundRangeLd = IA(0, this.domFreeMax - this.minDom);
 
          // Set range to be used for TE calculations
-         this.rangeVars.tamedLevel = IA().halfOpenRight(this.levelBeforeDom, this.levelBeforeDom + 1);
+         this.tamedLevel = IA().halfOpenRight(this.levelBeforeDom, this.levelBeforeDom + 1);
 
          // If it's bred, we need to do some magic with the IB
          if (this.input.bred)
@@ -242,21 +240,12 @@ export class Extractor {
                   this.isTEStat[statIndex] = true;
                }
 
-               /*
-               let methToCall = (!this.input.tamed || IA.leq(this.m[statIndex].Tm, IA.ZERO)) ? this.nonTEStatCalculation.bind(this) : undefined;
-               if (!methToCall) {
-                  // Call a different function if we already added some TE stats
-                  methToCall = (localMap.size === 0) ? this.findTEStats.bind(this) : this.findMultiTEStat.bind(this);
-                  this.isTEStat[statIndex] = true;
-               }
-               */
-
                // Loop all possible Lws
                for (this.rangeVars.Lw of intFromRangeReverse(rangeLw)) {
                   /** Pre-calculated value of (1 + Lw * IW) */
                   const preCalcWildValue = IA.add(IA.ONE, IA.mul(IA(this.rangeVars.Lw), this.m[statIndex].Iw));
 
-                  /** Pre-calculated value of B * TBHM * (1 + Lw * Iw) * (1 + IB * IBM) + Ta */
+                  /** Pre-calculated value of V / (B * TBHM * (1 + Lw * Iw) * (1 + IB * IBM) + Ta) */
                   const preCalcValue = IA.div(this.values[statIndex], IA.add(
                      IA.mul(IA.mul(preCalcBaseValue, preCalcWildValue), preCalcIBValue), this.m[statIndex].Ta));
 
@@ -409,31 +398,19 @@ export class Extractor {
       const localVars = this.rangeVars;
 
       for (localVars.Ld of intFromRange(rangeLd)) {
-         // FIXME: shouldn't be modifying the TE
          let tempTE = calcTE(this.values[statIndex], localVars.Lw, localVars.Ld, localVars.IB, localStats);
-
-         // If the range is greater than 1
-         if (IA.gt(tempTE, IA.ONE))
-            continue;
-
-         // If the range is less than 0, it will only continue to get smaller
-         if (IA.lt(tempTE, IA.ZERO))
-            break;
 
          tempTE = IA.intersection(tempTE, IA(0, 1));
 
-         const rangeWL = calcWL(localVars.tamedLevel, tempTE);
+         const rangeWL = calcWL(this.tamedLevel, tempTE);
 
          for (const wildLevel of intFromRange(rangeWL, Math.ceil)) {
-            localVars.wildLevel = IA(wildLevel);
-            let tempTERange = calcTEFromWL(localVars.tamedLevel, localVars.wildLevel);
-            tempTERange = IA.intersection(tempTE, tempTERange);
+            const tempTERange = IA.intersection(tempTE, calcTEFromWL(this.tamedLevel, IA(wildLevel)));
 
             // Valid range
             if (!IA.isEmpty(tempTERange)) {
                const TEStat = new TEProps();
                TEStat.wildLevel = wildLevel;
-               // Get the average of the TE range
                TEStat.TE = tempTERange;
 
                const workingStat = new Stat(localVars.Lw, localVars.Ld);

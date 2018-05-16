@@ -13,22 +13,8 @@
       },
       {
          "type": "node",
-         "request": "launch",
-         "name": "Launch Release",
-         // "runtimeExecutable": "node",
-         "program": "${workspaceFolder}/scripts/release.mjs",
-         "runtimeArgs": [
-            "--experimental-modules",
-         ],
-         "args": [
-            "-b",
-            "release/0.1.1-preview.0",
-         ],
-      },
-      {
-         "type": "node",
          "request": "attach",
-         "name": "Attach by Process ID",
+         "name": "Attach to Node process",
          "processId": "${command:PickProcess}"
       },
    ]

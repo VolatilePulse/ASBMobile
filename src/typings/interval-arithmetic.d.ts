@@ -45,6 +45,10 @@ declare class Interval {
    readonly lo: number;
    readonly hi: number;
 
+   bounded(range: Interval): Interval;
+   bounded(lo: number, hi: number): Interval;
+   boundedSingleton(value: number): Interval;
+
    open(lo: number, hi: number): Interval;
    halfOpenRight(lo: number, hi: number): Interval;
    halfOpenLeft(lo: number, hi: number): Interval;
