@@ -25,21 +25,42 @@ const HEIGHTS = {
    Aberrant Achatina
    Aberrant Arthropluera
    Aberrant Dimetrodon
-   Aberrant Dimorphodon
+   Aberrant Diplocaulus
    Aberrant Dung Beetle
    Aberrant Otter
    Aberrant Titanoboa
+   Achatina
+   Arthropluera
+   Compy
+   Dimetrodon
+   Diplocaulus
+   Dung Beetle
+   Glowtail
+   Otter
+   Titanoboa
    `,
    45: `
    Aberrant Araneo
    Aberrant Beelzebufo
-   Aberrant Diplocaulus
    Aberrant Dodo
    Aberrant Lystrosaurus
+   Araneo
+   Archaeopteryx
+   Beelzebufo
+   Bulbdog
+   Dilophosaur
+   Dodo
+   Lystrosaurus
+   Troodon
    `,
    75: `
    Aberrant Doedicurus
    Aberrant Megalania
+   Direwolf
+   Doedicurus
+   Hyaenodon
+   Megalania
+   Shinehorn
    `,
    100: `
    Aberrant Ankylosaurus
@@ -47,40 +68,78 @@ const HEIGHTS = {
    Aberrant Dire Bear
    Aberrant Equus
    Aberrant Gigantopithecus
-   Aberrant Iguanodon
    Aberrant Moschops
    Aberrant Ovis
    Aberrant Parasaur
-   Aberrant Purlovia
+   Ankylosaurus
+   Baryonyx
+   Castoroides
+   Direbear
+   Equus
+   Gigantopithecus
+   Moschops
+   Ovis
+   Parasaur
    `,
    150: `
+   Aberrant Iguanodon
    Aberrant Raptor
-   Aberrant Sarco
    Aberrant Triceratops
+   Iguanodon
+   Raptor
+   Triceratops
    `,
    200: `
    Aberrant Carnotaurus
+   Aberrant Sarco
+   Argentavis
+   Carnotaurus
+   Sarco
    `,
    300: `
    Aberrant Stegosaurus
+   Allosaurus
+   Stegosaurus
    `,
    500: `
    Aberrant Diplodocus
    Aberrant Paraceratherium
    Aberrant Spino
+   Brontosaurus
+   Diplodocus
+   Paracer
+   Spino
    `,
+   1000: `
+   Giganotosaurus
+   `,
+   1500: `
+   Dragon
+   `
 }
 
 const WATER = `
    Aberrant Electrophorus
    Aberrant Anglerfish
    Aberrant Manta
+   Basilosaurus
+   Dunkleosteus
+   Electrophorus
+   Anglerfish
+   Manta
 `;
 
 const OVERRIDES = {
    species: {
       'Aberrant Megalosaurus': { optionsAngle: 315 },
       'Aberrant Moschops': { optionsAngle: 270 },
+      'Megalosaurus': { optionsAngle: 315 },
+      'Moschops': { optionsAngle: 270 },
+      'Griffin': { optionsAngle: 270 },
+      'Bulbdog': { optionsAngle: 315 },
+      'Featherlight': { optionsAngle: 315 },
+      'Glowtail': { optionsAngle: 315 },
+      'Shinehorn': { optionsAngle: 315 },
    },
 };
 
@@ -88,7 +147,19 @@ const DISBALED = `
    Aberrant Baryonyx  // forcetame - look up
    Aberrant Beelzebufo  // forcetame - look down
    Aberrant Carnotaurus // forcetame - ?
+   Aberrant Dimorphodon  // flyer with ramdom spawn behaviour
    Aberrant Pulmonoscorpius // forcetame - move backwards
+   Aberrant Purlovia  // spawns in buried form sometimes
+   Dragon  // can't be exported
+   Baryonyx  // forcetame - look up
+   Beelzebufo  // forcetame - look down
+   Carnotaurus // forcetame - ?
+   Dimorphodon  // flyer with ramdom spawn behaviour
+   Featherlight  // flyer with random spawn behaviour
+   Gallimimus  // forcetame - move backwards
+   Hesperornis  // forcetame - spawns to the side
+   Pulmonoscorpius // forcetame - move backwards
+   Purlovia  // spawns in buried form sometimes
 `;
 
 
@@ -143,7 +214,13 @@ https.get(URL, res => {
       for (var [height, block] of Object.entries(HEIGHTS)) {
          var names = linq.from(block.split('\n')).where(s => s && s.trim()).select(s => s.trim()).toArray();
          for (var name of names) {
-            output.species[name].spawnHeight = height;
+            try {
+               output.species[name].spawnHeight = height;
+            }
+            catch (ex) {
+               console.error("Not found: " + name);
+               throw ex;
+            }
          }
       }
 
