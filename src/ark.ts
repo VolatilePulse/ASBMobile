@@ -76,6 +76,8 @@ export function ConvertValue(value: number, index: number, source: CreatureDataS
    }
    else if (source === 'ark_export') {
       precision = 6;
+      if (index === DAMAGE || index === SPEED)
+         precision = 4;
    }
    else {
       throw new Error('Invalid data source');
