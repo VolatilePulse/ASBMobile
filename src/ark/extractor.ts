@@ -435,12 +435,13 @@ export class Extractor {
          // Loop Ld range
          for (tempStat.Ld of intFromRange(rangeForLd)) {
             // Makes sure duplicate stats aren't being added
-            if (localStats.find(stat => tempStat.isEqual(stat)))
+            if (localStats.find(stat => tempStat.isEqual(stat) && IA.equal(map.get(stat).TE, statTE.TE)))
                continue;
 
             // Add stat
-            localStats.push(tempStat);
-            map.set(tempStat, statTE);
+            const goodStat = new Stat(tempStat);
+            localStats.push(goodStat);
+            map.set(goodStat, statTE);
          }
       });
    }
@@ -512,7 +513,7 @@ export class Extractor {
             for (const stat of this.stats[statIndex]) {
                const currentTEstat = map.get(stat);
                const testingTEstat = map.get(TEstat);
-               if (testingTEstat !== undefined && currentTEstat.TE === testingTEstat.TE)
+               if (currentTEstat.wildLevel === testingTEstat.wildLevel && IA.equal(currentTEstat.TE, testingTEstat.TE))
                   return true;
             }
             return false;
@@ -560,7 +561,7 @@ export class Extractor {
       const indexMax = localStats.length - 1;
       let runningWild = 0;
       let runningDom = 0;
-      let runningTE = -1;
+      let runningTE = IA(-1);
       let currentTE = runningTE;
       let statIndexTE = 0;
       let statIndex = 0;
@@ -586,8 +587,8 @@ export class Extractor {
          if (localMap.size > 0) {
             const tempTE = localMap.get(localStat);
             if (tempTE !== undefined) {
-               currentTE = intervalAverage(tempTE.TE);
-               if (runningTE === -1) {
+               currentTE = tempTE.TE;
+               if (IA.equal(runningTE, IA(-1))) {
                   runningTE = currentTE;
                   statIndexTE = statIndex;
                }
@@ -595,11 +596,11 @@ export class Extractor {
          }
 
          // If we are at the last stat
-         if (statIndex === indexMax && (runningWild === freeWild || this.unusedStat) && runningDom === freeDom && currentTE === runningTE)
+         if (statIndex === indexMax && (runningWild === freeWild || this.unusedStat) && runningDom === freeDom && IA.equal(currentTE, runningTE))
             this.options.push(tempStatOption.slice());
 
          // Otherwise we need to continue to the next stat index
-         if (statIndex !== indexMax && runningWild <= freeWild && runningDom <= freeDom && currentTE === runningTE) {
+         if (statIndex !== indexMax && runningWild <= freeWild && runningDom <= freeDom && IA.equal(currentTE, runningTE)) {
             statIndex++;
             continue;
          }
@@ -618,7 +619,7 @@ export class Extractor {
                runningDom -= localStat.Ld;
             }
             if (statIndexTE === statIndex)
-               runningTE = -1;
+               runningTE = IA(-1);
             currentTE = runningTE;
             statIndices[statIndex]++;
          } while (statIndices[statIndex] === indexMaxArray[statIndex]);
