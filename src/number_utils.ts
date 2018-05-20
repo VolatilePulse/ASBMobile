@@ -1,5 +1,5 @@
 import IA from 'interval-arithmetic';
-import nextafterf32 from 'math-float32-nextafter';
+import nextfloat32 from 'math-float32-nextafter';
 
 /** @fileOverview Number and Interval arithmetic helper functions */
 
@@ -10,7 +10,7 @@ import nextafterf32 from 'math-float32-nextafter';
  */
 export function intervalFromDecimal(value: number, places: number): Interval {
    const offset = IA.mul(IA(5), IA.pow(IA(10), IA(-(places + 1))));
-   return IA().halfOpenRight(value - offset.lo, value + offset.hi);
+   return IA().halfOpenRight(floatRange(value - offset.lo).lo, floatRange(value + offset.hi).hi);
 }
 
 /** Return the average of an Interval */
@@ -21,7 +21,7 @@ export function intervalAverage(range: Interval): number {
 /** Returns the Interval range of the previous and next float representation of value */
 export function floatRange(value: number) {
    if (value === 0) return IA.ZERO;
-   return IA(nextafterf32(value, -Infinity), nextafterf32(value, Infinity));
+   return IA(nextfloat32(value, -Infinity), nextfloat32(value, Infinity));
 }
 
 

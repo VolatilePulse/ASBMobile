@@ -196,10 +196,6 @@ export class Extractor {
          this.levelBeforeDom = this.stats[TORPOR][0].Lw + 1;
          this.domFreeMax = Math.max(this.input.level - this.wildFreeMax - 1, 0);
 
-         // Ranges to restrict Lw and Ld to
-         const boundRangeLw = IA(0, this.wildFreeMax - this.minWild);
-         const boundRangeLd = IA(0, this.domFreeMax - this.minDom);
-
          // Set range to be used for TE calculations
          this.tamedLevel = IA().halfOpenRight(this.levelBeforeDom, this.levelBeforeDom + 1);
 
@@ -215,6 +211,10 @@ export class Extractor {
 
             /** Pre-calculated value (1 + IB * IBM) */
             const preCalcIBValue = IA.add(IA.ONE, IA.mul(this.rangeVars.IB, this.m[statIndex].IBM));
+
+            // Ranges to restrict Lw and Ld to
+            const boundRangeLw = IA(0, this.wildFreeMax - this.minWild);
+            const boundRangeLd = IA(0, this.domFreeMax - this.minDom);
 
             // Covers unused stats like oxygen
             if (!this.uniqueStatSituation(statIndex)) {
@@ -255,29 +255,29 @@ export class Extractor {
                   if (!IA.isEmpty(rangeLd))
                      calcStatsFn(statIndex, rangeLd, localMap, preCalcValue);
                }
-            }
 
-            if (this.stats[statIndex].length === 1) {
-               this.wildFreeMax -= this.stats[statIndex][0].Lw;
-               this.domFreeMax -= this.stats[statIndex][0].Ld;
-               this.checkedStat[statIndex] = true;
-            }
-            else if (this.stats[statIndex].length > 1) {
-               let tempWM = this.wildFreeMax, tempDM = this.domFreeMax;
-               for (const stat of this.stats[statIndex]) {
-                  if (tempWM > stat.Lw)
-                     tempWM = stat.Lw;
-                  if (tempDM > stat.Ld)
-                     tempDM = stat.Ld;
+               if (this.stats[statIndex].length === 1) {
+                  this.wildFreeMax -= this.stats[statIndex][0].Lw;
+                  this.domFreeMax -= this.stats[statIndex][0].Ld;
+                  this.checkedStat[statIndex] = true;
                }
-               this.wildMin[statIndex] = tempWM; this.domMin[statIndex] = tempDM;
-               this.minWild += tempWM;
-               this.minDom += tempDM;
-            }
+               else if (this.stats[statIndex].length > 1) {
+                  let tempWM = this.wildFreeMax, tempDM = this.domFreeMax;
+                  for (const stat of this.stats[statIndex]) {
+                     if (tempWM > stat.Lw)
+                        tempWM = stat.Lw;
+                     if (tempDM > stat.Ld)
+                        tempDM = stat.Ld;
+                  }
+                  this.wildMin[statIndex] = tempWM; this.domMin[statIndex] = tempDM;
+                  this.minWild += tempWM;
+                  this.minDom += tempDM;
+               }
 
-            // No stat possibilities were found for this stat
-            else
-               this.success = false;
+               // No stat possibilities were found for this stat
+               else
+                  this.success = false;
+            }
          }
 
          // All creatures, even wild, need their stats filtered
