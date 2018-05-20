@@ -1,5 +1,5 @@
 import IA from 'interval-arithmetic';
-import nextafter from 'math-float32-nextafter';
+import nextafterf32 from 'math-float32-nextafter';
 
 /** @fileOverview Number and Interval arithmetic helper functions */
 
@@ -21,7 +21,7 @@ export function intervalAverage(range: Interval): number {
 /** Returns the Interval range of the previous and next float representation of value */
 export function floatRange(value: number) {
    if (value === 0) return IA.ZERO;
-   return IA(nextafter(value, -Infinity), nextafter(value, Infinity));
+   return IA(nextafterf32(value, -Infinity), nextafterf32(value, Infinity));
 }
 
 
