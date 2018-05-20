@@ -82,15 +82,6 @@ https.get(URL, res => {
             let newName = SPECIES_FIELDS[field];
             result[newName] = cloneDeep(speciesData[field]);
          }
-
-         // FIXME: Remove this when input data is corrected
-         // Temporary fix for Aberrant variety:
-         //     TBHM being 96% of regular TBHM
-         //     Negative Health Tm is zero
-         if (speciesData.name.startsWith('Aberrant')) {
-            result['TBHM'] = (result['TBHM'] || 1) * 0.96;
-            result['stats'][0][4] = 0; // set Health Tm to zero
-         }
       }
 
       console.log("Species: " + speciesCount);
