@@ -91,7 +91,7 @@ function generateTestData(ini: string, serverId: string): string {
    const data = parseExportedCreature(ini);
    return `{
    tag: '',
-   species: '${data.species}', level: ${data.level}, imprint: ${data.imprint || 0}, mode: '${data.mode}',
+   species: '${data.species}', level: ${data.level}, imprint: ${data.imprint || 0}, mode: '${data.mode}', source: \'ark_export\',
    values: [${data.values.join(', ')}],
    serverId: '${serverId}',
    results: [],
