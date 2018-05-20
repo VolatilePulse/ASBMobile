@@ -52,6 +52,7 @@ import { parseExportedCreature } from '@/ark/import/ark_export';
 import { ReadDroppedBlob } from '@/utils';
 import test_data from '@/ark/test_data';
 import { TestData } from '@/ark/types';
+import { CreatureDataSource } from '@/ark';
 
 
 @Component({ name: 'TestImporter' })
@@ -91,7 +92,7 @@ function generateTestData(ini: string, serverId: string): string {
    const data = parseExportedCreature(ini);
    return `{
    tag: '',
-   species: '${data.species}', level: ${data.level}, imprint: ${data.imprint || 0}, mode: '${data.mode}', source: \'ark_export\',
+   species: '${data.species}', level: ${data.level}, imprint: ${data.imprint || 0}, mode: '${data.mode}', source: '${data.source}',
    values: [${data.values.join(', ')}],
    serverId: '${serverId}',
    results: [],
@@ -107,6 +108,7 @@ function generateTest(ini: string, serverId: string): TestData {
       level: data.level,
       imprint: data.imprint || 0,
       mode: data.mode as any,
+      source: data.source as CreatureDataSource,
       values: [...data.values],
       serverId: serverId,
       temporary: true,
