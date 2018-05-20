@@ -385,7 +385,7 @@ const testData: TestData[] = [
       species: 'Aberrant Carbonemys', level: 37, imprint: 0, mode: 'Tamed', source: 'ark_export',
       values: [67000.757813, 320, 150, 4800, 334.799927, 6479890.2344, 180.20000000000002, 275.5],
       serverId: 'test:High Ta (HP+DMG)',
-      results: [],
+      results: [[{ Lw: 0, Ld: 6 }], [{ Lw: 0, Ld: 6 }], [{ Lw: -1, Ld: 0 }], [{ Lw: 0, Ld: 6 }], [{ Lw: 0, Ld: 6 }], [{ Lw: 0, Ld: 6 }], [{ Lw: -1, Ld: 6 }], [{ Lw: 0, Ld: 0 }]],
    },
    {
       tag: 'Fresh tame',
@@ -449,6 +449,48 @@ const testData: TestData[] = [
       values: [66250.84375, 160, 240, 828, 62, 12959649.2188, 318, 30.5],
       serverId: 'test:High Ta (HP+DMG)',
       results: [[{ Lw: 0, Ld: 6 }], [{ Lw: 0, Ld: 6 }], [{ Lw: 0, Ld: 6 }], [{ Lw: 0, Ld: 6 }], [{ Lw: 0, Ld: 6 }], [{ Lw: 0, Ld: 6 }], [{ Lw: 0, Ld: 6 }], [{ Lw: 0, Ld: 0 }]],
+   },
+   {
+      tag: '',
+      species: 'Griffin', level: 272, imprint: 0, mode: 'Tamed', source: 'ark_export',
+      values: [9483.404297, 2296.575195, 825, 6605.827637, 459.200012, 252.0441, 136.5, 20760.5],
+      serverId: 'predef:Official Server',
+      results: [[{ Lw: 39, Ld: 16 }], [{ Lw: 39, Ld: 41 }], [{ Lw: 45, Ld: 0 }], [{ Lw: 26, Ld: 0 }], [{ Lw: 32, Ld: 0 }], [{ Lw: 33, Ld: 0 }], [{ Lw: 0, Ld: 0 }], [{ Lw: 214, Ld: 0 }]],
+   },
+   {
+      tag: '',
+      species: 'Poison Wyvern', level: 217, imprint: 72.7273, mode: 'Bred', source: 'ark_export',
+      values: [16323.027344, 1389.4375, 525, 8934.545898, 641.45459, 386.2843, 100, 8753.491211],
+      serverId: 'predef:Official Server',
+      results: [[{ Lw: 26, Ld: 22 }], [{ Lw: 27, Ld: 23 }], [{ Lw: 25, Ld: 0 }], [{ Lw: 29, Ld: 0 }], [{ Lw: 20, Ld: 0 }], [{ Lw: 32, Ld: 12 }], [{ Lw: 0, Ld: 0 }], [{ Lw: 159, Ld: 0 }]],
+   },
+   {
+      tag: '',
+      species: 'Lystrosaurus', level: 296, imprint: 100, mode: 'Bred', source: 'ark_export',
+      values: [1123.27002, 380, 903, 3588.000244, 389.836792, 466.87200000000007, 320, 2078.900146],
+      serverId: 'predef:Official Server',
+      results: [[{ Lw: 47, Ld: 0 }], [{ Lw: 28, Ld: 0 }, { Lw: 10, Ld: 9 }], [{ Lw: 32, Ld: 0 }, { Lw: 20, Ld: 4 }], [{ Lw: 42, Ld: 0 }, { Lw: 30, Ld: 3 }, { Lw: 10, Ld: 16 }], [{ Lw: 91, Ld: 7 }, { Lw: 44, Ld: 23 }], [{ Lw: 45, Ld: 0 }], [{ Lw: 34, Ld: 0 }, { Lw: 29, Ld: 0 }, { Lw: 19, Ld: 0 }], [{ Lw: 272, Ld: 0 }]],
+   },
+   {
+      tag: '',
+      species: 'Pteranodon', level: 331, imprint: 54.000099999999996, mode: 'Bred', source: 'ark_export',
+      values: [6754.974609, 630, 765, 7645.20166, 224.596069, 472.70570000000004, 135, 2295.390137],
+      serverId: 'predef:Official Server',
+      results: [[{ Lw: 58, Ld: 52 }], [{ Lw: 50, Ld: 5 }], [{ Lw: 41, Ld: 0 }], [{ Lw: 40, Ld: 0 }], [{ Lw: 32, Ld: 1 }], [{ Lw: 50, Ld: 1 }], [{ Lw: 0, Ld: 0 }], [{ Lw: 271, Ld: 0 }]],
+   },
+   {
+      tag: '',
+      species: 'Daeodon', level: 321, imprint: 0, mode: 'Tamed', source: 'ark_export',
+      values: [10256.507813, 1325, 645, 59512.078125, 1035.839966, 416.1294, 130, 13664.5],
+      serverId: 'test:Dusty.P',
+      results: [],
+   },
+   {
+      tag: '',
+      species: 'Aberrant Ovis', level: 77, imprint: 0, mode: 'Tamed', source: 'ark_export',
+      values: [260.070007, 140, 195, 7452, 221.615997, 157.584, 100, 258.899994],
+      serverId: 'test:Dusty.P',
+      results: [],
    },
 ];
 
