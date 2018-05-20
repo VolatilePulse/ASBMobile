@@ -3,14 +3,17 @@
       <!-- control buttons -->
       <div class="clearfix">
          <b-button-toolbar class="float-right mb-3">
-            <b-button-group class="mr-2">
+            <b-button-group v-if="running" class="mr-2">
                <b-button v-show="running" variant="link" disabled>...running...</b-button>
             </b-button-group>
-            <b-button-group class="mr-2">
-               <b-button v-if="passes" variant="success" title="Click to re-run passes" :disabled="running" @click="runPasses">
+            <b-button-group v-else class="mr-2">
+               <b-button v-if="passes" size="sm" variant="success" title="Click to re-run passes" :disabled="running" @click="runPasses">
                   {{passes}} pass{{passes==1?'':'es'}}
                </b-button>
-               <b-button v-if="fails" variant="danger" title="Click to re-run fails" :disabled="running" @click="runFails">
+               <b-button v-if="partials" size="sm" variant="warning" title="Click to re-run partials" :disabled="running" @click="runPartials">
+                  {{partials}} with options
+               </b-button>
+               <b-button v-if="fails" size="sm" variant="danger" title="Click to re-run fails" :disabled="running" @click="runFails">
                   {{fails}} fail{{fails==1?'':'s'}}
                </b-button>
             </b-button-group>
@@ -49,15 +52,16 @@
                         </div>
                      </b-col>
 
+                     <!-- status badge -->
                      <div class="float-right mr-3 pr-0">
-                        <span v-if="isPass(testIndex)">
-                           <span v-if="results[testIndex] && results[testIndex]['duration'] != undefined" class="badge badge-success badge-pill timepill">
-                              {{formatNumber(results[testIndex]['duration'], 1)}}
+                        <span v-if="results[testIndex]" class="badge badge-pill" :class="badgeClasses(testIndex)">
+                           <span v-if="results[testIndex]['duration']">{{formatNumber(results[testIndex]['duration'], 1)}}
                               <span style="font-size:85%">ms</span>
                            </span>
-                           <span v-else class="badge badge-info badge-pill resultpill">PASS</span>
+                           <template v-else-if="isPass(testIndex)">PASS</template>
+                           <template v-else-if="isPartial(testIndex)">PART</template>
+                           <template v-else-if="isFail(testIndex)">FAIL</template>
                         </span>
-                        <span v-else-if="isFail(testIndex)" class="badge badge-danger badge-pill resultpill">FAIL</span>
                      </div>
                   </b-row>
                </div>
@@ -129,7 +133,7 @@
 </template>
 
 
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .resultpill {
   font-size: 75%;
   width: 3rem;

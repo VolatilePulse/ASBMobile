@@ -24,6 +24,7 @@ export default class TesterTab extends Common {
    results: TestResult[] = [];
    testServers: Server[] = [];
    passes = 0;
+   partials = 0;
    fails = 0;
    running = false;
    accordionIndex?: number = null;
@@ -35,7 +36,8 @@ export default class TesterTab extends Common {
 
    openResults(index: number) { this.openTestIndex = (this.openTestIndex !== index) ? index : null; }
    isPass(index: number) { return this.results[index] && this.results[index]['pass']; }
-   isFail(index: number) { return this.results[index] && !this.results[index]['pass']; }
+   isPartial(index: number) { return this.results[index] && !this.results[index]['pass'] && this.results[index].options && this.results[index].options.length; }
+   isFail(index: number) { return this.results[index] && !this.results[index]['pass'] && !(this.results[index].options && this.results[index].options.length); }
    formatNumber(n: number, places = 0) { return Utils.FormatNumber(n, places); }
    formattedOptions(options: Stat[]) { return options ? FormatOptions(options) : '-'; }
    formattedStats(stats: Stat[][]) { return FormatAllOptions(stats); }
@@ -67,6 +69,27 @@ export default class TesterTab extends Common {
       }
 
       return undefined;
+   }
+
+   badgeClasses(testIndex: number): string[] {
+      const classes: string[] = [];
+      const result: TestResult = this.results[testIndex];
+      const hasOptions = result.options && result.options.length;
+      if (!result) return classes;
+
+      if (result.duration && (result.pass || hasOptions))
+         classes.push('timepill');
+      else
+         classes.push('resultpill');
+
+      if (result.pass)
+         classes.push('badge-success');
+      else if (hasOptions)
+         classes.push('badge-warning');
+      else
+         classes.push('badge-danger');
+
+      return classes;
    }
 
    optionWildLevel(testIndex: number, optionIndex: number): string {
@@ -155,6 +178,13 @@ export default class TesterTab extends Common {
       await this.runTestSelection(Utils.Range(testData.length).filter(i => this.results[i] && this.results[i].pass));
    }
 
+   /** Re-run the partials */
+   @catchAsyncErrors
+   async runPartials() {
+      await this.runTestSelection(Utils.Range(testData.length).filter(i => this.results[i] && !this.results[i]['pass'] &&
+         this.results[i].options && this.results[i].options.length));
+   }
+
    /** Re-run the failures */
    @catchAsyncErrors
    async runFails() {
@@ -164,6 +194,8 @@ export default class TesterTab extends Common {
    /** Count the number of passes and fails, excluding those that haven't run */
    updateStatus() {
       this.passes = this.results.reduce((total: number, result: TestResult) => total + (result && result.pass === true && 1), 0);
-      this.fails = this.results.reduce((total: number, result: TestResult) => total + (result && result.pass === false && 1), 0);
+      this.partials = this.results.reduce((total: number, result: TestResult) => total +
+         (result && !result.pass && result.options && result.options.length && 1), 0);
+      this.fails = this.results.length - this.passes - this.partials;
    }
 }
