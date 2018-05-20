@@ -1,4 +1,5 @@
 import * as consts from '@/consts';
+import { floatRange } from '@/number_utils';
 import IA from 'interval-arithmetic';
 
 
@@ -16,13 +17,13 @@ export class StatMultipliers {
    notUsed: boolean = false;
 
    constructor(mult: StatSpeciesMultipliers) {
-      this.B = Number.isInteger(mult.B) ? IA(mult.B) : IA().boundedSingleton(mult.B);
-      this.Id = Number.isInteger(mult.Id) ? IA(mult.Id) : IA().boundedSingleton(mult.Id);
-      this.Iw = Number.isInteger(mult.Iw) ? IA(mult.Iw) : IA().boundedSingleton(mult.Iw);
-      this.Ta = Number.isInteger(mult.Ta) ? IA(mult.Ta) : IA().boundedSingleton(mult.Ta);
-      this.Tm = Number.isInteger(mult.Tm) ? IA(mult.Tm) : IA().boundedSingleton(mult.Tm);
+      this.B = floatRange(mult.B);
+      this.Id = floatRange(mult.Id);
+      this.Iw = floatRange(mult.Iw);
+      this.Ta = floatRange(mult.Ta);
+      this.Tm = floatRange(mult.Tm);
 
-      this.TBHM = !mult.TBHM ? IA.ONE : Number.isInteger(mult.TBHM) ? IA(mult.TBHM) : IA().boundedSingleton(mult.TBHM);
+      this.TBHM = !mult.TBHM ? IA.ONE : floatRange(mult.TBHM);
 
       this.notUsed = mult.notUsed;
    }

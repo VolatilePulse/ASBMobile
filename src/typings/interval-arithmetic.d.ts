@@ -27,6 +27,7 @@ declare interface IntervalArithmeticStatic {
    div(a: Interval, b: Interval): Interval;
    add(a: Interval, b: Interval): Interval;
    sub(a: Interval, b: Interval): Interval;
+   pow(a: Interval, b: Interval): Interval;
 
    equal(a: Interval, b: Interval): boolean;
    gt(a: Interval, b: Interval): boolean;

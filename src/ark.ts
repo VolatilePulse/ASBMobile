@@ -2,7 +2,7 @@ import { StatMultipliers } from '@/ark/multipliers';
 import { Stat } from '@/ark/types';
 import { DAMAGE, HEALTH, PRE_IB, PRE_TE, SERVER_IDM, SERVER_IWM, SERVER_TAM, SERVER_TMM, SPEED, TORPOR } from '@/consts';
 import { Server } from '@/data/objects';
-import { intervalFromDecimal } from '@/number_utils';
+import { floatRange, intervalFromDecimal } from '@/number_utils';
 import theStore from '@/ui/store';
 import IA from 'interval-arithmetic';
 import merge from 'lodash/merge';
@@ -103,28 +103,28 @@ export function GetMultipliers(server: Server, speciesName: string): StatMultipl
    for (let stat = HEALTH; stat <= TORPOR; stat++) {
       // Make up a set of multipliers, based on the species values and server multipliers
       multipliers[stat] = new StatMultipliers(speciesValues[stat]);
-      multipliers[stat].IBM = speciesValues[stat].noImprint ? IA.ZERO : Number.isInteger(server.IBM) ? IA(server.IBM) : IA().boundedSingleton(server.IBM);
+      multipliers[stat].IBM = speciesValues[stat].noImprint ? IA.ZERO : floatRange(server.IBM);
 
       // Apply single-player multipliers
       if (server.singlePlayer && theStore.officialServerSP.multipliers[stat]) {
-         multipliers[stat].Iw = IA.mul(multipliers[stat].Iw, IA(theStore.officialServerSP.multipliers[stat][SERVER_IWM] || 1));
-         multipliers[stat].Id = IA.mul(multipliers[stat].Id, IA(theStore.officialServerSP.multipliers[stat][SERVER_IDM] || 1));
+         multipliers[stat].Iw = IA.mul(multipliers[stat].Iw, floatRange(theStore.officialServerSP.multipliers[stat][SERVER_IWM] || 1));
+         multipliers[stat].Id = IA.mul(multipliers[stat].Id, floatRange(theStore.officialServerSP.multipliers[stat][SERVER_IDM] || 1));
 
          if (IA.gt(multipliers[stat].Ta, IA.ZERO))
-            multipliers[stat].Ta = IA.mul(multipliers[stat].Ta, IA(theStore.officialServerSP.multipliers[stat][SERVER_TAM] || 1));
+            multipliers[stat].Ta = IA.mul(multipliers[stat].Ta, floatRange(theStore.officialServerSP.multipliers[stat][SERVER_TAM] || 1));
          if (IA.gt(multipliers[stat].Tm, IA.ZERO))
-            multipliers[stat].Tm = IA.mul(multipliers[stat].Tm, IA(theStore.officialServerSP.multipliers[stat][SERVER_TMM] || 1));
+            multipliers[stat].Tm = IA.mul(multipliers[stat].Tm, floatRange(theStore.officialServerSP.multipliers[stat][SERVER_TMM] || 1));
       }
 
       // Pre-calculate what we can
       const [TaM, TmM, IdM, IwM] = values[stat];
       if (IA.gt(multipliers[stat].Ta, IA.ZERO))
-         multipliers[stat].Ta = IA.mul(multipliers[stat].Ta, IA(TaM));
+         multipliers[stat].Ta = IA.mul(multipliers[stat].Ta, floatRange(TaM));
       if (IA.gt(multipliers[stat].Tm, IA.ZERO))
-         multipliers[stat].Tm = IA.mul(multipliers[stat].Tm, IA(TmM));
+         multipliers[stat].Tm = IA.mul(multipliers[stat].Tm, floatRange(TmM));
 
-      multipliers[stat].Id = IA.mul(multipliers[stat].Id, IA(IdM));
-      multipliers[stat].Iw = IA.mul(multipliers[stat].Iw, IA(IwM));
+      multipliers[stat].Id = IA.mul(multipliers[stat].Id, floatRange(IdM));
+      multipliers[stat].Iw = IA.mul(multipliers[stat].Iw, floatRange(IwM));
 
       if (!IA.equal(multipliers[stat].IBM, IA.ZERO))
          multipliers[stat].IBM = IA.div(multipliers[stat].IBM, IA(5)); // * 0.2
