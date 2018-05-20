@@ -20,6 +20,7 @@
     "test:perf": "vue-cli-service test tests/perf/.*\\.spec\\.ts",
     "test:data": "vue-cli-service test tests/extraction/embedded.*\\.spec\\.ts",
     "test:archive": "vue-cli-service test tests/extraction/archive.*\\.spec\\.ts --reporters ./scripts/jest-dino-test-reporter.js",
+    "test:extractor": "vue-cli-service test tests/extraction/.*\\.spec\\.ts --reporters ./scripts/jest-dino-test-reporter.js",
     "lint": "vue-cli-service lint",
     "values": "node scripts/make_values.js",
     "gencert": "bash scripts/generate-ssl.sh",
