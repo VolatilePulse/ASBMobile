@@ -3,6 +3,8 @@ import { Extractor, ExtractorInput } from '@/ark/extractor';
 import testData from '@/ark/test_data';
 import { Stat, TestData } from '@/ark/types';
 import { PRE_IB } from '@/consts';
+import { LibraryManager } from '@/data';
+import { Creature } from '@/data/objects';
 import { intervalAverage } from '@/number_utils';
 import { getServerById } from '@/servers';
 import Common from '@/ui/behaviour/Common';
@@ -77,16 +79,44 @@ export default class ExtractorTab extends Common {
    }
 
    addCreature() {
+      const c = new Creature();
+      c.wild = (this.mode === 'Wild');
+      c.tamed = (this.mode === 'Tamed');
+      if (c.tamed) {
+         this.extractor.options[this.selectedOption].forEach(stat => {
+            const mapTE = this.extractor.statTEMap.get(stat);
+            if (mapTE)
+               c.TE = intervalAverage(mapTE.TE);
+         });
+      }
+      c.bred = (this.mode === 'Bred');
+      if (c.bred)
+         c.IB = intervalAverage(this.extractor.rangeVars.IB);
+
+      c.stats = this.extractor.options[this.selectedOption];
+
+      // Get variables from theStore
+      c.level = theStore.tempCreature.level;
+      c.species = theStore.tempCreature.species;
+      c.serverId = theStore.tempCreature.serverId;
+
+      /*
+      // Creature variables that still need set
+      c.name?: string = null;
+      c.tribe?: string = null;
+      c.owner?: string = null;
+      c.uuid?: string = null;
+      */
       // 2) give the creature an ID
       // 2) gather the stat options from this.extractor.options[this.selectedOption]
       // 3) save the creature using LibraryManager.current.saveCreature
 
-      // FIXME: Disabled temporarily due to Interval integration
-      /*
-      const c = this.extractor.c;
       if (!c._id) c._id = generateInputId();
       LibraryManager.current.saveCreature(c);
-      */
+
+      // Resets the options forcing the user to extract again
+      this.options = [];
+      this.selectedOption = 0;
    }
 
    // Nasty debug-only methods to show stats and their options

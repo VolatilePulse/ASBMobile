@@ -1,6 +1,7 @@
 <template>
    <b-container fluid>
       <b-table :items="store.creaturesCache.content"></b-table>
+      <div :items="store.creaturesCache.content"></div>
    </b-container>
 </template>
 

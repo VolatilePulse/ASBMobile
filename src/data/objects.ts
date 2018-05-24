@@ -2,7 +2,6 @@ import { Stat } from '@/ark/types';
 import { DatabaseObject } from '@/data/database';
 import { FilledArray } from '@/utils';
 
-
 export class Server extends DatabaseObject {
    name: string;
 
@@ -11,23 +10,30 @@ export class Server extends DatabaseObject {
    }
 }
 
-
 export class Creature extends DatabaseObject {
    // null is used here to ensure the fields are Observable, but still clearly not set
    name?: string = null;
    tribe?: string = null;
    owner?: string = null;
+
    serverId?: string = null;
    species?: string = null;
+
    uuid?: string = null;
+   dinoId1?: number = null;
+   dinoId2?: number = null;
+
    wild = true;
    tamed = false;
    bred = false;
-   TE = 0;
-   IB = 0;
+
+   TE?: number = null;
+   wildLevel?: number = null;
+
+   IB?: number = null;
+
    level: number = 0;
-   stats: Stat[][] = FilledArray(8, () => []);
-   values: number[] = FilledArray(8, () => undefined);
+   stats: Stat[] = FilledArray(8, () => new Stat());
 
    constructor() {
       super();
