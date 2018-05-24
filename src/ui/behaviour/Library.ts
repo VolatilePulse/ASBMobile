@@ -15,6 +15,13 @@ export default class LibraryTab extends Common {
       { key: 'species', label: 'Species' },
       { key: 'name', label: 'Name' },
       { key: 'tribe', label: 'Tribe' },
-      { key: 'stats', label: 'Stats' },
+      { key: 'level', label: 'Lvl', class: 'text-center' },
+      { key: 'stat0', label: 'HP', class: 'stat' },
+      { key: 'stat1', label: 'ST', class: 'stat' },
+      { key: 'stat2', label: 'OX', class: 'stat' },
+      { key: 'stat3', label: 'FD', class: 'stat' },
+      { key: 'stat4', label: 'WE', class: 'stat' },
+      { key: 'stat5', label: 'DM', class: 'stat' },
+      { key: 'stat6', label: 'SP', class: 'stat' },
    ];
 }
