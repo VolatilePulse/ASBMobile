@@ -10,7 +10,7 @@ import nextfloat32 from 'math-float32-nextafter';
  */
 export function intervalFromDecimal(value: number, places: number): Interval {
    const offset = IA.mul(IA(5), IA.pow(IA(10), IA(-(places + 1))));
-   return IA().halfOpenRight(floatRange(value - offset.lo).lo, floatRange(value + offset.hi).hi);
+   return IA().halfOpenRight(floatRange(value - offset.hi).lo, floatRange(value + offset.hi).hi);
 }
 
 /** Return the average of an Interval */
