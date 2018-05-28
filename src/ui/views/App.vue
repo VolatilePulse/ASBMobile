@@ -17,6 +17,7 @@
                <b-nav-item @click="tab='servers'" :disabled="!store.dataLoaded">Servers</b-nav-item>
                <b-nav-item @click="tab='extractor'" :disabled="!store.dataLoaded">Extractor</b-nav-item>
                <b-nav-item @click="tab='library'" :disabled="!store.dataLoaded">Library</b-nav-item>
+               <b-nav-item @click="tab='firestore'" :disabled="!store.dataLoaded">fs</b-nav-item>
             </b-navbar-nav>
 
             <!-- Right aligned nav items -->
@@ -53,6 +54,7 @@
                <extractor v-show="tab=='extractor'" key="extractor"></extractor>
                <library v-show="tab=='library'" key="library"></library>
                <tester v-show="tab=='tester'" key="tester"></tester>
+               <firestore v-show="tab=='firestore'" key="firestore"></firestore>
                <about v-show="tab=='about'" key="about"></about>
             </transition-group>
             <div v-else class="spinner-holder">

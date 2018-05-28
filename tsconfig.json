@@ -25,6 +25,8 @@
       "types": [
          "node",
          "jest",
+         "firebase",
+         "vue",
          // "mocha",
          // "chai"
       ],
@@ -32,7 +34,7 @@
          "@/*": [
             "src/*"
          ]
-      }
+      },
    },
    "include": [
       "src/**/*.ts",
