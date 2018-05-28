@@ -8,7 +8,7 @@
 
          <template v-for="i in range(7)" :slot="'stat'+i" slot-scope="row">{{row.item.stats[i].Lw}}</template>
 
-         <template v-for="i in range(7)" :slot="'HEAD_stat'+i" scope="header">
+         <template v-for="i in range(7)" :slot="'HEAD_stat'+i" slot-scope="header">
             <b-img :src="store.statImages[i]" :key="i" style="width:18px;height:18px"></b-img>
          </template>
       </b-table>
@@ -18,6 +18,9 @@
 <style lang="scss">
 div#library table {
   font-size: 90%;
+}
+div#library table th {
+   vertical-align: middle;
 }
 div#library table td {
   vertical-align: middle;
