@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" prefix="og: http://ogp.me/ns#">
 
 <head>
    <meta charset="utf-8">
    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-   <meta name="description" content="Ark Smart Breeding for Mobile">
+   <meta name="description" content="Ark Smart Breeding for Mobile is a tool to help manage breeding in Ark: Survival Evolved">
    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1.5">
    <link rel="shortcut icon" href="<%= webpackConfig.output.publicPath %>favicon.ico">
    <title>ASB Mobile</title>
@@ -21,7 +21,22 @@
    <link rel="apple-touch-icon" sizes="180x180" href="<%= htmlWebpackPlugin.files.publicPath %>img/icons/apple-touch-icon.png">
    <meta name="application-name" content="ASB Mobile">
    <meta name="msapplication-config" content="<%= htmlWebpackPlugin.files.publicPath %>browserconfig.xml">
-   <!-- -->
+
+   <!-- These fields produce nice link previews in Discord/Slack and some other sites, and will need customising for specific links, e.g. to a specific creature -->
+   <meta property="og:title" content="ASBMobile" />
+   <meta property="og:site_name" content="ASBMobile"/>
+   <meta property="og:type" content="website" />
+   <meta property="og:url" content="https://volatilepulse.github.io/ASBMobile/" />
+   <!-- <meta property="og:image" content="https://volatilepulse.github.io/ASBMobile/....png" /> -->
+
+   <!-- These fields produce nice link previews in Twitter, but also need customising -->
+   <meta name="twitter:title" content="ASBMobile">
+   <!-- <meta name="twitter:site" content="@USERNAME"> -->
+   <!-- <meta name="twitter:creator" content="@USERNAME"> -->
+   <!-- <meta name="twitter:label1" value="Opens in Theaters" /> -->
+   <!-- <meta name="twitter:data1" value="December 1, 2015" /> -->
+   <!-- <meta name="twitter:label2" value="Or on demand" /> -->
+   <!-- <meta name="twitter:data2" value="at Hulu.com" /> -->
 </head>
 
 <body>
