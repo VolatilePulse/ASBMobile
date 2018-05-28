@@ -5,7 +5,6 @@ module.exports = {
    baseUrl: BASE_URL,
    lintOnSave: true,
    outputDir: "docs",
-   dll: false,
 
    // Turn this off to remove the *large* debug source maps at the cost of unreadable stack traces in production
    productionSourceMap: true,
