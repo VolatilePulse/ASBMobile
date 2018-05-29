@@ -47,5 +47,11 @@ module.exports = {
             args[0]['formatter'] = 'default';
             return args;
          })
+   },
+
+   configureWebpack: {
+      performance: {
+         hints: false,
+      }
    }
 }
