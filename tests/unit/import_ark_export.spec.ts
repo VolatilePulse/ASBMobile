@@ -16,7 +16,7 @@ describe('importing UTF8 export from Coldino', async () => {
    let creature: TestData;
 
    beforeAll(async () => {
-      const buffer = readFileSync('testdata/coldino/sp/DinoExport_98039615458863017.ini');
+      const buffer = readFileSync('tests/unit/coldino-dino-utf8.ini');
       const content = decodeBuffer(buffer);
       creature = parseExportedCreature(content) as TestData;
    });
@@ -29,7 +29,7 @@ describe('importing UTF16-LE export from Davis', async () => {
    let creature: TestData;
 
    beforeAll(async () => {
-      const buffer = readFileSync('testdata/Davis/OfficialPVP/DinoExport_375799389266114837.ini');
+      const buffer = readFileSync('tests/unit/davis-dino-1-utf16.ini');
       const content = decodeBuffer(buffer);
       creature = parseExportedCreature(content) as TestData;
    });

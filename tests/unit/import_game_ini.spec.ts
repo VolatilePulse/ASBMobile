@@ -16,7 +16,7 @@ describe('importing game.ini from coldino', async () => {
    let server: Server;
 
    beforeAll(async () => {
-      const content = readFileSync('testdata/coldino/sp/Game.ini').toString();
+      const content = readFileSync('tests/unit/coldino-sp-game.ini').toString();
       server = parseGameIni(content);
    });
 
@@ -37,7 +37,7 @@ describe('importing game.ini from Dusty.P', async () => {
    let server: Server;
 
    beforeAll(async () => {
-      const content = readFileSync('testdata\\Dusty.P\\Game.ini').toString();
+      const content = readFileSync('tests/unit/dusty-game.ini').toString();
       server = parseGameIni(content);
    });
 
