@@ -1,5 +1,5 @@
 <template>
-   <div>
+   <div v-if="store.loaded.firestore">
       <h6 v-if="path" class="text-warning">{{leafname(path)}}</h6>
       <p v-if="error" class="text-danger">{{error}}</p>
       <ul v-if="!error && loaded">

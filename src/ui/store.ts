@@ -40,6 +40,10 @@ class Store {
    tempCreature: Creature = new Creature();
    valuesVersion: string = '-';
 
+   loaded = {
+      firestore: false,
+   };
+
    private initialised: boolean;
    private _server: Server = null;
 

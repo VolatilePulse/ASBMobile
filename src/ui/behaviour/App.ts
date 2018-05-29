@@ -5,6 +5,8 @@ import * as Servers from '@/servers';
 import Common, { catchAsyncErrors } from '@/ui/behaviour/Common';
 import theStore, { EVENT_LIBRARY_CHANGED } from '@/ui/store';
 import { Delay } from '@/utils';
+import firebase from 'firebase/app';
+import 'firebase/firestore'; // required to load the Firestore part of Firebase
 import { Component } from 'vue-property-decorator';
 
 /**
@@ -14,6 +16,17 @@ import { Component } from 'vue-property-decorator';
  */
 
 // TODO: Change over to vue-router for more capability
+
+
+// Initialize Firebase
+const firebaseConfig = {
+   apiKey: 'AIzaSyCSt83PIbk2ljv66mJRAn-XZZBzQIFOTbQ', // cspell:disable-line
+   authDomain: 'fir-firebase-2-48261.firebaseapp.com',
+   databaseURL: 'https://fir-firebase-2-48261.firebaseio.com',
+   projectId: 'fir-firebase-2-48261',
+   storageBucket: 'fir-firebase-2-48261.appspot.com',
+   messagingSenderId: '977953119111'
+};
 
 
 @Component
@@ -46,6 +59,12 @@ export default class AppShell extends Common {
       // Hook important changes
       theStore.eventListener.on(EVENT_LIBRARY_CHANGED, activateSelectedServer);
 
+      // Initialise Firestore
+      firebase.initializeApp(firebaseConfig);
+      firebase.firestore().settings({ timestampsInSnapshots: true });
+      firebase.firestore().enablePersistence()
+         .then(() => theStore.loaded.firestore = true)
+         .catch(err => { console.warn('Firestore offline persistance not enabled'); console.warn(err); });
    }
 
    catchUnhandledRejection(event: any) {

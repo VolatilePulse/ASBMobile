@@ -20,25 +20,6 @@ Vue.use(BootstrapVue);
 Vue.use(PouchVue, { pouch: PouchDB });
 
 
-// Initialize Firebase
-const config = {
-   apiKey: 'AIzaSyCSt83PIbk2ljv66mJRAn-XZZBzQIFOTbQ',
-   authDomain: 'fir-firebase-2-48261.firebaseapp.com',
-   databaseURL: 'https://fir-firebase-2-48261.firebaseio.com',
-   projectId: 'fir-firebase-2-48261',
-   storageBucket: 'fir-firebase-2-48261.appspot.com',
-   messagingSenderId: '977953119111'
-};
-
-import firebase from 'firebase/app';
-import 'firebase/firestore';
-
-firebase.initializeApp(config);
-const settings = { timestampsInSnapshots: true };
-firebase.firestore().settings(settings);
-firebase.firestore().enablePersistence();
-
-
 import App from '@/ui/views/App.vue';
 import About from '@/ui/views/About.vue';
 import Welcome from '@/ui/views/Welcome.vue';
@@ -48,6 +29,7 @@ import Extractor from '@/ui/views/Extractor.vue';
 import Library from '@/ui/views/Library.vue';
 import Tester from '@/ui/views/Tester.vue';
 import Firestore from '@/ui/views/Firestore.vue';
+import Fireauth from '@/ui/views/Fireauth.vue';
 
 
 Vue.config.productionTip = false;
@@ -62,5 +44,6 @@ new App({
       Library: Library,
       Tester: Tester,
       Firestore: Firestore,
+      Fireauth: Fireauth,
    },
 }).$mount('#app');
