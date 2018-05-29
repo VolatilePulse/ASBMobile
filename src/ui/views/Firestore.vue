@@ -4,11 +4,7 @@
          <h3 class="text-center">Firestore</h3>
 
          <section>
-            <fs-collection title="Users" path="users"></fs-collection>
-         </section>
-
-         <section>
-            <fs-collection title="Me" path="users/alikKrDd4lSxoWglV77inzUHXgD2/libraries"></fs-collection>
+            <fs-collection :tree="pathTree"></fs-collection>
          </section>
       </header>
    </b-container>
