@@ -1,8 +1,11 @@
 <template>
    <div v-if="store.loaded.firestore">
-      <h6 v-if="path" class="text-warning">{{leafname(path)}}</h6>
-      <p v-if="error" class="text-danger">{{error}}</p>
-      <ul v-if="!error && loaded">
+      <div>
+         <span v-if="path" class="text-warning">{{leafname(path)}} </span>
+         <span v-if="size > 0">({{size}}) </span>
+         <span v-if="error" class="text-danger">{{error}} </span>
+      </div>
+      <ul v-if="loaded">
          <li v-for="item in cache" :key="item.id">
             <b-btn variant="link" v-b-toggle="'collapse'+item.id">{{item.id}}</b-btn>
             <b-collapse :id="'collapse'+item.id">
@@ -49,6 +52,7 @@ export default class FirestoreCollection extends Common {
    error: string = null;
    loaded = false;
    closing = false;
+   size: number = null;
 
    mounted() {
       if (this.path) {
@@ -97,7 +101,7 @@ export default class FirestoreCollection extends Common {
    receiveSnapshotChanges(changes: firebase.firestore.QuerySnapshot) {
       if (this.closing) return;
       this.loaded = true;
-      console.log(`receiveSnapshotChanges for ${changes.size} docs`);
+      this.size = changes.size;
       changes.docChanges().forEach(change => {
          switch (change.type) {
             case 'added':
