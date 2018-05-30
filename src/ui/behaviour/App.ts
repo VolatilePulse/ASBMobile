@@ -69,13 +69,18 @@ export default class AppShell extends Common {
          .catch(err => { console.warn('Firestore offline persistance not enabled'); console.warn(err); });
 
       // Initialise Firestore Auth
-      firebase.auth().onAuthStateChanged((user: firebase.User) => {
+      firebase.auth().onAuthStateChanged(async (user: firebase.User) => {
          theStore.loaded.auth = true;
          theStore.user = user;
          if (user) {
             theStore.loggedIn = true;
             theStore.userBlankColor = user ? 'grey' : new ColorHash().hex('id:' + user.uid);
             console.log(`Auth as: ${user.email} (${user.uid})`);
+
+            const userDocRef = firebase.firestore().collection('users').doc(user.uid);
+            userDocRef.set({ exists: true }, { merge: true });
+            const userData = await userDocRef.get();
+            console.log(userData);
          }
          else {
             theStore.loggedIn = false;
