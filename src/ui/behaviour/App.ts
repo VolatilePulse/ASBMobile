@@ -5,7 +5,9 @@ import * as Servers from '@/servers';
 import Common, { catchAsyncErrors } from '@/ui/behaviour/Common';
 import theStore, { EVENT_LIBRARY_CHANGED } from '@/ui/store';
 import { Delay } from '@/utils';
+import ColorHash from 'color-hash';
 import firebase from 'firebase/app';
+import 'firebase/auth'; // required to load the Auth part of Firebase
 import 'firebase/firestore'; // required to load the Firestore part of Firebase
 import { Component } from 'vue-property-decorator';
 
@@ -65,6 +67,21 @@ export default class AppShell extends Common {
       firebase.firestore().enablePersistence()
          .then(() => theStore.loaded.firestore = true)
          .catch(err => { console.warn('Firestore offline persistance not enabled'); console.warn(err); });
+
+      // Initialise Firestore Auth
+      firebase.auth().onAuthStateChanged((user: firebase.User) => {
+         theStore.loaded.auth = true;
+         theStore.user = user;
+         if (user) {
+            theStore.loggedIn = true;
+            theStore.userBlankColor = user ? 'grey' : new ColorHash().hex('id:' + user.uid);
+            console.log(`Auth as: ${user.email} (${user.uid})`);
+         }
+         else {
+            theStore.loggedIn = false;
+            console.log('No authentication found');
+         }
+      });
    }
 
    catchUnhandledRejection(event: any) {

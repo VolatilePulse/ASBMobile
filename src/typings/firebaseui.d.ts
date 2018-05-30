@@ -13,7 +13,9 @@ declare module "firebaseui" {
       tosUrl: string;
    }
    interface ICallbacks {
+      signInSuccessWithAuthResult?: (authResult: firebase.auth.UserCredential, redirectUrl: string) => boolean;
       signInSuccess?: (currentUser: firebase.User, credential?: firebase.auth.AuthCredential, redirectUrl?: string) => boolean;
+      signInFailure?: (error: { code: string, credential: firebase.auth.AuthCredential }) => Promise<void>;
       uiShown?: () => void;
    }
    interface ISignInOption {
@@ -27,6 +29,8 @@ declare module "firebaseui" {
       class AuthUI {
          constructor(auth: firebase.auth.Auth);
          start(containerCSSselector: string, config: IConfig): void;
+         reset(): void;
+         isPendingRedirect(): boolean;
       }
    }
 }

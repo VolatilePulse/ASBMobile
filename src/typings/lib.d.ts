@@ -5,6 +5,7 @@
 declare module 'bootstrap-vue';
 declare module 'pouch-vue';
 declare module 'math-float32-nextafter';
+declare module 'color-hash';
 
 // Vue shim to support importing components from *.vue
 declare module '*.vue' {

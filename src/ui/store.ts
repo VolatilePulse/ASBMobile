@@ -6,6 +6,7 @@ import { Creature, Server } from '@/data/objects';
 import { isServerEditable } from '@/servers';
 import { Delay } from '@/utils';
 import { EventEmitter } from 'events';
+import firebase from 'firebase/app';
 import Vue from 'vue';
 
 /** @fileOverview The central data store */
@@ -13,6 +14,7 @@ import Vue from 'vue';
 
 export const EVENT_SERVER_CHANGED = 'server-changed';
 export const EVENT_LIBRARY_CHANGED = 'library-changed';
+export const EVENT_LOADED_AUTH = 'loaded-auth';
 
 // !!! Everything public in this class should be initialised to a non-undefined value such as null to enable Vue observation !!!
 class Store {
@@ -42,7 +44,12 @@ class Store {
 
    loaded = {
       firestore: false,
+      auth: false,
    };
+
+   loggedIn: boolean = false;
+   user: firebase.User = null;
+   userBlankColor: string = null;
 
    private initialised: boolean;
    private _server: Server = null;

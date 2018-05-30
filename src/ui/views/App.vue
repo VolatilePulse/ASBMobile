@@ -48,7 +48,7 @@
          </b-alert>
 
          <transition name="fade">
-            <transition-group v-if="store.dataLoaded && store.libraryReady && store.settingsReady" name="slidefade" tag="div" class="tabcont">
+            <transition-group v-if="store.dataLoaded && store.libraryReady && store.settingsReady && store.loaded.auth" name="slidefade" tag="div" class="tabcont">
                <welcome v-show="tab=='welcome'" key="welcome"></welcome>
                <settings v-show="tab=='settings'" key="settings"></settings>
                <servers v-show="tab=='servers'" key="servers"></servers>
