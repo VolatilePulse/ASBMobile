@@ -93,8 +93,6 @@ export default class FirestoreCollection extends Common {
    }
 
    receiveError(error: Error) {
-      console.log(`receiveError: ${error.message}`);
-      console.dir(error);
       this.error = error.message;
    }
 
