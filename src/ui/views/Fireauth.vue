@@ -26,7 +26,7 @@
       <section id="firebaseui-div">
       </section>
 
-      <b-modal id="displayNameEdit" :visible="showDisplayNameEdit" title="Edit display name" @ok.prevent="submitDisplayName" :ok-disabled="!isDisplayNameValid" @shown="newDisplayName=store.user.displayName" centered>
+      <b-modal id="displayNameEdit" v-model="showDisplayNameEdit" title="Edit display name" centered @ok.prevent="submitDisplayName" :ok-disabled="!isDisplayNameValid" @shown="newDisplayName=store.user.displayName">
          <b-form @submit.stop.prevent="submitDisplayName">
             <b-form-input type="text" v-model.trim="newDisplayName" :state="isDisplayNameValid"></b-form-input>
             <b-form-invalid-feedback>
@@ -35,6 +35,8 @@
          </b-form>
       </b-modal>
    </b-container>
+
+   <!-- Required to ensure there's always something in the template -->
    <div v-else></div>
 </template>
 
