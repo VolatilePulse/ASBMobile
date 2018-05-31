@@ -22,12 +22,12 @@ import { Component } from 'vue-property-decorator';
 
 // Initialize Firebase
 const firebaseConfig = {
-   apiKey: 'AIzaSyCSt83PIbk2ljv66mJRAn-XZZBzQIFOTbQ', // cspell:disable-line
-   authDomain: 'fir-firebase-2-48261.firebaseapp.com',
-   databaseURL: 'https://fir-firebase-2-48261.firebaseio.com',
-   projectId: 'fir-firebase-2-48261',
-   storageBucket: 'fir-firebase-2-48261.appspot.com',
-   messagingSenderId: '977953119111'
+   apiKey: 'AIzaSyDZdHGcb-LUbegNC2v_i40S1MByua0LBEQ', // cspell:disable-line
+   authDomain: 'asbmobile-dev.firebaseapp.com',
+   databaseURL: 'https://asbmobile-dev.firebaseio.com',
+   projectId: 'asbmobile-dev',
+   storageBucket: 'asbmobile-dev.appspot.com',
+   messagingSenderId: '621406128308'
 };
 
 

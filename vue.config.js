@@ -1,4 +1,4 @@
-const BASE_URL = "/ASBMobile/";
+const BASE_URL = "/";
 
 module.exports = {
    // Basic options
