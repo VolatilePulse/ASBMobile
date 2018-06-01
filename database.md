@@ -14,6 +14,17 @@ General limitations of synced NoSQL:
 
 Google Firebase's Firestore database system is organised as collections and subcollections of documents: e.g. `library/{library_id}/creature/{creature_id}`
 
+## User Roles
+
+Each library has an owner, admins, members and pending members.
+
+|Role|Meaning|
+|-|-|
+|Owner|Full control + only the owner can transfer a library to a different owner|
+|Admin|Same as owner except cannot change owner or admins|
+|Member|Creature management only|
+|Pending Member|No rights at all - awaiting approval|
+
 ## Data Types
 
 ### User
@@ -25,7 +36,7 @@ Key : `string` : assigned by Firebase Auth (`uid`) and unique to our server.
 |Field|Type|Description|
 |-:|:-:|:-|
 |`_libraries`|`string[]`|A cache of library IDs accessible by the user.<br/>*Not used for permissions! Only used to reduce the need to query libraries.*|
-|`settings`|`?`|TBD, in a format useful for both ASB and ASBM|
+|`settings`|`?`|User-specific settings (not device-specific, such as column layouts).<br/>Format TBD, to be useful for both ASB and ASBM|
 
 Most user fields are managed by Firebase Auth, including a customisable display name and avatar pic, so they don't need to be duplicated in a User object.
 
@@ -131,5 +142,31 @@ Key : `string` : UUID from Ark or randomly assigned unique string.
 |List|Only when owner == auth.uid or auth.uid in admins or auth.uid in members|
 
 ### Invite
-A record of an invite to join a particular library. Can be used by anyone, but will need to be approved before membership is granted.
+A record of an invite to join a particular library. Can be used by anyone, but only adds the user to the pending members list, ready for approval.
 
+Key : `string` : Randomly assigned unique string.
+
+#### Contains
+|Field|Type|Description|
+|-:|:-:|:-|
+|`target`|`string`|Library ID that the invite refers to|
+|`creator`|`string`|UID of the user that created the invite|
+|`expires`|`timestamp`|Time at which the invite becomes invalid|
+|`persistent`|`boolean`|If false, allow only a single use|
+
+#### Permissions
+|Action|Restricted to|
+|-|-|
+|Create|Only when creator == auth.uid and (creator == library.owner || creator in library.admins)
+|Update|Never|
+|Delete|Never|
+|Read|Open, even to unauthorised clients|
+|List|Never|
+
+## Mainenance
+
+Regularly scheduled batch operations:
+
+### Weekly
+ * Expired invites should be deleted.
+ * Obsolete servers that own no creatures should be deleted.
