@@ -6,156 +6,130 @@ Aims:
  * Allow full interop between ASB and ASBM.
  * Support a backend that provides access to libraries and authentication services.
  * Allow users to have multiple libraries.
- * Allow groups of users to have access to shared libraries.
+ * Allow multiple users to share a library.
 
-General limitations:
- * Pouch/Couch databases are part way between a relational database and a single relational table.
+General limitations of synced NoSQL:
  * Content within data objects is essentially unformatted and unspecified.
  * IDs can never be changed due to sync support, so unique IDs must be used over names.
- * In the web client databases cannot be renamed. To support multiple libraries we must maintain mappings to/from displayable names.
 
-Syncing:
- * It is intended for clients to maintain a synced copy of relevant databases.
+Google Firebase's Firestore database system is organised as collections and subcollections of documents: e.g. `library/{library_id}/creature/{creature_id}`
 
-## Data Layout
+## Data Types
 
-Relationships:
+### User
+A single user, authenticated by one or more 3rd party services.
 
-* A User has authentication sources, settings and a list of personal Libraries.
-* A Group has an owner User, settings, a list of member Users and a list of personal Libraries.
-* A Library has an owner, settings, any number of Servers and any number of Creatures.
+Key : `string` : assigned by Firebase Auth (`uid`) and unique to our server.
 
-Separate databases will exist for each...
-* Library
-* User and Group, despite only containing one single object each (to support sync)
+#### Contains
+|Field|Type|Description|
+|-:|:-:|:-|
+|`_libraries`|`string[]`|A cache of library IDs accessible by the user.<br/>*Not used for permissions! Only used to reduce the need to query libraries.*|
+|`settings`|`?`|TBD, in a format useful for both ASB and ASBM|
 
-## Permissions
+Most user fields are managed by Firebase Auth, including a customisable display name and avatar pic, so they don't need to be duplicated in a User object.
 
-Access to each database will be limited:
- * Users and Groups are limited to their owner or members
- * Libraries are limited in the same way as the owner (either a User or Group)
+#### Subcollections
+None yet.
 
-It also also planned to be able to mark a creature as 'public' and obtain a shareable link to view on the website. This will not confer database access in any way.
-
-There will be no unauthenticated access to Users/Groups or Libraries.
-
-## Authentication
-
-Authentication is via 3rd parties only, based on OAuth2. It should be possible to link multiple 3rd party accounts with one user for potential future features.
-
-## Object IDs
-
-To support multiple types of object within one database it is common to prefix the object IDs with the type of the data. We will follow this scheme and also sometimes include a secondary prefix that shows the type and/or source of the ID. Where a unique ID is not already available a CUID will be generated and used. CUID was chosen due to its smaller size, lower costs and collision resistance.
-
-(CUID has both [Javascript](https://github.com/ericelliott/cuid) and [.Net](https://github.com/stewart-ritchie/ncuid) implementations)
-
-### Creature IDs
-
-Creature IDs are prefixed with `creature:` when stored and use a secondary prefix to denote their source. All IDs are strings.
-
-|2nd Prefix|Data Source|ID Type|
-|-|-|-|
-|`input:`|User entered data manually|A CUID|
-|`ark_export:`|Imported ARK creature .ini file|UUID from DinoID1 and DinoID2 using ark-tools method|
-|`ark_tools:`|Imported from ark-tools output|UUID taken directly from ark-tools|
-
-An example ID when stored in the database: `creature:input:cjhluzqzx000001t36u2hod58`.
-
-### Server IDs
-
-Server IDs are prefixed with `server:` when stored and use a secondary prefix based on their source, with special values being used to identify common pre-defined servers.
-
-|2nd Prefix|Data Source|ID Type|
-|-|-|-|
-|`predef:`|Predefined|One of the predefined server IDs|
-|`test:`|Dev-only test servers|Server name|
-|`input:`|User entered data manually|CUID|
-|`game_ini:`|Imported from a Game.ini file|CUID|
-
-Predefined servers are intended to remove the need to create a server definition where the user is using Official or potentially also very popular 3rd party servers, if we decide to add them. Once defined they can never be removed, only hidden. Note that they are **not** stored in any database.
-
-Current predefined servers:
-
-|ID|Meaning|
+#### Permissions
+|Action|Restricted to|
 |-|-|
-|`server:predef:Official Server`|Official Server settings|
-|`server:predef:Official Single Player`|Official Server settings with Single Player enabled|
+|Create|Only when new user_id == auth.uid|
+|Update|Only when existing user_id == auth.uid|
+|Delete|Only when existing user_id == auth.uid|
+|Read|Only when user_id == auth.uid|
+|List|Never|
 
-An example ID when stored in the database: `server:game_ini:cjhlvclcv000001o4es3v3r6f`.
+### Library
+Represents a collections of creatures on a cluster of servers, owned by one user and possibly shared with others.
 
+Key : `string` : Randomly assigned unique string.
 
+#### Contains
+|Field|Type|Description|
+|-:|:-:|:-|
+|`name`|`string`|Display name, visible to others|
+|`owner`|`string`|Owner of the library|
+|`admins`|`string[]`|Array of user_ids of administrators of this library|
+|`members`|`string[]`|Array of user_ids of members of this library|
+|`pending`|`string[]`|Array of user_ids of unapproved members of this library|
+|`settings`|`?`|TBD, in a format useful for both ASB and ASBM|
 
-# Old...
+#### Subcollections
+|Name|Description|
+|-|-|
+|`server`|Server definitions|
+|`creature`|Creatures data|
 
-Layout:
- * In order to best fit our data we should split object types into different databases.
- * Settings DB - general application settings and settings related to specific libraries
- * Library Servers DBs - separate DB for each library, containing only servers
- * Library Creature DBs - separate DB for each library, containing only creatures
+#### Permissions
+|Action|Restricted to|
+|-|-|
+|Create|Only when new owner == auth.uid|
+|Update (including owner field)|Only when existing owner == auth.uid|
+|Update (not including owner field)|Only when existing owner == auth.uid or auth.uid in existing admins|
+|Delete|Only when owner == auth.uid|
+|Read|Only when owner == auth.uid or auth.uid in admins or auth.uid in members|
+|List|Never|
 
-## Settings
- * Contains application settings and settings for each library.
- * Application settings should be stored in a single entry with the index `settings`.
- * Library settings should be stored in entries named after the library ID.
+### Server
+Contains multipliers and other values related a specific server.
 
-Contents of the application `settings` entry:
-| Key | Type | Description |
-|-:|:-:|-|
-| libraries | `{[name:string]:string}` | Library display name -> database name mapping |
+Key : `string` : Randomly assigned unique string.
 
-Contents of library settings entries:
-| Key | Type | Default | Description |
-|-:|:-:|-|-|
-| showDead | `boolean` | `true` | Whether to show creatures with status Dead |
-| showUnavailable | `boolean` | `true` | Whether to show creatures with status Unavailable |
-| librarySort | `string` | `"name"` | Column name to sort the library on |
+#### Contains
+|Field|Type|Description|
+|-:|:-:|:-|
+|`name`|`string`|Display name|
+|`multipliers`|`number[][]`|2D array of multipliers by stat then paramater (order TBD)|
+|`singlePlayer`|`boolean`|True to enable single-player settings|
+|`IBM`|`number`|IBM|
+|`mods`|`string[]`|Array of Steam mod IDs, which should be applied in order
 
-## Libraries
- * Support multiple libraries, each containing server definitions and creatures.
- * It is not possible to rename databases after creation so each DB will need a unique, unchanging name.
- * Database IDs will be mapped from display names by maintaining the `libraries` dictionary in Settings.
- * For performance, each object type stored in the library should be held in a different database, with a name to include the library's ID.
+#### Permissions
+|Action|Restricted to|
+|-|-|
+|Create|Only when owner == auth.uid or auth.uid in admins|
+|Update|Only when owner == auth.uid or auth.uid in admins|
+|Delete|Only when owner == auth.uid or auth.uid in admins **(reject if any creatures have this server as origin)**|
+|Read|Only when owner == auth.uid or auth.uid in admins or auth.uid in members|
+|List|Only when owner == auth.uid or auth.uid in admins or auth.uid in members|
 
-Libraries contain:
- * Server definitions
- * Creature definitions
+### Creature
+Contains all of the data that represents a creature.
 
-### Server Defintions
-Servers should be stored in a database named `servers_` followed by the library ID.
-Primary keys are references by creatures that may move around, so UUIDs are the most sensible choice.
+Key : `string` : UUID from Ark or randomly assigned unique string.
 
-Fields:
-| Key | Type (jsdoc) | Default (if unset) | Description |
-|-:|:-:|-|-|
-| name | `string` | - | User's name for the server |
-| singlePlayer | `boolean` | `false` | Apply single player extra multipliers? |
-| multipliers | `number[][]` | - | 8x4 array with multipliers, or null if not overridden from official |
-| IBM | `boolean` | `1` | Imprint multiplier |
-| wildLevelStep | `number?` | `1` | The size of the step between wild creature levels, or undefined |
+#### Contains
+|Field|Type|Description|
+|-:|:-:|:-|
+|`name`|`string`|Display name|
+|`species`|`string`|Species (for display purposes only)|
+|`bp_species`|`string`|Species as blueprint path|
+|`origin_server`|`string`|Server ID that this creature was created on|
+|`current_server`|`string`|Server ID of current location|
+| `neutered` | `boolean` | Set if creature is neutered |
+| `status` | `string` | Available/Unavailable/Dead/Obelisk |
+| `levels` | `number[][]` | Array of `[Lw,Ld]` pairs, per stat |
+| `TE` | `number` | Taming efficiency, as a percentage (0-1) |
+| `imprint` | `number` | Imprint level, as a percentage (0-1) |
+| `mutMat` | `number` | Number of mutations on the matrilineal line |
+| `mutPat` | `number` | Number of mutations on the patrilineal line |
+| `mother` | `string` | UUID of mother creature |
+| `father` | `string` | UUID of father creature |
+| `owner` | `string` | Free-form text field |
+| `tribe` | `string` | Free-form text field |
+| `notes` | `string` | Free-form text field |
 
+#### Permissions
+|Action|Restricted to|
+|-|-|
+|Create|Only when owner == auth.uid or auth.uid in admins or auth.uid in members|
+|Update|Only when owner == auth.uid or auth.uid in admins or auth.uid in members|
+|Delete|Only when owner == auth.uid or auth.uid in admins|
+|Read|Only when owner == auth.uid or auth.uid in admins or auth.uid in members|
+|List|Only when owner == auth.uid or auth.uid in admins or auth.uid in members|
 
-### Creature Defintions
-Creatures should be stored in a database named `creatures_` followed by the library ID.
-Primary keys for creatures are simply the creature's UUID, which is either imported or created at random.
+### Invite
+A record of an invite to join a particular library. Can be used by anyone, but will need to be approved before membership is granted.
 
-If creatures reference pre-defined servers they may do so without including them in the servers list in the library.
-
-Fields:
-| Key | Type (jsdoc) | Default (if unset) | Description |
-|-:|:-:|-|-|
-| server_uuid | `string` | - | The server the creature belongs to |
-| species | `string` | - | Species name |
-| name | `string` | - | Creature name |
-| female | `boolean` | - | Set if the creature is female |
-| neutered | `boolean` | false | Set if creature is neutered |
-| status | `string` | `"Available"` | Dead \| Available \| Unavailable |
-| levels | `number[][]` | - | Array of `[Lw,Ld]` pairs, one for each stat |
-| tamingEff | `number` | - | Taming efficiency, as a percentage (0-1) |
-| imprint | `number` | - | Imprint level, as a percentage (0-1) |
-| mutMat | `number` | 0 | Number of mutations on the matrilineal line |
-| mutPat | `number` | 0 | Number of mutations on the patrilineal line |
-| mother_uuid | `string` | - | UUID of mother creature |
-| father_uuid | `string` | - | UUID of father creature |
-| owner | `string` | - | Free-form text field |
-| tribe | `string` | - | Free-form text field |
-| notes | `string` | - | Free-form text field |
