@@ -30,3 +30,6 @@ tags
 *.tmp
 *.log
 testdata
+
+# Webpack analyser output
+build-size.html

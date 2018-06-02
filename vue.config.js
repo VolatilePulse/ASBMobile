@@ -1,5 +1,19 @@
 const BASE_URL = "/";
 
+const plugins = [];
+
+if (process.env.NODE_ENV === 'production') {
+   // Include the bundle size visualiser
+   plugins.push(new (require('webpack-bundle-analyzer').BundleAnalyzerPlugin)({
+      analyzerMode: 'static',
+      openAnalyzer: false,
+      reportFilename: '../build-size.html',
+   }));
+
+   // plugins.push(new (require('webpack').IgnorePlugin)(/firebase/));
+}
+
+
 module.exports = {
    // Basic options
    baseUrl: BASE_URL,
@@ -50,8 +64,23 @@ module.exports = {
    },
 
    configureWebpack: {
+      plugins: plugins,
+
       performance: {
+         // Turn off the bundle size warnings
          hints: false,
-      }
+      },
+
+      // Avoid bundling these as they're pulled from a CDN
+      externals: [
+         {
+            'vue': 'var Vue',
+            'firebase': 'var firebase',
+            'firebase/app': 'var firebase',
+            'firebase/auth': 'var firebase.auth',
+            'firebase/firestore': 'var firebase.firestore',
+            'firebaseui': 'var firebaseui',
+         },
+      ],
    }
 }

@@ -21,14 +21,17 @@ import { Component } from 'vue-property-decorator';
 
 
 // Initialize Firebase
-const firebaseConfig = {
-   apiKey: 'AIzaSyDZdHGcb-LUbegNC2v_i40S1MByua0LBEQ', // cspell:disable-line
-   authDomain: 'asbmobile-dev.firebaseapp.com',
-   databaseURL: 'https://asbmobile-dev.firebaseio.com',
-   projectId: 'asbmobile-dev',
-   storageBucket: 'asbmobile-dev.appspot.com',
-   messagingSenderId: '621406128308'
-};
+if (firebase.apps.length === 0) {
+   const firebaseConfig = {
+      apiKey: 'AIzaSyDZdHGcb-LUbegNC2v_i40S1MByua0LBEQ', // cspell:disable-line
+      authDomain: 'asbmobile-dev.firebaseapp.com',
+      databaseURL: 'https://asbmobile-dev.firebaseio.com',
+      projectId: 'asbmobile-dev',
+      storageBucket: 'asbmobile-dev.appspot.com',
+      messagingSenderId: '621406128308'
+   };
+   firebase.initializeApp(firebaseConfig);
+}
 
 
 @Component
@@ -62,7 +65,6 @@ export default class AppShell extends Common {
       theStore.eventListener.on(EVENT_LIBRARY_CHANGED, activateSelectedServer);
 
       // Initialise Firestore
-      firebase.initializeApp(firebaseConfig);
       firebase.firestore().settings({ timestampsInSnapshots: true });
       firebase.firestore().enablePersistence()
          .then(() => theStore.loaded.firestore = true)
