@@ -295,6 +295,7 @@ const stages = [
       announceStage(chalk`Collating recent release notes`);
 
       status.past_versions = await retrieveGitTags();
+      status.past_versions = status.past_versions.map(v => v.replace(/-preview(\d)/, '-preview.$1')); // handle bad preview tags
       status.past_versions.push(status.package_version);
       status.past_versions.sort((a, b) => -semver.compare(a, b));
       let versions_list = Enumerable.from(status.past_versions).take(options.numNotes).toArray().join(', ');
@@ -310,7 +311,7 @@ const stages = [
          }
          catch (e) { }
 
-         notes.push(`<div><title>${version}</title><section>${markdownToHtml(note)}</section></div>`);
+         notes.push(`<div><header>${version}</header><section>${markdownToHtml(note)}</section></div>`);
       }
 
       // Generate file contents
