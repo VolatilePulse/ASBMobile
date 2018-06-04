@@ -1,5 +1,5 @@
 /*
-* Orson http://en.orson.io , autreplanete http://www.autreplanete.com/
+* Created at: https://pikock.github.io/bootstrap-magic/
 *
 **/
 
@@ -245,7 +245,7 @@ $form-feedback-invalid-color: theme-color('danger');
 $dropdown-min-width: 10rem;
 $dropdown-padding-y: 0.5rem;
 $dropdown-spacer: 0.125rem;
-$dropdown-bg: $white;
+$dropdown-bg: theme-color('primary');
 $dropdown-border-color: rgba($black, 0.15);
 $dropdown-border-width: $border-width;
 $dropdown-divider-bg: $gray-200;
@@ -535,13 +535,3 @@ $kbd-color: $gray-300;
 $kbd-bg: $gray-800;
 $pre-color: $gray-300;
 $pre-scrollable-max-height: 340px;
-
-
-// Options
-$enable-rounded: true;
-$enable-shadows: false;
-$enable-gradients: false;
-$enable-transitions: true;
-$enable-hover-media-query: false;
-$enable-grid-classes: true;
-$enable-print-styles: false;
