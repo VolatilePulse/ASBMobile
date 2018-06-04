@@ -76,4 +76,8 @@ export default class UICommon extends Vue {
       else
          alert('ASBM encountered an unexpected error:\n' + ex);
    }
+
+   goBack() {
+      window.history.length > 1 ? this.$router.go(-1) : this.$router.push('/');
+   }
 }

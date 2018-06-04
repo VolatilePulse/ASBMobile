@@ -16,8 +16,10 @@ PouchDB.plugin(PouchLiveFind);
 import Vue from 'vue';
 import BootstrapVue from 'bootstrap-vue';
 import PouchVue from 'pouch-vue';
+import Router from 'vue-router';
 Vue.use(BootstrapVue);
 Vue.use(PouchVue, { pouch: PouchDB });
+Vue.use(Router);
 
 
 import App from '@/ui/views/App.vue';

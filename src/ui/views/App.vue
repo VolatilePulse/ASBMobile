@@ -3,7 +3,7 @@
       <!-- <router-link to="/">Home</router-link> -->
       <!-- <router-view/> -->
 
-      <b-navbar fixed="top" toggleable="sm" type="dark" variant="primary">
+      <b-navbar fixed="top" toggleable="sm" type="dark" variant="primary" style="height:53px">
          <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
          <b-navbar-brand href="#" class="py-0 mr-1" style="margin-top:-0.2rem">
             <b-img :src="require('@/assets/asbm-inline.svg')" alt="ASB Mobile" style="max-height:1.6rem"></b-img>
@@ -12,19 +12,34 @@
          <b-collapse is-nav id="nav_collapse">
             <!-- Left aligned nav items -->
             <b-navbar-nav>
-               <b-nav-item @click="tab='about'">About</b-nav-item>
-               <b-nav-item @click="tab='welcome'">Welcome</b-nav-item>
-               <b-nav-item @click="tab='servers'" :disabled="!store.dataLoaded">Servers</b-nav-item>
-               <b-nav-item @click="tab='extractor'" :disabled="!store.dataLoaded">Extractor</b-nav-item>
-               <b-nav-item @click="tab='library'" :disabled="!store.dataLoaded">Library</b-nav-item>
-               <b-nav-item @click="tab='firestore'" :disabled="!store.dataLoaded">fs</b-nav-item>
-               <b-nav-item @click="tab='fireauth'" :disabled="!store.dataLoaded">auth</b-nav-item>
+               <b-nav-item-dropdown text="About" variant="info">
+                  <b-nav-item to="/about">About</b-nav-item>
+                  <b-nav-item to="/about/welcome">Welcome</b-nav-item>
+                  <b-nav-item to="/about/whatsnew">What's New</b-nav-item>
+               </b-nav-item-dropdown>
+
+               <b-nav-item to="/libraries">Libraries</b-nav-item>
+
+               <b-nav-item to="/settings">Settings</b-nav-item>
+
+               <!-- <b-nav-item @click="tab='servers'" :disabled="!store.dataLoaded">Servers</b-nav-item> -->
+               <!-- <b-nav-item @click="tab='extractor'" :disabled="!store.dataLoaded">Extractor</b-nav-item> -->
+               <!-- <b-nav-item @click="tab='library'" :disabled="!store.dataLoaded">Library</b-nav-item> -->
+               <!-- <b-nav-item @click="tab='firestore'" :disabled="!store.dataLoaded">fs</b-nav-item> -->
+               <!-- <b-nav-item @click="tab='fireauth'" :disabled="!store.dataLoaded">auth</b-nav-item> -->
             </b-navbar-nav>
 
             <!-- Right aligned nav items -->
             <b-navbar-nav class="ml-auto">
-               <b-nav-item @click="tab='settings'">Settings</b-nav-item>
-               <b-nav-item @click="tab='tester'" :disabled="!store.dataLoaded">Tester</b-nav-item>
+               <transition name="fade">
+                  <b-nav-item to="/user" v-if="!store.user">Sign In</b-nav-item>
+                  <b-nav-item to="/user" v-else class="p-0 hdr-user-img-nav">
+                     <b-img :src="store.user.photoURL" class="p-0 hdr-user-img" rounded="circle"></b-img>
+                  </b-nav-item>
+               </transition>
+               <b-nav-item-dropdown text="Dev" boundary="window">
+                  <b-nav-item to="/tester">Tester</b-nav-item>
+               </b-nav-item-dropdown>
             </b-navbar-nav>
          </b-collapse>
       </b-navbar>
@@ -47,28 +62,42 @@
             <div>Most of this application will be disabled until access to the database is restored.</div>
          </b-alert>
 
-         <transition name="fade">
-            <transition-group v-if="store.dataLoaded && store.libraryReady && store.settingsReady && store.loaded.auth" name="slidefade" tag="div" class="tabcont">
-               <welcome v-show="tab=='welcome'" key="welcome"></welcome>
-               <settings v-show="tab=='settings'" key="settings"></settings>
-               <servers v-show="tab=='servers'" key="servers"></servers>
-               <extractor v-show="tab=='extractor'" key="extractor"></extractor>
-               <library v-show="tab=='library'" key="library"></library>
-               <tester v-show="tab=='tester'" key="tester"></tester>
-               <firestore v-show="tab=='firestore'" key="firestore"></firestore>
-               <fireauth v-show="tab=='fireauth'" key="fireauth"></fireauth>
-               <about v-show="tab=='about'" key="about"></about>
-            </transition-group>
-            <div v-else class="spinner-holder">
-               <spinner size="4rem" background="#49649C" style="display:block"></spinner>
-            </div>
-         </transition>
+         <div class="tabcont">
+            <transition name="slidefade" class="tabcont">
+               <!-- <transition-group name="slidefade" tag="div" class="tabcont"> -->
+               <router-view></router-view>
+               <!-- <welcome v-show="tab=='welcome'" key="welcome"></welcome> -->
+               <!-- <settings v-show="tab=='settings'" key="settings"></settings> -->
+               <!-- <servers v-show="tab=='servers'" key="servers"></servers> -->
+               <!-- <extractor v-show="tab=='extractor'" key="extractor"></extractor> -->
+               <!-- <library v-show="tab=='library'" key="library"></library> -->
+               <!-- <tester v-show="tab=='tester'" key="tester"></tester> -->
+               <!-- <firestore v-show="tab=='firestore'" key="firestore"></firestore> -->
+               <!-- <fireauth v-show="tab=='fireauth'" key="fireauth"></fireauth> -->
+               <!-- <about v-show="tab=='about'" key="about"></about> -->
+               <!-- </transition-group> -->
+               <div v-if="false" class="spinner-holder">
+                  <spinner size="4rem" background="#49649C" style="display:block"></spinner>
+               </div>
+            </transition>
+         </div>
       </b-container>
    </div>
 </template>
 
 
-<style scoped>
+<style>
+.hdr-user-img {
+  max-height: 1.5rem;
+  max-width: 1.54rem;
+  object-fit: contain;
+}
+
+.hdr-user-img-nav {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
 .statusbadge {
   z-index: 500;
   position: fixed;

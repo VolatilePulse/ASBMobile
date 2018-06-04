@@ -10,6 +10,7 @@ import firebase from 'firebase/app';
 import 'firebase/auth'; // required to load the Auth part of Firebase
 import 'firebase/firestore'; // required to load the Firestore part of Firebase
 import { Component } from 'vue-property-decorator';
+import routerConfig from '../router';
 
 /**
  * @fileOverview Vue component that represents the outer app shell.
@@ -34,7 +35,9 @@ if (firebase.apps.length === 0) {
 }
 
 
-@Component
+@Component({
+   router: routerConfig,
+})
 export default class AppShell extends Common {
    // Adding the store here makes it observable right from the start
    store = theStore;
@@ -122,7 +125,7 @@ async function loadDataJson() {
    let response: Response;
 
    try {
-      response = await fetch('data/data.json');
+      response = await fetch('/data/data.json');
    }
    catch (ex) {
       console.error(ex);

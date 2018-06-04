@@ -57,6 +57,7 @@
       "TMPL",
       "UUIDs",
       "asbmobile",
+      "bezier",
       "consts",
       "debounced",
       "debouncer",
