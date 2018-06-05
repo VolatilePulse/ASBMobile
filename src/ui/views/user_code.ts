@@ -100,7 +100,7 @@ export default class UserTab extends Common {
 
 function makeAuthConfig(_page: UserTab): firebaseui.IConfig {
    const callbacks: firebaseui.ICallbacks = {
-      signInSuccessWithAuthResult(authResult, redirectUrl) {
+      signInSuccessWithAuthResult(authResult, _redirectUrl) {
          console.log('fireauth ui callback:signInSuccessWithAuthResult:');
          console.log('Auth result:', authResult);
 
@@ -122,9 +122,9 @@ const staticAuthConfig: firebaseui.IConfig = {
    signInOptions: [
       // List of OAuth providers supported  (must be registered as an app for each provider first)
       firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+      firebase.auth.GithubAuthProvider.PROVIDER_ID,
       // firebase.auth.FacebookAuthProvider.PROVIDER_ID,
       // firebase.auth.TwitterAuthProvider.PROVIDER_ID,
-      // firebase.auth.GithubAuthProvider.PROVIDER_ID,
    ],
 
    // Choose UI method based on whether we're in standalone mode (installed app)
