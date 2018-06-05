@@ -30,7 +30,7 @@
 <script lang="ts">
 import { isObject } from 'util';
 import { Component, Prop } from 'vue-property-decorator';
-import Common from '@/ui/behaviour/Common';
+import Common from '@/ui/common';
 import firebase from 'firebase/app';
 
 interface DocData {

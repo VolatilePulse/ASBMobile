@@ -3,8 +3,9 @@
       <!-- <router-link to="/">Home</router-link> -->
       <!-- <router-view/> -->
 
-      <b-navbar fixed="top" toggleable="sm" type="dark" variant="primary" style="height:53px">
+      <b-navbar fixed="top" toggleable="sm" type="dark" variant="primary">
          <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
+
          <b-navbar-brand href="#" class="py-0 mr-1" style="margin-top:-0.2rem">
             <b-img :src="require('@/assets/asbm-inline.svg')" alt="ASB Mobile" style="max-height:1.6rem"></b-img>
          </b-navbar-brand>
@@ -12,10 +13,10 @@
          <b-collapse is-nav id="nav_collapse">
             <!-- Left aligned nav items -->
             <b-navbar-nav>
-               <b-nav-item-dropdown text="About" variant="info">
-                  <b-nav-item to="/about">About</b-nav-item>
-                  <b-nav-item to="/about/welcome">Welcome</b-nav-item>
-                  <b-nav-item to="/about/whatsnew">What's New</b-nav-item>
+               <b-nav-item-dropdown text="Info" variant="info">
+                  <b-nav-item to="/info/about">About</b-nav-item>
+                  <b-nav-item to="/info/welcome">Welcome</b-nav-item>
+                  <b-nav-item to="/info/whatsnew">What's New</b-nav-item>
                </b-nav-item-dropdown>
 
                <b-nav-item to="/libraries">Libraries</b-nav-item>
@@ -38,7 +39,8 @@
                   </b-nav-item>
                </transition>
                <b-nav-item-dropdown text="Dev" boundary="window">
-                  <b-nav-item to="/tester">Tester</b-nav-item>
+                  <b-nav-item to="/dev/tester">Tester</b-nav-item>
+                  <b-nav-item to="/dev/firestore">Data explorer</b-nav-item>
                </b-nav-item-dropdown>
             </b-navbar-nav>
          </b-collapse>
@@ -86,16 +88,26 @@
 </template>
 
 
-<style>
+<style lang="scss">
+@import '~bootstrap/scss/functions';//, '~bootstrap/scss/variables';
+@import "../assets/scss/asbm-bootstrap";
+
 .hdr-user-img {
-  max-height: 1.5rem;
-  max-width: 1.54rem;
+  max-height: 37px;
+  max-width: 37px;
   object-fit: contain;
 }
 
-.hdr-user-img-nav {
+.hdr-user-img-nav a {
   padding-top: 0 !important;
   padding-bottom: 0 !important;
+  vertical-align: middle;
+  height: 100%;
+}
+
+.navbar-nav .dropdown-menu {
+  background-color: darken(theme-color('primary'), 5%);
+  padding-left: 0.5rem;
 }
 
 .statusbadge {
@@ -148,8 +160,8 @@
 
 <script lang="ts">
 import { Component } from 'vue-property-decorator';
-import Behaviour from '../behaviour/App';
 import Spinner from '@/ui/components/Spinner.vue';
+import Behaviour from './app_code';
 @Component({ name: 'App', components: { spinner: Spinner } })
 export default class extends Behaviour { }
 </script>

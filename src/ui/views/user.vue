@@ -1,5 +1,5 @@
 <template>
-   <b-container fluid v-if="store.loaded.firestore && store.loaded.auth">
+   <b-container fluid>
       <header>
          <h3 class="text-center">Firebase Auth</h3>
       </header>
@@ -35,9 +35,6 @@
          </b-form>
       </b-modal>
    </b-container>
-
-   <!-- Required to ensure there's always something in the template -->
-   <div v-else></div>
 </template>
 
 
@@ -52,7 +49,7 @@
 
 <script lang="ts">
 import { Component } from 'vue-property-decorator';
-import Behaviour from '../behaviour/Fireauth';
-@Component({ name: 'Fireauth' })
+import Behaviour from './user_code';
+@Component({ name: 'User' })
 export default class extends Behaviour { }
 </script>

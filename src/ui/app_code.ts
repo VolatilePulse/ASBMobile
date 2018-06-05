@@ -2,7 +2,7 @@ import { ParseDatabase } from '@/ark/data';
 import { ID_OFFICIAL_SERVER } from '@/ark/servers_predef';
 import { LibraryManager, SettingsManager } from '@/data';
 import * as Servers from '@/servers';
-import Common, { catchAsyncErrors } from '@/ui/behaviour/Common';
+import Common, { catchAsyncErrors } from '@/ui/common';
 import theStore, { EVENT_LIBRARY_CHANGED } from '@/ui/store';
 import { Delay } from '@/utils';
 import ColorHash from 'color-hash';
@@ -10,15 +10,13 @@ import firebase from 'firebase/app';
 import 'firebase/auth'; // required to load the Auth part of Firebase
 import 'firebase/firestore'; // required to load the Firestore part of Firebase
 import { Component } from 'vue-property-decorator';
-import routerConfig from '../router';
+import routerConfig from './router';
 
 /**
  * @fileOverview Vue component that represents the outer app shell.
  * This component also handles initialising the rest of the system and controls
  * which tab is currently displayed.
  */
-
-// TODO: Change over to vue-router for more capability
 
 
 // Initialize Firebase

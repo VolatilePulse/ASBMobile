@@ -7,7 +7,7 @@ import { LibraryManager } from '@/data';
 import { Creature } from '@/data/objects';
 import { intervalAverage } from '@/number_utils';
 import { getServerById } from '@/servers';
-import Common from '@/ui/behaviour/Common';
+import Common from '@/ui/common';
 import theStore from '@/ui/store';
 import { Delay, FilledArray } from '@/utils';
 import cuid from 'cuid';

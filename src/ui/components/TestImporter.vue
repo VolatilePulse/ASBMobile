@@ -47,7 +47,7 @@
 
 <script lang="ts">
 import { Component } from 'vue-property-decorator';
-import Common, { catchAsyncErrors } from '@/ui/behaviour/Common';
+import Common, { catchAsyncErrors } from '@/ui/common';
 import { parseExportedCreature } from '@/ark/import/ark_export';
 import { ReadDroppedBlob } from '@/utils';
 import test_data from '@/ark/test_data';

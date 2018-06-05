@@ -4,19 +4,6 @@
 </template>
 
 
-<script lang="ts">
-import { Component } from 'vue-property-decorator';
-import Behaviour from '../../behaviour/Common';
-
-import versionInfo from '../../whatsnew';
-
-@Component({ name: 'WhatsNew' })
-export default class extends Behaviour {
-   versionInfo = versionInfo;
-}
-</script>
-
-
 <style lang="scss">
 @import '~bootstrap/scss/functions';//, '~bootstrap/scss/variables';
 @import "../../../assets/scss/asbm-bootstrap";
@@ -42,3 +29,16 @@ export default class extends Behaviour {
    }
 }
 </style>
+
+
+<script lang="ts">
+import { Component } from 'vue-property-decorator';
+import Behaviour from '../../common';
+
+import versionInfo from '../../whatsnew';
+
+@Component({ name: 'WhatsNew' })
+export default class extends Behaviour {
+   versionInfo = versionInfo;
+}
+</script>

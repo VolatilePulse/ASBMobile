@@ -1,5 +1,5 @@
 import { Component } from 'vue-property-decorator';
-import Common from '@/ui/behaviour/Common';
+import Common from '@/ui/common';
 import FirestoreCollection from '@/ui/components/FirestoreCollection.vue';
 
 @Component({

@@ -36,7 +36,7 @@ div#library table .stat {
 
 <script lang='ts'>
 import { Component } from 'vue-property-decorator';
-import Behaviour from '../behaviour/Library';
+import Behaviour from './library_code';
 @Component({ name: 'Library' })
 export default class extends Behaviour { }
 </script>

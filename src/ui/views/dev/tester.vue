@@ -219,8 +219,8 @@
 
 <script lang="ts">
 import { Component } from 'vue-property-decorator';
-import Behaviour from '../behaviour/Tester';
-import TestImporter from '../components/TestImporter.vue';
+import Behaviour from './tester_code';
+import TestImporter from '../../components/TestImporter.vue';
 @Component({
    name: 'Tester',
    components: { TestImporter: TestImporter },

@@ -3,7 +3,7 @@ import { SAVE_MAX_TIMEOUT, SAVE_TIMEOUT } from '@/consts';
 import { LibraryManager } from '@/data';
 import { Server } from '@/data/objects';
 import * as Servers from '@/servers';
-import Common, { catchAsyncErrors } from '@/ui/behaviour/Common';
+import Common, { catchAsyncErrors } from '@/ui/common';
 import theStore from '@/ui/store';
 import * as Utils from '@/utils';
 // @ts-ignore

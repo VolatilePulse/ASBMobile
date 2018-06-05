@@ -6,7 +6,7 @@ import { statNames } from '@/consts';
 import { Server } from '@/data/objects';
 import { getServerById } from '@/servers';
 import { PerformPerfTest, PerformTest, TestResult } from '@/testing';
-import Common, { catchAsyncErrors } from '@/ui/behaviour/Common';
+import Common, { catchAsyncErrors } from '@/ui/common';
 import * as Utils from '@/utils';
 import { Component, Vue } from 'vue-property-decorator';
 

@@ -1,14 +1,18 @@
 /// <reference types="webpack-env" />
 
-import Common from '@/ui/behaviour/Common';
+import Common from '@/ui/common';
 import theStore from '@/ui/store';
 import firebase from 'firebase/app';
 import * as firebaseui from 'firebaseui';
 import { Component, Vue } from 'vue-property-decorator';
 
 
+// We keep a global instance of this as it needs to be used as a singleton from dynamically created Vue components
+let firebaseuiInstance: firebaseui.auth.AuthUI = null;
+
+
 @Component
-export default class FireauthTab extends Common {
+export default class UserTab extends Common {
    firebaseui: firebaseui.auth.AuthUI = null;
    authUIVisible = false;
 
@@ -39,12 +43,18 @@ export default class FireauthTab extends Common {
 
    async mounted() {
       console.log('FireauthTab.mounted');
-      if (!this.firebaseui) {
-         this.firebaseui = new firebaseui.auth.AuthUI(firebase.auth());
+      await Vue.nextTick();
+
+      // Ensure the singleton is created
+      if (!firebaseuiInstance) {
+         console.log('FireauthTab.mounted : creating firebaseui instance');
+         firebaseuiInstance = new firebaseui.auth.AuthUI(firebase.auth());
       }
-      if (this.firebaseui.isPendingRedirect()) {
+
+      await Vue.nextTick();
+
+      if (firebaseuiInstance.isPendingRedirect()) {
          console.log('FireauthTab.mounted : pending redirect : starting UI');
-         await Vue.nextTick();
          this.startFirebaseAuthUI();
       }
       else {
@@ -52,19 +62,20 @@ export default class FireauthTab extends Common {
       }
    }
 
+   beforeDestroy() {
+      if (this.authUIVisible) {
+         console.log('FireauthTab.beforeDestroy : cleaning up UI');
+         firebaseuiInstance.reset();
+         this.authUIVisible = false;
+      }
+   }
+
    startFirebaseAuthUI() {
       console.log('FireauthTab.startFirebaseAuthUI');
       if (!this.authUIVisible) {
          const config = makeAuthConfig(this);
-         this.firebaseui.start('#firebaseui-div', config);
+         firebaseuiInstance.start('#firebaseui-div', config);
          this.authUIVisible = true;
-      }
-   }
-
-   destroyed() {
-      if (this.authUIVisible) {
-         this.firebaseui.reset();
-         this.authUIVisible = false;
       }
    }
 
@@ -78,15 +89,24 @@ export default class FireauthTab extends Common {
       await firebase.auth().signOut();
       this.startFirebaseAuthUI();
    }
+
+   authCompleted() {
+      if (this.$route.query['redirect']) {
+         console.log('Auth complete and redirect detected to:', this.$route.query['redirect']);
+         setTimeout(() => this.$router.replace(this.$route.query['redirect']), 500);
+      }
+   }
 }
 
-function makeAuthConfig(_page: FireauthTab): firebaseui.IConfig {
+function makeAuthConfig(_page: UserTab): firebaseui.IConfig {
    const callbacks: firebaseui.ICallbacks = {
       signInSuccessWithAuthResult(authResult, redirectUrl) {
          console.log('fireauth ui callback:signInSuccessWithAuthResult:');
          console.log('Auth result:', authResult);
-         console.log('Redirect:', redirectUrl);
-         // Return type determines whether we continue the redirect automatically
+
+         _page.authCompleted();
+
+         // Do not redirect - we do this ourselves
          return false;
       },
       uiShown() {
@@ -112,7 +132,7 @@ const staticAuthConfig: firebaseui.IConfig = {
 
    credentialHelper: firebaseui.auth.CredentialHelper.ACCOUNT_CHOOSER_COM,
 
-   tosUrl: '/nothing',
+   tosUrl: '/info/about',
 };
 
 

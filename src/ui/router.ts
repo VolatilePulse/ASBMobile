@@ -1,14 +1,15 @@
 import theStore from '@/ui/store';
 import Vue from 'vue';
 import Router, { RawLocation, Route } from 'vue-router';
-import About from './views/About.vue';
-import Fireauth from './views/Fireauth.vue';
-import Firestore from './views/Firestore.vue';
-import NotFound from './views/NotFound.vue';
-import Settings from './views/Settings.vue';
-import Tester from './views/Tester.vue';
-import Welcome from './views/Welcome.vue';
-import whatsnew from './views/about/whatsnew.vue';
+import Firestore from './views/dev/firestore.vue';
+import Tester from './views/dev/tester.vue';
+import Extractor from './views/extractor.vue';
+import About from './views/info/about.vue';
+import Welcome from './views/info/welcome.vue';
+import WhatsNew from './views/info/whatsnew.vue';
+import NotFound from './views/not_found.vue';
+import Settings from './views/settings.vue';
+import User from './views/user.vue';
 
 
 export type IRouterNext = (to?: RawLocation | false | ((vm: Vue) => any) | void) => void;
@@ -16,6 +17,7 @@ export type IRouterNext = (to?: RawLocation | false | ((vm: Vue) => any) | void)
 function requireAuth(to: Route, _from: Route, next: IRouterNext) {
    // FIXME: Add handling for when store.loaded.auth is not yet set
    if (!theStore.user) {
+      // Go to login screen, remembering where to go back to
       next({
          path: '/login',
          query: { redirect: to.fullPath },
@@ -29,14 +31,14 @@ function requireAuth(to: Route, _from: Route, next: IRouterNext) {
 const router = new Router({
    mode: 'history',
    routes: [
-      { path: '/about', component: About, alias: '/' },
-      { path: '/about/welcome', component: Welcome },
-      { path: '/about/whatsnew', component: whatsnew },
-      { path: '/about/firestore', component: Firestore },
+      { path: '/info/about', component: About },
+      { path: '/info/welcome', component: Welcome, alias: '/' },
+      { path: '/info/whatsnew', component: WhatsNew },
 
-      { path: '/login', component: Fireauth },
-      { path: '/user', component: Fireauth, beforeEnter: requireAuth },
+      { path: '/login', component: User },
+      { path: '/user', component: User, beforeEnter: requireAuth },
       { path: '/settings', component: Settings, beforeEnter: requireAuth },
+      { path: '/extractor', component: Extractor, beforeEnter: requireAuth },
       { path: '/invite', component: Vue, beforeEnter: requireAuth },
 
       { path: '/libraries', name: 'libraries', component: Vue, beforeEnter: requireAuth },
@@ -46,7 +48,8 @@ const router = new Router({
       { path: '/library/:library_id/creatures', name: 'creatures', component: Vue, beforeEnter: requireAuth },
       { path: '/library/:library_id/creature/:creature_id', name: 'creature', component: Vue, beforeEnter: requireAuth },
 
-      { path: '/tester', component: Tester },
+      { path: '/dev/tester', component: Tester },
+      { path: '/dev/firestore', component: Firestore },
 
       { path: '*', component: NotFound },
    ],

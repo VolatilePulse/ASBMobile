@@ -73,7 +73,7 @@
 
 <script lang="ts">
 import { Component } from 'vue-property-decorator';
-import Behaviour from '../behaviour/Settings';
+import Behaviour from './settings_code';
 @Component({ name: 'Settings' })
 export default class extends Behaviour { }
 </script>

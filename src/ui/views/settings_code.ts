@@ -1,5 +1,5 @@
 import { LibraryManager, SettingsManager } from '@/data';
-import Common from '@/ui/behaviour/Common';
+import Common from '@/ui/common';
 import { Component, Vue } from 'vue-property-decorator';
 
 /** @fileOverview Tab containing the UI for settings */

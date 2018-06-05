@@ -248,7 +248,7 @@ export function ParseIni(content: string) {
       const blockByIndex: string[] = [];
       (blockByIndex as any).label = name;
 
-      for (const [_, label, value] of GenerateRegexMatches(lineRe, block)) {
+      for (const [, label, value] of GenerateRegexMatches(lineRe, block)) {
          blockByIndex.push(value);
          blockByName[label.toLowerCase()] = value;
       }

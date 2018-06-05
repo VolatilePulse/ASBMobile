@@ -1,5 +1,5 @@
 import { Stat } from '@/ark/types';
-import Common from '@/ui/behaviour/Common';
+import Common from '@/ui/common';
 import theStore from '@/ui/store';
 import { FilledArray } from '@/utils';
 import { Component } from 'vue-property-decorator';

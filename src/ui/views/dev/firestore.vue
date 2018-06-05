@@ -13,7 +13,7 @@
 
 <script lang="ts">
 import { Component } from 'vue-property-decorator';
-import Behaviour from '../behaviour/Firestore';
+import Behaviour from './firestore_code';
 @Component({ name: 'Firestore' })
 export default class extends Behaviour { }
 </script>
