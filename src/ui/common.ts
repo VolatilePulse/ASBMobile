@@ -80,4 +80,13 @@ export default class UICommon extends Vue {
    goBack() {
       window.history.length > 1 ? this.$router.go(-1) : this.$router.push('/');
    }
+
+   stringifyData(data: any) {
+      let text = JSON.stringify(data, undefined, 2);
+      let lines = text.split('\n');
+      lines = lines.map(line => line.replace(/[{}]/, '').replace(/,$/, ''));
+      lines = lines.filter(line => line.trim());
+      text = lines.join('\n');
+      return text;
+   }
 }

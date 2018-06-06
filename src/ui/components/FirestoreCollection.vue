@@ -6,11 +6,11 @@
          <span v-if="cache && cache.error" class="text-danger">{{cache.error}} </span>
       </div>
       <ul v-if="cache && cache.isActive">
-         <li v-for="item in cache.collection" :key="item.id">
-            <b-btn variant="link" v-b-toggle="'collapse'+item.id">{{item.id}}</b-btn>
-            <b-collapse :id="'collapse'+item.id">
+         <li v-for="item in cache.collection" :key="item.ref.id">
+            <b-btn variant="link" v-b-toggle="'collapse'+item.ref.id">{{item.ref.id}}</b-btn>
+            <b-collapse :id="'collapse'+item.ref.id">
                <pre>{{stringifyData(item)}}</pre>
-               <FirestoreCollection v-for="sub in subCollections(tree, item.id)" :key="sub.path" :path="sub.path" :tree="sub.tree"></FirestoreCollection>
+               <FirestoreCollection v-for="sub in subCollections(tree, item.ref.id)" :key="sub.path" :path="sub.path" :tree="sub.tree"></FirestoreCollection>
             </b-collapse>
          </li>
       </ul>
@@ -31,7 +31,7 @@
 import { isObject } from 'util';
 import { Component, Prop } from 'vue-property-decorator';
 import Common from '@/ui/common';
-import { CreateLiveCollection, IObservableLiveCache } from '@/data/collection';
+import { CreateLiveCollection, LiveCollection } from '@/data/firestore/live';
 
 interface DocData {
    id: string;
@@ -47,7 +47,7 @@ export default class FirestoreCollection extends Common {
    @Prop() path: string;
    @Prop() tree: PathTree;
 
-   cache: IObservableLiveCache<any> = null;
+   cache: LiveCollection<any> = null;
    error: string = null;
 
    mounted() {
