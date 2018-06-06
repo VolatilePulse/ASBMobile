@@ -2,11 +2,11 @@
    <div v-if="store.loaded.firestore">
       <div>
          <span v-if="path" class="text-warning">{{leafname(path)}} </span>
-         <span v-if="size > 0">({{size}}) </span>
-         <span v-if="error" class="text-danger">{{error}} </span>
+         <span v-if="cache && cache.collection.length > 0">({{cache.collection.length}}) </span>
+         <span v-if="cache && cache.error" class="text-danger">{{cache.error}} </span>
       </div>
-      <ul v-if="loaded">
-         <li v-for="item in cache" :key="item.id">
+      <ul v-if="cache && cache.isActive">
+         <li v-for="item in cache.collection" :key="item.id">
             <b-btn variant="link" v-b-toggle="'collapse'+item.id">{{item.id}}</b-btn>
             <b-collapse :id="'collapse'+item.id">
                <pre>{{stringifyData(item)}}</pre>
@@ -31,7 +31,7 @@
 import { isObject } from 'util';
 import { Component, Prop } from 'vue-property-decorator';
 import Common from '@/ui/common';
-import firebase from 'firebase/app';
+import { CreateLiveCollection, IObservableLiveCache } from '@/data/collection';
 
 interface DocData {
    id: string;
@@ -47,24 +47,22 @@ export default class FirestoreCollection extends Common {
    @Prop() path: string;
    @Prop() tree: PathTree;
 
-   pathRef: firebase.firestore.CollectionReference;
-   cache: DocData[] = [];
+   cache: IObservableLiveCache<any> = null;
    error: string = null;
-   loaded = false;
-   closing = false;
-   size: number = null;
 
    mounted() {
       if (this.path) {
-         this.pathRef = firebase.firestore().collection(this.path);
-         this.pathRef.onSnapshot(change => this.receiveSnapshotChanges(change), error => this.receiveError(error));
+         console.log('mounted: ' + this.path);
+         this.cache = CreateLiveCollection<any>(this.path);
       }
    }
 
    beforeDestroy() {
-      this.closing = true;
-      this.pathRef = null;
-      this.cache = [];
+      if (this.cache) {
+         console.log('beforeDestroy: ' + this.path);
+         this.cache.close();
+         this.cache = null;
+      }
    }
 
    leafname(path: string) {
@@ -91,40 +89,5 @@ export default class FirestoreCollection extends Common {
       text = lines.join('\n');
       return text;
    }
-
-   receiveError(error: Error) {
-      this.error = error.message;
-   }
-
-   receiveSnapshotChanges(changes: firebase.firestore.QuerySnapshot) {
-      if (this.closing) return;
-      this.loaded = true;
-      this.size = changes.size;
-      changes.docChanges().forEach(change => {
-         switch (change.type) {
-            case 'added':
-               this.cache.splice(change.newIndex, 0, normalize(change));
-               break;
-            case 'removed':
-               this.cache.splice(change.oldIndex, 1);
-               break;
-            case 'modified':
-               if (change.oldIndex !== change.newIndex) {
-                  this.cache.splice(change.oldIndex, 1);
-                  this.cache.splice(change.newIndex, 0, normalize(change));
-               } else {
-                  this.cache.splice(change.newIndex, 1, normalize(change));
-               }
-               break;
-         }
-      });
-   }
-}
-
-function normalize(snapshot: firebase.firestore.DocumentChange): DocData {
-   const value = snapshot.doc.data();
-   const out = isObject(value) ? value : { '.value': value };
-   const result = { id: snapshot.doc.id, data: out };
-   return result;
 }
 </script>

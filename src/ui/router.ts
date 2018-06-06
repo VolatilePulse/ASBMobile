@@ -7,6 +7,7 @@ import Extractor from './views/extractor.vue';
 import About from './views/info/about.vue';
 import Welcome from './views/info/welcome.vue';
 import WhatsNew from './views/info/whatsnew.vue';
+import Libraries from './views/libraries.vue';
 import NotFound from './views/not_found.vue';
 import Settings from './views/settings.vue';
 import User from './views/user.vue';
@@ -41,7 +42,7 @@ const router = new Router({
       { path: '/extractor', component: Extractor, beforeEnter: requireAuth },
       { path: '/invite', component: Vue, beforeEnter: requireAuth },
 
-      { path: '/libraries', name: 'libraries', component: Vue, beforeEnter: requireAuth },
+      { path: '/libraries', name: 'libraries', component: Libraries, beforeEnter: requireAuth },
       { path: '/library/:library_id', name: 'library', component: Vue, beforeEnter: requireAuth },
       { path: '/library/:library_id/servers', name: 'servers', component: Vue, beforeEnter: requireAuth },
       { path: '/library/:library_id/server/:server_id', name: 'server', component: Vue, beforeEnter: requireAuth },
