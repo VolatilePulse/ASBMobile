@@ -1,6 +1,7 @@
 <template>
    <b-container fluid>
       <h2>Library</h2>
+      <b-alert v-if="cache && cache.error" variant="danger">{{cache.error}}</b-alert>
       <div v-if="cache">
          <pre>{{stringifyData(cache.data)}}</pre>
          <b-btn :to="`/library/${cache.ref.id}/servers`" variant="link">servers</b-btn>
