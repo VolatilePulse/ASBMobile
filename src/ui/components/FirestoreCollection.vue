@@ -6,9 +6,9 @@
          <span v-if="cache && cache.error" class="text-danger">{{cache.error}} </span>
       </div>
       <ul v-if="cache && cache.isActive">
-         <li v-for="item in cache.collection" :key="item.ref.id">
-            <b-btn variant="link" v-b-toggle="'collapse'+item.ref.id">{{item.ref.id}}</b-btn>
-            <b-collapse :id="'collapse'+item.ref.id">
+         <li v-for="item in cache.collection" :key="item.ref.path">
+            <b-btn variant="link" v-b-toggle="'collapse'+item.ref.path">{{item.ref.id}}</b-btn>
+            <b-collapse :id="'collapse'+item.ref.path">
                <pre>{{stringifyData(item)}}</pre>
                <FirestoreCollection v-for="sub in subCollections(tree, item.ref.id)" :key="sub.path" :path="sub.path" :tree="sub.tree"></FirestoreCollection>
             </b-collapse>

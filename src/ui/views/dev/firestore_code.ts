@@ -9,13 +9,13 @@ import { Component } from 'vue-property-decorator';
 })
 export default class FirestoreTab extends Common {
    pathTree = {
-      users:
+      user:
       {
       },
-      libraries:
+      library:
       {
-         servers: null as any,
-         creatures: null as any,
+         server: null as any,
+         creature: null as any,
       }
    };
 }
