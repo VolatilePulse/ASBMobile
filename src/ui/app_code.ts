@@ -3,7 +3,7 @@ import { ID_OFFICIAL_SERVER } from '@/ark/servers_predef';
 import { LibraryManager, SettingsManager } from '@/data';
 import * as Servers from '@/servers';
 import Common, { catchAsyncErrors } from '@/ui/common';
-import theStore, { EVENT_LIBRARY_CHANGED } from '@/ui/store';
+import theStore, { EVENT_LIBRARY_CHANGED, EVENT_LOADED_AUTH, EVENT_LOADED_FIRESTORE } from '@/ui/store';
 import { Delay } from '@/utils';
 import ColorHash from 'color-hash';
 import firebase from 'firebase/app';
@@ -68,12 +68,18 @@ export default class AppShell extends Common {
       // Initialise Firestore
       firebase.firestore().settings({ timestampsInSnapshots: true });
       firebase.firestore().enablePersistence()
-         .then(() => theStore.loaded.firestore = true)
+         .then(() => {
+            theStore.loaded.firestore = true;
+            theStore.eventListener.emit(EVENT_LOADED_FIRESTORE);
+         })
          .catch(err => { console.warn('Firestore offline persistance not enabled'); console.warn(err); });
 
       // Initialise Firestore Auth
       firebase.auth().onAuthStateChanged(async (user: firebase.User) => {
-         theStore.loaded.auth = true;
+         if (!theStore.loaded.auth) {
+            theStore.loaded.auth = true;
+            theStore.eventListener.emit(EVENT_LOADED_AUTH);
+         }
          theStore.user = user;
          if (user) {
             theStore.loggedIn = true;

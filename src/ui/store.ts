@@ -15,6 +15,7 @@ import Vue from 'vue';
 export const EVENT_SERVER_CHANGED = 'server-changed';
 export const EVENT_LIBRARY_CHANGED = 'library-changed';
 export const EVENT_LOADED_AUTH = 'loaded-auth';
+export const EVENT_LOADED_FIRESTORE = 'loaded-firestore';
 
 // !!! Everything public in this class should be initialised to a non-undefined value such as null to enable Vue observation !!!
 class Store {

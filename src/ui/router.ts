@@ -1,4 +1,4 @@
-import theStore from '@/ui/store';
+import theStore, { EVENT_LOADED_AUTH, EVENT_LOADED_FIRESTORE } from '@/ui/store';
 import Vue from 'vue';
 import Router, { RawLocation, Route } from 'vue-router';
 import Creature from './views/creature.vue';
@@ -20,10 +20,22 @@ import User from './views/user.vue';
 
 export type IRouterNext = (to?: RawLocation | false | ((vm: Vue) => any) | void) => void;
 
-function requireAuth(to: Route, _from: Route, next: IRouterNext) {
-   // FIXME: Add handling for when store.loaded.auth is not yet set
+function requireAuth(to: Route, from: Route, next: IRouterNext) {
+   // If the system isn't fully loaded yet, call us back when we are...
+   if (!theStore.loaded.auth) {
+      console.log('Deferring requireAuth until auth loaded');
+      theStore.eventListener.once(EVENT_LOADED_AUTH, () => requireAuth(to, from, next));
+      return;
+   }
+   if (!theStore.loaded.firestore) {
+      console.log('Deferring requireAuth until firestore loaded');
+      theStore.eventListener.once(EVENT_LOADED_FIRESTORE, () => requireAuth(to, from, next));
+      return;
+   }
+
    if (!theStore.user) {
       // Go to login screen, remembering where to go back to
+      console.log('requireAuth failed to find user');
       next({
          path: '/login',
          query: { redirect: to.fullPath },
