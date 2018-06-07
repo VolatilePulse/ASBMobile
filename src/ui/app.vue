@@ -65,22 +65,11 @@
          </b-alert>
 
          <div class="tabcont">
-            <transition name="slidefade" class="tabcont">
-               <!-- <transition-group name="slidefade" tag="div" class="tabcont"> -->
-               <router-view></router-view>
-               <!-- <welcome v-show="tab=='welcome'" key="welcome"></welcome> -->
-               <!-- <settings v-show="tab=='settings'" key="settings"></settings> -->
-               <!-- <servers v-show="tab=='servers'" key="servers"></servers> -->
-               <!-- <extractor v-show="tab=='extractor'" key="extractor"></extractor> -->
-               <!-- <library v-show="tab=='library'" key="library"></library> -->
-               <!-- <tester v-show="tab=='tester'" key="tester"></tester> -->
-               <!-- <firestore v-show="tab=='firestore'" key="firestore"></firestore> -->
-               <!-- <fireauth v-show="tab=='fireauth'" key="fireauth"></fireauth> -->
-               <!-- <about v-show="tab=='about'" key="about"></about> -->
-               <!-- </transition-group> -->
-               <div v-if="false" class="spinner-holder">
+            <transition name="slidefade">
+               <div v-if="store.routerAwaitingLoad" class="spinner-holder">
                   <spinner size="4rem" background="#49649C" style="display:block"></spinner>
                </div>
+               <router-view v-else></router-view>
             </transition>
          </div>
       </b-container>

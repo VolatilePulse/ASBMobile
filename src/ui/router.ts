@@ -20,19 +20,31 @@ import User from './views/user.vue';
 
 export type IRouterNext = (to?: RawLocation | false | ((vm: Vue) => any) | void) => void;
 
+// TODO: Implement a general way to say what a page requires, from:
+//  * An authenticated user
+//  * Subsystem ready: Authentication
+//  * Subsystem ready: Firestore
+//  * Ark Data is loaded
+//  * Online connection
+
+
+/** Called before navigating to a page that requires authentication */
 function requireAuth(to: Route, from: Route, next: IRouterNext) {
    // If the system isn't fully loaded yet, call us back when we are...
    if (!theStore.loaded.auth) {
+      theStore.routerAwaitingLoad = true;
       console.log('Deferring requireAuth until auth loaded');
       theStore.eventListener.once(EVENT_LOADED_AUTH, () => requireAuth(to, from, next));
       return;
    }
    if (!theStore.loaded.firestore) {
+      theStore.routerAwaitingLoad = true;
       console.log('Deferring requireAuth until firestore loaded');
       theStore.eventListener.once(EVENT_LOADED_FIRESTORE, () => requireAuth(to, from, next));
       return;
    }
 
+   theStore.routerAwaitingLoad = false;
    if (!theStore.user) {
       // Go to login screen, remembering where to go back to
       console.log('requireAuth failed to find user');

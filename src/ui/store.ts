@@ -32,6 +32,7 @@ class Store {
    devMode: boolean = true;
    dataLoaded: boolean = false;
    dataLoadError: string = null;
+   routerAwaitingLoad: boolean = false;
    libraryReady: boolean = false;
    settingsReady: boolean = false;
    updateAvailable: boolean = false;
