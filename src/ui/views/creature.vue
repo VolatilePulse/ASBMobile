@@ -2,6 +2,7 @@
    <b-container fluid>
       <h2>Creature</h2>
       <b-alert v-if="cache && cache.error" variant="danger">{{cache.error}}</b-alert>
+      <b-btn :to="$route.path+'/edit'" variant="link">edit</b-btn>
       <pre v-if="cache">{{stringifyData(cache.data)}}</pre>
    </b-container>
 </template>

@@ -3,6 +3,7 @@ import Vue from 'vue';
 import Router, { RawLocation, Route } from 'vue-router';
 import Creature from './views/creature.vue';
 import Creatures from './views/creatures.vue';
+import CreatureEdit from './views/creature_edit.vue';
 import Firestore from './views/dev/firestore.vue';
 import Tester from './views/dev/tester.vue';
 import Extractor from './views/extractor.vue';
@@ -77,6 +78,7 @@ const router = new Router({
       { path: '/library/:library_id/server/:server_id', name: 'server', component: Server, beforeEnter: requireAuth },
       { path: '/library/:library_id/creatures', name: 'creatures', component: Creatures, beforeEnter: requireAuth },
       { path: '/library/:library_id/creature/:creature_id', name: 'creature', component: Creature, beforeEnter: requireAuth },
+      { path: '/library/:library_id/creature/:creature_id/edit', component: CreatureEdit, beforeEnter: requireAuth },
 
       { path: '/dev/tester', component: Tester },
       { path: '/dev/firestore', component: Firestore },

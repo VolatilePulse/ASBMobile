@@ -6,6 +6,7 @@ export interface DocumentData<T> {
    ref: firebase.firestore.DocumentReference;
 }
 
+/** Encapsulates a collection from the database that is automatically updated with remote changes */
 export interface LiveCollection<T> {
    collection: ReadonlyArray<DocumentData<T>>;
    error: string;
@@ -14,6 +15,7 @@ export interface LiveCollection<T> {
    close(): void;
 }
 
+/** Encapsulates a document from the database that is automatically updated with remote changes */
 export interface LiveDocument<T> {
    error: string;
    isActive: boolean;
