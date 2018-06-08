@@ -74,7 +74,7 @@ module.exports = {
       // Avoid bundling these as they're pulled from a CDN
       externals: [
          {
-            'vue': 'var Vue',
+            // 'vue': 'var Vue',
             'firebase': 'var firebase',
             'firebase/app': 'var firebase',
             'firebase/auth': 'var firebase.auth',
