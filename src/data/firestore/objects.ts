@@ -1,4 +1,5 @@
-import { CreatureStatus, LibraryId, ServerId, Stat, UserId } from '@/data/firestore/types';
+import { CreatureStatus, InputSource, LibraryId, ServerId, UserId } from '@/data/firestore/types';
+import firebase from 'firebase/app';
 
 
 export interface User {
@@ -8,9 +9,9 @@ export interface User {
 export interface Library {
    name: string;
    owner: UserId;
-   admins: UserId[];
-   members: UserId[];
-   pending: UserId[];
+   admins: { [user: string]: true };
+   members: { [user: string]: true };
+   pending: { [user: string]: true };
 }
 
 export interface Server {
@@ -21,30 +22,51 @@ export interface Server {
 }
 
 export interface Creature {
-   name: string;
-
-   uuid?: string;
    dinoId1?: number;
    dinoId2?: number;
 
-   tribe: string;
-   owner: string;
-
-   originServer: ServerId;
-   currentServer: ServerId;
-
-   species: string;
-
-   isWild: boolean;
-   isTamed: boolean;
-   isBred: boolean;
-
-   TE?: number;
-   wildLevel?: number;
-   IB: number;
-
-   level: number;
-   stats: Stat[];
+   speciesName: string;
+   speciesBP: string;
 
    status: CreatureStatus;
+
+   name: string;
+
+   tribe: string;
+   owner: string;
+   imprinter?: string;
+
+   originServer?: ServerId;
+   currentServer: ServerId;
+
+   isWild?: boolean;
+   isTamed?: boolean;
+   isBred?: boolean;
+
+   isFemale: boolean;
+   isNeutered?: boolean;
+
+   level: number;
+   levelsWild: number[];
+   levelsDom: number[];
+   statValues: number[];
+   breedingValues: number[];
+   TE: number;
+   WL: number;
+   IB: number;
+
+   mutations: number;
+   mutationsMaternal: number;
+   mutationsPaternal: number;
+
+   tags: { [name: string]: true };
+
+   times: {
+      growingUntil?: firebase.firestore.Timestamp;
+      cooldownUntil?: firebase.firestore.Timestamp;
+      addedToLibrary?: firebase.firestore.Timestamp;
+      domesticated?: firebase.firestore.Timestamp;
+   };
+
+   inputSource: InputSource;
 }

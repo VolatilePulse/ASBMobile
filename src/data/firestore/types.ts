@@ -14,3 +14,5 @@ export interface Stat {
    Lw: number;
    Ld: number;
 }
+
+export type InputSource = 'asb_xml' | 'asbm_user_input' | 'ark_export' | 'ark_tools_export';
