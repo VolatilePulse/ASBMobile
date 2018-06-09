@@ -86,10 +86,10 @@ export default class AppShell extends Common {
             theStore.userBlankColor = user ? 'grey' : new ColorHash().hex('id:' + user.uid);
             console.log(`Auth as: ${user.email} (${user.uid})`);
 
-            const userDocRef = firebase.firestore().collection('users').doc(user.uid);
-            userDocRef.set({ exists: true }, { merge: true });
-            const userData = await userDocRef.get();
-            console.log(userData);
+            const userDocRef = firebase.firestore().collection('user').doc(user.uid);
+            userDocRef.set({ exists: true }, { merge: true }).catch(err => console.warn('Failed to set user object after authentication', err));
+            const userData = await userDocRef.get().catch(err => console.warn('Failed to get user object after authentication', err));
+            console.log('User object:', userData);
          }
          else {
             theStore.loggedIn = false;
