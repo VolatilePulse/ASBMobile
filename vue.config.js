@@ -1,6 +1,7 @@
 const BASE_URL = "/";
 
 const plugins = [];
+let firebasePublicKeys = null;
 
 if (process.env.NODE_ENV === 'production') {
    // Include the bundle size visualiser
@@ -11,6 +12,14 @@ if (process.env.NODE_ENV === 'production') {
    }));
 
    // plugins.push(new (require('webpack').IgnorePlugin)(/firebase/));
+}
+else {
+   // Get the firebase web setup public keys from the Firebase CLI
+   var exec = require('child_process').exec;
+   exec('firebase setup:web', (error, stdout, stderr) => {
+      if (error || stderr) console.error("Failed to fetch Firebase web setup: ", error || stderr);
+      firebasePublicKeys = stdout;
+   });
 }
 
 
@@ -51,6 +60,7 @@ module.exports = {
          .plugin('define')
          .tap(args => {
             // Add the package version number into the DefinePlugin's expansions, or "DEV" if in development mode
+            // @ts-ignore
             args[0]['process.env'].VERSION = args[0]['process.env']['NODE_ENV'] == '"development"' ? '"DEV"' : JSON.stringify(require("./package.json").version);
             return args;
          });
@@ -60,7 +70,7 @@ module.exports = {
             // Change the linting output format so the line number is included with the filename (so VSCode can jump straight to it)
             args[0]['formatter'] = 'default';
             return args;
-         })
+         });
    },
 
    configureWebpack: {
@@ -82,5 +92,16 @@ module.exports = {
             'firebaseui': 'var firebaseui',
          },
       ],
-   }
+
+   },
+
+   devServer: {
+      // Send the current Firebase public keys on requests to: /__/firebase/init.js
+      before(app) {
+         app.get('/__/firebase/init.js', function (req, res) {
+            res.set('Content-Type', 'application/javascript');
+            res.send(firebasePublicKeys);
+         });
+      },
+   },
 }
