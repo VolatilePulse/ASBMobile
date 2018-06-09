@@ -17,6 +17,6 @@
    "scope": "/",
    "theme_color": "#2e54a5",
    "background_color": "#fafafa",
-   "start_url": "https://asbmobile-dev.firebaseapp.com/",
+   "start_url": "https://dev.arkbreeder.com/",
    "display": "standalone"
 }
