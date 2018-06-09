@@ -11,10 +11,10 @@
  * See https://goo.gl/2aRDsh
  */
 
-importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.1.0/workbox-sw.js");
+importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.2.0/workbox-sw.js");
 
 importScripts(
-  "/ASBMobile/precache-manifest.4f591502120c7a225886e48c472522c8.js"
+  "/precache-manifest.ad31b2e505dfb350eb6917cbad215f6c.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "asb-mobile"});
