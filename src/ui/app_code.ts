@@ -1,11 +1,11 @@
 import { ParseDatabase } from '@/ark/data';
 import { ID_OFFICIAL_SERVER } from '@/ark/servers_predef';
 import { LibraryManager, SettingsManager } from '@/data';
+import { User } from '@/data/firestore/objects';
 import * as Servers from '@/servers';
 import Common, { catchAsyncErrors } from '@/ui/common';
 import theStore, { EVENT_LIBRARY_CHANGED, EVENT_LOADED_AUTH, EVENT_LOADED_FIRESTORE } from '@/ui/store';
 import { Delay } from '@/utils';
-import ColorHash from 'color-hash';
 import firebase from 'firebase/app';
 import 'firebase/auth'; // required to load the Auth part of Firebase
 import 'firebase/firestore'; // required to load the Firestore part of Firebase
@@ -61,6 +61,7 @@ export default class AppShell extends Common {
          .catch(err => { console.warn('Firestore offline persistance not enabled'); console.warn(err); });
 
       // Initialise Firestore Auth
+      // TODO: Decouple this lot into an auth component
       firebase.auth().onAuthStateChanged(async (user: firebase.User) => {
          if (!theStore.loaded.auth) {
             theStore.loaded.auth = true;
@@ -69,16 +70,51 @@ export default class AppShell extends Common {
          theStore.user = user;
          if (user) {
             theStore.loggedIn = true;
-            theStore.userBlankColor = user ? 'grey' : new ColorHash().hex('id:' + user.uid);
-            console.log(`Auth as: ${user.email} (${user.uid})`);
+            console.dir(`Auth as ${user.uid}:`, user);
 
+            // TODO: Set up a live-writable document for the user data
             const userDocRef = firebase.firestore().collection('user').doc(user.uid);
-            userDocRef.set({ exists: true }, { merge: true }).catch(err => console.warn('Failed to set user object after authentication', err));
-            const userData = await userDocRef.get().catch(err => console.warn('Failed to get user object after authentication', err));
-            console.log('User object:', userData);
+            let userData: User;
+            try {
+               userData = (await userDocRef.get()).data() as User;
+            }
+            catch (err) {
+               console.warn('Failed to get user object after authentication', err);
+            }
+
+            let changed = false;
+            if (!userData) {
+               userData = {};
+               changed = true;
+            }
+
+            if (!userData.photoURL) {
+               userData.photoURL = user.providerData.reduce((agg, a) => agg || a.photoURL, '') || user.photoURL;
+               changed = true;
+            }
+
+            if (!userData.displayName) {
+               userData.displayName = user.displayName || user.providerData.reduce((agg, a) => agg || a.displayName, '') || 'Anon E. Mouse';
+               changed = true;
+            }
+
+            if (changed) {
+               console.log('Updating user object');
+               try {
+                  await userDocRef.set(userData, { merge: true });
+               }
+               catch (err) {
+                  console.warn('Failed to update user object after authentication', err);
+               }
+            }
+
+            theStore.userData = userData;
+            console.log('User data:', userData);
          }
          else {
             theStore.loggedIn = false;
+            theStore.user = null;
+            theStore.userData = null;
             console.log('No authentication found');
          }
       });

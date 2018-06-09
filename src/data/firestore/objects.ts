@@ -3,7 +3,9 @@ import firebase from 'firebase/app';
 
 
 export interface User {
-   libraries: LibraryId[];
+   photoURL?: string;
+   displayName?: string;
+   libraries?: LibraryId[];
 }
 
 export interface Library {

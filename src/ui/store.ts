@@ -1,6 +1,7 @@
 import { SpeciesParameters } from '@/ark/multipliers';
 import { statNames } from '@/consts';
 import { LibraryManager, SettingsManager } from '@/data';
+import { User } from '@/data/firestore/objects';
 import { MirrorCache } from '@/data/mirror';
 import { Creature, Server } from '@/data/objects';
 import { isServerEditable } from '@/servers';
@@ -52,6 +53,7 @@ class Store {
    loggedIn: boolean = false;
    user: firebase.User = null;
    userBlankColor: string = null;
+   userData: User = null;
 
    private initialised: boolean;
    private _server: Server = null;

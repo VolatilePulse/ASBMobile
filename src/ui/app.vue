@@ -35,7 +35,8 @@
                <transition name="fade">
                   <b-nav-item to="/user" v-if="!store.user">Sign In</b-nav-item>
                   <b-nav-item to="/user" v-else class="p-0 hdr-user-img-nav">
-                     <b-img :src="store.user.photoURL" class="p-0 hdr-user-img" rounded="circle"></b-img>
+                     <b-img v-if="store.userData && store.userData.photoURL" :src="store.userData.photoURL" class="p-0 hdr-user-img" rounded="circle"></b-img>
+                     <b-img v-else blank blank-color="grey" class="p-0 hdr-user-img" rounded="circle"></b-img>
                   </b-nav-item>
                </transition>
                <b-nav-item-dropdown text="Dev" boundary="window">
@@ -82,8 +83,8 @@
 @import "../assets/scss/asbm-bootstrap";
 
 .hdr-user-img {
-  max-height: 37px;
-  max-width: 37px;
+  height: 37px;
+  width: 37px;
   object-fit: contain;
 }
 

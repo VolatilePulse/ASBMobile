@@ -10,8 +10,8 @@
 
       <section v-if="store.loggedIn">
          <b-media>
-            <b-img v-if="store.user.photoURL" slot="aside" :src="store.user.photoURL" alt="User avatar" class="user-img" rounded="circle"></b-img>
-            <b-img v-else slot="aside" blank :blank-color="store.userBlankColor" alt="User avatar" class="user-img" rounded></b-img>
+            <b-img v-if="store.userData && store.userData.photoURL" slot="aside" :src="store.userData.photoURL" alt="User avatar" class="user-img" rounded="circle"></b-img>
+            <b-img v-else slot="aside" blank blank-color="grey" alt="Blank user avatar" class="user-img" rounded="circle"></b-img>
             <div class="mt-0">
                <span class="">{{store.user.displayName}}</span>
                <b-btn variant="link" @click="showDisplayNameEdit=true">
