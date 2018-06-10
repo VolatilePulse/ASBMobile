@@ -58,7 +58,11 @@ export default class AppShell extends Common {
             theStore.loaded.firestore = true;
             theStore.eventListener.emit(EVENT_LOADED_FIRESTORE);
          })
-         .catch(err => { console.warn('Firestore offline persistance not enabled'); console.warn(err); });
+         .catch(err => {
+            console.warn('Firestore offline persistance not enabled: ', err);
+            theStore.loaded.firestore = true;
+            theStore.eventListener.emit(EVENT_LOADED_FIRESTORE);
+         });
 
       // Initialise Firestore Auth
       // TODO: Decouple this lot into an auth component
