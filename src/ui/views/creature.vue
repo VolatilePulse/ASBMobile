@@ -18,35 +18,35 @@
                Display Species BP Path on hover
                {{cache.data.speciesBP}}
             -->
-            <p v-if="cache.data.name">{{cache.data.name}} ({{cache.data.speciesName}})</p>
-            <p v-else>{{cache.data.speciesName}}</p>
+            <p v-if="cache.data.name">{{cache.data.name}} ({{cache.data.species}})</p>
+            <p v-else>{{cache.data.species}}</p>
          </h1>
          <h3>LEVEL:
-            <p v-if="cache.data.level">{{cache.data.level}}</p>
-            <p v-else>{{calculatedLevel()}}</p>
+            <span v-if="cache.data.level">{{cache.data.level}}</span>
+            <span v-else>{{calculatedLevel()}}</span>
          </h3>
          <h4>
-            <p v-if="cache.data.owner && cache.data.owner !== cache.data.tribe">{{cache.data.tribe}} - </p>
-            <p v-if="cache.data.tribe">{{cache.data.tribe}}</p>
+            <span v-if="cache.data.owner && cache.data.owner !== cache.data.tribe">{{cache.data.tribe}} - </span>
+            <span v-if="cache.data.tribe">{{cache.data.tribe}}</span>
          </h4>
          <!-- {{cache.data.colors}} -->
-         <wheel :size=200 :colors=cache.data.colors></wheel>
-         <div v-if="cache.data.isTamed">Tamed @ {{cache.data.WL}} w/ {{displayPercent(cache.data.TE)}} Taming Effectiveness</div>
-         <div v-else-if="cache.data.isBred">Bred @ {{getBabyLevel()}} w/ {{displayPercent(cache.data.IB)}} Imprinting</div>
+         <wheel :size="200" :colors="cache.data.colors"></wheel>
+         <div v-if="cache.data.isTamed">Tamed @ {{cache.data.wildLevel}} w/ {{displayPercent(cache.data.tamingEff)}} Taming Effectiveness</div>
+         <div v-else-if="cache.data.isBred">Bred @ {{getBabyLevel()}} w/ {{displayPercent(cache.data.imprintingBonus)}} Imprinting</div>
 
          <!--
             Display Stat Values and Breeding Values
             {{cache.data.breedingValues}}
          -->
-         <b-row v-for="i in range(8)" :key=i>
-            <div>
-               <b-img :src="store.statImages[i]" fluid-grow class="align-items-center" style="max-height:28px;min-height:22px"></b-img>
-            </div>
-
-            <div>
-               {{cache.data.statValues}} = ({{cache.data.levelsWild[i]}} + {{cache.data.levelsDom[i]}})
-            </div>
-         </b-row>
+         <b-container>
+            <b-row v-for="i in range(8)" :key="i">
+               <b-col cols="2">
+                  <b-img :src="store.statImages[i]" class="align-items-center" style="height:28px;height:22px"></b-img>
+               </b-col>
+               <b-col cols="5">{{cache.data.statValues ? cache.data.statValues[i]: '?'}}</b-col>
+               <b-col cols="5">({{cache.data.levelsWild[i]}} + {{cache.data.levelsDom[i]}})</b-col>
+            </b-row>
+         </b-container>
 
          <br />
          <div>{{cache.data.inputSource}}</div>

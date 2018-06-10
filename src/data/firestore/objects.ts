@@ -11,6 +11,7 @@ export interface User {
 export interface Library {
    name: string;
    owner: UserId;
+   public: boolean;
    admins: { [user: string]: true };
    members: { [user: string]: true };
    pending: { [user: string]: true };
@@ -27,7 +28,7 @@ export interface Creature {
    dinoId1?: number;
    dinoId2?: number;
 
-   speciesName: string;
+   species: string;
    speciesBP: string;
 
    status: CreatureStatus;
@@ -48,14 +49,10 @@ export interface Creature {
    isFemale: boolean;
    isNeutered?: boolean;
 
-   level: number;
    levelsWild: number[];
    levelsDom: number[];
-   statValues: number[];
-   breedingValues: number[];
-   TE: number;
-   WL: number;
-   IB: number;
+   tamingEff: number;
+   imprintingBonus: number;
 
    mutations: number;
    mutationsMaternal: number;
@@ -71,4 +68,11 @@ export interface Creature {
    };
 
    inputSource: InputSource;
+
+   // Cached values
+   level?: number;
+   breedingLevel?: number;
+   wildLevel?: number;
+   statValues?: number[];
+   breedingValues?: number[];
 }
