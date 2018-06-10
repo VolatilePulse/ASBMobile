@@ -32,7 +32,7 @@
          <!-- {{cache.data.colors}} -->
          <wheel :size=200 :colors=cache.data.colors></wheel>
          <div v-if="cache.data.isTamed">Tamed @ {{cache.data.WL}} w/ {{displayPercent(cache.data.TE)}} Taming Effectiveness</div>
-         <div v-else-if="cache.data.isBred">Bred @ {{cache.data.levelsWild[TORPOR] + 1}} w/ {{displayPercent(cache.data.IB)}} Imprinting</div>
+         <div v-else-if="cache.data.isBred">Bred @ {{getBabyLevel()}} w/ {{displayPercent(cache.data.IB)}} Imprinting</div>
 
          <!--
             Display Stat Values and Breeding Values
@@ -91,6 +91,9 @@ export default class extends Common {
    }
    displayPercent(num: number) {
       return (num * 100).toFixed(2) + '%';
+   }
+   getBabyLevel() {
+      return this.cache.data.levelsWild[TORPOR] + 1;
    }
    calculatedLevel() {
       // All creatures start at level 1
