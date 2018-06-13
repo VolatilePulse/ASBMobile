@@ -20,7 +20,7 @@ export interface Library {
 export interface Server {
    name: string;
    IBM: number;
-   multipliers: Array<Array<number | null | undefined>>;
+   multipliers: { [idx: number]: { [idx: number]: number | null | undefined } };
    singlePlayer: boolean;
 }
 
