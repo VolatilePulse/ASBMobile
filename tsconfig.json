@@ -26,15 +26,13 @@
          "node",
          "jest",
          "firebase",
-         "vue",
-         // "mocha",
-         // "chai"
+         "vue"
       ],
       "paths": {
          "@/*": [
             "src/*"
          ]
-      },
+      }
    },
    "include": [
       "src/**/*.ts",
@@ -48,6 +46,6 @@
       "ref",
       "public",
       "versions",
-      "testdata",
+      "testdata"
    ]
 }
