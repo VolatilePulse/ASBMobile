@@ -2,14 +2,17 @@
    <b-container fluid>
       <b-container fluid>
          <b-row>
-            <!--12 cols at xs and 4 cols at sm and above -->
+            <b-col class="color7">1/3</b-col>
+            <b-col class="color8">1/3</b-col>
+            <b-col class="color9">1/3</b-col>
+         </b-row>
+         <hr/>
+         <b-row>
             <b-col sm="4" class="color1">full width @ xs<br/>4 cols @ sm+</b-col>
-            <!-- take remaining space -->
             <b-col class="color2">all remaining space</b-col>
          </b-row>
          <hr/>
          <b-row>
-            <!--12 cols at xs and 6 cols at sm and above -->
             <b-col sm="6" class="color3">full width @ xs<br/>6 cols @ sm+</b-col>
             <b-col class="color4">shares space equally</b-col>
             <b-col class="color5">shares space equally</b-col>
