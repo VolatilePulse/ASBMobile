@@ -10,6 +10,7 @@ import Extractor from './views/extractor.vue';
 import About from './views/info/about.vue';
 import Welcome from './views/info/welcome.vue';
 import WhatsNew from './views/info/whatsnew.vue';
+import LayoutTest from './views/layout_test.vue';
 import Libraries from './views/libraries.vue';
 import Library from './views/library.vue';
 import NotFound from './views/not_found.vue';
@@ -82,6 +83,7 @@ const router = new Router({
 
       { path: '/dev/tester', component: Tester },
       { path: '/dev/firestore', component: Firestore },
+      { path: '/dev/layout', component: LayoutTest },
 
       { path: '*', component: NotFound },
    ],
