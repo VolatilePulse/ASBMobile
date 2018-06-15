@@ -9,13 +9,20 @@
 </style>
 
 <script lang="ts">
-import { Component, Prop } from 'vue-property-decorator';
+import { Component, Prop, Watch } from 'vue-property-decorator';
 import Common from '@/ui/common';
 
 @Component({ name: 'Wheel' })
 export default class Wheel extends Common {
    @Prop({ type: Number, default: 100 }) size: number;
    @Prop({ type: Array }) colors: number[];
+
+   regions: number[];
+   radius: number;
+   degreesPerSeg: number;
+   coords: { x: number, y: number };
+   d: string;
+   transforms: string[];
 
    colorCodes = ['#808080', // Fallback Color
       '#ff0000', '#0000ff', '#00ff00', '#ffff00', '#00ffff', '#ff00ff', '#c0ffba', '#c8caca',
@@ -27,15 +34,34 @@ export default class Wheel extends Common {
       '#787496', '#b0a2c0', '#6281a7', '#485c75', '#5fa4ea', '#4568d4', '#ededed', '#515151'
    ];
 
-   // If no color regions, give it 1 default region
-   regions = (this.colors.length) ? this.colors.filter(num => num !== 0) : [0];
+   // Run when the component is about to be shown
+   beforeMount() {
+      this.recalculate();
+   }
 
-   r = (this.size - 10) / 2;
-   degree = 360 / this.regions.length;
-   coords = this.coordinatesFromDegree(this.degree, this.r);
-   d = `M 0,0 l ${this.r},0 A ${this.r},${this.r},0,0,0,${this.coords.x},${-this.coords.y} L 0,0`;
+   // Watch the colors property (and anything in it) for changes, calling recalculate when it does
+   @Watch('colors', { deep: true })
+   updateColors() {
+      this.recalculate();
+   }
 
-   transforms = this.generateRegions(this.degree, this.r, this.regions);
+   // Watch the size property for changes, calling recalculate when it does
+   @Watch('size')
+   updateSize() {
+      this.recalculate();
+   }
+
+   recalculate() {
+      this.regions = this.colors.filter(id => id !== 0).map(id => ((id - 1) % 56) + 1);
+      if (this.regions.length === 0) this.regions = [];
+
+      this.radius = (this.size - 10) / 2;
+      this.degreesPerSeg = 360 / this.regions.length;
+      this.coords = this.coordinatesFromDegree(this.degreesPerSeg, this.radius);
+      this.d = `M 0,0 l ${this.radius},0 A ${this.radius},${this.radius},0,0,0,${this.coords.x},${-this.coords.y} L 0,0`;
+
+      this.transforms = this.generateRegions(this.degreesPerSeg, this.radius, this.regions);
+   }
 
    coordinatesFromDegree(degree: number, radius: number) {
       // TODO: check if degree is valid

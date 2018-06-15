@@ -30,7 +30,7 @@
             <span v-if="cache.data.tribe">{{cache.data.tribe}}</span>
          </h4>
          <!-- {{cache.data.colors}} -->
-         <wheel :size="200" :colors="cache.data.colors"></wheel>
+         <wheel :size="200" :colors="Object.values(cache.data.colors)"></wheel>
          <div v-if="cache.data.isTamed">Tamed @ {{cache.data.wildLevel}} w/ {{displayPercent(cache.data.tamingEff)}} Taming Effectiveness</div>
          <div v-else-if="cache.data.isBred">Bred @ {{getBabyLevel()}} w/ {{displayPercent(cache.data.imprintingBonus)}} Imprinting</div>
 
