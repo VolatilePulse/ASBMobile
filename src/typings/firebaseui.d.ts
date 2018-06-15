@@ -1,4 +1,4 @@
-declare module "firebaseui" {
+declare module 'firebaseui' {
 
    import firebase from 'firebase';
 
@@ -20,7 +20,7 @@ declare module "firebaseui" {
    }
    interface ISignInOption {
       provider: string;
-      scopes?: Array<string>;
+      scopes?: string[];
       requireDisplayName?: boolean;
    }
 

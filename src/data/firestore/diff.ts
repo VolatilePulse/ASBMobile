@@ -143,7 +143,7 @@ export function applyDiff(target: any, diffs: Changes, deletedValue?: any): any 
 }
 
 interface MergeResult {
-   target: any,
+   target: any;
    conflicts: MergeChanges;
 }
 
