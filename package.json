@@ -51,7 +51,6 @@
     "@types/glob": "^5.0.35",
     "@types/jest": "^22.2.3",
     "@types/lodash-es": "^4.17.0",
-    "@types/mocha": "^2.2.46",
     "@types/pouchdb-adapter-idb": "^6.1.2",
     "@types/pouchdb-core": "^6.4.0",
     "@types/pouchdb-find": "^6.3.2",
