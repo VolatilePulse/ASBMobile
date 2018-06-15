@@ -99,7 +99,7 @@ export default class extends Common {
       // All creatures start at level 1
       let sum = 1 + this.cache.data.levelsWild[TORPOR];
 
-      for (const value of this.cache.data.levelsDom)
+      for (const value of Object.values(this.cache.data.levelsDom))
          sum += value;
 
       return sum;
