@@ -142,6 +142,20 @@ export function applyDiff(target: any, diffs: Changes, deletedValue?: any): any 
    return target;
 }
 
+export function resolveAllConflicts(target: any, conflicts: MergeChanges, oursNotTheirs: boolean, deletedValue?: any) {
+   for (const [path, conflict] of Object.entries(conflicts)) {
+      resolveConflict(target, path, conflict, oursNotTheirs, deletedValue);
+   }
+}
+
+export function resolveConflict(target: any, path: string, change: MergeChange, oursNotTheirs: boolean, deletedValue?: any) {
+   if (change.operation !== 'merge') throw new Error('Change must be from a conflict');
+   if (oursNotTheirs !== true && oursNotTheirs !== false) throw new Error('oursNotTheirs must be explicitly set');
+
+   const source = oursNotTheirs ? change.ourChange : change.theirChange;
+   applyDiff(target, { [path]: source }, deletedValue);
+}
+
 interface MergeResult {
    target: any;
    conflicts: MergeChanges;

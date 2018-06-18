@@ -1,11 +1,8 @@
 import { applyDiff, findDiff } from '@/data/firestore/diff';
 import { expect } from 'chai';
 import { cloneDeep } from 'lodash';
-import { inspect } from 'util';
 
 // tslint:disable:no-unused-expression
-
-inspect.defaultOptions = { colors: true, depth: 4, showProxy: true };
 
 
 describe('object differ', () => {
@@ -277,5 +274,31 @@ describe('object differ', () => {
       const deleted = {};
       const result = applyDiff(target, changes, deleted);
       expect(result).to.have.property('a').which.equals(deleted);
+   });
+
+   describe('handles properties as values', () => {
+      let left: any;
+      let right: any;
+
+      beforeEach(() => {
+         left = {
+            get a() { return 1; }
+         };
+         right = {
+            a: 1,
+         };
+      });
+
+      it('when no difference', () => {
+         const changes = findDiff(left, right);
+         expect(changes).to.be.empty;
+      });
+
+      it('when different', () => {
+         right.a = 2;
+         const changes = findDiff(left, right);
+         expect(changes).to.have.property('.a').which.has.property('operation').which.equals('update');
+         expect(changes['.a']).to.have.property('value').which.equals(2);
+      });
    });
 });
