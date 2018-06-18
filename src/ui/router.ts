@@ -4,6 +4,7 @@ import Router, { RawLocation, Route } from 'vue-router';
 import Creature from './views/creature.vue';
 import Creatures from './views/creatures.vue';
 import CreatureEdit from './views/creature_edit.vue';
+import ChangesTest from './views/dev/changes.vue';
 import Firestore from './views/dev/firestore.vue';
 import Tester from './views/dev/tester.vue';
 import Extractor from './views/extractor.vue';
@@ -84,6 +85,7 @@ const router = new Router({
       { path: '/dev/tester', component: Tester },
       { path: '/dev/firestore', component: Firestore },
       { path: '/dev/layout', component: LayoutTest },
+      { path: '/dev/changes', component: ChangesTest },
 
       { path: '*', component: NotFound },
    ],
