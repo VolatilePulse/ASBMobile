@@ -11,6 +11,7 @@ import 'firebase/auth'; // required to load the Auth part of Firebase
 import 'firebase/firestore'; // required to load the Firestore part of Firebase
 import { Component } from 'vue-property-decorator';
 import './filters'; // registers Vue filters
+import './net_data'; // registers the v-net-data directive
 import routerConfig from './router';
 
 /**

@@ -28,12 +28,12 @@
                </b-form-row>
                <b-form-row>
                   <b-form-group label="Text">
-                     <b-form-input type="text" v-model="cache.user.str"></b-form-input>
+                     <b-form-input type="text" v-net-data:str></b-form-input>
                   </b-form-group>
                </b-form-row>
                <b-form-row>
                   <b-form-group label="Number:">
-                     <b-form-input type="number" v-model="cache.user.num"></b-form-input>
+                     <b-form-input type="number" v-net-data:num></b-form-input>
                   </b-form-group>
                </b-form-row>
                <b-form-row class="right justify-content-right">
@@ -68,6 +68,26 @@
    padding: 0.7rem;
    min-height: 2.5rem;
 }
+
+input.net-data {
+   transition: background-color 0.5s, border-color 0.5s;
+   background-color: antiquewhite;
+}
+
+input.net-data:disabled {
+   background-color: rgb(157, 148, 136);
+}
+
+input.changed {
+   background-color: rgb(157, 216, 157);
+   border-color: rgb(63, 230, 77);
+}
+
+input.conflict {
+   border-color: red;
+   background-color: rgb(235, 65, 52);
+   color: var(--light);
+}
 </style>
 
 
@@ -93,14 +113,15 @@ export default class extends Vue {
    cache = new ChangeHandler<TestData>();
 
    receiveFromNetwork() {
-      this.cache.acceptNewData(this.network, true);
+      this.cache.acceptNewData(this.network);
       this.calcUserDiff();
    }
 
    sendToNetwork() {
       this.network = cloneDeep(this.cache.user);
-      this.cache.conflicts = {};
-      this.calcUserDiff();
+      this.receiveFromNetwork();
+      // this.cache.conflicts = {};
+      // this.calcUserDiff();
    }
 
    calcUserDiff() {
