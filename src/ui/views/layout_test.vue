@@ -31,8 +31,6 @@
 
 
 <style lang="scss" scoped>
-@import '~bootstrap/scss/functions';
-
 div { font-size: 105% }
 .color1  { background-color: #B71C1C; min-height: 4.3rem }
 .color2  { background-color: #880E4F; min-height: 4.3rem }

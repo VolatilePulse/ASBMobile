@@ -5,9 +5,6 @@
 
 
 <style lang="scss">
-@import '~bootstrap/scss/functions';//, '~bootstrap/scss/variables';
-@import "../../../assets/scss/asbm-bootstrap";
-
 .whatsnew {
    margin: 1rem;
 

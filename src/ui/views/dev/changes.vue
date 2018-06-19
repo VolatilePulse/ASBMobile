@@ -59,8 +59,6 @@
 
 
 <style lang="scss" scoped>
-@import '~bootstrap/scss/functions';
-@import "../../../assets/scss/asbm-bootstrap.scss";
 .inspect {
    background-color: $gray-900;
    border-radius: 1rem;

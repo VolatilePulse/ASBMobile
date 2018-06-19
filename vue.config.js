@@ -54,6 +54,17 @@ module.exports = {
       },
    },
 
+   css: {
+      loaderOptions: {
+         sass: {
+            data: `
+            @import "~bootstrap/scss/functions";
+            @import "src/assets/scss/asbm-bootstrap.scss";
+            `,
+         },
+      },
+   },
+
    // Extensions to vue-cli's internal webpack build process go here
    chainWebpack: config => {
       config

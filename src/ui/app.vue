@@ -79,9 +79,6 @@
 
 
 <style lang="scss">
-@import '~bootstrap/scss/functions';//, '~bootstrap/scss/variables';
-@import "../assets/scss/asbm-bootstrap";
-
 .hdr-user-img {
   height: 37px;
   width: 37px;
