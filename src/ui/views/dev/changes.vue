@@ -37,7 +37,7 @@
                   </b-form-group>
                </b-form-row>
                <b-form-row class="right justify-content-right">
-                  <b-button @click="sendToNetwork()" title="Simulate saving user data">&larr;</b-button>
+                  <b-button @click="sendToNetwork()" :disabled="cache.hasConflicts" title="Simulate saving user data">&larr;</b-button>
                </b-form-row>
             </b-card>
          </b-col>
@@ -76,12 +76,12 @@ input.net-data:disabled {
    background-color: rgb(157, 148, 136);
 }
 
-input.changed {
+input.net-data.changed {
    background-color: rgb(157, 216, 157);
    border-color: rgb(63, 230, 77);
 }
 
-input.conflict {
+input.net-data.conflict {
    border-color: red;
    background-color: rgb(235, 65, 52);
    color: var(--light);
@@ -93,7 +93,7 @@ input.conflict {
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator';
 import { ChangeHandler } from '@/data/firestore/change';
 import { cloneDeep } from 'lodash';
-import { findDiff } from '@/data/firestore/diff';
+import { findDiff, applyDiff } from '@/data/firestore/diff';
 
 interface TestData {
    str: string;
@@ -118,12 +118,11 @@ export default class extends Vue {
    sendToNetwork() {
       this.network = cloneDeep(this.cache.user);
       this.receiveFromNetwork();
-      // this.cache.conflicts = {};
-      // this.calcUserDiff();
    }
 
    calcUserDiff() {
-      this.userDiff = findDiff(this.cache.network, this.cache.user);
+      const changes = findDiff(this.cache.network, this.cache.user);
+      this.userDiff = applyDiff({}, changes, '<deleted>');
    }
 
    @Watch('cache.user', { deep: true })

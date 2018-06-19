@@ -52,6 +52,20 @@ describe('network change handler', () => {
       expect(cache.conflicts).to.be.empty;
    });
 
+   it('maintains user data when non-conflicting data arrives (repeated)', () => {
+      cache.user.a = 2;
+      temp.b.c = 4;
+      cache.acceptNewData(temp);
+      expect(cache.user).to.have.property('a').which.equals(2);
+      expect(cache.user.b).to.have.property('c').which.equals(4);
+      expect(cache.conflicts).to.be.empty;
+      temp.b.c = 5;
+      cache.acceptNewData(temp);
+      expect(cache.user).to.have.property('a').which.equals(2);
+      expect(cache.user.b).to.have.property('c').which.equals(5);
+      expect(cache.conflicts).to.be.empty;
+   });
+
    it('maintains user data when conflicting data arrives', () => {
       cache.user.a = 2;
       temp.a = 3;
@@ -108,5 +122,17 @@ describe('network change handler', () => {
       cache.acceptNewData(temp);
       expect(cache.user).to.have.property('b').which.has.property('c').which.equals(3);
       expect(cache.conflicts).to.have.property('.b.c');
+   });
+
+   it('removes conflicts after same data arrives', () => {
+      cache.user.a = 3;
+      temp.a = 2;
+      cache.acceptNewData(temp);
+      expect(cache.user).to.have.property('a').which.equals(3);
+      expect(cache.conflicts).to.have.property('.a');
+      temp.a = 3;
+      cache.acceptNewData(temp);
+      expect(cache.user).to.have.property('a').which.equals(3);
+      expect(cache.conflicts).to.be.empty;
    });
 });

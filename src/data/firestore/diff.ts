@@ -1,7 +1,8 @@
 import { isEqual } from 'lodash';
+import Vue from 'vue';
 
 
-type Change = {
+export type Change = {
    operation: 'add' | 'update';
    value: any;
 } | {
@@ -14,7 +15,7 @@ export interface MergeChange {
    theirChange: Change;
 }
 
-interface Changes {
+export interface Changes {
    [path: string]: Change;
 }
 
@@ -197,14 +198,17 @@ function setValueByPath(ob: any, path: string, value: any) {
    let val = ob;
    const length = keys.length;
    for (let i = 0; i < length; i++) {
-      if (val == null || keys[i].length < 1) {
+      if (val == null) {
          throw new Error('Invalid data');
       }
       if (i !== length - 1) {
-         val = val[keys[i]];
+         if (keys[i] in val)
+            val = val[keys[i]];
+         else
+            val = Vue.set(val, keys[i], {});
       }
       else {
-         val[keys[i]] = value;
+         Vue.set(val, keys[i], value);
       }
    }
    return ob;
@@ -223,7 +227,7 @@ function deleteValueByPath(ob: any, path: string) {
          val = val[keys[i]];
       }
       else {
-         delete val[keys[i]];
+         Vue.delete(val, keys[i]);
       }
    }
    return ob;

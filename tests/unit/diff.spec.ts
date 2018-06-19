@@ -200,7 +200,7 @@ describe('object differ', () => {
          const reversed = applyDiff(target, reverseDiff);
          expect(reversed).to.have.property('a').which.eql(original.a);
          expect(reversed).to.have.property('b').which.eql(original.b);
-         expect(reversed).to.have.property('arr').with.length(4);
+         expect(reversed).to.have.property('arr').with.length(3);
          expect(reversed.arr[3]).to.be.undefined;
       });
    });
@@ -258,7 +258,7 @@ describe('object differ', () => {
          const reversed = applyDiff(target, reverseDiff);
          expect(reversed).to.have.property('a').which.eql(original.a);
          expect(reversed).to.have.property('b').which.eql(original.b);
-         expect(reversed).to.have.property('arr').with.length(4);
+         expect(reversed).to.have.property('arr').with.length(3);
          expect(reversed.arr[3]).to.be.undefined;
       });
    });

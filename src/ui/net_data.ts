@@ -43,15 +43,13 @@ Vue.directive('net-data', {
    bind(el: HTMLElement, binding: VNodeDirective, vNode: VNode) { // on first bind, before VNodes are present
       if (!(vNode.context as any).cache) throw new Error('v-net-data requires a cache in the containing component');
 
-      if (el.tagName === 'div' && el.childElementCount > 0) el = el.childNodes[0] as HTMLElement;
+      if (el.tagName.toLowerCase() === 'div' && el.childElementCount > 0) el = el.childNodes[0] as HTMLElement;
       if (el.tagName.toLowerCase() !== 'input') throw new Error('v-net-data attached no non-input element');
 
-      // console.log(JSON.stringify(binding, null, 2));
       const inputEl = el as HTMLInputElement;
       const vm = vNode.context as Vue;
       const cache = (vNode.context as any).cache as ChangeHandler<any>;
       const path = binding.arg.replace(/_/g, '.');
-      // console.log('path:', path);
 
       inputEl.disabled = true;
       inputEl.classList.add('net-data');
@@ -69,40 +67,34 @@ Vue.directive('net-data', {
 
             // Monitor all data model changes
             vm.$watch('cache.user.' + path, value => {
-               console.log('data updated');
                inputEl.value = value.toString();
-               if (el.dataset.netIgnoreNext) {
-                  console.log('ignoring change due to flag');
-                  delete el.dataset.netIgnoreNext;
+               if (inputEl.dataset.netIgnoreNext) {
+                  delete inputEl.dataset.netIgnoreNext;
                } else {
-                  console.log('highlighting change');
-                  el.classList.add('changed');
-                  setTimeout(() => el.classList.remove('changed'), 1000);
+                  inputEl.classList.add('changed');
+                  setTimeout(() => inputEl.classList.remove('changed'), 1000);
                }
             }, { immediate: true });
 
             // Monitor incoming conflicts
             vm.$watch('cache.conflicts', () => {
-               console.log('conflict watcher');
-               const conflict = cache.conflicts['.' + path];
-               if (conflict) {
-                  console.log('conflict found');
-                  el.classList.add('conflict');
+               if (('.' + path) in cache.conflicts) {
+                  inputEl.classList.add('conflict');
+                  inputEl.disabled = true;
                } else {
-                  console.log('conflict not found');
-                  el.classList.remove('conflict');
+                  inputEl.classList.remove('conflict');
+                  inputEl.disabled = false;
                }
             }, { immediate: true, deep: true });
 
             // Watch for user changes in the element
             el.addEventListener('input', () => {
-               console.log('input evt');
                const newValue = isNumber ? parseFloat(inputEl.value) : inputEl.value;
                const oldValue = get(cache.user, path);
                if (newValue !== oldValue) {
-                  console.log('updating cache data');
                   vueSet(cache.user, path, newValue); // vueSet is a deep, path-based Vue.set
                   el.dataset.netIgnoreNext = 'true';
+                  cache.notifyUserDirty();
                }
             });
          }
