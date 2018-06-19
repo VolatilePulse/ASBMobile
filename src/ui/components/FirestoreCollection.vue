@@ -9,7 +9,7 @@
          <li v-for="item in cache.collection" :key="item.ref.path">
             <b-btn variant="link" v-b-toggle="'collapse'+item.ref.path">{{item.ref.id}}</b-btn>
             <b-collapse :id="'collapse'+item.ref.path">
-               <pre>{{stringifyData(item)}}</pre>
+               <pre>{{item.data | inspect}}</pre>
                <FirestoreCollection v-for="sub in subCollections(tree, item.ref.id)" :key="sub.path" :path="sub.path" :tree="sub.tree"></FirestoreCollection>
             </b-collapse>
          </li>
@@ -33,10 +33,6 @@ import { Component, Prop } from 'vue-property-decorator';
 import Common from '@/ui/common';
 import { CreateLiveCollection, LiveCollection } from '@/data/firestore/live';
 
-interface DocData {
-   id: string;
-   data: any;
-}
 
 interface PathTree {
    [name: string]: null | PathTree;
@@ -79,15 +75,6 @@ export default class FirestoreCollection extends Common {
    subCollections(tree: PathTree, itemId: string) {
       if (!isObject(tree)) return [];
       return Object.entries(tree).map(kvp => ({ path: this.combine(this.path, itemId, kvp[0]), tree: kvp[1] }));
-   }
-
-   stringifyData(item: DocData) {
-      let text = JSON.stringify(item.data, undefined, 2);
-      let lines = text.split('\n');
-      lines = lines.map(line => line.replace(/[{}]/, '').replace(/,$/, ''));
-      lines = lines.filter(line => line.trim());
-      text = lines.join('\n');
-      return text;
    }
 }
 </script>

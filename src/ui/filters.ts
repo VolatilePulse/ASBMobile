@@ -5,7 +5,12 @@ import Vue from 'vue';
 Vue.filter('inspect', (obj: any) => {
    let text = JSON.stringify(obj, undefined, 2);
    let lines = text.split('\n');
-   lines = lines.map(line => line.replace(/(^[{}]|[{}]$)/g, '').replace(/,$/, '').replace(/^  /, ''));
+   lines = lines.map(line => line
+      .replace(/,$/, '')
+      .replace(/(^[{}]|[{}]$)/g, '')
+      .replace(/^  /, '')
+      .replace(/"([\w_]+)":/, '$1:')
+   );
    lines = lines.filter(line => line.trim());
    text = lines.join('\n');
    return text;
