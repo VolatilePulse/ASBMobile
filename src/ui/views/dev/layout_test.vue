@@ -47,7 +47,7 @@ div { font-size: 105% }
 
 <script lang="ts">
 import { Component } from 'vue-property-decorator';
-import Common from '../common';
+import Common from '../../common';
 @Component({ name: 'LayoutTest' })
 export default class extends Common { }
 </script>

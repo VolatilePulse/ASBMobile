@@ -1,11 +1,8 @@
 import { SpeciesParameters } from '@/ark/multipliers';
 import { statNames } from '@/consts';
-import { LibraryManager, SettingsManager } from '@/data';
-import { User } from '@/data/firestore/objects';
-import { MirrorCache } from '@/data/mirror';
-import { Creature, Server } from '@/data/objects';
-import { isServerEditable } from '@/servers';
+import { Creature, Server, User } from '@/data/firestore/objects';
 import { Delay } from '@/utils';
+import ColorHash from 'color-hash';
 import { EventEmitter } from 'events';
 import firebase from 'firebase/app';
 import Vue from 'vue';
@@ -15,12 +12,15 @@ import Vue from 'vue';
 
 export const EVENT_SERVER_CHANGED = 'server-changed';
 export const EVENT_LIBRARY_CHANGED = 'library-changed';
+export const EVENT_LOADED_DATA = 'loaded-data';
 export const EVENT_LOADED_AUTH = 'loaded-auth';
 export const EVENT_LOADED_FIRESTORE = 'loaded-firestore';
 
 // !!! Everything public in this class should be initialised to a non-undefined value such as null to enable Vue observation !!!
 class Store {
-   eventListener: EventEmitter = new EventEmitter();
+   events: EventEmitter = new EventEmitter();
+
+   messages: Array<{ variant: string, message: string }> = [];
 
    applicationVersion: string = process.env.VERSION;
    statImages: any[] = [];
@@ -39,49 +39,29 @@ class Store {
    updateAvailable: boolean = false;
    changesPending = { settings: false, servers: false };
 
-   creaturesCache: MirrorCache<Creature> = { content: [] };
-   userServersCache: MirrorCache<Server> = { content: [] };
-   isServerEditable: boolean = true;
-   tempCreature: Creature = new Creature();
+   tempCreature: Partial<Creature> = {};
    valuesVersion: string = '-';
 
+   loadErrors: string[] = [];
+   console: Array<{ type: string, message: string }> = [];
+
    loaded = {
+      data: false,
       firestore: false,
       auth: false,
    };
 
-   loggedIn: boolean = false;
-   user: firebase.User = null;
-   userBlankColor: string = null;
-   userData: User = null;
+   get loggedIn() { return this.authUser != null; }
+   authUser: firebase.User = null;
+   userInfo: User = null;
 
    private initialised: boolean;
-   private _server: Server = null;
-
-   setCurrentServer(server: Server) {
-      this._server = server;
-      this.tempCreature.serverId = server._id;
-      this.isServerEditable = isServerEditable(server);
-      if (SettingsManager.current.selectedServerId !== server._id) {
-         SettingsManager.current.selectedServerId = server._id;
-         SettingsManager.notifyChanged();
-      }
-      this.eventListener.emit(EVENT_SERVER_CHANGED);
-   }
-
-   get server() {
-      return this._server;
-   }
 
    async initialise() {
       if (this.initialised) return;
 
       // Don't await - it can complete in its own time
       this.loadStatImages();
-
-      // Hook into library changes to get updated user servers
-      this.eventListener.on(EVENT_LIBRARY_CHANGED, () => this.onLibraryChange());
-      this.onLibraryChange();
    }
 
    async loadStatImages() {
@@ -95,11 +75,18 @@ class Store {
       }
    }
 
-   private onLibraryChange() {
-      if (LibraryManager.current) {
-         this.userServersCache = LibraryManager.current.getUserServersCache();
-         this.creaturesCache = LibraryManager.current.getCreaturesCache();
-      }
+   addDismissableMessage(variant: 'danger' | 'warning' | 'info', msg: string) {
+      this.messages.push({ variant, message: msg });
+   }
+
+   removeDismissableMessage(index: number) {
+      this.messages.splice(index, 1);
+   }
+
+   colorForUser() {
+      if (this.userInfo && this.userInfo.color) return this.userInfo.color;
+      if (this.authUser) return new ColorHash().hex('id:' + this.authUser.uid);
+      return 'grey';
    }
 }
 

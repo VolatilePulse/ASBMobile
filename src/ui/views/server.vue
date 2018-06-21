@@ -2,7 +2,7 @@
    <b-container fluid>
       <h2>Server</h2>
       <b-alert v-if="cache && cache.error" variant="danger">{{cache.error}}</b-alert>
-      <pre v-if="cache">{{stringifyData(cache.data)}}</pre>
+      <pre v-if="cache">{{cache.data | inspect}}</pre>
    </b-container>
 </template>
 

@@ -2,8 +2,8 @@ import * as Ark from '@/ark';
 import { StatMultipliers } from '@/ark/multipliers';
 import { Stat } from '@/ark/types';
 import { FOOD, HEALTH, SPEED, TORPOR } from '@/consts';
-import { Server } from '@/data/objects';
-import { intFromRange, intFromRangeReverse, intervalAverage } from '@/number_utils';
+import { Server } from '@/data/firestore/objects';
+import { intervalAverage, intFromRange, intFromRangeReverse } from '@/number_utils';
 import * as Utils from '@/utils';
 import IA from 'interval-arithmetic';
 

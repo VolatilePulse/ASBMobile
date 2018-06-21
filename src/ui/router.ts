@@ -5,19 +5,18 @@ import Creature from './views/creature.vue';
 import Creatures from './views/creatures.vue';
 import CreatureEdit from './views/creature_edit.vue';
 import ChangesTest from './views/dev/changes.vue';
+import Console from './views/dev/console.vue';
 import Firestore from './views/dev/firestore.vue';
-import Tester from './views/dev/tester.vue';
-import Extractor from './views/extractor.vue';
+import LayoutTest from './views/dev/layout_test.vue';
+// import Tester from './views/dev/tester.vue';
 import About from './views/info/about.vue';
 import Welcome from './views/info/welcome.vue';
 import WhatsNew from './views/info/whatsnew.vue';
-import LayoutTest from './views/layout_test.vue';
 import Libraries from './views/libraries.vue';
 import Library from './views/library.vue';
 import NotFound from './views/not_found.vue';
 import Server from './views/server.vue';
 import Servers from './views/servers.vue';
-import Settings from './views/settings.vue';
 import User from './views/user.vue';
 
 
@@ -31,26 +30,28 @@ export type IRouterNext = (to?: RawLocation | false | ((vm: Vue) => any) | void)
 //  * Online connection
 
 
+// FIXME: We have a loop here now...
+
 /** Called before navigating to a page that requires authentication */
 function requireAuth(to: Route, from: Route, next: IRouterNext) {
    // If the system isn't fully loaded yet, call us back when we are...
    if (!theStore.loaded.auth) {
       theStore.routerAwaitingLoad = true;
-      console.log('Deferring requireAuth until auth loaded');
-      theStore.eventListener.once(EVENT_LOADED_AUTH, () => requireAuth(to, from, next));
+      console.log('Router: Deferring requireAuth until auth loaded');
+      theStore.events.once(EVENT_LOADED_AUTH, () => requireAuth(to, from, next));
       return;
    }
    if (!theStore.loaded.firestore) {
       theStore.routerAwaitingLoad = true;
-      console.log('Deferring requireAuth until firestore loaded');
-      theStore.eventListener.once(EVENT_LOADED_FIRESTORE, () => requireAuth(to, from, next));
+      console.log('Router: Deferring requireAuth until firestore loaded');
+      theStore.events.once(EVENT_LOADED_FIRESTORE, () => requireAuth(to, from, next));
       return;
    }
 
    theStore.routerAwaitingLoad = false;
-   if (!theStore.user) {
+   if (!theStore.authUser) {
       // Go to login screen, remembering where to go back to
-      console.log('requireAuth failed to find user');
+      console.log('Router: requireAuth failed to find user');
       next({
          path: '/login',
          query: { redirect: to.fullPath },
@@ -70,8 +71,8 @@ const router = new Router({
 
       { path: '/login', component: User },
       { path: '/user', component: User, beforeEnter: requireAuth },
-      { path: '/settings', component: Settings, beforeEnter: requireAuth },
-      { path: '/extractor', component: Extractor, beforeEnter: requireAuth },
+      // { path: '/settings', component: Settings, beforeEnter: requireAuth },
+      // { path: '/extractor', component: Extractor, beforeEnter: requireAuth },
       { path: '/invite', component: Vue, beforeEnter: requireAuth },
 
       { path: '/libraries', name: 'libraries', component: Libraries, beforeEnter: requireAuth },
@@ -82,10 +83,11 @@ const router = new Router({
       { path: '/library/:library_id/creature/:creature_id', name: 'creature', component: Creature, beforeEnter: requireAuth },
       { path: '/library/:library_id/creature/:creature_id/edit', component: CreatureEdit, beforeEnter: requireAuth },
 
-      { path: '/dev/tester', component: Tester },
+      // { path: '/dev/tester', component: Tester },
       { path: '/dev/firestore', component: Firestore },
       { path: '/dev/layout', component: LayoutTest },
       { path: '/dev/changes', component: ChangesTest },
+      { path: '/dev/console', component: Console },
 
       { path: '*', component: NotFound },
    ],

@@ -1,4 +1,4 @@
-import { Server } from '@/data/objects';
+import { Server } from '@/data/firestore/objects';
 
 /** @fileOverview Pre-defined servers that can always be referenced or copied (then modifed) */
 
@@ -10,21 +10,19 @@ export const ID_OFFICIAL_SERVER_SP = SERVER_PREFIX_PREDEF + 'Official Single Pla
 
 // Servers in this group must have IDs prefixed with 'predef:' and must never change.
 // Entries should never be deleted. We can add a 'hidden' mechanism if servers need to retire.
-const servers: Server[] = [
-   {
-      _id: ID_OFFICIAL_SERVER,
+const servers: { [id: string]: Server } = {
+   ID_OFFICIAL_SERVER: {
       name: 'Official Server',
       IBM: 1,
       singlePlayer: false,
       multipliers: [],
    },
-   {
-      _id: ID_OFFICIAL_SERVER_SP,
+   ID_OFFICIAL_SERVER_SP: {
       name: 'Official Single Player',
       IBM: 1,
       singlePlayer: true,
       multipliers: [],
    },
-];
+};
 
 export default servers;

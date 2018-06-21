@@ -11,3 +11,9 @@ export interface Stat {
 }
 
 export type InputSource = 'asb_xml' | 'asbm_user_input' | 'ark_export' | 'ark_tools_export';
+
+export interface Multipliers {
+   [stat_index: number]: {
+      [param_index: number]: number | null | undefined
+   };
+}

@@ -10,15 +10,15 @@
 
       <section v-if="store.loggedIn">
          <b-media>
-            <b-img v-if="store.userData && store.userData.photoURL" slot="aside" :src="store.userData.photoURL" alt="User avatar" class="user-img" rounded="circle"></b-img>
+            <b-img v-if="store.userInfo && store.userInfo.photoURL" slot="aside" :src="store.userInfo.photoURL" alt="User avatar" class="user-img" rounded="circle"></b-img>
             <b-img v-else slot="aside" blank blank-color="grey" alt="Blank user avatar" class="user-img" rounded="circle"></b-img>
             <div class="mt-0">
-               <span class="">{{store.user.displayName}}</span>
+               <span class="">{{store.userInfo && store.userInfo.displayName || '-'}}</span>
                <b-btn variant="link" @click="showDisplayNameEdit=true">
                   <b-img :src="require('@/assets/edit.svg')"></b-img>
                </b-btn>
             </div>
-            <p>{{store.user.email}}</p>
+            <p>{{store.authUser.email}}</p>
          </b-media>
          <b-btn @click="signOut">Sign out</b-btn>
       </section>
@@ -26,7 +26,7 @@
       <section id="firebaseui-div">
       </section>
 
-      <b-modal id="displayNameEdit" v-model="showDisplayNameEdit" title="Edit display name" centered @ok.prevent="submitDisplayName" :ok-disabled="!isDisplayNameValid" @shown="newDisplayName=store.user.displayName">
+      <b-modal id="displayNameEdit" v-model="showDisplayNameEdit" title="Edit display name" centered @ok.prevent="submitDisplayName" :ok-disabled="!isDisplayNameValid" @shown="newDisplayName=store.userInfo && store.userInfo.displayName || ''">
          <b-form @submit.stop.prevent="submitDisplayName">
             <b-form-input type="text" v-model.trim="newDisplayName" :state="isDisplayNameValid"></b-form-input>
             <b-form-invalid-feedback>
@@ -48,8 +48,5 @@
 
 
 <script lang="ts">
-import { Component } from 'vue-property-decorator';
-import Behaviour from './user_code';
-@Component({ name: 'User' })
-export default class extends Behaviour { }
+export { default as default } from './user_code';
 </script>

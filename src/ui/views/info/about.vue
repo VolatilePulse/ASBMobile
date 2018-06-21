@@ -2,7 +2,7 @@
    <b-container fluid>
       <section class="my-3">
          <div>Application version: {{store.applicationVersion || 'n/a'}}</div>
-         <div>Database version: {{store.dataLoaded ? store.valuesVersion : "n/a"}}</div>
+         <div>Database version: {{store.loaded.data ? store.valuesVersion : "n/a"}}</div>
       </section>
       <hr/>
       <section>
@@ -20,7 +20,7 @@
                <b-img :src="require('@/assets/vue.svg')" v-b-tooltip title="Vue"></b-img>
             </div>
             <div>
-               <b-img :src="require('@/assets/pouchdb.svg')" v-b-tooltip title="PouchDB"></b-img>
+               <b-img :src="require('@/assets/firebase.svg')" v-b-tooltip title="Firebase Firestore"></b-img>
             </div>
             <div>
                <b-img :src="require('@/assets/bootstrap.svg')" v-b-tooltip title="Bootstrap 4"></b-img>
@@ -38,9 +38,9 @@
          <div>
             And...
             <ul>
+               <li>Built with Firestore from Firebase</li>
                <li>vue-cli v3</li>
                <li>Bootstrap-vue</li>
-               <li>Pouch-vue</li>
                <li>Icons from
                   <a href="https://fontawesome.com/license">FontAwesome</a> and
                   <a href="https://material.io/icons/">Material.io</a>.

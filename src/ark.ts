@@ -1,7 +1,7 @@
 import { StatMultipliers } from '@/ark/multipliers';
 import { Stat } from '@/ark/types';
 import { DAMAGE, HEALTH, PRE_IB, PRE_TE, SERVER_IDM, SERVER_IWM, SERVER_TAM, SERVER_TMM, SPEED, TORPOR } from '@/consts';
-import { Server } from '@/data/objects';
+import { Server } from '@/data/firestore/objects';
 import { floatRange, intervalFromDecimal } from '@/number_utils';
 import theStore from '@/ui/store';
 import IA from 'interval-arithmetic';

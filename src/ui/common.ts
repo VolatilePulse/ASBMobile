@@ -1,4 +1,5 @@
 import { NUM_STATS, statNames } from '@/consts';
+import { handleError } from '@/ui/app_code';
 import theStore from '@/ui/store';
 import { FormatNumber, Range } from '@/utils';
 import { isString } from 'util';
@@ -38,7 +39,7 @@ export function catchAsyncErrors(_target: any, _propertyName: string, descriptor
             ex = prepend + ex;
 
          // Report it to the global error handler
-         (this as any).globalError(ex);
+         handleError(ex);
       });
 
       // Return the original method's result
@@ -61,32 +62,7 @@ export default class UICommon extends Vue {
       return Range(n);
    }
 
-   globalError(ex: any) {
-      console.error('Uncaught exception handler:');
-      if (!ex) {
-         console.error('<undefined exception>');
-      }
-      else {
-         if (ex.stack) console.error(ex.stack);
-      }
-
-      if (theStore && theStore.devMode)
-         // tslint:disable-next-line:no-debugger
-         debugger; // There was an uncaught exception in an async function. Check the console for more information.
-      else
-         alert('ASBM encountered an unexpected error:\n' + ex);
-   }
-
    goBack() {
       window.history.length > 1 ? this.$router.go(-1) : this.$router.push('/');
-   }
-
-   stringifyData(data: any) {
-      let text = JSON.stringify(data, undefined, 2);
-      let lines = text.split('\n');
-      lines = lines.map(line => line.replace(/[{}]/, '').replace(/,$/, ''));
-      lines = lines.filter(line => line.trim());
-      text = lines.join('\n');
-      return text;
    }
 }

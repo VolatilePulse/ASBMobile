@@ -20,7 +20,7 @@ export default class UserTab extends Common {
    showDisplayNameEdit = false;
 
    get isDisplayNameValid() {
-      if (theStore.user && this.newDisplayName === theStore.user.displayName) return null;
+      if (theStore.authUser && this.newDisplayName === theStore.authUser.displayName) return null;
       return !!this.newDisplayName && this.newDisplayName.length >= 2;
    }
 

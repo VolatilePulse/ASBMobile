@@ -3,7 +3,7 @@
       <h2>Library</h2>
       <b-alert v-if="cache && cache.error" variant="danger">{{cache.error}}</b-alert>
       <div v-if="cache">
-         <pre>{{stringifyData(cache.data)}}</pre>
+         <pre>{{cache.data | inspect}}</pre>
          <b-btn :to="`/library/${cache.ref.id}/servers`" variant="link">servers</b-btn>
          <b-btn :to="`/library/${cache.ref.id}/creatures`" variant="link">creatures</b-btn>
       </div>

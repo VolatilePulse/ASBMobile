@@ -1,10 +1,11 @@
-import { CreatureStatus, InputSource, ServerId, UserId } from '@/data/firestore/types';
+import { CreatureStatus, InputSource, Multipliers, ServerId, UserId } from '@/data/firestore/types';
 import firebase from 'firebase/app';
 
 
 export interface User {
    photoURL?: string;
    displayName?: string;
+   color?: string;
    libraries?: { [library_id: string]: true };
 }
 
@@ -20,7 +21,7 @@ export interface Library {
 export interface Server {
    name: string;
    IBM: number;
-   multipliers: { [stat_index: number]: { [param_index: number]: number | null | undefined } };
+   multipliers: Multipliers;
    singlePlayer: boolean;
 }
 

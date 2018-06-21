@@ -1,7 +1,5 @@
 <template>
    <div id="app" style="overflow-x:hidden">
-      <!-- <router-link to="/">Home</router-link> -->
-      <!-- <router-view/> -->
 
       <b-navbar fixed="top" toggleable="sm" type="dark" variant="primary">
          <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
@@ -22,25 +20,20 @@
                <b-nav-item to="/libraries">Libraries</b-nav-item>
 
                <b-nav-item to="/settings">Settings</b-nav-item>
-
-               <!-- <b-nav-item @click="tab='servers'" :disabled="!store.dataLoaded">Servers</b-nav-item> -->
-               <!-- <b-nav-item @click="tab='extractor'" :disabled="!store.dataLoaded">Extractor</b-nav-item> -->
-               <!-- <b-nav-item @click="tab='library'" :disabled="!store.dataLoaded">Library</b-nav-item> -->
-               <!-- <b-nav-item @click="tab='firestore'" :disabled="!store.dataLoaded">fs</b-nav-item> -->
-               <!-- <b-nav-item @click="tab='fireauth'" :disabled="!store.dataLoaded">auth</b-nav-item> -->
             </b-navbar-nav>
 
             <!-- Right aligned nav items -->
             <b-navbar-nav class="ml-auto">
                <transition name="fade">
-                  <b-nav-item to="/user" v-if="!store.user">Sign In</b-nav-item>
+                  <b-nav-item to="/user" v-if="!store.authUser">Sign In</b-nav-item>
                   <b-nav-item to="/user" v-else class="p-0 hdr-user-img-nav">
-                     <b-img v-if="store.userData && store.userData.photoURL" :src="store.userData.photoURL" class="p-0 hdr-user-img" rounded="circle"></b-img>
-                     <b-img v-else blank blank-color="grey" class="p-0 hdr-user-img" rounded="circle"></b-img>
+                     <b-img v-if="store.userInfo && store.userInfo.photoURL" :src="store.userInfo.photoURL" class="p-0 hdr-user-img" rounded="circle"></b-img>
+                     <b-img v-else blank :blank-color="store.colorForUser()" class="p-0 hdr-user-img" rounded="circle"></b-img>
                   </b-nav-item>
                </transition>
-               <b-nav-item-dropdown text="Dev" boundary="window">
-                  <b-nav-item to="/dev/tester">Tester</b-nav-item>
+               <b-nav-item-dropdown v-if="store.devMode" text="Dev" right>
+                  <b-nav-item disabled to="/dev/tester">Tester</b-nav-item>
+                  <b-nav-item to="/dev/console">Console</b-nav-item>
                   <b-nav-item to="/dev/firestore">Data explorer</b-nav-item>
                </b-nav-item-dropdown>
             </b-navbar-nav>
@@ -48,7 +41,7 @@
       </b-navbar>
 
       <b-container fluid style="margin-top: 4rem" class="p-0">
-         <b-progress v-show="!store.dataLoaded && !store.dataLoadError" :value="100" striped :animated="true" variant="secondary" class="fixed-top" style="height: 0.4rem"></b-progress>
+         <b-progress v-show="!store.loaded.data" :value="100" striped :animated="true" variant="secondary" class="fixed-top" style="height: 0.4rem"></b-progress>
 
          <!-- TODO: Replace: Temporary indicators for pending changes ready to be saved -->
          <div class="statusbadge" style="margin-top: -0.8rem">
@@ -58,6 +51,17 @@
 
          <!-- The update available notice -->
          <b-alert :show="store.updateAvailable" dismissible variant="info">Update available! Reload to activate.</b-alert>
+
+         <!-- Loading errors - TODO: clean this up? -->
+         <b-alert v-for="err in store.loadErrors" :key="err" :show="true" variant="danger">
+            <b>Load error:</b>
+            <pre class="text-dark" style="white-space:pre-wrap;word-wrap:break-word">{{err}}</pre>
+         </b-alert>
+
+         <!-- General messages -->
+         <b-alert v-for="({variant,message},idx) in store.messages" :key="idx" :show="true" dismissible :variant="variant" @dismissed="store.removeDismissableMessage(idx)">
+            <span class="text-dark" style="white-space:normal;word-wrap:break-word">{{message}}</span>
+         </b-alert>
 
          <!-- The alert on data load failure -->
          <b-alert variant="danger" :show="!!store.dataLoadError">
