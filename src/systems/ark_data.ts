@@ -1,4 +1,7 @@
 import { SpeciesParameters } from '@/ark/multipliers';
+import { NUM_STATS } from '@/consts';
+import { Server } from '@/data/firestore/objects';
+import { Multipliers } from '@/data/firestore/types';
 import theStore, { EVENT_LOADED_DATA } from '@/ui/store';
 import { Delay } from '@/utils';
 import { SubSystem } from './common';
@@ -43,7 +46,8 @@ class ArkDataSystem implements SubSystem {
 }
 
 
-function ParseDatabase(jsonObject: any) {
+/** Only to be used by tests */
+export function ParseDatabase(jsonObject: any) {
    // Local stores for constructing the data (unobserved until saved into theStore)
    const speciesNames = [];
    const speciesMultipliers: { [species: string]: SpeciesParameters } = {};
@@ -67,14 +71,50 @@ function ParseDatabase(jsonObject: any) {
    theStore.speciesNames = speciesNames;
    theStore.speciesMultipliers = speciesMultipliers;
 
-   // FIXME: TRANSITION : Pouch removal
    // Define the constant servers and populate the list if empty
-   // theStore.officialServer = new Server(jsonObject.settings.officialMultipliers, jsonObject.settings.imprintingMultiplier, false, ID_OFFICIAL_SERVER);
-   // theStore.officialServerSP = new Server(jsonObject.settings.officialMultipliersSP, jsonObject.settings.imprintingMultiplier, true, ID_OFFICIAL_SERVER_SP);
+   theStore.officialServer = makeServer('Official', jsonObject.settings.officialMultipliers, jsonObject.settings.imprintingMultiplier, false);
+   theStore.officialServerSP = makeServer('Official Single Player', jsonObject.settings.officialMultipliersSP, jsonObject.settings.imprintingMultiplier, true);
 
    // Save the version number
    theStore.valuesVersion = jsonObject.settings.version;
 }
 
-
 export const arkDataSystem = new ArkDataSystem();
+
+
+function makeServer(name: string, mults: number[][], ibm: number, sp: boolean): Server {
+   const server: Server = {
+      multipliers: MultArrayToObjects(mults),
+      IBM: ibm,
+      singlePlayer: sp,
+      name,
+   };
+   return server;
+}
+
+export function MultArrayToObjects(arr: number[][]): Multipliers {
+   const result: Multipliers = {};
+
+   // Always do every index
+   for (let i = 0; i < NUM_STATS; i++) {
+      const value = arr[i];
+      if (value == null) {
+         result[i] = {};
+      }
+      else {
+         result[i] = ArrayToObjectValues(value);
+      }
+   }
+
+   return result;
+}
+
+export function ArrayToObjectValues<T>(arr: T[]): { [index: string]: T } {
+   const result: { [index: string]: T } = {};
+
+   Object.entries(arr).forEach(([index, value]) => {
+      result[index] = value;
+   });
+
+   return result;
+}

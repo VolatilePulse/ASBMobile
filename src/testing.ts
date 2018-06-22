@@ -1,9 +1,10 @@
+import { ConvertValue } from '@/ark';
 import { Stat, TestData } from '@/ark/types';
+import { PRE_IB } from '@/consts';
 import { Server } from '@/data/firestore/objects';
-// import { getServerById } from '@/servers';
 import { CompareFloat } from '@/utils';
 import { isArray, isFunction, isNumber, isObject, isString } from 'util';
-import { TEProps } from './ark/extractor';
+import { Extractor, ExtractorInput, TEProps } from './ark/extractor';
 
 
 /** Flexible object to hold test results */
@@ -23,122 +24,119 @@ export interface TestResult {
 /**
  * Perform a single test, timing it and checking the results if applicable.
  * Fields set in the output vary based on the result.
- * @example PerformTest(test_data, performance.now.bind(performance));
+ * @example PerformTest(test_data, performance.now.bind(performance), server);
  */
 // @ts-ignore
-export function PerformTest(testData: TestData, timingFn?: () => number, overrideServer?: Server): TestResult {
-   throw new Error('TRANSITION');
-   // const server = overrideServer || getServerById(testData.serverId);
-   // if (!server) return { pass: false, exception: 'Unable to locate server' };
+export function PerformTest(testData: TestData, timingFn?: () => number, server: Server): TestResult {
+   if (!server) return { pass: false, exception: 'Server definition is required' };
 
-   // // Set the properties to prepare for extraction
-   // const source = testData.source || 'ui';
-   // const inputs: ExtractorInput = {
-   //    wild: (testData.mode === 'Wild'),
-   //    tamed: (testData.mode === 'Tamed'),
-   //    bred: (testData.mode === 'Bred'),
-   //    IB: Ark.ConvertValue(testData.imprint, PRE_IB, source),
-   //    level: testData.level,
-   //    values: testData.values.map((v, i) => Ark.ConvertValue(v, i, source)),
-   //    server: server,
-   //    species: testData.species,
-   // };
+   // Set the properties to prepare for extraction
+   const source = testData.source || 'asbm_ui';
+   const inputs: ExtractorInput = {
+      wild: (testData.mode === 'Wild'),
+      tamed: (testData.mode === 'Tamed'),
+      bred: (testData.mode === 'Bred'),
+      IB: ConvertValue(testData.imprint, PRE_IB, source),
+      level: testData.level,
+      values: testData.values.map((v, i) => ConvertValue(v, i, source)),
+      server: server,
+      species: testData.species,
+   };
 
-   // const extractObject = new Extractor(inputs);
+   const extractObject = new Extractor(inputs);
 
-   // const dbg: any = {
-   //    totalIterations: 0,
-   //    numberRemoved: 0,
-   // };
+   const dbg: any = {
+      totalIterations: 0,
+      numberRemoved: 0,
+   };
 
-   // let t1: number, t2: number;
-   // let exception: Error;
-   // let output: { stats: Stat[][], options: Stat[][], TEs: Map<Stat, TEProps>, IB: Interval };
+   let t1: number, t2: number;
+   let exception: Error;
+   let output: { stats: Stat[][], options: Stat[][], TEs: Map<Stat, TEProps>, IB: Interval };
 
-   // try {
-   //    if (timingFn) t1 = timingFn();
-   //    output = extractObject.extract(dbg);
-   //    if (timingFn) t2 = timingFn();
-   // }
-   // catch (ex) {
-   //    exception = ex;
-   // }
+   try {
+      if (timingFn) t1 = timingFn();
+      output = extractObject.extract(dbg);
+      if (timingFn) t2 = timingFn();
+   }
+   catch (ex) {
+      exception = ex;
+   }
 
-   // if (output && output.IB) dbg.IB = output.IB;
+   if (output && output.IB) dbg.IB = output.IB;
 
-   // const result: TestResult = {
-   //    pass: false,
-   //    stats: output ? output.stats : undefined,
-   //    options: output ? output.options : undefined,
-   //    mapTE: output ? output.TEs : undefined,
-   //    dbg: dbg,
-   //    extra: {},
-   // };
+   const result: TestResult = {
+      pass: false,
+      stats: output ? output.stats : undefined,
+      options: output ? output.options : undefined,
+      mapTE: output ? output.TEs : undefined,
+      dbg: dbg,
+      extra: {},
+   };
 
-   // if (exception) {
-   //    result.exception = exception;
-   //    result.dbg = dbg;
-   // }
-   // else if (dbg['failReason']) {
-   //    result.failReason = dbg.failReason;
-   // }
-   // else {
-   //    result.pass = IsPass(testData['results'], output.stats);
-   //    result.duration = t2 - t1;
-   // }
+   if (exception) {
+      result.exception = exception;
+      result.dbg = dbg;
+   }
+   else if (dbg['failReason']) {
+      result.failReason = dbg.failReason;
+   }
+   else {
+      result.pass = IsPass(testData['results'], output.stats);
+      result.duration = t2 - t1;
+   }
 
-   // return result;
+   return result;
 }
 
 /**
  * Run a test in performance mode, repeating it until `duration` is up and reporting on the average run time.
  */
-// @ts-ignore
-export function PerformPerfTest(testData: TestData, timingFn: () => number, duration = 5000, generateProfiler = false, overrideServer?: Server): TestResult {
-   throw new Error('TRANSITION');
-   // let runs = 0;
-   // let t1, t2;
-   // const cutoffTime = Date.now() + duration;
+export function PerformPerfTest(testData: TestData, timingFn: () => number, server: Server, duration = 5000, generateProfiler = false): TestResult {
+   let runs = 0;
+   let t1, t2;
+   const cutoffTime = Date.now() + duration;
 
-   // try {
-   //    if (generateProfiler && window.console && window.console.profile)
-   //       console.profile(testData.tag);
-   //    t1 = timingFn();
+   if (!server) return { exception: 'Unable to locate server' };
 
-   //    const server = overrideServer || getServerById(testData.serverId);
-   //    if (!server) return { exception: 'Unable to locate server' };
+   try {
+      if (generateProfiler && window.console && window.console.profile) {
+         console.profile(testData.tag);
+      }
 
-   //    do {
-   //       // Set the properties to prepare for extraction
-   //       const source = testData.source || 'ui';
-   //       const inputs: ExtractorInput = {
-   //          wild: (testData.mode === 'Wild'),
-   //          tamed: (testData.mode === 'Tamed'),
-   //          bred: (testData.mode === 'Bred'),
-   //          IB: Ark.ConvertValue(testData.imprint, PRE_IB, source),
-   //          level: testData.level,
-   //          values: testData.values.map((v, i) => Ark.ConvertValue(v, i, source)),
-   //          server: server,
-   //          species: testData.species,
-   //       };
+      t1 = timingFn();
 
-   //       const extractObject = new Extractor(inputs);
-   //       extractObject.extract();
-   //       runs += 1;
-   //    }
-   //    while (Date.now() < cutoffTime);
+      do {
+         // Set the properties to prepare for extraction
+         const source = testData.source || 'asbm_ui';
+         const inputs: ExtractorInput = {
+            wild: (testData.mode === 'Wild'),
+            tamed: (testData.mode === 'Tamed'),
+            bred: (testData.mode === 'Bred'),
+            IB: ConvertValue(testData.imprint, PRE_IB, source),
+            level: testData.level,
+            values: testData.values.map((v, i) => ConvertValue(v, i, source)),
+            server: server,
+            species: testData.species,
+         };
 
-   //    t2 = timingFn();
-   //    if (generateProfiler && window.console && window.console.profile)
-   //       console.profileEnd();
+         const extractObject = new Extractor(inputs);
+         extractObject.extract();
+         runs += 1;
+      }
+      while (Date.now() < cutoffTime);
 
-   //    duration = (t2 - t1) / runs;
-   // }
-   // catch (_) {
-   //    return { exception: '-' };
-   // }
+      t2 = timingFn();
+      if (generateProfiler && window.console && window.console.profile)
+         console.profileEnd();
 
-   // return { duration, runs };
+      duration = (t2 - t1) / runs;
+   }
+   catch (_) {
+      return { exception: '-' };
+   }
+
+   return { duration, runs };
 }
 
 /**

@@ -12,8 +12,10 @@ export interface Stat {
 
 export type InputSource = 'asb_xml' | 'asbm_user_input' | 'ark_export' | 'ark_tools_export';
 
+export interface ServerStatParams {
+   [param_index: number]: number;
+}
+
 export interface Multipliers {
-   [stat_index: number]: {
-      [param_index: number]: number | null | undefined
-   };
+   [stat_index: number]: ServerStatParams;
 }

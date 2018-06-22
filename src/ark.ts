@@ -12,7 +12,7 @@ import * as Utils from './utils';
 
 
 /** The source of the data dictates its precision */
-export type CreatureDataSource = 'ui' | 'ark_export';
+export type CreatureDataSource = 'asbm_ui' | 'asb_ui' | 'ark_export';
 
 
 export function FormatAllOptions(stats: Stat[][]) {
@@ -69,7 +69,7 @@ export function DisplayValue(value: number, index: number): number {
 export function ConvertValue(value: number, index: number, source: CreatureDataSource) {
    let precision: number;
 
-   if (source === 'ui') {
+   if (source === 'asbm_ui' || source === 'asb_ui') {
       precision = 1;
       if (index === PRE_IB)
          precision = 0;
@@ -95,7 +95,7 @@ export function ConvertValue(value: number, index: number, source: CreatureDataS
 export function GetMultipliers(server: Server, speciesName: string): StatMultipliers[] {
 
    // Gather raw multipliers first from the official server, overriding with settings from the given server
-   const values = merge([], theStore.officialServer.multipliers, server.multipliers);
+   const values = merge({}, theStore.officialServer.multipliers, server.multipliers);
 
    // Find the settings for the species
    const speciesValues = theStore.speciesMultipliers[speciesName];
@@ -119,7 +119,7 @@ export function GetMultipliers(server: Server, speciesName: string): StatMultipl
       }
 
       // Pre-calculate what we can
-      const [TaM, TmM, IdM, IwM] = values[stat];
+      const { 0: TaM, 1: TmM, 2: IdM, 3: IwM } = values[stat];
       if (IA.gt(multipliers[stat].Ta, IA.ZERO))
          multipliers[stat].Ta = IA.mul(multipliers[stat].Ta, floatRange(TaM));
       if (IA.gt(multipliers[stat].Tm, IA.ZERO))

@@ -7,6 +7,7 @@ import { intervalAverage, intFromRange, intFromRangeReverse } from '@/number_uti
 import * as Utils from '@/utils';
 import IA from 'interval-arithmetic';
 
+
 export interface ExtractorInput {
    server: Server;
    species: string;
