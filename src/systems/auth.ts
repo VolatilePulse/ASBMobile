@@ -6,7 +6,7 @@ import { eventWaiter, SubSystem } from './common';
 
 
 /** Subsystem that handles user authentication changes from Firebase */
-export class AuthSystem implements SubSystem {
+class AuthSystem implements SubSystem {
    async initialise() {
       console.log('AuthSystem: Waiting for Firestore to load');
       await eventWaiter(theStore.events, EVENT_LOADED_FIRESTORE);
@@ -86,3 +86,5 @@ export class AuthSystem implements SubSystem {
       }
    }
 }
+
+export const authSystem = new AuthSystem();

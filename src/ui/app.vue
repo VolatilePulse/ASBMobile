@@ -31,7 +31,7 @@
                      <b-img v-else blank :blank-color="store.colorForUser()" class="p-0 hdr-user-img" rounded="circle"></b-img>
                   </b-nav-item>
                </transition>
-               <b-nav-item-dropdown v-if="store.devMode" text="Dev" right>
+               <b-nav-item-dropdown v-if="store.localSettings.devMode" text="Dev" right>
                   <b-nav-item disabled to="/dev/tester">Tester</b-nav-item>
                   <b-nav-item to="/dev/console">Console</b-nav-item>
                   <b-nav-item to="/dev/firestore">Data explorer</b-nav-item>

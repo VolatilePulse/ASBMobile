@@ -1,12 +1,13 @@
-import { ArkDataSystem } from '@/systems/ark_data';
-import { AuthSystem } from '@/systems/auth';
-import { FirestoreSystem } from '@/systems/firestore';
+import { arkDataSystem } from '@/systems/ark_data';
+import { authSystem } from '@/systems/auth';
+import { firestoreSystem } from '@/systems/firestore';
+import { settingsSystem } from '@/systems/local_settings';
 import Common, { catchAsyncErrors } from '@/ui/common';
 import Spinner from '@/ui/components/Spinner.vue';
 import theStore from '@/ui/store';
 import 'firebase/auth'; // required to load the Auth part of Firebase
 import 'firebase/firestore'; // required to load the Firestore part of Firebase
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Watch } from 'vue-property-decorator';
 import { inspect } from './filters';
 import './net_data'; // registers the v-net-data directive
 import routerConfig from './router';
@@ -19,9 +20,10 @@ import routerConfig from './router';
 
 
 const subsystems = [
-   new FirestoreSystem(),
-   new AuthSystem(),
-   new ArkDataSystem(),
+   firestoreSystem,
+   authSystem,
+   arkDataSystem,
+   settingsSystem,
 ];
 
 @Component({
@@ -50,12 +52,17 @@ export default class AppShell extends Common {
       }
    }
 
+   @Watch('store.localSettings', { deep: true })
+   localSettingsChanged() {
+      settingsSystem.notifyChanged();
+   }
+
 
    catchUnhandledRejection(event: any) {
       console.error('Unhandled rejection (promise: ', event.promise, ', reason: ', event.reason, ').');
       handleError(event.reason, 'Unhandled rejection');
       console.log(event);
-      if (theStore && theStore.devMode)
+      if (theStore && theStore.localSettings && theStore.localSettings.devMode)
          // tslint:disable-next-line:no-debugger
          debugger;
    }

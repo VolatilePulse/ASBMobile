@@ -33,7 +33,7 @@
 
 //    stores.push(preDefinedServers);
 //    if (LibraryManager.current) stores.push(LibraryManager.current.getUserServersCache().content);
-//    if (theStore.devMode) stores.push(testServers);
+//    if (theStore.localSettings.devMode) stores.push(testServers);
 
 //    for (const store of stores) {
 //       const found = store.find(v => v._id === id);

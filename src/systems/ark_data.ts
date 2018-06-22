@@ -5,7 +5,7 @@ import { SubSystem } from './common';
 
 
 /** Subsystem that handles loading and parsing data.json */
-export class ArkDataSystem implements SubSystem {
+class ArkDataSystem implements SubSystem {
    async initialise() {
       console.log('ArkDataSystem: Sleeping');
       // Let the app become responsive before doing anything
@@ -75,3 +75,6 @@ function ParseDatabase(jsonObject: any) {
    // Save the version number
    theStore.valuesVersion = jsonObject.settings.version;
 }
+
+
+export const arkDataSystem = new ArkDataSystem();

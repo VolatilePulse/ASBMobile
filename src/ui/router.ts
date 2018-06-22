@@ -17,6 +17,7 @@ import Library from './views/library.vue';
 import NotFound from './views/not_found.vue';
 import Server from './views/server.vue';
 import Servers from './views/servers.vue';
+import Settings from './views/settings.vue';
 import User from './views/user.vue';
 
 
@@ -71,7 +72,7 @@ const router = new Router({
 
       { path: '/login', component: User },
       { path: '/user', component: User, beforeEnter: requireAuth },
-      // { path: '/settings', component: Settings, beforeEnter: requireAuth },
+      { path: '/settings', component: Settings, beforeEnter: requireAuth },
       // { path: '/extractor', component: Extractor, beforeEnter: requireAuth },
       { path: '/invite', component: Vue, beforeEnter: requireAuth },
 

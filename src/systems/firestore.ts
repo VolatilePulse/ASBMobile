@@ -5,7 +5,7 @@ import { SubSystem } from './common';
 
 
 /** Subsystem that handles initialising Firestore */
-export class FirestoreSystem implements SubSystem {
+class FirestoreSystem implements SubSystem {
    async initialise() {
       console.log('FirestoreSystem: Setting settings');
       // Initialise Firestore
@@ -29,3 +29,5 @@ export class FirestoreSystem implements SubSystem {
       theStore.events.emit(EVENT_LOADED_FIRESTORE);
    }
 }
+
+export const firestoreSystem = new FirestoreSystem();

@@ -2,7 +2,7 @@
    <b-container fluid>
       <div>
          <h1>Not Found!</h1>
-         <div v-if="store.devMode">
+         <div v-if="store.localSettings.devMode">
             <p>Path: {{$route.path}}</p>
             <p>Params: {{JSON.stringify($route.params)}}</p>
             <p>Query: {{JSON.stringify($route.query)}}</p>

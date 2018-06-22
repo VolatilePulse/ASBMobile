@@ -1,6 +1,7 @@
 import { SpeciesParameters } from '@/ark/multipliers';
 import { statNames } from '@/consts';
 import { Creature, Server, User } from '@/data/firestore/objects';
+import { LocalSettings } from '@/systems/local_settings';
 import { Delay } from '@/utils';
 import ColorHash from 'color-hash';
 import { EventEmitter } from 'events';
@@ -15,6 +16,7 @@ export const EVENT_LIBRARY_CHANGED = 'library-changed';
 export const EVENT_LOADED_DATA = 'loaded-data';
 export const EVENT_LOADED_AUTH = 'loaded-auth';
 export const EVENT_LOADED_FIRESTORE = 'loaded-firestore';
+export const EVENT_LOADED_LOCAL_SETTINGS = 'loaded-local-settings';
 
 // !!! Everything public in this class should be initialised to a non-undefined value such as null to enable Vue observation !!!
 class Store {
@@ -30,7 +32,8 @@ class Store {
    officialServer: Server = null;
    officialServerSP: Server = null;
 
-   devMode: boolean = true;
+   localSettings: LocalSettings = {};
+
    dataLoaded: boolean = false;
    dataLoadError: string = null;
    routerAwaitingLoad: boolean = false;
@@ -49,6 +52,7 @@ class Store {
       data: false,
       firestore: false,
       auth: false,
+      localSettings: false,
    };
 
    get loggedIn() { return this.authUser != null; }
