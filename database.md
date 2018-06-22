@@ -35,10 +35,13 @@ Key : `string` : assigned by Firebase Auth (`uid`) and unique to our server.
 #### Contains
 |Field|Type|Description|
 |-:|:-:|:-|
-|`_libraries`|`string[]`|A cache of library IDs accessible by the user.<br/>*Not used for permissions! Only used to reduce the need to query libraries.*|
+|`libraries`|`string[]`|A cache of library IDs accessible by the user.<br/>*Not used for permissions! Only used to reduce the need to query libraries.*|
 |`settings`|`?`|User-specific settings (not device-specific, such as column layouts).<br/>Format TBD, to be useful for both ASB and ASBM|
+|`color`|`string`|A color to use for the user's avatar when no image is available.|
+|`displayName`|`string`|Name to use for the user when shown in member lists.|
+|`photoURL`|`string`|URL to the user's avatar image. Should be cropped to a circle before display.|
 
-Most user fields are managed by Firebase Auth, including a customisable display name and avatar pic, so they don't need to be duplicated in a User object.
+Many other user fields are managed by Firebase Auth and kept separately. The customisable fields in this document are made available to facilitate library membership management.
 
 #### Subcollections
 None yet.
@@ -92,7 +95,7 @@ Key : `string` : Randomly assigned unique string.
 |Field|Type|Description|
 |-:|:-:|:-|
 |`name`|`string`|Display name|
-|`multipliers`|`number[][]`|2D array of multipliers by stat then paramater (order TBD)|
+|`multipliers`|`number[][]`|Nested objects acting like a 2D array of multipliers by stat then paramater (order TBD)|
 |`singlePlayer`|`boolean`|True to enable single-player settings|
 |`IBM`|`number`|IBM|
 |`mods`|`string[]`|Array of Steam mod IDs, which should be applied in order
@@ -112,25 +115,7 @@ Contains all of the data that represents a creature.
 Key : `string` : UUID from Ark or randomly assigned unique string.
 
 #### Contains
-|Field|Type|Description|
-|-:|:-:|:-|
-|`name`|`string`|Display name|
-|`species`|`string`|Species (for display purposes only)|
-|`bp_species`|`string`|Species as blueprint path|
-|`origin_server`|`string`|Server ID that this creature was created on|
-|`current_server`|`string`|Server ID of current location|
-| `neutered` | `boolean` | Set if creature is neutered |
-| `status` | `string` | Available/Unavailable/Dead/Obelisk |
-| `levels` | `number[][]` | Array of `[Lw,Ld]` pairs, per stat |
-| `TE` | `number` | Taming efficiency, as a percentage (0-1) |
-| `imprint` | `number` | Imprint level, as a percentage (0-1) |
-| `mutMat` | `number` | Number of mutations on the matrilineal line |
-| `mutPat` | `number` | Number of mutations on the patrilineal line |
-| `mother` | `string` | UUID of mother creature |
-| `father` | `string` | UUID of father creature |
-| `owner` | `string` | Free-form text field |
-| `tribe` | `string` | Free-form text field |
-| `notes` | `string` | Free-form text field |
+...see the `Creature` interface in `src/data/firestore/objects.ts`...
 
 #### Permissions
 |Action|Restricted to|
