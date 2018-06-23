@@ -81,7 +81,7 @@ function consoleArgsToString(args: any[]): string {
 console.error = (...args: any[]) => {
    oldConsole.error(...args);
    try {
-      theStore.console.splice(0, 0, { type: 'error', message: consoleArgsToString(args) });
+      Vue.nextTick(() => theStore.console.splice(0, 0, { type: 'error', message: consoleArgsToString(args) }));
    } catch (_) {
       // skip
    }
@@ -90,7 +90,7 @@ console.error = (...args: any[]) => {
 console.warn = (...args: any[]) => {
    oldConsole.warn(...args);
    try {
-      theStore.console.splice(0, 0, { type: 'warn', message: consoleArgsToString(args) });
+      Vue.nextTick(() => theStore.console.splice(0, 0, { type: 'warn', message: consoleArgsToString(args) }));
    } catch (_) {
       // skip
    }
@@ -99,7 +99,7 @@ console.warn = (...args: any[]) => {
 console.log = (...args: any[]) => {
    oldConsole.log(...args);
    try {
-      theStore.console.splice(0, 0, { type: 'log', message: consoleArgsToString(args) });
+      Vue.nextTick(() => theStore.console.splice(0, 0, { type: 'log', message: consoleArgsToString(args) }));
    } catch (_) {
       // skip
    }
