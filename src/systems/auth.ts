@@ -9,7 +9,8 @@ import { eventWaiter, SubSystem } from './common';
 class AuthSystem implements SubSystem {
    async initialise() {
       console.log('AuthSystem: Waiting for Firestore to load');
-      await eventWaiter(theStore.events, EVENT_LOADED_FIRESTORE);
+      if (!theStore.loaded.firestore)
+         await eventWaiter(theStore.events, EVENT_LOADED_FIRESTORE);
 
       console.log('AuthSystem: Beginning');
 

@@ -39,7 +39,7 @@ describe('performance', () => {
       expect(server).to.exist;
 
       let result: TestResult;
-      result = PerformTest(STRESS_GIGA, now, server);
+      result = PerformTest(STRESS_GIGA, server, now);
       expect(result).to.be.a('object');
       expect(result.pass).to.equal(true);
       expect(result.duration, 'is duration less than 250').to.be.a('number').and.lt(250);
@@ -50,7 +50,7 @@ describe('performance', () => {
       expect(server).to.exist;
 
       let result: TestResult;
-      result = PerformPerfTest(STRESS_GIGA, now, server, PERF_TEST_DURATION, false);
+      result = PerformPerfTest(STRESS_GIGA, server, now, PERF_TEST_DURATION, false);
       expect(result).to.be.a('object');
       expect(result.duration, 'is duration less than 250').to.be.a('number').and.lt(250);
       console.log(`      duration (repeated) : ${Number(result.duration).toFixed(2)} ms`);

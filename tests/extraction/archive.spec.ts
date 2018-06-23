@@ -83,7 +83,7 @@ function generateTests(node: Node) {
             expect(serverDef).to.exist;
             const input = await loadCreature(creatureFile);
             expect(input).to.exist;
-            const results = PerformTest(input, undefined, serverDef);
+            const results = PerformTest(input, serverDef, undefined);
             const detailsReport = ` [Lvl ${input.level} ${input.mode.toLowerCase()} ${input.species} at ${creatureFile}]`;
             expect(results).to.exist;
             expect(results.options, 'no options' + detailsReport).to.be.instanceof(Array).and.not.be.empty;

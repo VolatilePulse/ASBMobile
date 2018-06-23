@@ -11,6 +11,7 @@ import { SubSystem } from './common';
 class ArkDataSystem implements SubSystem {
    async initialise() {
       console.log('ArkDataSystem: Sleeping');
+
       // Let the app become responsive before doing anything
       await Delay(250);
 

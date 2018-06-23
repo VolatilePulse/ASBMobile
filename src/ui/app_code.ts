@@ -2,6 +2,7 @@ import { arkDataSystem } from '@/systems/ark_data';
 import { authSystem } from '@/systems/auth';
 import { firestoreSystem } from '@/systems/firestore';
 import { settingsSystem } from '@/systems/local_settings';
+import { testingSystem } from '@/systems/testing';
 import Common, { catchAsyncErrors } from '@/ui/common';
 import Spinner from '@/ui/components/Spinner.vue';
 import theStore from '@/ui/store';
@@ -24,6 +25,7 @@ const subsystems = [
    authSystem,
    arkDataSystem,
    settingsSystem,
+   testingSystem,
 ];
 
 @Component({

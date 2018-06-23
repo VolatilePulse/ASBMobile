@@ -8,8 +8,14 @@ import { SubSystem } from './common';
 class FirestoreSystem implements SubSystem {
    async initialise() {
       console.log('FirestoreSystem: Setting settings');
-      // Initialise Firestore
-      firebase.firestore().settings({ timestampsInSnapshots: true });
+      try {
+         // Set settings
+         firebase.firestore().settings({ timestampsInSnapshots: true });
+      }
+      catch (err) {
+         console.warn('Firestore settings cannot be applied - probably already started: ', err);
+         theStore.addDismissableMessage('warning', 'Firestore settings cannot be applied: ' + err);
+      }
 
       await Delay(100);
 

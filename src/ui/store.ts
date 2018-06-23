@@ -2,6 +2,7 @@ import { SpeciesParameters } from '@/ark/multipliers';
 import { statNames } from '@/consts';
 import { Creature, Server, User } from '@/data/firestore/objects';
 import { LocalSettings } from '@/systems/local_settings';
+import { TestDefinition, TestResult } from '@/testing';
 import { Delay } from '@/utils';
 import ColorHash from 'color-hash';
 import { EventEmitter } from 'events';
@@ -10,6 +11,13 @@ import Vue from 'vue';
 
 /** @fileOverview The central data store */
 
+interface Testing {
+   tests: { [id: string]: TestDefinition };
+   results: { [id: string]: TestResult };
+   numPass: number;
+   numPartial: number;
+   numFail: number;
+}
 
 export const EVENT_SERVER_CHANGED = 'server-changed';
 export const EVENT_LIBRARY_CHANGED = 'library-changed';
@@ -59,6 +67,14 @@ class Store {
    authUser: firebase.User = null;
    userInfo: User = null;
 
+   testing: Testing = {
+      tests: {},
+      results: {},
+      numPass: null,
+      numPartial: null,
+      numFail: null,
+   };
+
    private initialised: boolean;
 
    async initialise() {
@@ -79,7 +95,8 @@ class Store {
       }
    }
 
-   addDismissableMessage(variant: 'danger' | 'warning' | 'info', msg: string) {
+   async addDismissableMessage(variant: 'danger' | 'warning' | 'info', msg: string) {
+      await Vue.nextTick();
       this.messages.push({ variant, message: msg });
    }
 

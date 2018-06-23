@@ -8,7 +8,7 @@ import ChangesTest from './views/dev/changes.vue';
 import Console from './views/dev/console.vue';
 import Firestore from './views/dev/firestore.vue';
 import LayoutTest from './views/dev/layout_test.vue';
-// import Tester from './views/dev/tester.vue';
+import Tester from './views/dev/tester.vue';
 import About from './views/info/about.vue';
 import Welcome from './views/info/welcome.vue';
 import WhatsNew from './views/info/whatsnew.vue';
@@ -31,20 +31,18 @@ export type IRouterNext = (to?: RawLocation | false | ((vm: Vue) => any) | void)
 //  * Online connection
 
 
-// FIXME: We have a loop here now...
-
 /** Called before navigating to a page that requires authentication */
 function requireAuth(to: Route, from: Route, next: IRouterNext) {
    // If the system isn't fully loaded yet, call us back when we are...
    if (!theStore.loaded.auth) {
       theStore.routerAwaitingLoad = true;
-      console.log('Router: Deferring requireAuth until auth loaded');
+      console.log('Router: Deferring navigation until auth loaded');
       theStore.events.once(EVENT_LOADED_AUTH, () => requireAuth(to, from, next));
       return;
    }
    if (!theStore.loaded.firestore) {
       theStore.routerAwaitingLoad = true;
-      console.log('Router: Deferring requireAuth until firestore loaded');
+      console.log('Router: Deferring navigation until firestore loaded');
       theStore.events.once(EVENT_LOADED_FIRESTORE, () => requireAuth(to, from, next));
       return;
    }
@@ -63,6 +61,20 @@ function requireAuth(to: Route, from: Route, next: IRouterNext) {
    }
 }
 
+/** Called before navigating to a page that requires Firestore, but not authentication */
+function requireFirestore(to: Route, from: Route, next: IRouterNext) {
+   // If the system isn't fully loaded yet, call us back when we are...
+   if (!theStore.loaded.firestore) {
+      theStore.routerAwaitingLoad = true;
+      console.log('Router: Deferring navigation until firestore loaded');
+      theStore.events.once(EVENT_LOADED_FIRESTORE, () => requireFirestore(to, from, next));
+      return;
+   }
+
+   theStore.routerAwaitingLoad = false;
+   next();
+}
+
 const router = new Router({
    mode: 'history',
    routes: [
@@ -72,7 +84,7 @@ const router = new Router({
 
       { path: '/login', component: User },
       { path: '/user', component: User, beforeEnter: requireAuth },
-      { path: '/settings', component: Settings, beforeEnter: requireAuth },
+      { path: '/settings', component: Settings },
       // { path: '/extractor', component: Extractor, beforeEnter: requireAuth },
       { path: '/invite', component: Vue, beforeEnter: requireAuth },
 
@@ -84,8 +96,8 @@ const router = new Router({
       { path: '/library/:library_id/creature/:creature_id', name: 'creature', component: Creature, beforeEnter: requireAuth },
       { path: '/library/:library_id/creature/:creature_id/edit', component: CreatureEdit, beforeEnter: requireAuth },
 
-      // { path: '/dev/tester', component: Tester },
-      { path: '/dev/firestore', component: Firestore },
+      { path: '/dev/tester', component: Tester, alias: '/dev/testing', beforeEnter: requireFirestore },
+      { path: '/dev/firestore', component: Firestore, beforeEnter: requireFirestore },
       { path: '/dev/layout', component: LayoutTest },
       { path: '/dev/changes', component: ChangesTest },
       { path: '/dev/console', component: Console },

@@ -1,5 +1,5 @@
 <template>
-   <div id="app" style="overflow-x:hidden">
+   <div style="overflow-x:hidden;min-width:326px">
 
       <b-navbar fixed="top" toggleable="sm" type="dark" variant="primary">
          <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
@@ -32,7 +32,7 @@
                   </b-nav-item>
                </transition>
                <b-nav-item-dropdown v-if="store.localSettings.devMode" text="Dev" right>
-                  <b-nav-item disabled to="/dev/tester">Tester</b-nav-item>
+                  <b-nav-item to="/dev/tester">Tester</b-nav-item>
                   <b-nav-item to="/dev/console">Console</b-nav-item>
                   <b-nav-item to="/dev/firestore">Data explorer</b-nav-item>
                </b-nav-item-dropdown>
@@ -146,7 +146,6 @@
   opacity: 0;
 }
 </style>
-
 
 
 <script lang="ts">

@@ -1,10 +1,31 @@
 import { ConvertValue } from '@/ark';
 import { Stat, TestData } from '@/ark/types';
 import { PRE_IB } from '@/consts';
-import { Server } from '@/data/firestore/objects';
+import { Creature, Server } from '@/data/firestore/objects';
 import { CompareFloat } from '@/utils';
 import { isArray, isFunction, isNumber, isObject, isString } from 'util';
 import { Extractor, ExtractorInput, TEProps } from './ark/extractor';
+
+
+export interface ITestCriteria {
+   test: string;
+}
+
+export interface HasAnOptionTestCriteria extends ITestCriteria {
+   test: 'has_an_option';
+}
+
+export interface HasOptionTestCriteria extends ITestCriteria {
+   test: 'has_option';
+   levelsWild: number[];
+   levelsDom: number[];
+}
+
+export interface TestDefinition {
+   description: string;
+   creature: Creature;
+   criteria: ITestCriteria[];
+}
 
 
 /** Flexible object to hold test results */
@@ -26,8 +47,7 @@ export interface TestResult {
  * Fields set in the output vary based on the result.
  * @example PerformTest(test_data, performance.now.bind(performance), server);
  */
-// @ts-ignore
-export function PerformTest(testData: TestData, timingFn?: () => number, server: Server): TestResult {
+export function PerformTest(testData: TestData, server: Server, timingFn: () => number): TestResult {
    if (!server) return { pass: false, exception: 'Server definition is required' };
 
    // Set the properties to prepare for extraction
@@ -92,7 +112,7 @@ export function PerformTest(testData: TestData, timingFn?: () => number, server:
 /**
  * Run a test in performance mode, repeating it until `duration` is up and reporting on the average run time.
  */
-export function PerformPerfTest(testData: TestData, timingFn: () => number, server: Server, duration = 5000, generateProfiler = false): TestResult {
+export function PerformPerfTest(testData: TestData, server: Server, timingFn: () => number, duration = 5000, generateProfiler = false): TestResult {
    let runs = 0;
    let t1, t2;
    const cutoffTime = Date.now() + duration;
