@@ -7,7 +7,7 @@ export function inspect(obj: any) {
    let lines = text.split('\n');
    lines = lines.map(line => line
       .replace(/,$/, '')
-      .replace(/(^[{}]|[{}]$)/g, '')
+      .replace(/(^[{}]|[{}]$|\{\}$)/g, '')
       .replace(/^  /, '')
       .replace(/"([\w_]+)":/, '$1:')
    );
