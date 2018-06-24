@@ -35,7 +35,8 @@
    <!-- <meta name="twitter:label2" value="Or on demand" /> -->
    <!-- <meta name="twitter:data2" value="at Hulu.com" /> -->
 
-   <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.0.0/firebaseui.css">
+   <!-- This defers loading the CSS, but still needs a normal css link to be inserted later (in app startup) -->
+   <link rel="preload" href="https://cdn.firebase.com/libs/firebaseui/3.0.0/firebaseui.css" as="style">
 </head>
 
 <body style="background:#212529;padding:0;margin:0">

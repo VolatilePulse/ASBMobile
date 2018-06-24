@@ -49,7 +49,26 @@ module.exports = {
 
          exclude: [
             /js\/manifest\..*\.js$/, // remove this non-existent file from the pre-cache list (webpack/vue-cli bug?)
-            /\.js\.map$/, // remove .js.map files from the cache as it is insane to always require fetching them
+            /\.(js|css)\.map$/, // remove .map files from the cache as it is insane to always require fetching them
+         ],
+
+         // Allow the service worker to handle requests for all navigation routes
+         navigateFallback: '/',
+
+         // Cache CDN-based files that we depend on
+         runtimeCaching: [
+            {
+               // Would prefer cacheFirst but https://developers.google.com/web/tools/workbox/guides/handle-third-party-requests
+               handler: 'staleWhileRevalidate',
+               urlPattern: /(https:\/\/www\.gstatic\.com\/firebasejs.*\.(js|css)|https:\/\/cdn\.firebase\.com\/libs\/firebaseui.*\.(js|css)|https:\/\/fonts\.googleapis\.com\/css.*)/,
+               options: {
+                  cacheName: 'cdn',
+               },
+            },
+            {
+               handler: 'cacheFirst',
+               urlPattern: '/__/firebase/init.js',
+            }
          ],
       },
    },
