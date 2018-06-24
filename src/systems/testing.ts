@@ -13,11 +13,19 @@ class TestingSystem implements SubSystem {
       console.log('TestingSystem: Done');
    }
 
-   public async runTestById(id: string) {
+   public runTestById(id: string) {
       const test = theStore.testing.tests[id];
       if (!test) throw new Error('Test not found');
 
-      console.log('TestingSystem: Running ' + id);
+      console.log('TestingSystem: Running test ' + id);
+      // TODO: Do it...
+   }
+
+   public runPerfTestById(id: string) {
+      const test = theStore.testing.tests[id];
+      if (!test) throw new Error('Test not found');
+
+      console.log('TestingSystem: Running perf test ' + id);
       // TODO: Do it...
    }
 

@@ -10,7 +10,7 @@ export interface Stat {
    Ld: number;
 }
 
-export type InputSource = 'asb_xml' | 'asbm_user_input' | 'ark_export' | 'ark_tools_export';
+export type CreatureDataSource = 'asb_xml' | 'asbm_user_input' | 'asb_user_input' | 'ark_export' | 'ark_tools_export';
 
 export interface ServerStatParams {
    [param_index: number]: number;

@@ -19,6 +19,13 @@ export interface ExtractorInput {
    values: Interval[];
 }
 
+export interface ExtractorOutput {
+   stats: Stat[][];
+   options: Stat[][];
+   TEs: Map<Stat, TEProps>;
+   IB: Interval;
+}
+
 // tamedLevel / (1 + 0.5 * TE)
 function calcWL(tamedLevel: Interval, TE: Interval) {
    return IA.div(tamedLevel, (IA.add(IA.ONE, IA.mul(IA(0.5), TE))));
@@ -136,7 +143,7 @@ export class Extractor {
       this.values = inputs.values;
 
       // considerWildLevelSteps = considerWildLevelSteps && !bred;
-      const incomingM = Ark.GetMultipliers(inputs.server, inputs.species);
+      const incomingM = Ark.gatherMultipliers(inputs.server, inputs.species);
 
       // Clear the checked property for future extractions (also clearing out any Vue observer)
       this.stats = Utils.FilledArray(8, () => []);
@@ -168,7 +175,7 @@ export class Extractor {
       this.m = incomingM;
    }
 
-   extract(dbg?: any) {
+   extract(dbg?: any): ExtractorOutput {
       // TODO: Add either a way to throw errors w/ codes (for specific reasons like bad multipliers, stats, etc.)
       //    Or provide an alternative method (returning under bad situations is acceptable for now)
 

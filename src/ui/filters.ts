@@ -1,4 +1,4 @@
-import { DisplayValue } from '@/ark';
+import { formatDisplayValue } from '@/ark';
 import Vue from 'vue';
 
 
@@ -19,6 +19,6 @@ export function inspect(obj: any) {
 // Debug tool to JSON.stringify (cleaned up)
 Vue.filter('inspect', inspect);
 
-Vue.filter('display', (value: number, statIndex: number = 1) => DisplayValue(value, statIndex));
+Vue.filter('display', (value: number, statIndex: number = 1) => formatDisplayValue(value, statIndex));
 
-Vue.filter('pct', (value: number) => DisplayValue(value, -2));
+Vue.filter('pct', (value: number) => formatDisplayValue(value, -2));

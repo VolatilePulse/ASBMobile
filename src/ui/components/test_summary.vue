@@ -3,9 +3,9 @@
       <div class="d-flex flex-row flex-nowrap m-1">
          <!-- Run/Perf buttons -->
          <div class="d-flex flex-column mt-0 mr-1">
-            <b-img @click.prevent="runTest(testIndex)" :src="require('@/assets/play.svg')" style="height:22px" title="Run this test" pointer="hand"></b-img>
+            <b-img @click.prevent="runTest" :src="require('@/assets/play.svg')" style="height:22px" title="Run this test" pointer="hand"></b-img>
             <div style="margin-top:0.4rem"></div>
-            <b-img @click.prevent="runPerfTest(testIndex)" :src="require('@/assets/timer.svg')" style="height:16px" title="Evaluate this test's performane over 5 seconds"></b-img>
+            <b-img @click.prevent="runPerfTest" :src="require('@/assets/timer.svg')" style="height:16px" title="Evaluate this test's performane over 5 seconds"></b-img>
          </div>
 
          <!-- Info -->
@@ -82,6 +82,7 @@ import { Component } from 'vue-property-decorator';
 import Common from '@/ui/common';
 import theStore from '@/ui/store';
 import { TestDefinition } from '@/testing';
+import { testingSystem } from '@/systems/testing';
 
 @Component({
    props: {
@@ -100,5 +101,13 @@ export default class TestSummary extends Common {
    }
 
    get result() { return theStore.testing.results[this.id]; }
+
+   runTest() {
+      testingSystem.runTestById(this.id);
+   }
+
+   runPerfTest() {
+      testingSystem.runPerfTestById(this.id);
+   }
 }
 </script>

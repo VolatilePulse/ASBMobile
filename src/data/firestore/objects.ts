@@ -1,4 +1,4 @@
-import { CreatureStatus, InputSource, Multipliers, ServerId, UserId } from '@/data/firestore/types';
+import { CreatureDataSource, CreatureStatus, Multipliers, ServerId, UserId } from '@/data/firestore/types';
 import firebase from 'firebase/app';
 
 
@@ -68,7 +68,7 @@ export interface Creature {
       domesticated?: firebase.firestore.Timestamp;
    };
 
-   inputSource: InputSource;
+   inputSource: CreatureDataSource;
 
    // Cached values
    level?: number;

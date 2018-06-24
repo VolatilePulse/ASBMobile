@@ -1,66 +1,81 @@
-import { ConvertValue } from '@/ark';
-import { Stat, TestData } from '@/ark/types';
-import { PRE_IB } from '@/consts';
-import { Creature, Server } from '@/data/firestore/objects';
-import { CompareFloat } from '@/utils';
+import { inputValueToInterval } from '@/ark';
+import { Stat } from '@/ark/types';
+import { NUM_STATS, PRE_IB } from '@/consts';
+import { Server } from '@/data/firestore/objects';
+import { CreatureDataSource, ServerId } from '@/data/firestore/types';
+import { CompareFloat, Range } from '@/utils';
 import { isArray, isFunction, isNumber, isObject, isString } from 'util';
-import { Extractor, ExtractorInput, TEProps } from './ark/extractor';
+import { Extractor, ExtractorInput, ExtractorOutput, TEProps } from './ark/extractor';
 
 
-export interface ITestCriteria {
-   test: string;
+export interface CreatureTestData {
+   species: string;
+   speciesBP?: string;
+   currentServer: ServerId;
+   isWild?: boolean;
+   isTamed?: boolean;
+   isBred?: boolean;
+   imprintingBonus: number;
+   inputSource: CreatureDataSource;
+   level: number;
+   values: { [stat_index: number]: number };
 }
 
-export interface HasAnOptionTestCriteria extends ITestCriteria {
+export type TestCriteria = HasAnOptionTestCriteria | HasOptionTestCriteria | HasOptionCountTestCriteria;
+
+export interface HasAnOptionTestCriteria {
    test: 'has_an_option';
 }
 
-export interface HasOptionTestCriteria extends ITestCriteria {
+export interface HasOptionTestCriteria {
    test: 'has_option';
    levelsWild: number[];
    levelsDom: number[];
 }
 
+export interface HasOptionCountTestCriteria {
+   test: 'has_option_count';
+   count: number;
+}
+
 export interface TestDefinition {
    description: string;
-   creature: Creature;
-   criteria: ITestCriteria[];
+   creature: CreatureTestData;
+   criteria: TestCriteria[];
 }
 
 
 /** Flexible object to hold test results */
 export interface TestResult {
    pass?: boolean;
-   stats?: Stat[][];
-   options?: Stat[][];
-   mapTE?: Map<Stat, TEProps>;
+   output?: ExtractorOutput;
    dbg?: any;
-   extra?: { [key: string]: any };
    exception?: any;
-   failReason?: string;
-   duration?: number | string;
+   duration?: number;
    runs?: number;
+   criteriaResults?: boolean[];
 }
 
 /**
  * Perform a single test, timing it and checking the results if applicable.
  * Fields set in the output vary based on the result.
- * @example PerformTest(test_data, performance.now.bind(performance), server);
+ * @example PerformTest(test_data, server, performance.now.bind(performance));
  */
-export function PerformTest(testData: TestData, server: Server, timingFn: () => number): TestResult {
-   if (!server) return { pass: false, exception: 'Server definition is required' };
+export function PerformTest(testData: TestDefinition, server: Server, timingFn?: () => number): TestResult {
+   if (!server) return { exception: 'Server definition is required' };
+   if (!testData.creature) return { exception: 'Creature definition is required' };
+   if (!testData.creature.inputSource) return { exception: 'Creature input source is required' };
 
    // Set the properties to prepare for extraction
-   const source = testData.source || 'asbm_ui';
    const inputs: ExtractorInput = {
-      wild: (testData.mode === 'Wild'),
-      tamed: (testData.mode === 'Tamed'),
-      bred: (testData.mode === 'Bred'),
-      IB: ConvertValue(testData.imprint, PRE_IB, source),
-      level: testData.level,
-      values: testData.values.map((v, i) => ConvertValue(v, i, source)),
+      wild: testData.creature.isWild,
+      tamed: testData.creature.isTamed,
+      bred: testData.creature.isBred,
+      IB: inputValueToInterval(testData.creature.imprintingBonus, PRE_IB, testData.creature.inputSource),
+      level: testData.creature.level,
+      values: Range(NUM_STATS).map(i => inputValueToInterval(testData.creature.values[i], i, testData.creature.inputSource)),
       server: server,
-      species: testData.species,
+      species: testData.creature.species,
    };
 
    const extractObject = new Extractor(inputs);
@@ -87,23 +102,16 @@ export function PerformTest(testData: TestData, server: Server, timingFn: () => 
 
    const result: TestResult = {
       pass: false,
-      stats: output ? output.stats : undefined,
-      options: output ? output.options : undefined,
-      mapTE: output ? output.TEs : undefined,
+      output: output,
       dbg: dbg,
-      extra: {},
    };
 
    if (exception) {
       result.exception = exception;
-      result.dbg = dbg;
-   }
-   else if (dbg['failReason']) {
-      result.failReason = dbg.failReason;
    }
    else {
-      result.pass = IsPass(testData['results'], output.stats);
       result.duration = t2 - t1;
+      evaluateCriteria(testData, result);
    }
 
    return result;
@@ -112,32 +120,32 @@ export function PerformTest(testData: TestData, server: Server, timingFn: () => 
 /**
  * Run a test in performance mode, repeating it until `duration` is up and reporting on the average run time.
  */
-export function PerformPerfTest(testData: TestData, server: Server, timingFn: () => number, duration = 5000, generateProfiler = false): TestResult {
+export function PerformPerfTest(testData: TestDefinition, server: Server, timingFn: () => number, duration = 5000, generateProfiler = false): TestResult {
    let runs = 0;
    let t1, t2;
    const cutoffTime = Date.now() + duration;
 
    if (!server) return { exception: 'Unable to locate server' };
 
+
    try {
       if (generateProfiler && window.console && window.console.profile) {
-         console.profile(testData.tag);
+         console.profile(testData.description);
       }
 
       t1 = timingFn();
 
       do {
          // Set the properties to prepare for extraction
-         const source = testData.source || 'asbm_ui';
          const inputs: ExtractorInput = {
-            wild: (testData.mode === 'Wild'),
-            tamed: (testData.mode === 'Tamed'),
-            bred: (testData.mode === 'Bred'),
-            IB: ConvertValue(testData.imprint, PRE_IB, source),
-            level: testData.level,
-            values: testData.values.map((v, i) => ConvertValue(v, i, source)),
+            wild: testData.creature.isWild,
+            tamed: testData.creature.isTamed,
+            bred: testData.creature.isBred,
+            IB: inputValueToInterval(testData.creature.imprintingBonus, PRE_IB, testData.creature.inputSource),
+            level: testData.creature.level,
+            values: Range(NUM_STATS).map(i => inputValueToInterval(testData.creature.values[i], i, testData.creature.inputSource)),
             server: server,
-            species: testData.species,
+            species: testData.creature.species,
          };
 
          const extractObject = new Extractor(inputs);
@@ -186,3 +194,32 @@ export function IsPass(result: any, expected: any): boolean {
 
    return true;
 }
+
+
+function evaluateCriteria(test: TestDefinition, result: TestResult) {
+   result.pass = false;
+   result.criteriaResults = test.criteria.map(criteria => {
+      const evaluator = criteriaEvaluators[criteria.test];
+      if (!evaluator) throw new Error(`Unexpected criteria '${criteria.test}'`);
+      return evaluator(result.output, criteria);
+   });
+   result.pass = result.criteriaResults.reduce((agg, pass) => agg && pass, true);
+}
+
+
+type CriteriaEvaluator = (output: ExtractorOutput, criteria: TestCriteria) => boolean;
+
+// A map of functions that check the different pass criteria
+const criteriaEvaluators: { [name: string]: CriteriaEvaluator } = {
+   has_an_option(output: ExtractorOutput, _criteria: TestCriteria) {
+      return output.options && output.options.length > 0;
+   },
+   has_option_count(output: ExtractorOutput, criteria: TestCriteria) {
+      const count = (criteria as HasOptionCountTestCriteria).count;
+      return output.options && output.options.length >= count;
+   },
+   has_option(output: ExtractorOutput, criteria: TestCriteria) {
+      const { levelsDom, levelsWild } = criteria as HasOptionTestCriteria;
+      return output.options.some(option => option.every((stat, i) => levelsWild[i] === stat.Lw && levelsDom[i] === stat.Ld));
+   }
+};

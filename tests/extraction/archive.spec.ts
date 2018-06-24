@@ -1,8 +1,7 @@
 import { parseExportedCreature } from '@/ark/import/ark_export';
 import { parseGameIni } from '@/ark/import/game_ini';
-import { TestData } from '@/ark/types';
 import { Server } from '@/data/firestore/objects';
-import { PerformTest } from '@/testing';
+import { CreatureTestData, PerformTest, TestDefinition } from '@/testing';
 import theStore from '@/ui/store';
 import { expect } from 'chai';
 import glob from 'glob';
@@ -55,10 +54,27 @@ async function loadGameIni(filename: string): Promise<Server> {
 }
 
 /** Load and parse an exported creature */
-async function loadCreature(filename: string): Promise<TestData> {
+async function loadCreature(filename: string): Promise<CreatureTestData> {
    const content = await loadFile(filename);
-   const input: any = parseExportedCreature(content);
+   const input = parseExportedCreature(content) as CreatureTestData;
    return input;
+}
+
+function makeTestDefinition(creature: CreatureTestData) {
+   const test: TestDefinition = {
+      description: '<archive test>',
+      creature: creature,
+      criteria: [
+         { test: 'has_an_option' }, // we say an archive test passes if there is at least one option
+      ],
+   };
+   return test;
+}
+
+function creatureMode(creature: CreatureTestData) {
+   if (creature.isBred) return 'bred';
+   if (creature.isTamed) return 'tamed';
+   return 'wild';
 }
 
 /** Generate the the entire hierarchy of tests */
@@ -81,12 +97,14 @@ function generateTests(node: Node) {
       (node.creatures || []).forEach(creatureFile => {
          it(path.basename(creatureFile, '.ini'), async () => {
             expect(serverDef).to.exist;
-            const input = await loadCreature(creatureFile);
-            expect(input).to.exist;
-            const results = PerformTest(input, serverDef, undefined);
-            const detailsReport = ` [Lvl ${input.level} ${input.mode.toLowerCase()} ${input.species} at ${creatureFile}]`;
+            const creature = await loadCreature(creatureFile);
+            expect(creature).to.exist;
+            const testDef = makeTestDefinition(creature);
+            const results = PerformTest(testDef, serverDef, undefined);
+            const detailsReport = ` [Lvl ${creature.level} ${creatureMode(creature)} ${creature.species} at ${creatureFile}]`;
             expect(results).to.exist;
-            expect(results.options, 'no options' + detailsReport).to.be.instanceof(Array).and.not.be.empty;
+            expect(results.exception).to.be.undefined;
+            expect(results.pass, 'no options' + detailsReport).to.be.true;
          });
       });
 

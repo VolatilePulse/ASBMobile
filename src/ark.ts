@@ -1,7 +1,7 @@
 import { StatMultipliers } from '@/ark/multipliers';
-import { Stat } from '@/ark/types';
 import { DAMAGE, HEALTH, PRE_IB, PRE_TE, SERVER_IDM, SERVER_IWM, SERVER_TAM, SERVER_TMM, SPEED, TORPOR } from '@/consts';
 import { Server } from '@/data/firestore/objects';
+import { CreatureDataSource } from '@/data/firestore/types';
 import { floatRange, intervalFromDecimal } from '@/number_utils';
 import theStore from '@/ui/store';
 import IA from 'interval-arithmetic';
@@ -11,36 +11,36 @@ import * as Utils from './utils';
 /** @fileOverview Ark-related utility functions */
 
 
-/** The source of the data dictates its precision */
-export type CreatureDataSource = 'asbm_ui' | 'asb_ui' | 'ark_export';
+// export function FormatAllOptions(stats: Stat[][]) {
+//    return stats.map(options => FormatOptions(options)).join('\n');
+// }
 
+// export function FormatOptions(options: Stat[]) {
+//    return options.map(option => FormatOption(option)).join(',') || '-';
+// }
 
-export function FormatAllOptions(stats: Stat[][]) {
-   return stats.map(options => FormatOptions(options)).join('\n');
-}
+// export function FormatOption(option: Stat, noBrackets = false) {
+//    if (!option) return '-';
+//    const { Lw, Ld } = option;
+//    if (noBrackets)
+//       return `${Lw}+${Ld}`;
+//    return `(${Lw}+${Ld})`;
+// }
 
-export function FormatOptions(options: Stat[]) {
-   return options.map(option => FormatOption(option)).join(',') || '-';
-}
-
-export function FormatOption(option: Stat, noBrackets = false) {
-   if (!option) return '-';
-   const { Lw, Ld } = option;
-   if (noBrackets)
-      return `${Lw}+${Ld}`;
-   return `(${Lw}+${Ld})`;
-}
-
-export function Precision(index: number) {
+/** Return the normal precision for the specified stat when displayed */
+export function displayPrecision(index: number) {
    // Displays Damage and Speed as 153.5(%)
    if (index === DAMAGE || index === SPEED)
-      return 3;
+      return 3; // ...prior to division by 100
+
    // Displays TE as 98.34(%)
    if (index === PRE_TE)
       return 2;
+
    // Displays IB as 38.8810(%)
    if (index === PRE_IB)
       return 4;
+
    // Displays other stats as 18362.4
    return 1;
 }
@@ -51,38 +51,21 @@ export function Precision(index: number) {
  * @param {number} index Number corresponding with the index of a stat
  * @returns {number} The rounded, converted value
  */
-export function DisplayValue(value: number, index: number): number {
+export function formatDisplayValue(value: number, index: number): number {
    let returnValue = value;
 
    if (index === DAMAGE || index === SPEED || index === PRE_TE || index === PRE_IB)
       returnValue *= 100;
 
    // We want to convert it to Display in ASBM
-   returnValue = Utils.RoundTo(returnValue, Precision(index));
+   returnValue = Utils.RoundTo(returnValue, displayPrecision(index));
 
    return returnValue;
 }
 
-/**
- * Convert an input value into an Interval representing it's value and precision.
- */
-export function ConvertValue(value: number, index: number, source: CreatureDataSource) {
-   let precision: number;
-
-   if (source === 'asbm_ui' || source === 'asb_ui') {
-      precision = 1;
-      if (index === PRE_IB)
-         precision = 0;
-   }
-   else if (source === 'ark_export') {
-      precision = 6;
-      if (index === DAMAGE || index === SPEED)
-         precision = 4;
-   }
-   else {
-      throw new Error('Invalid data source');
-   }
-
+/** Convert an input value into an Interval representing it's value and precision */
+export function inputValueToInterval(value: number, index: number, source: CreatureDataSource) {
+   const precision: number = inputDataPrecision(index, source);
    let range = intervalFromDecimal(value, precision);
 
    if (index === DAMAGE || index === SPEED || index === PRE_TE || index === PRE_IB)
@@ -91,8 +74,29 @@ export function ConvertValue(value: number, index: number, source: CreatureDataS
    return range;
 }
 
+/** Returns the number of decimal places given by the input the specified source for this type of data */
+function inputDataPrecision(index: number, source: CreatureDataSource) {
+   let precision: number;
+
+   if (source === 'asb_user_input' || source === 'asbm_user_input') {
+      precision = 1;
+      if (index === PRE_IB) precision = 0;
+   }
+   else if (source === 'ark_export') {
+      precision = 6;
+      if (index === DAMAGE || index === SPEED)
+         precision = 4;
+   }
+   else {
+      // TODO: Do we need to get precisions for asb_xml or ark_tools_export?
+      throw new Error('Invalid data source');
+   }
+
+   return precision;
+}
+
 /** Gather combined multipliers for the given server and species */
-export function GetMultipliers(server: Server, speciesName: string): StatMultipliers[] {
+export function gatherMultipliers(server: Server, speciesName: string): StatMultipliers[] {
 
    // Gather raw multipliers first from the official server, overriding with settings from the given server
    const values = merge({}, theStore.officialServer.multipliers, server.multipliers);
