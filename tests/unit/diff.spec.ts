@@ -1,6 +1,6 @@
 import { applyDiff, findDiff } from '@/data/firestore/diff';
 import { expect } from 'chai';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 
 // tslint:disable:no-unused-expression
 

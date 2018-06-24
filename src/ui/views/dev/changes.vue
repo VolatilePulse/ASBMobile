@@ -92,7 +92,7 @@ input.net-data.conflict {
 <script lang="ts">
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator';
 import { ChangeHandler } from '@/data/firestore/change';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { findDiff, applyDiff } from '@/data/firestore/diff';
 
 interface TestData {

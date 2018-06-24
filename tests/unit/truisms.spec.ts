@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { range } from 'lodash';
+import range from 'lodash/range';
 
 
 describe('system checks', () => {

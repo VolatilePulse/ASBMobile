@@ -1,7 +1,7 @@
 import { SubSystem } from '@/systems/common';
 import theStore, { EVENT_LOADED_LOCAL_SETTINGS } from '@/ui/store';
 import storage from 'local-storage-fallback';
-import { merge } from 'lodash';
+import merge from 'lodash/merge';
 
 
 const KEY_SETTINGS = 'settings';

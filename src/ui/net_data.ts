@@ -1,5 +1,5 @@
 import { ChangeHandler } from '@/data/firestore/change';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import Vue, { VNode, VNodeDirective } from 'vue';
 
 

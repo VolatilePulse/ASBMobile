@@ -1,6 +1,7 @@
 import { applyDiff, Changes, findDiff, MergeChange, MergeChanges } from '@/data/firestore/diff';
 import { AssertionError } from 'assert';
-import { cloneDeep, intersection } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import intersection from 'lodash/intersection';
 import Vue from 'vue';
 
 
