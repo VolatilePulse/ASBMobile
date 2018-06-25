@@ -4,11 +4,6 @@ import Router, { RawLocation, Route } from 'vue-router';
 import Creature from './views/creature.vue';
 import Creatures from './views/creatures.vue';
 import CreatureEdit from './views/creature_edit.vue';
-import ChangesTest from './views/dev/changes.vue';
-import Console from './views/dev/console.vue';
-import Firestore from './views/dev/firestore.vue';
-import LayoutTest from './views/dev/layout_test.vue';
-import Tester from './views/dev/tester.vue';
 import About from './views/info/about.vue';
 import Welcome from './views/info/welcome.vue';
 import WhatsNew from './views/info/whatsnew.vue';
@@ -21,6 +16,16 @@ import Settings from './views/settings.vue';
 import User from './views/user.vue';
 
 
+// These pages are lazily loaded and not included in the main app bundle
+const DevTester = () => import(/* webpackChunkName: "dev-pages" */ './views/dev/tester.vue');
+const DevTest = () => import(/* webpackChunkName: "dev-pages" */ './views/dev/test.vue');
+const DevChanges = () => import(/* webpackChunkName: "dev-pages" */ './views/dev/changes.vue');
+const DevConsole = () => import(/* webpackChunkName: "dev-pages" */ './views/dev/console.vue');
+const DevFirestore = () => import(/* webpackChunkName: "dev-pages" */ './views/dev/firestore.vue');
+const DevLayoutTest = () => import(/* webpackChunkName: "dev-pages" */ './views/dev/layout_test.vue');
+
+
+// Annoying that vue-router doesn't provide this type
 export type IRouterNext = (to?: RawLocation | false | ((vm: Vue) => any) | void) => void;
 
 // TODO: Implement a general way to say what a page requires, from:
@@ -96,11 +101,12 @@ const router = new Router({
       { path: '/library/:library_id/creature/:creature_id', name: 'creature', component: Creature, beforeEnter: requireAuth },
       { path: '/library/:library_id/creature/:creature_id/edit', component: CreatureEdit, beforeEnter: requireAuth },
 
-      { path: '/dev/tester', component: Tester, alias: '/dev/testing', beforeEnter: requireFirestore },
-      { path: '/dev/firestore', component: Firestore, beforeEnter: requireFirestore },
-      { path: '/dev/layout', component: LayoutTest },
-      { path: '/dev/changes', component: ChangesTest },
-      { path: '/dev/console', component: Console },
+      { path: '/dev/tester', component: DevTester, alias: '/dev/testing', beforeEnter: requireFirestore },
+      { path: '/dev/test/:test_id', component: DevTest, beforeEnter: requireFirestore },
+      { path: '/dev/firestore', component: DevFirestore, beforeEnter: requireFirestore },
+      { path: '/dev/layout', component: DevLayoutTest },
+      { path: '/dev/changes', component: DevChanges },
+      { path: '/dev/console', component: DevConsole },
 
       { path: '*', component: NotFound },
    ],

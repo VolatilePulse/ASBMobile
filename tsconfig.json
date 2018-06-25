@@ -1,7 +1,7 @@
 {
    "compilerOptions": {
       "target": "esnext",
-      "module": "es2015",
+      "module": "esNext",
       "jsx": "preserve",
       "moduleResolution": "node",
       "alwaysStrict": true,
