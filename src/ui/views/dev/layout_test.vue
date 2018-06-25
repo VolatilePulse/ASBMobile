@@ -2,28 +2,44 @@
    <b-container fluid>
       <b-container fluid>
          <b-row>
-            <b-col class="color7">1/3</b-col>
-            <b-col class="color8">1/3</b-col>
-            <b-col class="color9">1/3</b-col>
+            <b-col>
+               <h2 class="text-center">Guardian (Giganotosaurus)</h2>
+            </b-col>
          </b-row>
-         <hr/>
          <b-row>
-            <b-col sm="4" class="color1">full width @ xs<br/>4 cols @ sm+</b-col>
-            <b-col class="color2">all remaining space</b-col>
+            <b-col>
+               <h4 class="text-center">Untamed</h4>
+            </b-col>
          </b-row>
-         <hr/>
          <b-row>
-            <b-col sm="6" class="color3">full width @ xs<br/>6 cols @ sm+</b-col>
-            <b-col class="color4">shares space equally</b-col>
-            <b-col class="color5">shares space equally</b-col>
+            <b-col>
+               <h6 class="text-center">Alive</h6>
+            </b-col>
          </b-row>
-         <hr/>
          <b-row>
-            <!-- 12 cols at xs and equal spacing at sm and above -->
-            <b-col sm class="color6">full width @ xs<br/>equal @ sm+</b-col>
-            <b-col sm class="color7">full width @ xs<br/>equal @ sm+</b-col>
-            <b-col class="color8">shares space equally</b-col>
-            <b-col class="color9">shares space equally</b-col>
+            <b-col sm>
+               <b-row class="align-content-center">
+                  <wheel :size="200" :colors="[31,22,38,14,45,36]"></wheel>
+               </b-row>
+               <b-row class="color4">Tamed @ 150 w/ 99.85% TE</b-row>
+            </b-col>
+            <b-col sm>
+               <b-row class="color5">Stats</b-row>
+               <b-row>
+                  <b-col cols="2"></b-col>
+                  <b-col>Value</b-col>
+                  <b-col cols="2">Wild</b-col>
+                  <b-col cols="2">Dom</b-col>
+               </b-row>
+               <b-row v-for="i in range(8)" :key="i">
+                  <b-col cols="2">
+                     <b-img :src="store.statImages[i]" fluid-grow class="align-items-center" style="max-height:28px;min-height:22px"></b-img>
+                  </b-col>
+                  <b-col>Stat {{i}}</b-col>
+                  <b-col cols="2" class="bg-primary">Lw{{i}}</b-col>
+                  <b-col cols="2">Ld{{i}}</b-col>
+               </b-row>
+            </b-col>
          </b-row>
       </b-container>
    </b-container>
@@ -32,22 +48,23 @@
 
 <style lang="scss" scoped>
 div { font-size: 105% }
-.color1  { background-color: #B71C1C; min-height: 4.3rem }
-.color2  { background-color: #880E4F; min-height: 4.3rem }
-.color3  { background-color: #4A148C; min-height: 4.3rem }
-.color4  { background-color: #311B92; min-height: 4.3rem }
-.color5  { background-color: #1A237E; min-height: 4.3rem }
-.color6  { background-color: #0D47A1; min-height: 4.3rem }
-.color7  { background-color: #01579B; min-height: 4.3rem }
-.color8  { background-color: #006064; min-height: 4.3rem }
-.color9  { background-color: #004D40; min-height: 4.3rem }
-.color10 { background-color: #1B5E20; min-height: 4.3rem }
+.color1  { background-color: #B71C1C; }
+.color2  { background-color: #880E4F; }
+.color3  { background-color: #4A148C; }
+.color4  { background-color: #311B92; }
+.color5  { background-color: #1A237E; }
+.color6  { background-color: #0D47A1; }
+.color7  { background-color: #01579B; }
+.color8  { background-color: #006064; }
+.color9  { background-color: #004D40; }
+.color10 { background-color: #1B5E20; }
 </style>
 
 
 <script lang="ts">
 import { Component } from 'vue-property-decorator';
 import Common from '../../common';
-@Component({ name: 'LayoutTest' })
+import Wheel from '@/ui/components/wheel.vue';
+@Component({ name: 'LayoutTest', components: { wheel: Wheel } })
 export default class extends Common { }
 </script>
