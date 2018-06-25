@@ -76,6 +76,7 @@ module.exports = {
    css: {
       loaderOptions: {
          sass: {
+            // Make our theme available to all SCSS/SASS
             data: `
             @import "~bootstrap/scss/functions";
             @import "src/assets/scss/asbm-bootstrap.scss";
