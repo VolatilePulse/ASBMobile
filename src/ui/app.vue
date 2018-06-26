@@ -4,7 +4,7 @@
       <b-navbar fixed="top" toggleable="sm" type="dark" variant="primary">
          <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
 
-         <b-navbar-brand href="#" class="py-0 mr-1" style="margin-top:-0.2rem">
+         <b-navbar-brand to="/" class="py-0 mr-1" style="margin-top:-0.2rem">
             <b-img :src="require('@/assets/asbm-inline.svg')" alt="ASB Mobile" style="max-height:1.6rem"></b-img>
          </b-navbar-brand>
 
