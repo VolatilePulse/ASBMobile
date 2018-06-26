@@ -19,10 +19,12 @@ import User from './views/user.vue';
 // These pages are lazily loaded and not included in the main app bundle
 const DevTester = () => import(/* webpackChunkName: "dev-pages" */ './views/dev/tester.vue');
 const DevTest = () => import(/* webpackChunkName: "dev-pages" */ './views/dev/test.vue');
+const DevErrors = () => import(/* webpackChunkName: "dev-pages" */ './views/dev/errors.vue');
 const DevChanges = () => import(/* webpackChunkName: "dev-pages" */ './views/dev/changes.vue');
 const DevConsole = () => import(/* webpackChunkName: "dev-pages" */ './views/dev/console.vue');
 const DevFirestore = () => import(/* webpackChunkName: "dev-pages" */ './views/dev/firestore.vue');
 const DevLayoutTest = () => import(/* webpackChunkName: "dev-pages" */ './views/dev/layout_test.vue');
+const DevBulk = () => import(/* webpackChunkName: "dev-pages" */ './views/dev/bulk.vue');
 
 
 // Annoying that vue-router doesn't provide this type
@@ -106,7 +108,9 @@ const router = new Router({
       { path: '/dev/firestore', component: DevFirestore, beforeEnter: requireFirestore },
       { path: '/dev/layout', component: DevLayoutTest },
       { path: '/dev/changes', component: DevChanges },
+      { path: '/dev/errors', component: DevErrors },
       { path: '/dev/console', component: DevConsole },
+      { path: '/dev/bulk', component: DevBulk, beforeEnter: requireFirestore },
 
       { path: '*', component: NotFound },
    ],
