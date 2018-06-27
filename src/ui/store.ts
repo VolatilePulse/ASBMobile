@@ -1,5 +1,4 @@
 import { SpeciesParameters } from '@/ark/multipliers';
-import { statNames } from '@/consts';
 import { Creature, Server, User } from '@/data/firestore/objects';
 import { LocalSettings } from '@/systems/local_settings';
 import { TestDefinition, TestResult } from '@/testing';
@@ -96,11 +95,15 @@ class Store {
       // Let the rest of the app start first - these aren't urgent
       await Delay(200);
 
-      // Calculate the paths for each of the stat images
-      for (let i = 0; i < statNames.length; i++) {
-         const name = statNames[i];
-         Vue.set(this.statImages, i, require('@/assets/' + name.toLowerCase() + '.svg'));
-      }
+      // Get each of the stat images
+      Vue.set(this.statImages, 0, require('@/assets/health.svg'));
+      Vue.set(this.statImages, 1, require('@/assets/stamina.svg'));
+      Vue.set(this.statImages, 2, require('@/assets/oxygen.svg'));
+      Vue.set(this.statImages, 3, require('@/assets/food.svg'));
+      Vue.set(this.statImages, 4, require('@/assets/weight.svg'));
+      Vue.set(this.statImages, 5, require('@/assets/melee.svg'));
+      Vue.set(this.statImages, 6, require('@/assets/speed.svg'));
+      Vue.set(this.statImages, 7, require('@/assets/torpor.svg'));
    }
 
    async addDismissableMessage(variant: 'danger' | 'warning' | 'info', msg: string, error?: Error) {
