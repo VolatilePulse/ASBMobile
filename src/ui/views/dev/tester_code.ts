@@ -22,7 +22,6 @@ export default class extends UICommon {
    fetching = false;
 
    async mounted() {
-      console.log('tester_code: fetching from cache');
       await testingSystem.fetchFromCache();
    }
 

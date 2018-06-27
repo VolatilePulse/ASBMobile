@@ -1,7 +1,7 @@
 <template>
    <b-card no-body class="m-1 p-0">
       <div class="d-flex flex-row flex-nowrap m-1">
-         <!-- Run/Perf buttons -->
+         <!-- Left side: Run/Perf buttons -->
          <div class="d-flex flex-column mt-0 mr-1">
             <b-img @click.prevent="runTest" :src="require('@/assets/play.svg')" style="height:22px" title="Run this test" pointer="hand"></b-img>
             <div style="margin-top:0.4rem"></div>
@@ -28,10 +28,17 @@
 
          <div class="flex-spacer"></div>
 
-         <!-- Status and link -->
+         <!-- Right side: Status and link -->
          <div class="d-flex flex-column mx-2 mt-1">
-            <b-badge pill>State</b-badge>
+            <b-badge v-if="!result" pill variant="dark" class="blank-pill" title="Not run yet">&nbsp;</b-badge>
+            <b-badge v-else-if="!criteriaCount" pill variant="warning" title="No pass/fail criteria defined">????</b-badge>
+            <b-badge v-else-if="criteriaPasses === 0" pill variant="danger">0 / {{criteriaCount}}</b-badge>
+            <b-badge v-else-if="criteriaPasses < criteriaCount" pill variant="warning">{{criteriaPasses}} / {{criteriaCount}}</b-badge>
+            <b-badge v-else-if="criteriaPasses === criteriaCount" pill variant="success">{{criteriaPasses}} / {{criteriaCount}}</b-badge>
+
             <b-button :to="`/dev/test/${id}`" variant="link" class="m-0 p-1">Details</b-button>
+
+            <div v-if="result" class="small text-center text-warning">{{result.options ? result.options.length : 0}} options</div>
          </div>
       </div>
    </b-card>
@@ -74,6 +81,10 @@ span.wild::before {
       font-size: 95%;
    }
 }
+
+.blank-pill {
+   border: 1px solid $gray-700;
+}
 </style>
 
 
@@ -102,12 +113,18 @@ export default class TestSummary extends Common {
 
    get result() { return theStore.testing.results[this.id]; }
 
-   runTest() {
-      testingSystem.runTestById(this.id);
+   get criteriaCount() {
+      if (!this.test.criteria) return undefined;
+      return this.test.criteria.length;
    }
 
-   runPerfTest() {
-      testingSystem.runPerfTestById(this.id);
+   get criteriaPasses() {
+      if (!this.result || !this.result.criteriaResults) return undefined;
+      return this.result.criteriaResults.reduce((agg, result) => result ? agg + 1 : agg, 0);
    }
+
+   runTest() { testingSystem.runTestById(this.id); }
+
+   runPerfTest() { testingSystem.runPerfTestById(this.id); }
 }
 </script>
