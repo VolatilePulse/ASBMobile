@@ -40,7 +40,7 @@
     "lodash-es": "^4.17.10",
     "math-float32-nextafter": "^1.0.0",
     "register-service-worker": "^1.4.1",
-    "vue": "^2.5.16",
+    "vue": "github:coldino/vue#event-handler-errors-built",
     "vue-class-component": "^6.0.0",
     "vue-property-decorator": "^6.1.0",
     "vue-router": "^3.0.1"
@@ -73,7 +73,7 @@
     "semver": "^5.5.0",
     "ts-jest": "^22.4.6",
     "ts-loader": "^4.4.1",
-    "vue-template-compiler": "^2.5.13",
+    "vue-template-compiler": "^2.5.17-beta.0",
     "webpack-bundle-analyzer": "^2.13.1",
     "yargs": "^11.0.0"
   },

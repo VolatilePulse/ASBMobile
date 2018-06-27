@@ -24,7 +24,7 @@ class ArkDataSystem implements SubSystem {
       catch (ex) {
          console.error(ex);
          theStore.dataLoadError = 'Failed to fetch database: ' + ex;
-         theStore.loadErrors.push('Failed to fetch database: ' + ex);
+         theStore.addDismissableMessage('danger', 'Failed to fetch database', ex);
          return;
       }
 
@@ -35,7 +35,7 @@ class ArkDataSystem implements SubSystem {
       catch (ex) {
          console.error(ex);
          theStore.dataLoadError = 'Failed to parse database: ' + ex;
-         theStore.loadErrors.push('Failed to parse database: ' + ex);
+         theStore.addDismissableMessage('danger', 'Failed to parse database', ex);
          return;
       }
 

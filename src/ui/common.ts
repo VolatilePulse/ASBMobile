@@ -1,51 +1,10 @@
 import { NUM_STATS, statNames } from '@/consts';
-import { handleError } from '@/ui/app_code';
 import theStore from '@/ui/store';
 import { FormatNumber, Range } from '@/utils';
-import { isString } from 'util';
 import { Component, Vue } from 'vue-property-decorator';
 
 /** @fileOverview Vue component that all pages inherit from, containing common data and functionality. */
 
-
-/**
- * Decorator to wrap async functions, catching their exceptions and passing them to `this.globalError`.
- * Note that JSDoc can't handle the example below and there's no workaround.
- * @example
- * @catchAsyncErrors
- * async myMethod() {
- *   // exceptions in here will be caught
- * }
- */
-export function catchAsyncErrors(_target: any, _propertyName: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<any>>) {
-   const method = descriptor.value;
-
-   // tslint:disable-next-line:only-arrow-functions
-   descriptor.value = function () {
-      // Call the method
-      const results = method.apply(this, arguments);
-
-      // Hook a catch handler in if the return was a Promise
-      if (results && Promise.resolve(results) === results) results.catch((ex: any) => {
-         // Gather what info we can about where it happened
-         let targetName = '<unknown>';
-         if (_target && _target.constructor && _target.constructor.name) targetName = _target.constructor.name;
-         const prepend = `[async catch from: ${targetName}.${_propertyName}] `;
-
-         // Add it to the error
-         if (ex && ex.message)
-            ex.message = prepend + ex.message;
-         else if (isString(ex))
-            ex = prepend + ex;
-
-         // Report it to the global error handler
-         handleError(ex);
-      });
-
-      // Return the original method's result
-      return results;
-   };
-}
 
 @Component
 export default class UICommon extends Vue {

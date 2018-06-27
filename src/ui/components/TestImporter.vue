@@ -47,7 +47,7 @@
 
 <script lang="ts">
 import { Component } from 'vue-property-decorator';
-import Common, { catchAsyncErrors } from '@/ui/common';
+import Common from '@/ui/common';
 // import { parseExportedCreature } from '@/ark/import/ark_export';
 // import { ReadDroppedBlob } from '@/utils';
 // import test_data from '@/ark/test_data';
@@ -60,7 +60,6 @@ export default class Testimporter extends Common {
    exportedTestInfo: string = null;
 
    /** Handle changes to the file-drop target */
-   @catchAsyncErrors
    async dropFilesChange(_files: FileList) {
       this.exportedTestInfo = '';
       // const filesArray = Array.from(files);

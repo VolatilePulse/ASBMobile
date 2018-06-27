@@ -3,7 +3,7 @@ import { authSystem } from '@/systems/auth';
 import { firestoreSystem } from '@/systems/firestore';
 import { settingsSystem } from '@/systems/local_settings';
 import { testingSystem } from '@/systems/testing';
-import Common, { catchAsyncErrors } from '@/ui/common';
+import Common from '@/ui/common';
 import Spinner from '@/ui/components/Spinner.vue';
 import theStore from '@/ui/store';
 import 'firebase/auth'; // required to load the Auth part of Firebase
@@ -36,11 +36,8 @@ export default class AppShell extends Common {
    // Adding the store here makes it observable right from the start
    store = theStore;
 
-   @catchAsyncErrors
    async created() {
-      // Register handler for uncaught Promise rejections (i.e. exceptions in async functions)
-      window.addEventListener('unhandledrejection', event => this.catchUnhandledRejection(event));
-      Vue.config.errorHandler = (err, _vm, info) => handleError(err, info ? info : 'Vue Error');
+      Vue.config.warnHandler = (err, _vm, info) => console.error('Vue warnHandler', err, info);
 
       // Initialise the central store
       await theStore.initialise();
@@ -52,6 +49,12 @@ export default class AppShell extends Common {
       catch (err) {
          handleError(err, 'Sub-system initialisation');
       }
+   }
+
+   // Top-level error catcher for anything involved with Vue
+   errorCaptured(err: Error, _vm: Vue, info: string) {
+      handleError(err, info);
+      return false;  // propagate no further
    }
 
    mounted() {
@@ -67,18 +70,9 @@ export default class AppShell extends Common {
    localSettingsChanged() {
       settingsSystem.notifyChanged();
    }
-
-
-   catchUnhandledRejection(event: any) {
-      console.error('Unhandled rejection (promise: ', event.promise, ', reason: ', event.reason, ').');
-      handleError(event.reason, 'Unhandled rejection');
-      console.log(event);
-      if (theStore && theStore.localSettings && theStore.localSettings.devMode)
-         // tslint:disable-next-line:no-debugger
-         debugger;
-   }
 }
 
+// Capture original console functions then replace them
 const oldConsole: { [name: string]: (...args: any[]) => void } = {
    error: console.error,
    warn: console.warn,
@@ -118,22 +112,17 @@ console.log = (...args: any[]) => {
 
 
 export function handleError(err: Error | string, system?: string) {
-   let msg: string;
-   let stack: any;
-
-   const prefix = system ? system + ': ' : '';
-
-   if (err instanceof Error) {
-      msg = prefix + err.message;
-      stack = err.stack;
-   }
-   else {
-      msg = prefix + err;
+   if (!theStore) {
+      console.error(`Uncaught error: ${system}: ${err}`);
+      return;
    }
 
-   console.error('Unhandled error: ' + msg);
-   if (stack) console.error(stack);
+   system = system ? `: "${system}"` : '';
 
-   theStore.loadErrors.push(msg);
-   if (stack) theStore.loadErrors.push(stack);
+   if (err instanceof Error)
+      theStore.addDismissableMessage('danger', 'An unexpected error occurred' + system, err);
+   else
+      theStore.addDismissableMessage('danger', 'An unexpected error occurred' + system + ': ' + err);
+
+   console.error('handleError: ', system, err);
 }

@@ -82,7 +82,7 @@ class AuthSystem implements SubSystem {
          // This set never resolves it's promise if we're offline so we don't wait for it and use .catch to error check
          userDocRef.set(userInfo, { merge: true }).catch(err => {
             console.warn('AuthSystem: Failed to update user object after authentication', err);
-            theStore.loadErrors.push('AuthSystem: Failed to update user object: ' + err);
+            theStore.addDismissableMessage('warning', 'AuthSystem: Failed to update user object after authentication', err);
          });
       }
    }

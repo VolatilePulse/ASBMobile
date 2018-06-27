@@ -6,7 +6,6 @@
       <h3>Errors</h3>
       <b-button @click="raiseSyncException">Normal exception</b-button>
       <b-button @click="raiseAsyncException">Async exception</b-button>
-      <b-button @click="raiseCaughtAsyncException">Async exception (with @catchAsyncErrors)</b-button>
       <h3>Properties</h3>
       <b-checkbox v-model="showBroken">Show broken</b-checkbox>
       <span v-if="showBroken">{{broken}}</span>
@@ -15,13 +14,18 @@
 
 <script lang="ts">
 import { Component } from 'vue-property-decorator';
-import Common, { catchAsyncErrors } from '@/ui/common';
+import Common from '@/ui/common';
+
 @Component
 export default class DevError extends Common {
    showBroken = false;
 
+   created() {
+      throw new Error('This message should be display when the page is show. Something blew up in \'created\'');
+   }
+
    async mounted() {
-      throw new Error('Something blew up');
+      throw new Error('This message should be display when the page is show. Something async blew up in \'mounted\'');
    }
 
    addMessage() {
@@ -38,11 +42,6 @@ export default class DevError extends Common {
 
    async raiseAsyncException() {
       throw new Error('I\'m an async exception');
-   }
-
-   @catchAsyncErrors
-   async raiseCaughtAsyncException() {
-      throw new Error('I\'m an async exception behind @catchAsyncErrors');
    }
 
    get broken() { throw new Error('broken getter'); }

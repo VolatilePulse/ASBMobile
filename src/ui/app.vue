@@ -43,7 +43,7 @@
       <b-container fluid style="margin-top: 4rem" class="p-0">
          <b-progress v-show="!store.loaded.data" :value="100" striped :animated="true" variant="secondary" class="fixed-top" style="height: 0.4rem"></b-progress>
 
-         <!-- TODO: Replace: Temporary indicators for pending changes ready to be saved -->
+         <!-- FIXME: Replace with something relevant to Firestore -->
          <div class="statusbadge" style="margin-top: -0.8rem">
             <b-badge v-if="store.changesPending.settings" variant="info" class="mx-1 my-0">Pending Settings Save</b-badge>
             <b-badge v-if="store.changesPending.servers" variant="secondary" class="mx-1 my-0">Pending Server Save</b-badge>
@@ -52,15 +52,20 @@
          <!-- The update available notice -->
          <b-alert :show="store.updateAvailable" dismissible variant="info">Update available! Reload to activate.</b-alert>
 
-         <!-- Loading errors - TODO: clean this up? -->
-         <b-alert v-for="err in store.loadErrors" :key="err" :show="true" variant="danger">
-            <b>Load error:</b>
-            <pre class="text-dark" style="white-space:pre-wrap;word-wrap:break-word">{{err}}</pre>
-         </b-alert>
-
          <!-- General messages -->
-         <b-alert v-for="({variant,message},idx) in store.messages" :key="idx" :show="true" dismissible :variant="variant" @dismissed="store.removeDismissableMessage(idx)">
+         <b-alert v-for="([idx,{variant,message,error}]) in Object.entries(store.messages)" :key="idx" :show="true" dismissible :variant="variant" @dismissed="store.removeDismissableMessage(idx)">
             <span class="text-dark" style="white-space:normal;word-wrap:break-word">{{message}}</span>
+            <div v-if="error">
+               <div v-if="error.message">
+                  <strong>Error:</strong> {{error.message}}
+               </div>
+               <span v-if="error.stack">
+                  <b-btn v-b-toggle="'msgcollapse'+idx" variant="link" class="px-2">Show details</b-btn>
+                  <b-collapse :id="'msgcollapse'+idx">
+                     <pre class="text-dark" style="white-space:pre-wrap;word-wrap:break-word">{{error.stack}}</pre>
+                  </b-collapse>
+               </span>
+            </div>
          </b-alert>
 
          <!-- The alert on data load failure -->

@@ -11,12 +11,20 @@ import Vue from 'vue';
 
 /** @fileOverview The central data store */
 
+
 interface Testing {
+   servers: { [id: string]: Server };
    tests: { [id: string]: TestDefinition };
    results: { [id: string]: TestResult };
    numPass: number;
    numPartial: number;
    numFail: number;
+}
+
+interface DisplayMessage {
+   variant: string;
+   message: string;
+   error?: Error;
 }
 
 export const EVENT_SERVER_CHANGED = 'server-changed';
@@ -30,7 +38,7 @@ export const EVENT_LOADED_LOCAL_SETTINGS = 'loaded-local-settings';
 class Store {
    events: EventEmitter = new EventEmitter();
 
-   messages: Array<{ variant: string, message: string }> = [];
+   messages: { [index: string]: DisplayMessage } = {};
 
    applicationVersion: string = process.env.VERSION;
    statImages: any[] = [];
@@ -53,7 +61,6 @@ class Store {
    tempCreature: Partial<Creature> = {};
    valuesVersion: string = '-';
 
-   loadErrors: string[] = [];
    console: Array<{ type: string, message: string }> = [];
 
    loaded = {
@@ -68,6 +75,7 @@ class Store {
    userInfo: User = null;
 
    testing: Testing = {
+      servers: {},
       tests: {},
       results: {},
       numPass: null,
@@ -95,13 +103,15 @@ class Store {
       }
    }
 
-   async addDismissableMessage(variant: 'danger' | 'warning' | 'info', msg: string) {
+   async addDismissableMessage(variant: 'danger' | 'warning' | 'info', msg: string, error?: Error) {
       await Vue.nextTick();
-      this.messages.push({ variant, message: msg });
+      // We use timestamped keys on an object rather than an array so keys don't later change confusing Vue's :key VNode caching
+      const index = +new Date() + Math.random();
+      Vue.set(this.messages as any, index, { variant, message: msg, error: error });
    }
 
-   removeDismissableMessage(index: number) {
-      this.messages.splice(index, 1);
+   removeDismissableMessage(index: string) {
+      Vue.delete(this.messages, index);
    }
 
    colorForUser() {
