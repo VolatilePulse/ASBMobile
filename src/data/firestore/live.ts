@@ -47,6 +47,10 @@ export function CreateLiveCollection<T>(path: string): Readonly<LiveCollection<T
 
    unsubscribe = pathRef.onSnapshot(change => {
       cache.isActive = true;
+      console.log('LiveCollection: Active');
+      console.log(`  change._snapshot.fromCache: ${change.metadata.fromCache}`);
+      console.log(`  change.metadata.fromCache: ${change.metadata.fromCache}`);
+      console.log(`  change.size: ${change.size}`);
       updateCollectionFromSnapshotChanges(collection, change.docChanges());
    }, error => cache.error = error.message);
 
@@ -80,7 +84,9 @@ export function CreateLiveDocument<T>(path: string): Readonly<LiveDocument<T>> {
 }
 
 function updateCollectionFromSnapshotChanges(cache: any[], changes: firebase.firestore.DocumentChange[]) {
+   console.log(`updateCollection: with ${changes.length} changes`);
    for (const change of changes) {
+      console.log(`  change.type: ${change.type}, change.doc.metadata.fromCache: ${change.doc.metadata.fromCache}`);
       switch (change.type) {
          case 'added':
             cache.splice(change.newIndex, 0, normalize(change));
