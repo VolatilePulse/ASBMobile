@@ -104,7 +104,7 @@ function generateTests(node: Node) {
             const detailsReport = ` [Lvl ${creature.level} ${creatureMode(creature)} ${creature.species} at ${creatureFile}]`;
             expect(results).to.exist;
             expect(results.exception).to.be.undefined;
-            expect(results.pass, 'no options' + detailsReport).to.be.true;
+            expect(results.result, 'no options' + detailsReport).to.equal('pass');
          });
       });
 

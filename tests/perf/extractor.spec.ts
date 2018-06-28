@@ -43,7 +43,7 @@ describe('performance', () => {
       let result: TestResult;
       result = PerformTest(STRESS_GIGA, server, now);
       expect(result).to.be.a('object');
-      expect(result.pass).to.equal(true);
+      expect(result.result).to.equal('pass');
       expect(result.duration, 'is duration less than 250').to.be.a('number').and.lt(250);
       console.log(`      duration (first run) : ${Number(result.duration).toFixed(2)} ms`);
    }, 1000);

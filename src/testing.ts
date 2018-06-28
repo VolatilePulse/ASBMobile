@@ -47,7 +47,7 @@ export interface TestDefinition {
 
 /** Flexible object to hold test results */
 export interface TestResult {
-   pass?: boolean;
+   result: 'error' | 'pass' | 'fail' | 'partial';
    output?: ExtractorOutput;
    dbg?: any;
    exception?: any;
@@ -62,9 +62,9 @@ export interface TestResult {
  * @example PerformTest(test_data, server, performance.now.bind(performance));
  */
 export function PerformTest(testData: TestDefinition, server: Server, timingFn?: () => number): TestResult {
-   if (!server) return { exception: 'Server definition is required' };
-   if (!testData.creature) return { exception: 'Creature definition is required' };
-   if (!testData.creature.inputSource) return { exception: 'Creature input source is required' };
+   if (!server) return { result: 'error', exception: 'Server definition is required' };
+   if (!testData.creature) return { result: 'error', exception: 'Creature definition is required' };
+   if (!testData.creature.inputSource) return { result: 'error', exception: 'Creature input source is required' };
 
    // Set the properties to prepare for extraction
    const inputs: ExtractorInput = {
@@ -101,12 +101,13 @@ export function PerformTest(testData: TestDefinition, server: Server, timingFn?:
    if (output && output.IB) dbg.IB = output.IB;
 
    const result: TestResult = {
-      pass: false,
+      result: 'fail',
       output: output,
       dbg: dbg,
    };
 
    if (exception) {
+      result.result = 'error';
       result.exception = exception;
    }
    else {
@@ -125,7 +126,7 @@ export function PerformPerfTest(testData: TestDefinition, server: Server, timing
    let t1, t2;
    const cutoffTime = Date.now() + duration;
 
-   if (!server) return { exception: 'Unable to locate server' };
+   if (!server) return { result: 'error', exception: 'Unable to locate server' };
 
 
    try {
@@ -161,14 +162,15 @@ export function PerformPerfTest(testData: TestDefinition, server: Server, timing
       duration = (t2 - t1) / runs;
    }
    catch (_) {
-      return { exception: '-' };
+      return { result: 'error', exception: '-' };
    }
 
-   return { duration, runs };
+   return { result: 'pass', duration, runs };
 }
 
 /**
  * Recursive comparison, allowing for minor float variances.
+ * TODO: Remove me?
  * @param {any} result The test result
  * @param {any} expected The expected result
  */
@@ -197,13 +199,17 @@ export function IsPass(result: any, expected: any): boolean {
 
 
 function evaluateCriteria(test: TestDefinition, result: TestResult) {
-   result.pass = false;
    result.criteriaResults = test.criteria.map(criteria => {
       const evaluator = criteriaEvaluators[criteria.test];
       if (!evaluator) throw new Error(`Unexpected criteria '${criteria.test}'`);
       return evaluator(result.output, criteria);
    });
-   result.pass = result.criteriaResults.reduce((agg, pass) => agg && pass, true);
+   const passes = result.criteriaResults.reduce((agg, pass) => pass ? agg + 1 : agg, 0);
+   const total = test.criteria.length;
+   if (total === 0) result.result = 'partial';
+   else if (passes === 0) result.result = 'fail';
+   else if (passes < total) result.result = 'partial';
+   else result.result = 'pass';
 }
 
 

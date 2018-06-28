@@ -1,5 +1,10 @@
 <template>
    <b-container fluid>
+      <!-- progress bar -->
+      <transition name="fade">
+         <b-progress v-if="showProgress" :value="progress" class="mt-5 fixed-top" striped variant="secondary" style="height: 0.4rem"></b-progress>
+      </transition>
+
       <!-- control buttons -->
       <div class="d-flex align-items-center mb-4 mx-1">
          <b-button-toolbar>
@@ -48,6 +53,10 @@
 div.test {
    flex-grow: 1;
    align-self: stretch;
+}
+
+.progress {
+   background-color: transparent;
 }
 </style>
 

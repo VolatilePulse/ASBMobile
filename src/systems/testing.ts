@@ -15,6 +15,13 @@ class TestingSystem implements SubSystem {
       console.log('TestingSystem: Done');
    }
 
+   public clearAllResults() {
+      theStore.testing.results = {};
+      theStore.testing.numFail = 0;
+      theStore.testing.numPartial = 0;
+      theStore.testing.numPass = 0;
+   }
+
    public runTestById(id: string) {
       const test = theStore.testing.tests[id];
       if (!test) throw new Error('Test not found');
@@ -26,6 +33,8 @@ class TestingSystem implements SubSystem {
 
       const result = PerformTest(test, server, performance.now.bind(performance));
       Vue.set(theStore.testing.results, id, result);
+
+      this.updateResultCounts();
    }
 
    public runPerfTestById(id: string) {
@@ -33,7 +42,10 @@ class TestingSystem implements SubSystem {
       if (!test) throw new Error('Test not found');
 
       console.log('TestingSystem: Running perf test ' + id);
+
       // TODO: Do it...
+
+      this.updateResultCounts();
    }
 
    public async fetchFromCache() {
@@ -42,6 +54,20 @@ class TestingSystem implements SubSystem {
 
    public async fetchFromNetwork() {
       await this.fetchFrom('server');
+   }
+
+   private updateResultCounts() {
+      theStore.testing.numFail = 0;
+      theStore.testing.numPartial = 0;
+      theStore.testing.numPass = 0;
+      Object.keys(theStore.testing.tests).forEach(id => {
+         const result = theStore.testing.results[id];
+         if (!result) return;
+
+         if (result.result === 'pass') theStore.testing.numPass += 1;
+         else if (result.result === 'partial') theStore.testing.numPartial += 1;
+         else theStore.testing.numFail += 1;
+      });
    }
 
    private async fetchFrom(location: 'cache' | 'server') {
