@@ -7,11 +7,11 @@
       <hr/>
       <section>
          <div>
-            ASBMobile was inspired by
+            Ark Breeder was inspired by
             <a href="https://github.com/cadon/ARKStatsExtractor">ARK Smart Breeding</a>.<br/> Many thanks to Cadon for the inspiration and continued support.
          </div>
          <hr/>
-         <div>ASBMobile is possible with help from:</div>
+         <div>Ark Breeder is possible with help from:</div>
          <div class="madewith d-flex flex-wrap justify-content-center align-items-stretch">
             <div>
                <b-img :src="require('@/assets/github.svg')" v-b-tooltip title="GitHub"></b-img>

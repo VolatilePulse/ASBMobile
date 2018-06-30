@@ -113,7 +113,7 @@ function hashString(text) {
 function markdownToHtml(md) {
    return marked(md, {
       // @ts-ignore
-      baseUrl: '/ASBMobile/',
+      baseUrl: '/',
       gfm: true,
       breaks: true,
       smartypants: true,

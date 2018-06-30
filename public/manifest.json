@@ -1,7 +1,7 @@
 {
-   "name": "Ark Smart Breeding for Mobile",
-   "short_name": "ASB Mobile",
-   "description": "A minimalist mobile version of Ark Smart Breeding",
+   "name": "Ark Breeder",
+   "short_name": "Ark Breeder",
+   "description": "A cloud version of Ark Smart Breeding to help manage breeding in Ark: Survival Evolved",
    "icons": [
       {
          "src": "/img/icons/android-chrome-192x192.png",
@@ -16,7 +16,7 @@
    ],
    "scope": "/",
    "theme_color": "#2e54a5",
-   "background_color": "#fafafa",
-   "start_url": "https://dev.arkbreeder.com/",
+   "background_color": "#343a40",
+   "start_url": "/?source=pwa",
    "display": "standalone"
 }

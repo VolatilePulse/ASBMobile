@@ -34,9 +34,10 @@ module.exports = {
 
    pwa: {
       // These values mirror the manifest and are inserted into index.html
-      name: "ASB Mobile",
+      name: "Ark Breeder",
       themeColor: "#2e54a5",
       msTileColor: "#00aba9",
+      backgroundColor: '#343a40',
 
       workboxOptions: {
          // If a new service worker is found, install and take over immediately
