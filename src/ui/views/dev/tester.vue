@@ -38,9 +38,7 @@
 
       <!-- tests list -->
       <div v-if="tests && Object.keys(tests).length > 0" class="d-flex flex-wrap">
-         <template v-for="i in range(5)">
-            <test-summary v-for="([id,test]) in Object.entries(tests)" :key="id+':'+i" :test="test" :id="id" class="test"></test-summary>
-         </template>
+         <test-summary v-for="([id,test]) in Object.entries(tests)" :key="id" :test="test" :id="id" class="test"></test-summary>
       </div>
       <div v-else class="text-center mt-5">
          <p>Nothing here. Hit refresh to fetch tests.</p>

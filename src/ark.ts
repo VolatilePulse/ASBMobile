@@ -51,14 +51,15 @@ export function displayPrecision(index: number) {
  * @param {number} index Number corresponding with the index of a stat
  * @returns {number} The rounded, converted value
  */
-export function formatDisplayValue(value: number, index: number): number {
+export function formatDisplayValue(value: number, index: number, places?: number): number {
    let returnValue = value;
 
    if (index === DAMAGE || index === SPEED || index === PRE_TE || index === PRE_IB)
       returnValue *= 100;
 
    // We want to convert it to Display in ASBM
-   returnValue = Utils.RoundTo(returnValue, displayPrecision(index));
+   if (places == null) places = displayPrecision(index);
+   returnValue = Utils.RoundTo(returnValue, places);
 
    return returnValue;
 }

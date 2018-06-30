@@ -19,6 +19,6 @@ export function inspect(obj: any) {
 // Debug tool to JSON.stringify (cleaned up)
 Vue.filter('inspect', inspect);
 
-Vue.filter('display', (value: number, statIndex: number = 1) => formatDisplayValue(value, statIndex));
+Vue.filter('display', (value: number, statIndex: number = 1, places?: number) => formatDisplayValue(value, statIndex, places));
 
 Vue.filter('pct', (value: number) => formatDisplayValue(value, -2));

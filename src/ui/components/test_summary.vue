@@ -13,7 +13,7 @@
             <div class="header">
                <span class="text-muted">L </span>
                <span class="level">{{test.creature.level}} </span>
-               <span class="mode" :class="modeClass"></span>
+               <span class="mode" :class="modeClass">{{modeClass}}</span>
                <span class="species"> {{test.creature.species}}</span>
                <span class="imprint" v-if="test.creature.imprintingBonus" v-b-tooltip.focus.hover title="Imprint"> {{test.creature.imprintingBonus | pct}}%</span>
             </div>
@@ -46,35 +46,24 @@
 
 
 <style lang="scss" scoped>
-span.bred {
-  color: rgb(201, 94, 237);
-}
-span.tamed {
-  color: aqua;
-}
-span.wild {
-  color: rgb(16, 204, 72);
-}
-
-span.bred::before {
-   content: 'bred';
-}
-span.tamed::before {
-   content: 'tamed';
-}
-
-span.wild::before {
-   content: 'wild';
-}
-
 .test-info {
    .header {
       margin-top: 0;
       font-size: 92%;
-      font-weight: bold;
+      font-weight: 600;
 
-      .species { color:#DCA838 };
+      .species { color:#DCA838 }
       .imprint { color:#EE536D }
+
+      span.bred {
+         color: rgb(201, 94, 237);
+      }
+      span.tamed {
+         color: aqua;
+      }
+      span.wild {
+         color: rgb(16, 204, 72);
+      }
    }
 
    .server {

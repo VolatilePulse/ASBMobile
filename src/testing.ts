@@ -1,11 +1,10 @@
 import { inputValueToInterval } from '@/ark';
-import { Stat } from '@/ark/types';
 import { NUM_STATS, PRE_IB } from '@/consts';
 import { Server } from '@/data/firestore/objects';
 import { CreatureDataSource, ServerId } from '@/data/firestore/types';
 import { CompareFloat, Range } from '@/utils';
 import { isArray, isFunction, isNumber, isObject, isString } from 'util';
-import { Extractor, ExtractorInput, ExtractorOutput, TEProps } from './ark/extractor';
+import { Extractor, ExtractorInput, ExtractorOutput } from './ark/extractor';
 
 
 export interface CreatureTestData {
@@ -87,7 +86,7 @@ export function PerformTest(testData: TestDefinition, server: Server, timingFn?:
 
    let t1: number, t2: number;
    let exception: Error;
-   let output: { stats: Stat[][], options: Stat[][], TEs: Map<Stat, TEProps>, IB: Interval };
+   let output: ExtractorOutput;
 
    try {
       if (timingFn) t1 = timingFn();

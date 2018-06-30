@@ -1,7 +1,7 @@
 import * as Ark from '@/ark';
 import { StatMultipliers } from '@/ark/multipliers';
 import { Stat } from '@/ark/types';
-import { FOOD, HEALTH, SPEED, TORPOR } from '@/consts';
+import { FOOD, HEALTH, NUM_STATS, SPEED, TORPOR } from '@/consts';
 import { Server } from '@/data/firestore/objects';
 import { intervalAverage, intFromRange, intFromRangeReverse } from '@/number_utils';
 import * as Utils from '@/utils';
@@ -22,6 +22,8 @@ export interface ExtractorInput {
 export interface ExtractorOutput {
    stats: Stat[][];
    options: Stat[][];
+   optionWLs: number[];
+   optionTEs: Interval[];
    TEs: Map<Stat, TEProps>;
    IB: Interval;
 }
@@ -305,14 +307,38 @@ export class Extractor {
       for (let stat = HEALTH; stat <= SPEED; stat++) {
          if (this.stats[stat].length === 0) {
             if (dbg) dbg.failReason = 'No options found for stat ' + stat;
-            return { stats: this.stats, options: this.options, TEs: this.statTEMap, IB: this.rangeVars.IB };
+            return { stats: this.stats, options: this.options, TEs: this.statTEMap, IB: this.rangeVars.IB, optionWLs: [], optionTEs: [] };
          }
       }
 
       // Sort the options based on most likely (deviation from the expected average)
       this.options.sort((opt1, opt2) => this.optionDeviation(opt1, opt2));
 
-      return { stats: this.stats, options: this.options, TEs: this.statTEMap, IB: this.rangeVars.IB };
+      const { optionWLs, optionTEs } = this.findOptionTEMaps();
+
+      return { stats: this.stats, options: this.options, TEs: this.statTEMap, IB: this.rangeVars.IB, optionWLs, optionTEs };
+   }
+
+   /** Find the WL and TE associated with each option, if any */
+   findOptionTEMaps() {
+      const optionWLs: number[] = [];
+      const optionTEs: Interval[] = [];
+
+      for (const optionIndex in this.options) {
+         for (const statIndex in Utils.Range(NUM_STATS)) {
+            const stat = this.options[optionIndex][statIndex];
+            const foundTE = this.statTEMap.get(stat);
+
+            // TODO: Consider averaging found TEs rather than simply using the first found
+            if (foundTE) {
+               optionWLs[optionIndex] = foundTE.wildLevel;
+               optionTEs[optionIndex] = foundTE.TE;
+               break;
+            }
+         }
+      }
+
+      return { optionWLs, optionTEs };
    }
 
    /**
