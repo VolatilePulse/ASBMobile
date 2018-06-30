@@ -1,6 +1,7 @@
 import { SpeciesParameters } from '@/ark/multipliers';
 import { Creature, Server, User } from '@/data/firestore/objects';
 import { LocalSettings } from '@/systems/local_settings';
+import { ScreenState } from '@/systems/resize';
 import { TestDefinition, TestResult } from '@/testing';
 import { Delay } from '@/utils';
 import ColorHash from 'color-hash';
@@ -28,10 +29,13 @@ interface DisplayMessage {
 
 export const EVENT_SERVER_CHANGED = 'server-changed';
 export const EVENT_LIBRARY_CHANGED = 'library-changed';
+
 export const EVENT_LOADED_DATA = 'loaded-data';
 export const EVENT_LOADED_AUTH = 'loaded-auth';
 export const EVENT_LOADED_FIRESTORE = 'loaded-firestore';
 export const EVENT_LOADED_LOCAL_SETTINGS = 'loaded-local-settings';
+
+export const EVENT_SCREEN_RESIZED = 'screen-changed';
 
 // !!! Everything public in this class should be initialised to a non-undefined value such as null to enable Vue observation !!!
 class Store {
@@ -80,6 +84,13 @@ class Store {
       numPass: null,
       numPartial: null,
       numFail: null,
+   };
+
+   screen: ScreenState = {
+      width: NaN,
+      height: NaN,
+      breakpoint: null,
+      size: NaN,
    };
 
    private initialised: boolean;
