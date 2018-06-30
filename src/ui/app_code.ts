@@ -37,7 +37,7 @@ export default class AppShell extends Common {
    store = theStore;
 
    async created() {
-      Vue.config.warnHandler = (err, _vm, info) => console.error('Vue warnHandler', err, info);
+      Vue.config.warnHandler = (err, _vm, info) => handleError(err, info);
 
       // Initialise the central store
       await theStore.initialise();
