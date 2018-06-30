@@ -51,6 +51,18 @@ export default class AppShell extends Common {
       catch (err) {
          handleError(err, 'Sub-system initialisation');
       }
+
+      // Debug event handlers
+      window.addEventListener('online', () => console.log('EVT: online'), false);
+      window.addEventListener('offline', () => console.log('EVT: offline'), false);
+      window.addEventListener('pageshow', () => console.log('EVT: pageshow'), false);
+      window.addEventListener('pagehide', () => console.log('EVT: pagehide'), false);
+      window.addEventListener('popstate', () => console.log('EVT: popstate'), false);
+      window.addEventListener('unload', () => console.log('EVT: unload'), false);
+
+      document.addEventListener('close', () => console.log('EVT: close'), false);
+      document.addEventListener('visibilitychange', () => console.log(`EVT: visibilitychange: ${document.visibilityState}`), false);
+      document.addEventListener('fullscreenchange', () => console.log(`EVT: fullscreenchange: ${document.fullscreenEnabled}`), false);
    }
 
    // Top-level error catcher for anything involved with Vue
