@@ -13,7 +13,6 @@ import NotFound from './views/not_found.vue';
 import Server from './views/server.vue';
 import Servers from './views/servers.vue';
 import Settings from './views/settings.vue';
-import User from './views/user.vue';
 
 
 // These pages are lazily loaded and not included in the main app bundle
@@ -25,6 +24,8 @@ const DevConsole = () => import(/* webpackChunkName: "dev-pages" */ './views/dev
 const DevFirestore = () => import(/* webpackChunkName: "dev-pages" */ './views/dev/firestore.vue');
 const DevLayoutTest = () => import(/* webpackChunkName: "dev-pages" */ './views/dev/layout_test.vue');
 const DevBulk = () => import(/* webpackChunkName: "dev-pages" */ './views/dev/bulk.vue');
+
+const User = () => import(/* webpackChunkName: "auth-pages" */ './views/user.vue');
 
 
 // Annoying that vue-router doesn't provide this type

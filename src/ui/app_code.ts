@@ -68,15 +68,6 @@ export default class AppShell extends Common {
       return false;  // propagate no further
    }
 
-   mounted() {
-      // Delay loading of the firebaseui css
-      const cssLink = document.createElement('link');
-      cssLink.rel = 'stylesheet';
-      cssLink.href = 'https://cdn.firebase.com/libs/firebaseui/3.0.0/firebaseui.css';
-      cssLink.type = 'text/css';
-      document.head.appendChild(cssLink);
-   }
-
    @Watch('store.localSettings', { deep: true })
    localSettingsChanged() {
       settingsSystem.notifyChanged();
