@@ -2,7 +2,6 @@
 
 import 'bootstrap-vue/dist/bootstrap-vue.min.css';
 import '@/assets/scss/app.scss';
-import './registerServiceWorker';
 
 
 // Vue and its plugins

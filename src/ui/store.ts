@@ -1,6 +1,7 @@
 import { SpeciesParameters } from '@/ark/multipliers';
 import { Creature, Server, User } from '@/data/firestore/objects';
 import { LocalSettings } from '@/systems/local_settings';
+import { NetworkState } from '@/systems/offline';
 import { ScreenState } from '@/systems/resize';
 import { TestDefinition, TestResult } from '@/testing';
 import { Delay } from '@/utils';
@@ -91,6 +92,12 @@ class Store {
       height: NaN,
       breakpoint: null,
       size: NaN,
+   };
+
+   network: NetworkState = {
+      isOnline: null,
+      isAppCached: null,
+      isUpdateAvailable: false,
    };
 
    private initialised: boolean;

@@ -4,7 +4,10 @@ import firebase from 'firebase/app';
 import { SubSystem } from './common';
 
 
-/** Subsystem that handles initialising Firestore */
+/**
+ * Subsystem that handles initialising Firestore.
+ * TODO: Consider how to handle pagehide and Firestore subscription cancelling
+ */
 class FirestoreSystem implements SubSystem {
    async initialise() {
       console.log('FirestoreSystem: Setting settings');

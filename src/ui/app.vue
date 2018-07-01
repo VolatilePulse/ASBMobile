@@ -50,7 +50,7 @@
          </div>
 
          <!-- The update available notice -->
-         <b-alert :show="store.updateAvailable" dismissible variant="info">Update available! Reload to activate.</b-alert>
+         <b-alert :show="store.network.isUpdateAvailable" dismissible variant="info">Update available! Reload to activate.</b-alert>
 
          <!-- General messages -->
          <b-alert v-for="([idx,{variant,message,error}]) in Object.entries(store.messages)" :key="idx" :show="true" dismissible :variant="variant" @dismissed="store.removeDismissableMessage(idx)">

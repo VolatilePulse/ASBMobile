@@ -121,7 +121,7 @@ module.exports = {
             'firebase/app': 'var firebase',
             'firebase/auth': 'var firebase.auth',
             'firebase/firestore': 'var firebase.firestore',
-            'firebaseui': 'var firebaseui',
+            // 'firebaseui': 'var firebaseui',
          },
       ],
 

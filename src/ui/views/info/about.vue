@@ -3,6 +3,9 @@
       <section class="my-3">
          <div>Application version: {{store.applicationVersion || 'n/a'}}</div>
          <div>Database version: {{store.loaded.data ? store.valuesVersion : "n/a"}}</div>
+         <div>
+            <b-button @click="checkForUpdates" variant="link" class="p-0">Check for updates now</b-button>
+         </div>
       </section>
       <hr/>
       <section>
@@ -77,6 +80,11 @@
 <script lang="ts">
 import { Component } from 'vue-property-decorator';
 import Behaviour from '../../common';
+import { offlineSystem } from '@/systems/offline';
 @Component({ name: 'About' })
-export default class extends Behaviour { }
+export default class extends Behaviour {
+   checkForUpdates() {
+      offlineSystem.checkForUpdates();
+   }
+}
 </script>
