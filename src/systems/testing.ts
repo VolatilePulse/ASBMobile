@@ -1,10 +1,19 @@
 import { Server } from '@/data/firestore/objects';
 import { eventWaiter, SubSystem } from '@/systems/common';
-import { PerformTest, TestDefinition } from '@/testing';
+import { PerformTest, TestDefinition, TestResult } from '@/testing';
 import theStore, { EVENT_LOADED_FIRESTORE } from '@/ui/store';
 import firebase from 'firebase/app';
 import Vue from 'vue';
 
+
+export interface TestingState {
+   servers: { [id: string]: Server };
+   tests: { [id: string]: TestDefinition };
+   results: { [id: string]: TestResult };
+   numPass: number;
+   numPartial: number;
+   numFail: number;
+}
 
 class TestingSystem implements SubSystem {
    ready = false;

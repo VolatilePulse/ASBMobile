@@ -41,7 +41,6 @@ class ArkDataSystem implements SubSystem {
 
       console.log('ArkDataSystem: Marking loaded');
       theStore.loaded.data = true;
-      theStore.dataLoaded = true;
       theStore.events.emit(EVENT_LOADED_DATA);
    }
 }
