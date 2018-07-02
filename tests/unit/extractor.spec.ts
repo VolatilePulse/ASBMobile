@@ -37,7 +37,7 @@ describe('values.json', () => {
 describe('extractor', () => {
    it('should extract L1 Rex in official', () => {
       const result = PerformTest(L1_REX, theStore.officialServer);
-      expect(result).to.have.property('pass').which.equals(true);
+      expect(result).to.have.property('result').which.equals('pass');
       expect(result.output.options).to.not.be.empty;
    });
 });
