@@ -12,10 +12,10 @@ export interface Stat {
 
 export type CreatureDataSource = 'asb_xml' | 'asbm_user_input' | 'asb_user_input' | 'ark_export' | 'ark_tools_export';
 
-export interface ServerStatParams {
+export interface ServerStatParams extends Object {
    [param_index: number]: number;
 }
 
-export interface Multipliers {
+export interface Multipliers extends Object {
    [stat_index: number]: ServerStatParams;
 }

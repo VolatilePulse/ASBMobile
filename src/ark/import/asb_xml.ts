@@ -14,11 +14,23 @@ export function parseASBXml(text: string) {
    const parser = new LowLevelParser();
    parser.acceptData(text);
    const internalData = parser.finish();
-   console.log(internalData);
 
    // State 2 - convert to our data types
+   const server = convertServer(internalData);
+   const creatures = internalData.creatures.map(convertCreature);
 
    // Stage 3 - construct the output
+   return { server, creatures };
+}
+
+/** Export for testing only. Create a server object from the exported server info. */
+export function convertServer(input: any) {
+   throw new Error('Not Implemented');
+}
+
+/** Export for testing only. Create a creature object from the exported creature info. */
+export function convertCreature(input: any) {
+   throw new Error('Not Implemented');
 }
 
 interface StackState {
