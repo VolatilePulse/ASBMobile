@@ -95,11 +95,7 @@
   "jest": {
     "moduleFileExtensions": [
       "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json",
-      "vue"
+      "js"
     ],
     "transform": {
       "^.+\\.vue$": "vue-jest",
@@ -112,9 +108,7 @@
     "snapshotSerializers": [
       "jest-serializer-vue"
     ],
-    "testMatch": [
-      "<rootDir>/(tests/**/*.spec.(ts|tsx|js)|**/__tests__/*.(ts|tsx|js))"
-    ]
+    "testMatch": []
   },
   "browserslist": [
     "> 7%",
