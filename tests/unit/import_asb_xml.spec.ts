@@ -1,12 +1,25 @@
-import { LowLevelParser } from '@/ark/import/asb_xml';
+import { ASBXmlOutput, LowLevelParser } from '@/ark/import/asb_xml';
 import { expect } from 'chai';
 import { readFileSync } from 'fs';
+import * as util from 'util';
 import { decodeBuffer } from '../common/decoding';
 
 // tslint:disable:no-unused-expression
 
 
-describe('low-level ASB library importer', () => {
+function nestedArrayToObjectValues(arr: any) {
+   if (!util.isObject(arr)) return arr;
+   if (!Array.isArray(arr)) return arr;
+
+   const result: any = {};
+   Object.entries(arr).forEach(([key, value]) => {
+      if (value != null) result[key] = nestedArrayToObjectValues(value);
+   });
+   return result;
+}
+
+
+describe.skip('low-level ASB library importer', () => {
    let result: any;
 
    beforeAll(() => {
@@ -66,4 +79,61 @@ describe('low-level ASB library importer', () => {
       expect(result.CreatureCollection.creatures[0].mutationCounter).to.be.a('number');
    });
 
+});
+
+describe('xml output validation', () => {
+   let result: any;
+   const output: ASBXmlOutput = { creatures: [], server: {} as any, settings: {} };
+
+   beforeAll(() => {
+      const buffer = readFileSync('tests/unit/test-asb-library.xml');
+      const content = decodeBuffer(buffer);
+      const parser = new LowLevelParser();
+      parser.acceptData(content);
+      result = parser.finish();
+
+      // State 2 - convert to our data types
+      // Store Creature Data
+      output.creatures = result.CreatureCollection.creatures;
+
+      for (const creature of output.creatures) {
+         creature.inputSource = 'asb_xml';
+      }
+
+      // Set Server Data
+      output.server.name = '' as ASBXmlOutput['server']['name'];
+      output.server.IBM = result.CreatureCollection.imprintingMultiplier as ASBXmlOutput['server']['IBM'] || 1;
+      output.server.multipliers = nestedArrayToObjectValues(result.CreatureCollection.multipliers) as ASBXmlOutput['server']['multipliers'] || [];
+      output.server.singlePlayer = result.CreatureCollection.singlePlayer as ASBXmlOutput['server']['singlePlayer'] || false;
+
+      // Store Relevant Settings
+      // output.settings;
+
+      console.log();
+   });
+
+   describe('Creatures:', () => {
+      it('has data', () => {
+         expect(output.creatures).to.be.an('array').and.is.not.empty;
+         // expect(creature).to.have.property('guid').which.is.a('string').and.is.not.empty;
+      });
+   });
+
+   describe('Server:', () => {
+      it('correct format', () => {
+         expect(output.server).to.have.property('name').which.is.a('string');
+         expect(output.server).to.have.property('IBM').which.is.a('number');
+         expect(output.server).to.have.property('multipliers').which.is.an('object');
+         expect(output.server).to.have.property('singlePlayer').which.is.a('boolean');
+      });
+      it.skip('has a name', () => {
+         expect(output.server.name).does.not.equal('');
+      });
+   });
+
+   describe('Settings:', () => {
+      it('has data', () => {
+         expect(true);
+      });
+   });
 });
