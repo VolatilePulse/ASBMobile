@@ -3,7 +3,7 @@
 import Common from '@/ui/common';
 import theStore from '@/ui/store';
 import firebase from 'firebase/app';
-import * as firebaseui from 'firebaseui';
+import firebaseui from 'firebaseui';
 import { Component, Vue } from 'vue-property-decorator';
 
 
@@ -98,8 +98,8 @@ export default class UserTab extends Common {
    }
 }
 
-function makeAuthConfig(_page: UserTab): firebaseui.IConfig {
-   const callbacks: firebaseui.ICallbacks = {
+function makeAuthConfig(_page: UserTab): firebaseui.auth.Config {
+   const callbacks: firebaseui.auth.Config['callbacks'] = {
       signInSuccessWithAuthResult(authResult, _redirectUrl) {
          console.log('fireauth ui callback:signInSuccessWithAuthResult:');
          console.log('Auth result:', authResult);
@@ -118,7 +118,7 @@ function makeAuthConfig(_page: UserTab): firebaseui.IConfig {
 }
 
 
-const staticAuthConfig: firebaseui.IConfig = {
+const staticAuthConfig: firebaseui.auth.Config = {
    signInOptions: [
       // List of OAuth providers supported  (must be registered as an app for each provider first)
       firebase.auth.GoogleAuthProvider.PROVIDER_ID,
