@@ -1,6 +1,8 @@
 import { Creature, Server } from '@/data/firestore/objects';
+import { FilledArray } from '@/utils';
 import EasySax from 'easysax';
 import set from 'lodash/set';
+import * as util from 'util';
 
 
 export interface ASBXmlOutput {
@@ -17,20 +19,31 @@ export function parseASBXml(text: string) {
 
    // State 2 - convert to our data types
    const server = convertServer(internalData);
-   const creatures = internalData.creatures.map(convertCreature);
+   const creatures = internalData.CreatureCollection.creatures.map(convertCreature);
 
    // Stage 3 - construct the output
    return { server, creatures };
 }
 
 /** Export for testing only. Create a server object from the exported server info. */
-export function convertServer(input: any) {
-   throw new Error('Not Implemented');
+export function convertServer(input: any): Server {
+   const server: Partial<Server> = {};
+
+   server.name = '';
+   server.IBM = input.CreatureCollection.imprintingMultiplier;
+   server.multipliers = multiplierArrayToObjectValues(input.CreatureCollection.multipliers);
+   server.singlePlayer = input.CreatureCollection.singlePlayer;
+
+   return server as Server;
 }
 
 /** Export for testing only. Create a creature object from the exported creature info. */
-export function convertCreature(input: any) {
-   throw new Error('Not Implemented');
+export function convertCreature(input: any): Creature {
+   const creature: Creature = input;
+
+   creature.inputSource = 'asb_xml';
+
+   return creature;
 }
 
 interface StackState {
@@ -122,6 +135,29 @@ export class LowLevelParser {
    }
 }
 
+
+export function multiplierArrayToObjectValues(arr: number[][]): Server['multipliers'] {
+   if (!Array.isArray(arr)) return arr;
+
+   const tempArray = FilledArray(8, () => FilledArray(4, () => undefined));
+
+   for (let i = 0; arr !== [] && i < 8; i++)
+      for (let j = 0; arr[i] !== [] && j < 4; j++)
+         tempArray[i][j] = arr[i][j];
+
+   return nestedArrayToObjectValues(tempArray);
+}
+
+export function nestedArrayToObjectValues(arr: any) {
+   if (!util.isObject(arr)) return arr;
+   if (!Array.isArray(arr)) return arr;
+
+   const result: any = {};
+   Object.entries(arr).forEach(([key, value]) => {
+      if (value != null) result[key] = nestedArrayToObjectValues(value);
+   });
+   return result;
+}
 
 function parseBoolean(v: string) {
    return v.toLowerCase() === 'true';
