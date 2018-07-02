@@ -1,4 +1,5 @@
 import { Creature, Server } from '@/data/firestore/objects';
+import { Multipliers } from '@/data/firestore/types';
 import { FilledArray } from '@/utils';
 import EasySax from 'easysax';
 import set from 'lodash/set';
@@ -32,7 +33,7 @@ export function convertServer(input: any): Server {
    server.name = '';
    server.IBM = input.CreatureCollection.imprintingMultiplier;
    server.multipliers = multiplierArrayToObjectValues(input.CreatureCollection.multipliers);
-   server.singlePlayer = input.CreatureCollection.singlePlayer;
+   server.singlePlayer = input.CreatureCollection.singlePlayerSettings;
 
    return server as Server;
 }
@@ -136,7 +137,7 @@ export class LowLevelParser {
 }
 
 
-export function multiplierArrayToObjectValues(arr: number[][]): Server['multipliers'] {
+export function multiplierArrayToObjectValues(arr: number[][]): Multipliers {
    if (!Array.isArray(arr)) return arr;
 
    const tempArray = FilledArray(8, () => FilledArray(4, () => undefined));

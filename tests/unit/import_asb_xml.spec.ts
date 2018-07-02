@@ -1,4 +1,4 @@
-import { ASBXmlOutput, LowLevelParser } from '@/ark/import/asb_xml';
+import { convertServer, LowLevelParser, multiplierArrayToObjectValues } from '@/ark/import/asb_xml';
 import { expect } from 'chai';
 import { readFileSync } from 'fs';
 import * as util from 'util';
@@ -19,7 +19,7 @@ function nestedArrayToObjectValues(arr: any) {
 }
 
 
-describe.skip('low-level ASB library importer', () => {
+describe('low-level ASB library importer', () => {
    let result: any;
 
    beforeAll(() => {
@@ -81,59 +81,62 @@ describe.skip('low-level ASB library importer', () => {
 
 });
 
-describe('xml output validation', () => {
+describe('library output conversion', () => {
    let result: any;
-   const output: ASBXmlOutput = { creatures: [], server: {} as any, settings: {} };
 
    beforeAll(() => {
+      // Read the test library
       const buffer = readFileSync('tests/unit/test-asb-library.xml');
       const content = decodeBuffer(buffer);
       const parser = new LowLevelParser();
       parser.acceptData(content);
       result = parser.finish();
-
-      // State 2 - convert to our data types
-      // Store Creature Data
-      output.creatures = result.CreatureCollection.creatures;
-
-      for (const creature of output.creatures) {
-         creature.inputSource = 'asb_xml';
-      }
-
-      // Set Server Data
-      output.server.name = '' as ASBXmlOutput['server']['name'];
-      output.server.IBM = result.CreatureCollection.imprintingMultiplier as ASBXmlOutput['server']['IBM'] || 1;
-      output.server.multipliers = nestedArrayToObjectValues(result.CreatureCollection.multipliers) as ASBXmlOutput['server']['multipliers'] || [];
-      output.server.singlePlayer = result.CreatureCollection.singlePlayer as ASBXmlOutput['server']['singlePlayer'] || false;
-
-      // Store Relevant Settings
-      // output.settings;
-
-      console.log();
    });
 
-   describe('Creatures:', () => {
-      it('has data', () => {
-         expect(output.creatures).to.be.an('array').and.is.not.empty;
-         // expect(creature).to.have.property('guid').which.is.a('string').and.is.not.empty;
+   describe('the server', () => {
+      it('should have the correct contents', () => {
+         const server = convertServer(result);
+
+         expect(server).to.have.property('name').which.is.a('string');
+         expect(server).to.have.property('IBM').which.is.a('number').and.equals(1.5);
+         expect(server).to.have.property('singlePlayer').which.is.a('boolean').and.is.true;
+
+         expect(server).to.have.property('multipliers').which.is.an('object');
+         expect(server.multipliers).to.have.property('0').which.is.an('object');
       });
    });
 
-   describe('Server:', () => {
-      it('correct format', () => {
-         expect(output.server).to.have.property('name').which.is.a('string');
-         expect(output.server).to.have.property('IBM').which.is.a('number');
-         expect(output.server).to.have.property('multipliers').which.is.an('object');
-         expect(output.server).to.have.property('singlePlayer').which.is.a('boolean');
-      });
-      it.skip('has a name', () => {
-         expect(output.server.name).does.not.equal('');
-      });
+});
+
+
+// tslint:disable-next-line:no-sparse-arrays
+const multsColdinoSP_Input = [, [2, , 2], , , [10, , 10], [0.2, , 0.22], [3, , 3]];
+const multsColdinoSP_Output = { 0: {}, 1: { 0: 2, 2: 2 }, 2: {}, 3: {}, 4: { 0: 10, 2: 10 }, 5: { 0: 0.2, 2: 0.22 }, 6: { 0: 3, 2: 3 }, 7: {} };
+
+describe.skip('multiplierArrayToObjectValues', () => {
+   it('should handle empty inputs', () => {
+      const output = multiplierArrayToObjectValues([]);
+      expect(output).to.be.an('object').and.not.an('array');
    });
 
-   describe('Settings:', () => {
-      it('has data', () => {
-         expect(true);
-      });
+   it('should always produce 8 outputs', () => {
+      checkForAllEightKeys(multiplierArrayToObjectValues([]));
+      checkForAllEightKeys(multiplierArrayToObjectValues([[]]));
+      checkForAllEightKeys(multiplierArrayToObjectValues([[], []]));
+      checkForAllEightKeys(multiplierArrayToObjectValues(
+         [[, 1], [], undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, [1]]));
+   });
+
+   it('should produce the right output for Coldino SP mults', () => {
+      const output = multiplierArrayToObjectValues(multsColdinoSP_Input);
+
+      checkForAllEightKeys(output);
+      expect(output).to.deep.eq(multsColdinoSP_Output);
    });
 });
+
+function checkForAllEightKeys(object: any) {
+   for (let i = 0; i < 8; i++) {
+      expect(object).to.have.property(i);
+   }
+}
