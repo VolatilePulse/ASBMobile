@@ -1,7 +1,7 @@
 import { SubSystem } from '@/systems/common';
 import theStore, { EVENT_LOADED_LOCAL_SETTINGS } from '@/ui/store';
 import storage from 'local-storage-fallback';
-import merge from 'lodash/merge';
+import _ from 'lodash';
 
 
 const KEY_SETTINGS = 'settings';
@@ -18,7 +18,7 @@ class SettingsSystem implements SubSystem {
          const asString = storage.getItem(KEY_SETTINGS);
          if (asString) {
             const loadedSettings = JSON.parse(asString) as LocalSettings;
-            theStore.localSettings = merge({}, loadedSettings);
+            theStore.localSettings = _.merge({}, loadedSettings);
             console.log('SettingsSystem: Settings loaded');
          }
          else {

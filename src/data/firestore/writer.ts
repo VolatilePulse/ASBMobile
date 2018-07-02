@@ -1,5 +1,5 @@
 import firebase from 'firebase/app';
-import debounce from 'lodash/debounce';
+import _ from 'lodash';
 
 
 const DELAY_UPDATE_MIN = 5000;
@@ -33,7 +33,7 @@ export function CreateDocumentWriter<T>(path: string): Readonly<DocumentWriter<T
       });
    }
 
-   const changeDebounce = debounce(saveData, DELAY_UPDATE_MIN, { maxWait: DELAY_UPDATE_MAX });
+   const changeDebounce = _.debounce(saveData, DELAY_UPDATE_MIN, { maxWait: DELAY_UPDATE_MAX });
 
    cache = {
       data: null,

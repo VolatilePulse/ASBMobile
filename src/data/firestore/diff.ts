@@ -1,4 +1,4 @@
-import isEqual from 'lodash/isEqual';
+import _ from 'lodash';
 import Vue from 'vue';
 
 
@@ -171,7 +171,7 @@ export function mergeDiffs(target: any, ourChanges: Changes, theirChanges: Chang
    // scan our changes, saving as either conflicting or safe
    const safeChanges: Changes = {};
    Object.entries(ourChanges).forEach(([ourPath, ourChange]) => {
-      const overlap = Object.keys(theirChanges).some(theirPath => ourPath === theirPath && !isEqual(theirChanges[theirPath], ourChange));
+      const overlap = Object.keys(theirChanges).some(theirPath => ourPath === theirPath && !_.isEqual(theirChanges[theirPath], ourChange));
       if (overlap) {
          result.conflicts[ourPath] = { operation: 'merge', ourChange, theirChange: theirChanges[ourPath] };
       }

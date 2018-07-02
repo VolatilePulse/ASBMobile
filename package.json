@@ -59,6 +59,7 @@
     "@vue/cli-service": "^3.0.0-beta.15",
     "@vue/test-utils": "^1.0.0-beta.16",
     "babel-core": "^7.0.0-0",
+    "babel-plugin-lodash": "^3.3.4",
     "chai": "^4.1.2",
     "chalk": "^2.4.1",
     "glob": "^7.1.2",
@@ -81,6 +82,9 @@
   "babel": {
     "presets": [
       "@vue/app"
+    ],
+    "plugins": [
+      "lodash"
     ]
   },
   "postcss": {

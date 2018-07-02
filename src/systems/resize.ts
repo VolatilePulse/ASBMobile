@@ -1,6 +1,6 @@
 import { SubSystem } from '@/systems/common';
 import theStore, { EVENT_SCREEN_RESIZED } from '@/ui/store';
-import debounce from 'lodash/debounce';
+import _ from 'lodash';
 
 
 const BOUNDARIES: Array<[string, number]> = [
@@ -27,7 +27,7 @@ class ResizeSystem implements SubSystem {
    public async initialise() {
       console.log('ResizeSystem: Started');
 
-      this.resizeDebounce = debounce(this.onResize.bind(this), DEBOUNCE_WAIT, { maxWait: DEBOUNCE_WAIT_MAX });
+      this.resizeDebounce = _.debounce(this.onResize.bind(this), DEBOUNCE_WAIT, { maxWait: DEBOUNCE_WAIT_MAX });
 
       window.addEventListener('resize', this.resizeDebounce, false);
       window.addEventListener('orientationchange', this.resizeDebounce, false);

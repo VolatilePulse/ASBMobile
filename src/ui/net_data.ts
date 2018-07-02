@@ -1,5 +1,5 @@
 import { ChangeHandler } from '@/data/firestore/change';
-import get from 'lodash/get';
+import _ from 'lodash';
 import Vue, { VNode, VNodeDirective } from 'vue';
 
 
@@ -90,7 +90,7 @@ Vue.directive('net-data', {
             // Watch for user changes in the element
             el.addEventListener('input', () => {
                const newValue = isNumber ? parseFloat(inputEl.value) : inputEl.value;
-               const oldValue = get(cache.user, path);
+               const oldValue = _.get(cache.user, path);
                if (newValue !== oldValue) {
                   vueSet(cache.user, path, newValue); // vueSet is a deep, path-based Vue.set
                   el.dataset.netIgnoreNext = 'true';

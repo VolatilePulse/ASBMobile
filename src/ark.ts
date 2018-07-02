@@ -5,7 +5,7 @@ import { CreatureDataSource } from '@/data/firestore/types';
 import { floatRange, intervalFromDecimal } from '@/number_utils';
 import theStore from '@/ui/store';
 import IA from 'interval-arithmetic';
-import merge from 'lodash/merge';
+import _ from 'lodash';
 import * as Utils from './utils';
 
 /** @fileOverview Ark-related utility functions */
@@ -100,7 +100,7 @@ function inputDataPrecision(index: number, source: CreatureDataSource) {
 export function gatherMultipliers(server: Server, speciesName: string): StatMultipliers[] {
 
    // Gather raw multipliers first from the official server, overriding with settings from the given server
-   const values = merge({}, theStore.officialServer.multipliers, server.multipliers);
+   const values = _.merge({}, theStore.officialServer.multipliers, server.multipliers);
 
    // Find the settings for the species
    const speciesValues = theStore.speciesMultipliers[speciesName];

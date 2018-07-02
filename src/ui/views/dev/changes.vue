@@ -92,7 +92,7 @@ input.net-data.conflict {
 <script lang="ts">
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator';
 import { ChangeHandler } from '@/data/firestore/change';
-import cloneDeep from 'lodash/cloneDeep';
+import _ from 'lodash';
 import { findDiff, applyDiff } from '@/data/firestore/diff';
 
 interface TestData {
@@ -116,7 +116,7 @@ export default class extends Vue {
    }
 
    sendToNetwork() {
-      this.network = cloneDeep(this.cache.user);
+      this.network = _.cloneDeep(this.cache.user);
       this.receiveFromNetwork();
    }
 

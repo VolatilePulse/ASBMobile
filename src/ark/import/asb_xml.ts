@@ -2,7 +2,7 @@ import { Creature, Server } from '@/data/firestore/objects';
 import { Multipliers } from '@/data/firestore/types';
 import { FilledArray } from '@/utils';
 import EasySax from 'easysax';
-import set from 'lodash/set';
+import _ from 'lodash';
 import * as util from 'util';
 
 
@@ -102,13 +102,13 @@ export class LowLevelParser {
       this.stack.push(state);
    }
 
-   private onParseText(t: string) {
-      t = t.trim();
-      if (!t) return;
+   private onParseText(text: string) {
+      text = text.trim();
+      if (!text) return;
 
       const state = this.stack[this.stack.length - 1];
       const path = this.stack.filter(v => typeof v.name === 'string').map(v => v.name).join('.');
-      state.text = (state.text || '') + t;
+      state.text = (state.text || '') + text;
 
       const typeConverter = elementTypes[path] || elementTypes['.' + state.arrayType];
       if (typeConverter) {
@@ -127,11 +127,11 @@ export class LowLevelParser {
       }
    }
 
-   private onParseCloseTag(_: string) {
+   private onParseCloseTag(_name: string) {
       const path = this.stack.map(v => v.name).join('.');
       const state = this.stack.pop();
       if (state.text !== undefined) {
-         set(this.output, path, state.text);
+         _.set(this.output, path, state.text);
       }
    }
 }

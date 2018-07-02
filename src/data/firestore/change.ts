@@ -1,7 +1,6 @@
 import { applyDiff, Changes, findDiff, MergeChange, MergeChanges } from '@/data/firestore/diff';
 import { AssertionError } from 'assert';
-import cloneDeep from 'lodash/cloneDeep';
-import intersection from 'lodash/intersection';
+import _ from 'lodash';
 import Vue from 'vue';
 
 
@@ -13,8 +12,8 @@ export class ChangeHandler<T extends object> {
 
    constructor(initialData?: T) {
       initialData = initialData || {} as any;
-      this.network = cloneDeep(initialData);
-      this.user = cloneDeep(initialData);
+      this.network = _.cloneDeep(initialData);
+      this.user = _.cloneDeep(initialData);
    }
 
    public get hasConflicts() {
@@ -30,7 +29,7 @@ export class ChangeHandler<T extends object> {
    public acceptNewData(newData: T, dbg: boolean = false) {
       if (!this.isActive) this.isActive = true;
 
-      newData = cloneDeep(newData);
+      newData = _.cloneDeep(newData);
       const prevNetwork = this.network;
 
       if (dbg) console.log('New data...');
@@ -72,7 +71,7 @@ function updateConflicts(conflicts: MergeChanges, ourDiff: Changes, theirDiff: C
    }
 
    // Add new conflicts where data differs
-   for (const path of intersection(Object.keys(ourDiff), Object.keys(theirDiff))) {
+   for (const path of _.intersection(Object.keys(ourDiff), Object.keys(theirDiff))) {
       if (path in conflicts) throw new AssertionError({ message: 'Unexpected error: path already conflicting' });
       if (ourDiff[path].operation === theirDiff[path].operation) {
          if (ourDiff[path].operation === 'delete') continue;
