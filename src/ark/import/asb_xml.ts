@@ -1,7 +1,9 @@
+import { TORPOR } from '@/consts';
 import { Creature, Server } from '@/data/firestore/objects';
 import { Multipliers } from '@/data/firestore/types';
-import { FilledArray } from '@/utils';
+import theStore from '@/ui/store';
 import EasySax from 'easysax';
+import { firestore } from 'firebase';
 import _ from 'lodash';
 import * as util from 'util';
 
@@ -18,8 +20,8 @@ export function parseASBXml(text: string) {
    parser.acceptData(text);
    const internalData = parser.finish();
 
-   // State 2 - convert to our data types
-   const server = convertServer(internalData);
+   // Stage 2 - convert to our data types
+   const server = convertServer(internalData.CreatureCollection);
    const creatures = internalData.CreatureCollection.creatures.map(convertCreature);
 
    // Stage 3 - construct the output
@@ -31,20 +33,74 @@ export function convertServer(input: any): Server {
    const server: Partial<Server> = {};
 
    server.name = '';
-   server.IBM = input.CreatureCollection.imprintingMultiplier;
-   server.multipliers = multiplierArrayToObjectValues(input.CreatureCollection.multipliers);
-   server.singlePlayer = input.CreatureCollection.singlePlayerSettings;
+   server.IBM = input.imprintingMultiplier;
+   server.multipliers = multiplierArrayToObjectValues(input.multipliers);
+   server.singlePlayer = input.singlePlayerSettings;
 
    return server as Server;
 }
 
 /** Export for testing only. Create a creature object from the exported creature info. */
 export function convertCreature(input: any): Creature {
-   const creature: Creature = input;
+   const creature: Partial<Creature> = {};
 
+   // General Data
    creature.inputSource = 'asb_xml';
+   creature.name = input.name;
+   // FIXME: Properly address genderless creatures
+   creature.isFemale = (input.sex.toLowerCase === 'female');
+   creature.isNeutered = input.isNeutered;
 
-   return creature;
+   // Species
+   creature.species = input.species;
+   const speciesMultiplier = theStore.speciesMultipliers[creature.species];
+   creature.speciesBP = (speciesMultiplier === undefined) ? null : speciesMultiplier.blueprint;
+
+   // Ownership
+   creature.owner = input.owner;
+   creature.tribe = input.tribe;
+
+   // Levels
+   creature.level = input.levelsWild[TORPOR] + _.sum(input.levelsDom) + 1;
+   creature.levelsDom = input.levelsDom;
+   creature.levelsWild = input.levelsWild;
+
+   // Tags
+   creature.tags = {};
+   const predefinedTags = ['Available', 'Unavailable', 'Dead', 'Obelisk'];
+   for (const tag of input.tags) {
+      if (tag.startsWith('user:') || predefinedTags.includes(tag))
+         creature.tags[tag] = true;
+      else
+         creature.tags['user:' + tag] = true;
+   }
+   if (input.status && input.status.toLowerCase() !== 'available')
+      creature.tags[input.status] = true;
+
+   // FIXME: Needs more properties implemented
+   // Wild/Tamed/Bred
+   if (input.isBred) {
+      creature.isBred = true;
+      creature.breedingLevel = input.levelsWild[TORPOR] + 1;
+   }
+   else if (input.isWild) {
+      creature.isWild = true;
+   }
+   else {
+      creature.isTamed = true;
+   }
+
+   // Timestamps
+   creature.times = {};
+   creature.times.addedToLibrary = firestore.Timestamp.fromDate(input.addedToLibrary || new Date());
+   creature.times.domesticated = firestore.Timestamp.fromDate(input.domesticatedAt || new Date());
+
+   if (input.cooldownUntil && input.cooldownUntil > Date.now())
+      creature.times.cooldownUntil = firestore.Timestamp.fromDate(input.cooldownUntil);
+   if (input.growingUntil && input.growingUntil > Date.now())
+      creature.times.growingUntil = firestore.Timestamp.fromDate(input.growingUntil);
+
+   return creature as Creature;
 }
 
 interface StackState {
@@ -140,13 +196,16 @@ export class LowLevelParser {
 export function multiplierArrayToObjectValues(arr: number[][]): Multipliers {
    if (!Array.isArray(arr)) return arr;
 
-   const tempArray = FilledArray(8, () => FilledArray(4, () => undefined));
+   const result: any = {};
+   for (let p = 0; p < 8; p++) {
+      result[p] = {};
+      for (let s = 0; s < 4; s++) {
+         if (arr[p] != null && arr[p][s] != null)
+            result[p][s] = arr[p][s];
+      }
+   }
 
-   for (let i = 0; arr !== [] && i < 8; i++)
-      for (let j = 0; arr[i] !== [] && j < 4; j++)
-         tempArray[i][j] = arr[i][j];
-
-   return nestedArrayToObjectValues(tempArray);
+   return result;
 }
 
 export function nestedArrayToObjectValues(arr: any) {
@@ -165,7 +224,6 @@ function parseBoolean(v: string) {
 }
 
 function parseDateTime(v: string) {
-   // FIXME: Change over to Firestore Timestamp
    if (v === '0001-01-01T00:00:00') return null;
    return new Date(v);
 }

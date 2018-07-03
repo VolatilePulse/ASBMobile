@@ -1,23 +1,15 @@
-import { convertServer, LowLevelParser, multiplierArrayToObjectValues } from '@/ark/import/asb_xml';
+import { convertCreature, convertServer, LowLevelParser, multiplierArrayToObjectValues } from '@/ark/import/asb_xml';
 import { expect } from 'chai';
 import { readFileSync } from 'fs';
-import * as util from 'util';
 import { decodeBuffer } from '../common/decoding';
+import { initForExtraction } from '../common/init';
 
 // tslint:disable:no-unused-expression
 
 
-function nestedArrayToObjectValues(arr: any) {
-   if (!util.isObject(arr)) return arr;
-   if (!Array.isArray(arr)) return arr;
-
-   const result: any = {};
-   Object.entries(arr).forEach(([key, value]) => {
-      if (value != null) result[key] = nestedArrayToObjectValues(value);
-   });
-   return result;
-}
-
+beforeAll(async () => {
+   await initForExtraction();
+});
 
 describe('low-level ASB library importer', () => {
    let result: any;
@@ -28,7 +20,6 @@ describe('low-level ASB library importer', () => {
       const parser = new LowLevelParser();
       parser.acceptData(content);
       result = parser.finish();
-      console.log();
    });
 
    it('has the right shape', () => {
@@ -42,7 +33,7 @@ describe('low-level ASB library importer', () => {
       expect(result.CreatureCollection.players).has.length(3);
    });
 
-   it('should have two Spinos and an Argy', () => {
+   it('should have two Spino and an Argy', () => {
       expect(result.CreatureCollection.creatures).has.length(3);
       expect(result.CreatureCollection.creatures[0].species).to.equal('Spino');
       expect(result.CreatureCollection.creatures[1].species).to.equal('Spino');
@@ -81,6 +72,47 @@ describe('low-level ASB library importer', () => {
 
 });
 
+describe('creature output conversion', () => {
+   let result: any;
+
+   beforeAll(() => {
+      // Read the test library
+      const buffer = readFileSync('tests/unit/test-asb-library.xml');
+      const content = decodeBuffer(buffer);
+      const parser = new LowLevelParser();
+      parser.acceptData(content);
+      result = parser.finish();
+   });
+
+   // Check time stamps
+   describe('Steve the Spino', () => {
+      it('should have general properties', () => {
+         const creature = convertCreature(result.CreatureCollection.creatures[1]);
+
+         expect(creature).to.have.property('name').which.is.a('string').and.equals('Steve');
+         expect(creature).to.have.property('isFemale').which.is.a('boolean').and.equals(false);
+         expect(creature).to.have.property('species').which.is.a('string').and.equals('Spino');
+         expect(creature).to.have.property('speciesBP').which.equals('/Game/PrimalEarth/Dinos/Spino/Spino_Character_BP.Spino_Character_BP');
+      });
+      it('should have specific properties', () => {
+         const creature = convertCreature(result.CreatureCollection.creatures[1]);
+
+         expect(creature).to.have.property('level').which.is.a('number').and.equals(236);
+
+         expect(creature).to.have.property('tags').which.is.an('object');
+         expect(creature.tags).to.have.property('user:Deadly').which.equals(true);
+         expect(creature.tags).not.to.have.property('Available');
+
+         expect(creature).to.have.property('times').which.is.an('object');
+         expect(creature.times).to.have.property('addedToLibrary').and.not.equal('null');
+         expect(creature.times).to.have.property('domesticated').and.not.equal('null');
+         expect(creature.times).not.to.have.property('cooldownUntil');
+         expect(creature.times).not.to.have.property('growingUntil');
+      });
+   });
+
+});
+
 describe('library output conversion', () => {
    let result: any;
 
@@ -95,7 +127,7 @@ describe('library output conversion', () => {
 
    describe('the server', () => {
       it('should have the correct contents', () => {
-         const server = convertServer(result);
+         const server = convertServer(result.CreatureCollection);
 
          expect(server).to.have.property('name').which.is.a('string');
          expect(server).to.have.property('IBM').which.is.a('number').and.equals(1.5);
@@ -113,7 +145,7 @@ describe('library output conversion', () => {
 const multsColdinoSP_Input = [, [2, , 2], , , [10, , 10], [0.2, , 0.22], [3, , 3]];
 const multsColdinoSP_Output = { 0: {}, 1: { 0: 2, 2: 2 }, 2: {}, 3: {}, 4: { 0: 10, 2: 10 }, 5: { 0: 0.2, 2: 0.22 }, 6: { 0: 3, 2: 3 }, 7: {} };
 
-describe.skip('multiplierArrayToObjectValues', () => {
+describe('multiplierArrayToObjectValues', () => {
    it('should handle empty inputs', () => {
       const output = multiplierArrayToObjectValues([]);
       expect(output).to.be.an('object').and.not.an('array');
@@ -137,6 +169,6 @@ describe.skip('multiplierArrayToObjectValues', () => {
 
 function checkForAllEightKeys(object: any) {
    for (let i = 0; i < 8; i++) {
-      expect(object).to.have.property(i);
+      expect(object).to.have.property('' + i);
    }
 }
