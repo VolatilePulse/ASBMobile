@@ -1,5 +1,7 @@
 import { convertCreature, convertServer, LowLevelParser, multiplierArrayToObjectValues } from '@/ark/import/asb_xml';
+import { Creature } from '@/data/firestore/objects';
 import { expect } from 'chai';
+import firebase from 'firebase/app';
 import { readFileSync } from 'fs';
 import { decodeBuffer } from '../common/decoding';
 import { initForExtraction } from '../common/init';
@@ -56,59 +58,19 @@ describe('low-level ASB library importer', () => {
    });
 
    it('should have data with the correct types', () => {
-      expect(result.CreatureCollection.creatures[0]).to.have.property('levelsWild').which.is.an('array').of.length(8);
-      expect(result.CreatureCollection.creatures[0].levelsWild[0]).to.be.a('number');
-      expect(result.CreatureCollection.creatures[0]).to.have.property('levelsDom').which.is.an('array').of.length(8);
-      expect(result.CreatureCollection.creatures[0].levelsDom[0]).to.be.a('number');
-      expect(result.CreatureCollection.creatures[0]).to.have.property('colors').which.is.an('array').of.length(6);
-      expect(result.CreatureCollection.creatures[0].colors[0]).to.be.a('number');
-      expect(result.CreatureCollection.creatures[0]).to.have.property('tags').which.is.an('array').of.length(2);
-      expect(result.CreatureCollection.creatures[0].tags[0]).to.be.a('string');
-      expect(result.CreatureCollection.creatures[0].tamingEff).to.be.a('number');
-      expect(result.CreatureCollection.creatures[0].generation).to.be.a('number');
-      expect(result.CreatureCollection.creatures[0].neutered).to.be.a('boolean');
-      expect(result.CreatureCollection.creatures[0].mutationCounter).to.be.a('number');
-   });
-
-});
-
-describe('creature output conversion', () => {
-   let result: any;
-
-   beforeAll(() => {
-      // Read the test library
-      const buffer = readFileSync('tests/unit/test-asb-library.xml');
-      const content = decodeBuffer(buffer);
-      const parser = new LowLevelParser();
-      parser.acceptData(content);
-      result = parser.finish();
-   });
-
-   // Check time stamps
-   describe('Steve the Spino', () => {
-      it('should have general properties', () => {
-         const creature = convertCreature(result.CreatureCollection.creatures[1]);
-
-         expect(creature).to.have.property('name').which.is.a('string').and.equals('Steve');
-         expect(creature).to.have.property('isFemale').which.is.a('boolean').and.equals(false);
-         expect(creature).to.have.property('species').which.is.a('string').and.equals('Spino');
-         expect(creature).to.have.property('speciesBP').which.equals('/Game/PrimalEarth/Dinos/Spino/Spino_Character_BP.Spino_Character_BP');
-      });
-      it('should have specific properties', () => {
-         const creature = convertCreature(result.CreatureCollection.creatures[1]);
-
-         expect(creature).to.have.property('level').which.is.a('number').and.equals(236);
-
-         expect(creature).to.have.property('tags').which.is.an('object');
-         expect(creature.tags).to.have.property('user:Deadly').which.equals(true);
-         expect(creature.tags).not.to.have.property('Available');
-
-         expect(creature).to.have.property('times').which.is.an('object');
-         expect(creature.times).to.have.property('addedToLibrary').and.not.equal('null');
-         expect(creature.times).to.have.property('domesticated').and.not.equal('null');
-         expect(creature.times).not.to.have.property('cooldownUntil');
-         expect(creature.times).not.to.have.property('growingUntil');
-      });
+      const creature = result.CreatureCollection.creatures[0];
+      expect(creature).to.have.property('levelsWild').which.is.an('array').of.length(8);
+      expect(creature.levelsWild[0]).to.be.a('number');
+      expect(creature).to.have.property('levelsDom').which.is.an('array').of.length(8);
+      expect(creature.levelsDom[0]).to.be.a('number');
+      expect(creature).to.have.property('colors').which.is.an('array').of.length(6);
+      expect(creature.colors[0]).to.be.a('number');
+      expect(creature).to.have.property('tags').which.is.an('array').of.length(2);
+      expect(creature.tags[0]).to.be.a('string');
+      expect(creature.tamingEff).to.be.a('number');
+      expect(creature.generation).to.be.a('number');
+      expect(creature.neutered).to.be.a('boolean');
+      expect(creature.mutationCounter).to.be.a('number');
    });
 
 });
@@ -138,6 +100,75 @@ describe('library output conversion', () => {
       });
    });
 
+   describe('Mrs Spino', () => {
+      let creature: Creature;
+
+      beforeAll(() => {
+         creature = convertCreature(result.CreatureCollection.creatures[0]);
+      });
+
+      it('should have general properties', () => {
+         expect(creature).to.have.property('name').which.equals('');
+         expect(creature).to.have.property('isFemale').which.is.true;
+         expect(creature).to.have.property('levelsWild').which.eqls([2, 3, 2, 6, 6, 2, 6, 27]);
+         expect(creature).to.have.property('levelsDom').which.eqls([10, 7, 0, 0, 4, 16, 0, 0]);
+      });
+
+      it('should have calculated cached properties', () => {
+      });
+
+      it('should have converted tags and status', () => {
+         expect(creature).to.not.have.property('status');
+         expect(creature).to.have.property('tags').which.is.an('object');
+         expect(creature.tags).to.eql({ 'user:Egg Farm': true, 'user:Not Deadly': true });
+         expect(creature.tags).not.to.have.property('Available');
+      });
+
+      it('should have converted times', () => {
+         expect(creature).to.have.property('times').which.is.an('object');
+         expect(creature.times).to.have.property('addedToLibrary').which.is.instanceof(firebase.firestore.Timestamp);
+         expect(creature.times).to.have.property('domesticated').which.is.instanceof(firebase.firestore.Timestamp);
+         expect(creature.times).to.not.have.property('cooldownUntil');
+         expect(creature.times).to.not.have.property('growingUntil');
+      });
+   });
+
+   describe('Steve the Spino', () => {
+      let creature: Creature;
+
+      beforeAll(() => {
+         creature = convertCreature(result.CreatureCollection.creatures[1]);
+      });
+
+      it('should have general properties', () => {
+         expect(creature).to.have.property('name').which.is.a('string').and.equals('Steve');
+         expect(creature).to.have.property('isFemale').which.is.a('boolean').and.equals(false);
+         expect(creature).to.have.property('species').which.is.a('string').and.equals('Spino');
+         expect(creature).to.have.property('levelsWild').which.eqls([20, 32, 20, 27, 28, 23, 22, 172]);
+         expect(creature).to.have.property('levelsDom').which.eqls([10, 2, 0, 0, 4, 45, 2, 0]);
+      });
+
+      it('should have calculated cached properties', () => {
+         expect(creature).to.have.property('level').which.is.a('number').and.equals(236);
+         expect(creature).to.have.property('speciesBP').which.equals('/Game/PrimalEarth/Dinos/Spino/Spino_Character_BP.Spino_Character_BP');
+      });
+
+      it('should have converted tags and status', () => {
+         expect(creature).to.not.have.property('status');
+         expect(creature).to.have.property('tags').which.is.an('object');
+         expect(creature.tags).to.have.property('user:Deadly').which.equals(true);
+         expect(creature.tags).not.to.have.property('Available');
+         expect(creature.tags).to.eql({ 'user:Deadly': true }); // does a deep comparison - this should be all you need to do for tags
+      });
+
+      it('should have converted times', () => {
+         expect(creature).to.have.property('times').which.is.an('object');
+         expect(creature.times).to.have.property('addedToLibrary').which.is.instanceof(firebase.firestore.Timestamp);
+         expect(creature.times).to.have.property('domesticated').which.is.instanceof(firebase.firestore.Timestamp);
+         expect(creature.times).to.not.have.property('cooldownUntil');
+         expect(creature.times).to.not.have.property('growingUntil');
+      });
+   });
 });
 
 
