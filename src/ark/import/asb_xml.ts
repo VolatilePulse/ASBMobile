@@ -46,10 +46,18 @@ export function convertCreature(input: any): Creature {
 
    // General Data
    creature.inputSource = 'asb_xml';
-   creature.name = input.name;
+   creature.name = input.name || '';
    // FIXME: Properly address genderless creatures
-   creature.isFemale = (input.sex.toLowerCase === 'female');
+   creature.isFemale = (input.sex.toLowerCase() === 'female');
    creature.isNeutered = input.isNeutered;
+   // FIXME: Add Creature colors
+   // creature.colors = input.colors;
+   // FIXME:
+   // creature.uuid = input.guid;
+   // creature.currentServer
+   // creature.originServer
+   // creature.dinoId1
+   // creature.dinoId2
 
    // Species
    creature.species = input.species;
@@ -66,29 +74,54 @@ export function convertCreature(input: any): Creature {
    creature.levelsWild = input.levelsWild;
 
    // Tags
-   creature.tags = {};
    const predefinedTags = ['Available', 'Unavailable', 'Dead', 'Obelisk'];
-   for (const tag of input.tags) {
-      if (tag.startsWith('user:') || predefinedTags.includes(tag))
-         creature.tags[tag] = true;
-      else
-         creature.tags['user:' + tag] = true;
+   if (input.tags) {
+      creature.tags = creature.tags || {};
+      for (const tag of input.tags) {
+         if (tag.startsWith('user:') || predefinedTags.includes(tag))
+            creature.tags[tag] = true;
+         else
+            creature.tags['user:' + tag] = true;
+      }
    }
-   if (input.status && input.status.toLowerCase() !== 'available')
+   if (input.status && input.status.toLowerCase() !== 'available') {
+      creature.tags = creature.tags || {};
       creature.tags[input.status] = true;
+   }
 
-   // FIXME: Needs more properties implemented
    // Wild/Tamed/Bred
    if (input.isBred) {
       creature.isBred = true;
       creature.breedingLevel = input.levelsWild[TORPOR] + 1;
+      // FIXME:
+      creature.imprinter = input.imprinter || '';
+      creature.imprintingBonus = input.imprintingBonus;
+      creature.mutationsMaternal = input.mutationsMaternal || null;
+      creature.mutationsPaternal = input.mutationsPaternal || null;
+      creature.mutations = (creature.mutationsMaternal + creature.mutationsPaternal) || input.mutations;
+
+      // FIXME:
+      // creature.motherUuid = input.motherGuid;
+      // creature.fatherUuid = input.fatherGuid;
    }
    else if (input.isWild) {
       creature.isWild = true;
+      creature.wildLevel = input.levelsWild[TORPOR] + 1;
    }
    else {
       creature.isTamed = true;
+      creature.tamingEff = input.tamingEff || null;
+      // FIXME:
+      // creature.tamingLevel = input.levelsWild[TORPOR] + 1;
+      if (creature.tamingEff)
+         creature.wildLevel = Math.ceil((input.levelsWild[TORPOR] + 1) / (1 + 0.5 * creature.tamingEff));
+      else
+         creature.wildLevel = null;
    }
+
+   // FIXME:
+   creature.statValues = undefined;
+   creature.breedingValues = undefined;
 
    // Timestamps
    creature.times = {};

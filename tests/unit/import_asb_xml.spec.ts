@@ -112,6 +112,7 @@ describe('library output conversion', () => {
          expect(creature).to.have.property('isFemale').which.is.true;
          expect(creature).to.have.property('levelsWild').which.eqls([2, 3, 2, 6, 6, 2, 6, 27]);
          expect(creature).to.have.property('levelsDom').which.eqls([10, 7, 0, 0, 4, 16, 0, 0]);
+         expect(creature).to.have.property('wildLevel').which.equals(20);
       });
 
       it('should have calculated cached properties', () => {
@@ -142,10 +143,11 @@ describe('library output conversion', () => {
 
       it('should have general properties', () => {
          expect(creature).to.have.property('name').which.is.a('string').and.equals('Steve');
-         expect(creature).to.have.property('isFemale').which.is.a('boolean').and.equals(false);
+         expect(creature).to.have.property('isFemale').which.is.false;
          expect(creature).to.have.property('species').which.is.a('string').and.equals('Spino');
          expect(creature).to.have.property('levelsWild').which.eqls([20, 32, 20, 27, 28, 23, 22, 172]);
          expect(creature).to.have.property('levelsDom').which.eqls([10, 2, 0, 0, 4, 45, 2, 0]);
+         expect(creature).to.have.property('wildLevel').which.equals(116);
       });
 
       it('should have calculated cached properties', () => {
@@ -156,9 +158,43 @@ describe('library output conversion', () => {
       it('should have converted tags and status', () => {
          expect(creature).to.not.have.property('status');
          expect(creature).to.have.property('tags').which.is.an('object');
-         expect(creature.tags).to.have.property('user:Deadly').which.equals(true);
          expect(creature.tags).not.to.have.property('Available');
          expect(creature.tags).to.eql({ 'user:Deadly': true }); // does a deep comparison - this should be all you need to do for tags
+      });
+
+      it('should have converted times', () => {
+         expect(creature).to.have.property('times').which.is.an('object');
+         expect(creature.times).to.have.property('addedToLibrary').which.is.instanceof(firebase.firestore.Timestamp);
+         expect(creature.times).to.have.property('domesticated').which.is.instanceof(firebase.firestore.Timestamp);
+         expect(creature.times).to.not.have.property('cooldownUntil');
+         expect(creature.times).to.not.have.property('growingUntil');
+      });
+   });
+
+   describe('Buddy the Argy', () => {
+      let creature: Creature;
+
+      beforeAll(() => {
+         creature = convertCreature(result.CreatureCollection.creatures[2]);
+      });
+
+      it('should have general properties', () => {
+         expect(creature).to.have.property('name').which.equals('Buddy');
+         expect(creature).to.have.property('isFemale').which.is.false;
+         expect(creature).to.have.property('species').which.equals('Argentavis');
+         expect(creature).to.have.property('levelsWild').which.eqls([35, 34, 33, 28, 25, 35, 0, 190]);
+         expect(creature).to.have.property('levelsDom').which.eqls([6, 17, 0, 0, 8, 28, 0, 0]);
+         expect(creature).to.have.property('breedingLevel').which.equals(191);
+      });
+
+      it('should have calculated cached properties', () => {
+         expect(creature).to.have.property('level').which.is.a('number').and.equals(250);
+         expect(creature).to.have.property('speciesBP').which.equals('/Game/PrimalEarth/Dinos/Argentavis/Argent_Character_BP.Argent_Character_BP');
+      });
+
+      it('should have converted tags and status', () => {
+         expect(creature).to.not.have.property('status');
+         expect(creature).to.not.have.property('tags');
       });
 
       it('should have converted times', () => {
