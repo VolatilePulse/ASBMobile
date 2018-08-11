@@ -30,7 +30,7 @@ module.exports = {
    outputDir: "docs",
 
    // Turn this off to remove the *large* debug source maps at the cost of unreadable stack traces in production
-   productionSourceMap: true,
+   productionSourceMap: false,
 
    pwa: {
       // These values mirror the manifest and are inserted into index.html
