@@ -1,5 +1,5 @@
 import { convertCreature, convertServer, LowLevelParser, multiplierArrayToObjectValues } from '@/ark/import/asb_xml';
-import { Creature } from '@/data/firestore/objects';
+import { Creature, UUID } from '@/data/firestore/objects';
 import { expect } from 'chai';
 import firebase from 'firebase/app';
 import { readFileSync } from 'fs';
@@ -102,9 +102,10 @@ describe('library output conversion', () => {
 
    describe('Mrs Spino', () => {
       let creature: Creature;
+      let uuid: UUID;
 
       beforeAll(() => {
-         creature = convertCreature(result.CreatureCollection.creatures[0]);
+         [uuid, creature] = convertCreature(result.CreatureCollection.creatures[0]);
       });
 
       it('should have general properties', () => {
@@ -116,6 +117,7 @@ describe('library output conversion', () => {
       });
 
       it('should have calculated cached properties', () => {
+         // FIXME: ?
       });
 
       it('should have converted tags and status', () => {
@@ -136,9 +138,10 @@ describe('library output conversion', () => {
 
    describe('Steve the Spino', () => {
       let creature: Creature;
+      let uuid: UUID;
 
       beforeAll(() => {
-         creature = convertCreature(result.CreatureCollection.creatures[1]);
+         [uuid, creature] = convertCreature(result.CreatureCollection.creatures[1]);
       });
 
       it('should have general properties', () => {
@@ -173,9 +176,10 @@ describe('library output conversion', () => {
 
    describe('Buddy the Argy', () => {
       let creature: Creature;
+      let uuid: UUID;
 
       beforeAll(() => {
-         creature = convertCreature(result.CreatureCollection.creatures[2]);
+         [uuid, creature] = convertCreature(result.CreatureCollection.creatures[2]);
       });
 
       it('should have general properties', () => {

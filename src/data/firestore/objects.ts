@@ -25,6 +25,8 @@ export interface Server {
    singlePlayer: boolean;
 }
 
+export type UUID = string;
+
 export interface Creature {
    dinoId1?: number;
    dinoId2?: number;
@@ -58,6 +60,9 @@ export interface Creature {
    mutations: number;
    mutationsMaternal: number;
    mutationsPaternal: number;
+
+   mother: string;
+   father: string;
 
    tags: { [name: string]: true };
 
