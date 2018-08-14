@@ -2,13 +2,13 @@
 <html lang="en" prefix="og: http://ogp.me/ns#">
 
 <head>
-   <meta charset="utf-8">
-   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-   <meta name="description" content="A cloud version of Ark Smart Breeding to help manage breeding in Ark: Survival Evolved">
-   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5">
-   <meta name="application-name" content="Ark Breeder">
+   <meta charset="utf-8" />
+   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+   <meta name="description" content="A cloud version of Ark Smart Breeding to help manage breeding in Ark: Survival Evolved" />
+   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5" />
+   <meta name="application-name" content="Ark Breeder" />
    <meta name="format-detection" content="telephone=no" />
-   <base href='<%= htmlWebpackPlugin.files.publicPath %>'>
+   <base href='<%= htmlWebpackPlugin.files.publicPath %>' />
 
    <title>Ark Breeder</title>
 
@@ -23,20 +23,21 @@
    <meta name="msapplication-config" content="<%= htmlWebpackPlugin.files.publicPath %>browserconfig.xml">
 
    <!-- These fields produce nice link previews in Discord/Slack and some other sites, and will need customising for specific links, e.g. to a specific creature -->
-   <!-- <meta property="og:title" content="Ark Breeder" /> -->
    <meta property="og:site_name" content="Ark Breeder" />
+
+   <!-- Move this to the replace-meta section when we generate images -->
    <meta property="og:image" content="https://dev.arkbreeder.com/img/icons/apple-touch-icon-180x180.png" />
 
    <!-- Anything in this section is replaced for custom links like showcases and invites -->
-   <replace-meta-start></replace-meta-start>
+   <meta name=replace-meta-start />
    <!-- ---------------------------------------------------------------- -->
    <!-- OpenGraph tags : Produces nicer embedded links in some sites -->
-   <meta property="og:title" content="Ark Breeder">
-   <meta property="og:description" content="A cloud version of Ark Smart Breeding to help manage breeding in Ark: Survival Evolved">
+   <meta property="og:title" content="Ark Breeder" />
+   <meta property="og:description" content="A cloud version of Ark Smart Breeding to help manage breeding in Ark: Survival Evolved" />
    <meta property="og:type" content="website" />
    <meta property="og:url" content="https://dev.arkbreeder.com/" />
    <!-- ---------------------------------------------------------------- -->
-   <replace-meta-end></replace-meta-end>
+   <meta name=replace-meta-end />
 
    <!-- This defers loading the CSS for firebaseui, but still needs a normal css link to be inserted later (in app startup) -->
    <link rel="prefetch" href="https://www.gstatic.com/firebasejs/ui/3.3.0/firebase-ui-auth.css" as="style"><!-- should match src/ui/views/user.vue -->
