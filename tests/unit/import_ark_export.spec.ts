@@ -29,7 +29,7 @@ describe('importing UTF16-LE export from Davis', async () => {
    let creature: CreatureTestData;
 
    beforeAll(async () => {
-      const buffer = readFileSync('tests/unit/davis-dino-1-utf16.ini');
+      const buffer = readFileSync('tests/unit/davis-dino-utf16.ini');
       const content = decodeBuffer(buffer);
       creature = parseExportedCreature(content) as CreatureTestData;
    });
