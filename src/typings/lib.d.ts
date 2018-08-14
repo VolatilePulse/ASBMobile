@@ -3,11 +3,5 @@
 
 // Cheap fix: these just resolve as 'any' so they act like untyped Javascript
 declare module 'bootstrap-vue';
-declare module 'pouch-vue';
 declare module 'math-float32-nextafter';
-
-// Vue shim to support importing components from *.vue
-declare module '*.vue' {
-   import Vue from 'vue';
-   export default Vue;
-}
+declare module 'color-hash';

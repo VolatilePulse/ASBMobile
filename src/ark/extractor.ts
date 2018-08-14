@@ -1,11 +1,12 @@
 import * as Ark from '@/ark';
 import { StatMultipliers } from '@/ark/multipliers';
 import { Stat } from '@/ark/types';
-import { FOOD, HEALTH, SPEED, TORPOR } from '@/consts';
-import { Server } from '@/data/objects';
-import { intFromRange, intFromRangeReverse, intervalAverage } from '@/number_utils';
+import { FOOD, HEALTH, NUM_STATS, SPEED, TORPOR } from '@/consts';
+import { Server } from '@/data/firestore/objects';
+import { intervalAverage, intFromRange, intFromRangeReverse } from '@/number_utils';
 import * as Utils from '@/utils';
 import IA from 'interval-arithmetic';
+
 
 export interface ExtractorInput {
    server: Server;
@@ -16,6 +17,15 @@ export interface ExtractorInput {
    bred: boolean;
    IB: Interval;
    values: Interval[];
+}
+
+export interface ExtractorOutput {
+   stats: Stat[][];
+   options: Stat[][];
+   optionWLs: number[];
+   optionTEs: Interval[];
+   TEs: Map<Stat, TEProps>;
+   IB: Interval;
 }
 
 // tamedLevel / (1 + 0.5 * TE)
@@ -135,7 +145,7 @@ export class Extractor {
       this.values = inputs.values;
 
       // considerWildLevelSteps = considerWildLevelSteps && !bred;
-      const incomingM = Ark.GetMultipliers(inputs.server, inputs.species);
+      const incomingM = Ark.gatherMultipliers(inputs.server, inputs.species);
 
       // Clear the checked property for future extractions (also clearing out any Vue observer)
       this.stats = Utils.FilledArray(8, () => []);
@@ -167,7 +177,7 @@ export class Extractor {
       this.m = incomingM;
    }
 
-   extract(dbg?: any) {
+   extract(dbg?: any): ExtractorOutput {
       // TODO: Add either a way to throw errors w/ codes (for specific reasons like bad multipliers, stats, etc.)
       //    Or provide an alternative method (returning under bad situations is acceptable for now)
 
@@ -297,14 +307,38 @@ export class Extractor {
       for (let stat = HEALTH; stat <= SPEED; stat++) {
          if (this.stats[stat].length === 0) {
             if (dbg) dbg.failReason = 'No options found for stat ' + stat;
-            return { stats: this.stats, options: this.options, TEs: this.statTEMap, IB: this.rangeVars.IB };
+            return { stats: this.stats, options: this.options, TEs: this.statTEMap, IB: this.rangeVars.IB, optionWLs: [], optionTEs: [] };
          }
       }
 
       // Sort the options based on most likely (deviation from the expected average)
       this.options.sort((opt1, opt2) => this.optionDeviation(opt1, opt2));
 
-      return { stats: this.stats, options: this.options, TEs: this.statTEMap, IB: this.rangeVars.IB };
+      const { optionWLs, optionTEs } = this.findOptionTEMaps();
+
+      return { stats: this.stats, options: this.options, TEs: this.statTEMap, IB: this.rangeVars.IB, optionWLs, optionTEs };
+   }
+
+   /** Find the WL and TE associated with each option, if any */
+   findOptionTEMaps() {
+      const optionWLs: number[] = [];
+      const optionTEs: Interval[] = [];
+
+      for (const optionIndex in this.options) {
+         for (const statIndex in Utils.Range(NUM_STATS)) {
+            const stat = this.options[optionIndex][statIndex];
+            const foundTE = this.statTEMap.get(stat);
+
+            // TODO: Consider averaging found TEs rather than simply using the first found
+            if (foundTE) {
+               optionWLs[optionIndex] = foundTE.wildLevel;
+               optionTEs[optionIndex] = foundTE.TE;
+               break;
+            }
+         }
+      }
+
+      return { optionWLs, optionTEs };
    }
 
    /**

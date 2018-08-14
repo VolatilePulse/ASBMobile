@@ -1,15 +1,12 @@
 import { parseExportedCreature } from '@/ark/import/ark_export';
 import { parseGameIni } from '@/ark/import/game_ini';
-import { TestData } from '@/ark/types';
-import { Server } from '@/data/objects';
-import { PerformTest } from '@/testing';
+import { Server } from '@/data/firestore/objects';
+import { CreatureTestData, PerformTest, TestDefinition } from '@/testing';
 import theStore from '@/ui/store';
 import { expect } from 'chai';
-import fs from 'fs';
 import glob from 'glob';
 import path from 'path';
-import util from 'util';
-import { decodeBuffer } from '../common/decoding';
+import { loadFile } from '../common/decoding';
 import { initForExtraction } from '../common/init';
 
 /**
@@ -24,11 +21,6 @@ import { initForExtraction } from '../common/init';
 // tslint:disable:no-unused-expression
 
 const BASEPATH = 'testdata';
-
-const fsAsync = {
-   readFile: util.promisify(fs.readFile),
-};
-
 
 interface Node {
    name: string;
@@ -56,16 +48,33 @@ function discoverTestNodes(pathSegments: string[] = []): Node {
 
 /** Load and parse a Game.ini */
 async function loadGameIni(filename: string): Promise<Server> {
-   const content = await fsAsync.readFile(filename).then(buf => decodeBuffer(buf));
-   const server = parseGameIni(content);
+   const content = await loadFile(filename);
+   const server = parseGameIni(content) as Server;
    return server;
 }
 
 /** Load and parse an exported creature */
-async function loadCreature(filename: string): Promise<TestData> {
-   const content = await fsAsync.readFile(filename).then(buf => decodeBuffer(buf));
-   const input: any = parseExportedCreature(content);
+async function loadCreature(filename: string): Promise<CreatureTestData> {
+   const content = await loadFile(filename);
+   const input = parseExportedCreature(content) as CreatureTestData;
    return input;
+}
+
+function makeTestDefinition(creature: CreatureTestData) {
+   const test: TestDefinition = {
+      description: '<archive test>',
+      creature: creature,
+      criteria: [
+         { test: 'has_an_option' }, // we say an archive test passes if there is at least one option
+      ],
+   };
+   return test;
+}
+
+function creatureMode(creature: CreatureTestData) {
+   if (creature.isBred) return 'bred';
+   if (creature.isTamed) return 'tamed';
+   return 'wild';
 }
 
 /** Generate the the entire hierarchy of tests */
@@ -77,9 +86,9 @@ function generateTests(node: Node) {
       beforeAll(async () => {
          if (node.server) {
             serverDef = await loadGameIni(node.server);
-            serverDef._id = 'tmp:' + node.server;
          }
-         else {
+
+         if (!serverDef) {
             serverDef = theStore.officialServer;
          }
       });
@@ -87,13 +96,15 @@ function generateTests(node: Node) {
       // If there are creatures, generate a test per file which loads the creature and runs the extractor
       (node.creatures || []).forEach(creatureFile => {
          it(path.basename(creatureFile, '.ini'), async () => {
-            expect(serverDef).to.exist.and.be.instanceof(Server);
-            const input = await loadCreature(creatureFile);
-            expect(input).to.exist;
-            const results = PerformTest(input, undefined, serverDef);
-            const detailsReport = ` [Lvl ${input.level} ${input.mode.toLowerCase()} ${input.species} at ${creatureFile}]`;
+            expect(serverDef).to.exist;
+            const creature = await loadCreature(creatureFile);
+            expect(creature).to.exist;
+            const testDef = makeTestDefinition(creature);
+            const results = PerformTest(testDef, serverDef, undefined);
+            const detailsReport = ` [Lvl ${creature.level} ${creatureMode(creature)} ${creature.species} at ${creatureFile}]`;
             expect(results).to.exist;
-            expect(results.options, 'no options' + detailsReport).to.be.instanceof(Array).and.not.be.empty;
+            expect(results.exception).to.be.undefined;
+            expect(results.result, 'no options' + detailsReport).to.equal('pass');
          });
       });
 

@@ -1,4 +1,4 @@
-import cloneDeepWith from 'lodash/cloneDeepWith';
+import _ from 'lodash';
 import { isString } from 'util';
 
 /** @fileOverview Miscellaneous functions used throughout the app */
@@ -50,7 +50,7 @@ export function FormatNumber(value: number, places: number = 1, fixed: boolean =
  * @param {number} length Length of the array
  */
 export function Range(length: number) {
-   return FilledArray(length, (_, i) => i);
+   return FilledArray(length, (_value, i) => i);
 }
 
 /**
@@ -67,7 +67,7 @@ export function FilledArray<T>(length: number, fn: (_: null, i: number) => T): T
  * @param {number} duration Number of milliseconds to delay for.
  */
 export function Delay(duration: number) {
-   return new Promise((resolve, _) => setTimeout(() => resolve(), duration));
+   return new Promise((resolve, _reject) => setTimeout(() => resolve(), duration));
 }
 
 /**
@@ -77,7 +77,7 @@ export function Delay(duration: number) {
 export function DelayFunction(duration: number) {
    // tslint:disable-next-line:only-arrow-functions
    return function (...args: any[]) {
-      return new Promise((resolve, _) => setTimeout(() => resolve(...args), duration));
+      return new Promise((resolve, _reject) => setTimeout(() => resolve(...args), duration));
    };
 }
 
@@ -120,10 +120,10 @@ export function IsFunction(item: any) {
 }
 
 export function DeepCopy<T>(obj: T): T {
-   return cloneDeepWith(obj, CloneCustomizer);
+   return _.cloneDeepWith(obj, CloneCustomizer);
 }
 
-function CloneCustomizer<T>(_: T, key: string | number): any | null {
+function CloneCustomizer<T>(_value: T, key: string | number): any | null {
    if (!key) return undefined;
    if (isString(key) && key.startsWith('__')) return null;
 }
@@ -248,7 +248,7 @@ export function ParseIni(content: string) {
       const blockByIndex: string[] = [];
       (blockByIndex as any).label = name;
 
-      for (const [_, label, value] of GenerateRegexMatches(lineRe, block)) {
+      for (const [, label, value] of GenerateRegexMatches(lineRe, block)) {
          blockByIndex.push(value);
          blockByName[label.toLowerCase()] = value;
       }

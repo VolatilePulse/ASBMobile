@@ -1,0 +1,286 @@
+<?xml version="1.0"?>
+<CreatureCollection
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <creatures>
+      <Creature>
+         <species>Spino</species>
+         <gender>Female</gender>
+         <sex>Female</sex>
+         <status>Available</status>
+         <levelsWild>
+            <int>2</int>
+            <int>3</int>
+            <int>2</int>
+            <int>6</int>
+            <int>6</int>
+            <int>2</int>
+            <int>6</int>
+            <int>27</int>
+         </levelsWild>
+         <levelsDom>
+            <int>10</int>
+            <int>7</int>
+            <int>0</int>
+            <int>0</int>
+            <int>4</int>
+            <int>16</int>
+            <int>0</int>
+            <int>0</int>
+         </levelsDom>
+         <tamingEff>0.901155984874277</tamingEff>
+         <imprintingBonus>0</imprintingBonus>
+         <owner>Fale Tribe</owner>
+         <imprinterName />
+         <tribe>Fale Tribe</tribe>
+         <server />
+         <guid>13ad317d-1888-0ec6-0000-000000000000</guid>
+         <isBred>false</isBred>
+         <fatherGuid>00000000-0000-0000-0000-000000000000</fatherGuid>
+         <motherGuid>00000000-0000-0000-0000-000000000000</motherGuid>
+         <generation>0</generation>
+         <colors>
+            <int>20</int>
+            <int>27</int>
+            <int>0</int>
+            <int>0</int>
+            <int>19</int>
+            <int>25</int>
+         </colors>
+         <growingUntil>0001-01-01T00:00:00</growingUntil>
+         <cooldownUntil>0001-01-01T00:00:00</cooldownUntil>
+         <domesticatedAt>2018-02-19T12:13:04.1152028+00:00</domesticatedAt>
+         <addedToLibrary>0001-01-01T00:00:00</addedToLibrary>
+         <neutered>false</neutered>
+         <mutationCounter>0</mutationCounter>
+         <mutationsMaternal>0</mutationsMaternal>
+         <mutationsPaternal>0</mutationsPaternal>
+         <tags>
+            <string>Egg Farm</string>
+            <string>Not Deadly</string>
+         </tags>
+      </Creature>
+      <Creature>
+         <species>Spino</species>
+         <name>Steve</name>
+         <gender>Male</gender>
+         <sex>Male</sex>
+         <status>Available</status>
+         <levelsWild>
+            <int>20</int>
+            <int>32</int>
+            <int>20</int>
+            <int>27</int>
+            <int>28</int>
+            <int>23</int>
+            <int>22</int>
+            <int>172</int>
+         </levelsWild>
+         <levelsDom>
+            <int>10</int>
+            <int>2</int>
+            <int>0</int>
+            <int>0</int>
+            <int>4</int>
+            <int>45</int>
+            <int>2</int>
+            <int>0</int>
+         </levelsDom>
+         <tamingEff>0.98355906276106131</tamingEff>
+         <imprintingBonus>0</imprintingBonus>
+         <owner>Fale Tribe</owner>
+         <imprinterName />
+         <tribe>Fale Tribe</tribe>
+         <server />
+         <guid>1b4720cb-3ca4-038a-0000-000000000000</guid>
+         <isBred>false</isBred>
+         <fatherGuid>00000000-0000-0000-0000-000000000000</fatherGuid>
+         <motherGuid>00000000-0000-0000-0000-000000000000</motherGuid>
+         <generation>0</generation>
+         <colors>
+            <int>20</int>
+            <int>26</int>
+            <int>0</int>
+            <int>0</int>
+            <int>31</int>
+            <int>21</int>
+         </colors>
+         <growingUntil>0001-01-01T00:00:00</growingUntil>
+         <cooldownUntil>0001-01-01T00:00:00</cooldownUntil>
+         <domesticatedAt>2018-02-19T12:13:04.1157031+00:00</domesticatedAt>
+         <addedToLibrary>0001-01-01T00:00:00</addedToLibrary>
+         <neutered>false</neutered>
+         <mutationCounter>0</mutationCounter>
+         <mutationsMaternal>0</mutationsMaternal>
+         <mutationsPaternal>0</mutationsPaternal>
+         <tags>
+            <string>Deadly</string>
+         </tags>
+      </Creature>
+      <Creature>
+         <species>Argentavis</species>
+         <name>Buddy</name>
+         <gender>Male</gender>
+         <sex>Male</sex>
+         <status>Available</status>
+         <levelsWild>
+            <int>35</int>
+            <int>34</int>
+            <int>33</int>
+            <int>28</int>
+            <int>25</int>
+            <int>35</int>
+            <int>0</int>
+            <int>190</int>
+         </levelsWild>
+         <levelsDom>
+            <int>6</int>
+            <int>17</int>
+            <int>0</int>
+            <int>0</int>
+            <int>8</int>
+            <int>28</int>
+            <int>0</int>
+            <int>0</int>
+         </levelsDom>
+         <tamingEff>1</tamingEff>
+         <imprintingBonus>1</imprintingBonus>
+         <owner>Me</owner>
+         <imprinterName />
+         <tribe>Fale Tribe</tribe>
+         <server />
+         <guid>029499f3-e9b8-108f-0000-000000000000</guid>
+         <isBred>true</isBred>
+         <fatherGuid>0eb64d7f-4e64-0bba-0000-000000000000</fatherGuid>
+         <motherGuid>1cce83a0-32bb-1792-0000-000000000000</motherGuid>
+         <generation>2</generation>
+         <colors>
+            <int>36</int>
+            <int>0</int>
+            <int>163</int>
+            <int>13</int>
+            <int>40</int>
+            <int>134</int>
+         </colors>
+         <growingUntil>0001-01-01T00:00:00</growingUntil>
+         <cooldownUntil>0001-01-01T00:00:00</cooldownUntil>
+         <domesticatedAt>2018-02-19T12:13:04.1447025+00:00</domesticatedAt>
+         <addedToLibrary>0001-01-01T00:00:00</addedToLibrary>
+         <neutered>false</neutered>
+         <mutationCounter>7</mutationCounter>
+         <mutationsMaternal>4</mutationsMaternal>
+         <mutationsPaternal>3</mutationsPaternal>
+         <tags />
+      </Creature>
+   </creatures>
+   <creaturesValues />
+   <multipliers>
+      <ArrayOfDouble>
+         <double>0.14</double>
+         <double>0.44</double>
+         <double>0.2</double>
+         <double>1</double>
+      </ArrayOfDouble>
+      <ArrayOfDouble>
+         <double>2</double>
+         <double>1</double>
+         <double>2</double>
+         <double>1</double>
+      </ArrayOfDouble>
+      <ArrayOfDouble>
+         <double>1</double>
+         <double>1</double>
+         <double>1</double>
+         <double>1</double>
+      </ArrayOfDouble>
+      <ArrayOfDouble>
+         <double>1</double>
+         <double>1</double>
+         <double>1</double>
+         <double>1</double>
+      </ArrayOfDouble>
+      <ArrayOfDouble>
+         <double>10</double>
+         <double>1</double>
+         <double>10</double>
+         <double>1</double>
+      </ArrayOfDouble>
+      <ArrayOfDouble>
+         <double>0.2</double>
+         <double>0.44</double>
+         <double>0.22</double>
+         <double>1</double>
+      </ArrayOfDouble>
+      <ArrayOfDouble>
+         <double>3</double>
+         <double>1</double>
+         <double>3</double>
+         <double>1</double>
+      </ArrayOfDouble>
+      <ArrayOfDouble>
+         <double>1</double>
+         <double>1</double>
+         <double>1</double>
+         <double>1</double>
+      </ArrayOfDouble>
+   </multipliers>
+   <timerListEntries />
+   <incubationListEntries />
+   <hiddenOwners />
+   <dontShowTags />
+   <showDeads>true</showDeads>
+   <showUnavailable>true</showUnavailable>
+   <showNeutered>true</showNeutered>
+   <showMutated>true</showMutated>
+   <showObelisk>true</showObelisk>
+   <useFiltersInTopStatCalculation>false</useFiltersInTopStatCalculation>
+   <maxDomLevel>71</maxDomLevel>
+   <maxWildLevel>150</maxWildLevel>
+   <maxChartLevel>50</maxChartLevel>
+   <maxBreedingSuggestions>10</maxBreedingSuggestions>
+   <considerWildLevelSteps>false</considerWildLevelSteps>
+   <wildLevelStep>4</wildLevelStep>
+   <maxServerLevel>450</maxServerLevel>
+   <imprintingMultiplier>1.5</imprintingMultiplier>
+   <babyCuddleIntervalMultiplier>0.15</babyCuddleIntervalMultiplier>
+   <tamingSpeedMultiplier>3</tamingSpeedMultiplier>
+   <tamingFoodRateMultiplier>1</tamingFoodRateMultiplier>
+   <MatingIntervalMultiplier>0.005</MatingIntervalMultiplier>
+   <EggHatchSpeedMultiplier>3</EggHatchSpeedMultiplier>
+   <BabyMatureSpeedMultiplier>4</BabyMatureSpeedMultiplier>
+   <BabyFoodConsumptionSpeedMultiplier>1.5</BabyFoodConsumptionSpeedMultiplier>
+   <babyCuddleIntervalMultiplierEvent>1</babyCuddleIntervalMultiplierEvent>
+   <tamingSpeedMultiplierEvent>1.5</tamingSpeedMultiplierEvent>
+   <tamingFoodRateMultiplierEvent>1</tamingFoodRateMultiplierEvent>
+   <MatingIntervalMultiplierEvent>1</MatingIntervalMultiplierEvent>
+   <EggHatchSpeedMultiplierEvent>1</EggHatchSpeedMultiplierEvent>
+   <BabyMatureSpeedMultiplierEvent>1</BabyMatureSpeedMultiplierEvent>
+   <BabyFoodConsumptionSpeedMultiplierEvent>1</BabyFoodConsumptionSpeedMultiplierEvent>
+   <singlePlayerSettings>true</singlePlayerSettings>
+   <allowMoreThanHundredImprinting>true</allowMoreThanHundredImprinting>
+   <players>
+      <Player>
+         <PlayerName>Fale Tribe</PlayerName>
+         <Tribe />
+         <Level>0</Level>
+         <Note />
+      </Player>
+      <Player>
+         <PlayerName>Me</PlayerName>
+         <Tribe />
+         <Level>0</Level>
+         <Note />
+      </Player>
+      <Player>
+         <PlayerName>Tribe of Me</PlayerName>
+         <Tribe />
+         <Level>0</Level>
+         <Note />
+      </Player>
+   </players>
+   <tribes />
+   <additionalValues />
+   <noteList />
+   <tagsInclude />
+   <tagsExclude />
+</CreatureCollection>

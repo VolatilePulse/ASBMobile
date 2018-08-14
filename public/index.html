@@ -4,45 +4,69 @@
 <head>
    <meta charset="utf-8">
    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-   <meta name="description" content="Ark Smart Breeding for Mobile is a tool to help manage breeding in Ark: Survival Evolved">
-   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1.5">
-   <link rel="shortcut icon" href="<%= webpackConfig.output.publicPath %>favicon.ico">
-   <title>ASB Mobile</title>
+   <meta name="description" content="A cloud version of Ark Smart Breeding to help manage breeding in Ark: Survival Evolved">
+   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5">
+   <meta name="application-name" content="Ark Breeder">
+   <meta name="format-detection" content="telephone=no" />
+   <base href='<%= htmlWebpackPlugin.files.publicPath %>'>
+
+   <title>Ark Breeder</title>
 
    <!-- Generated on https://realfavicongenerator.net, commented out bits that are done by @vue/cli-plugin-pwa -->
    <!-- <link rel="mask-icon" href="<%= htmlWebpackPlugin.files.publicPath %>img/icons/safari-pinned-tab.svg" color="#2e54a5"> -->
    <!-- <meta name="apple-mobile-web-app-status-bar-style" content="#2e54a5"> -->
-   <!-- <meta name="apple-mobile-web-app-title" content="ASB Mobile"> -->
+   <!-- <meta name="apple-mobile-web-app-title" content="Ark Breeder"> -->
    <!-- <meta name="msapplication-TileColor" content="#00aba9"> -->
    <!-- <meta name="theme-color" content="#2e54a5"> -->
+   <link rel="shortcut icon" href="<%= webpackConfig.output.publicPath %>favicon.ico">
    <link rel="apple-touch-icon" sizes="180x180" href="<%= htmlWebpackPlugin.files.publicPath %>img/icons/apple-touch-icon.png">
-   <meta name="application-name" content="ASB Mobile">
    <meta name="msapplication-config" content="<%= htmlWebpackPlugin.files.publicPath %>browserconfig.xml">
 
    <!-- These fields produce nice link previews in Discord/Slack and some other sites, and will need customising for specific links, e.g. to a specific creature -->
-   <meta property="og:title" content="ASBMobile" />
-   <meta property="og:site_name" content="ASBMobile" />
-   <meta property="og:type" content="website" />
-   <meta property="og:url" content="https://volatilepulse.github.io/ASBMobile/" />
-   <!-- <meta property="og:image" content="https://volatilepulse.github.io/ASBMobile/....png" /> -->
+   <!-- <meta property="og:title" content="Ark Breeder" /> -->
+   <meta property="og:site_name" content="Ark Breeder" />
+   <meta property="og:image" content="https://dev.arkbreeder.com/img/icons/apple-touch-icon-180x180.png" />
 
-   <!-- These fields produce nice link previews in Twitter, but also need customising -->
-   <meta name="twitter:title" content="ASBMobile">
-   <!-- <meta name="twitter:site" content="@USERNAME"> -->
-   <!-- <meta name="twitter:creator" content="@USERNAME"> -->
-   <!-- <meta name="twitter:label1" value="Opens in Theaters" /> -->
-   <!-- <meta name="twitter:data1" value="December 1, 2015" /> -->
-   <!-- <meta name="twitter:label2" value="Or on demand" /> -->
-   <!-- <meta name="twitter:data2" value="at Hulu.com" /> -->
+   <!-- Anything in this section is replaced for custom links like showcases and invites -->
+   <replace-meta-start></replace-meta-start>
+   <!-- ---------------------------------------------------------------- -->
+   <!-- OpenGraph tags : Produces nicer embedded links in some sites -->
+   <meta property="og:title" content="Ark Breeder">
+   <meta property="og:description" content="A cloud version of Ark Smart Breeding to help manage breeding in Ark: Survival Evolved">
+   <meta property="og:type" content="website" />
+   <meta property="og:url" content="https://dev.arkbreeder.com/" />
+   <!-- ---------------------------------------------------------------- -->
+   <replace-meta-end></replace-meta-end>
+
+   <!-- This defers loading the CSS for firebaseui, but still needs a normal css link to be inserted later (in app startup) -->
+   <link rel="prefetch" href="https://www.gstatic.com/firebasejs/ui/3.1.1/firebase-ui-auth.css" as="style">
+   <link rel="prefetch" href="https://fonts.googleapis.com/css?family=Roboto:400,500,700" as="style">
+
+   <style>
+   #fake-navbar { transform: translateY(-53px); opacity: 0; transition: transform 0.35s ease, opacity 0.5s ease; }
+   #fake-navbar.loading-slide { transform: translateY(0); opacity: 1; }
+   </style>
 </head>
 
 <body style="background:#212529;padding:0;margin:0">
-   <noscript>
-      <strong>We're sorry but ASB Mobile doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-   </noscript>
    <div id="app">
-      <div style="width:100%;height:53px;background:#2E54A5"></div>
+      <!-- Fake navbar to show during loading -->
+      <div id="fake-navbar" style="width:100%;height:53px;background:#2E54A5"></div>
+      <script>document.querySelector('div#fake-navbar').classList.add('loading-slide');</script>
    </div>
+   <noscript>
+      <div style="margin-top:8rem;text-align:center">
+         <strong>We're sorry but Ark Breeder doesn't work properly without JavaScript enabled.</strong>
+         <p>Please enable it to continue.</p>
+      </div>
+   </noscript>
+
+   <!-- Firebase from CDN -->
+   <script src="https://www.gstatic.com/firebasejs/5.0.4/firebase-app.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/5.0.4/firebase-auth.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/5.0.4/firebase-firestore.js"></script>
+   <script src="/__/firebase/init.js"></script>
+
    <!-- built files will be auto injected -->
 </body>
 

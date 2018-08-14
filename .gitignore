@@ -9,6 +9,7 @@
 !.vscode/extensions.json
 
 node_modules
+docs
 
 npm-debug.log*
 yarn-debug.log*
@@ -30,3 +31,6 @@ tags
 *.tmp
 *.log
 testdata
+
+# Webpack analyser output
+build-size.html

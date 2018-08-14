@@ -1,5 +1,5 @@
 import { parseExportedCreature } from '@/ark/import/ark_export';
-import { TestData } from '@/ark/types';
+import { CreatureTestData } from '@/testing';
 import { expect } from 'chai';
 import { readFileSync } from 'fs';
 import { decodeBuffer } from '../common/decoding';
@@ -13,12 +13,12 @@ beforeAll(async () => {
 });
 
 describe('importing UTF8 export from Coldino', async () => {
-   let creature: TestData;
+   let creature: CreatureTestData;
 
    beforeAll(async () => {
       const buffer = readFileSync('tests/unit/coldino-dino-utf8.ini');
       const content = decodeBuffer(buffer);
-      creature = parseExportedCreature(content) as TestData;
+      creature = parseExportedCreature(content) as CreatureTestData;
    });
 
    it('should parse', () => { expect(creature).to.exist; });
@@ -26,12 +26,12 @@ describe('importing UTF8 export from Coldino', async () => {
 });
 
 describe('importing UTF16-LE export from Davis', async () => {
-   let creature: TestData;
+   let creature: CreatureTestData;
 
    beforeAll(async () => {
       const buffer = readFileSync('tests/unit/davis-dino-1-utf16.ini');
       const content = decodeBuffer(buffer);
-      creature = parseExportedCreature(content) as TestData;
+      creature = parseExportedCreature(content) as CreatureTestData;
    });
 
    it('should parse', () => { expect(creature).to.exist; });

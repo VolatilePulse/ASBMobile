@@ -1,6 +1,6 @@
 import { parseGameIni } from '@/ark/import/game_ini';
 import { DAMAGE, FOOD, HEALTH, OXYGEN, SERVER_IDM, SERVER_IWM, SERVER_TAM, SERVER_TMM, SPEED, STAMINA, TORPOR, WEIGHT } from '@/consts';
-import { Server } from '@/data/objects';
+import { Server } from '@/data/firestore/objects';
 import { expect } from 'chai';
 import { readFileSync } from 'fs';
 import { initForExtraction } from '../common/init';
@@ -16,11 +16,11 @@ describe('importing game.ini from coldino', async () => {
    let server: Server;
 
    beforeAll(async () => {
-      const content = readFileSync('tests/unit/coldino-sp-game.ini').toString();
-      server = parseGameIni(content);
+      const content = readFileSync('testdata/coldino/sp/Game.ini').toString();
+      server = parseGameIni(content) as Server;
    });
 
-   it('should parse', () => { expect(server).to.exist.and.be.instanceof(Server); });
+   it('should parse', () => { expect(server).to.exist; });
 
    it('should have correct IBM', () => { expect(server.IBM).to.equal(1.5); });
    it('should have singlePlayer set', () => { expect(server.singlePlayer).to.be.true; });
@@ -37,11 +37,11 @@ describe('importing game.ini from Dusty.P', async () => {
    let server: Server;
 
    beforeAll(async () => {
-      const content = readFileSync('tests/unit/dusty-game.ini').toString();
-      server = parseGameIni(content);
+      const content = readFileSync('testdata\\Dusty.P\\Game.ini').toString();
+      server = parseGameIni(content) as Server;
    });
 
-   it('should parse', () => { expect(server).to.exist.and.be.instanceof(Server); });
+   it('should parse', () => { expect(server).to.exist; });
 
    it('should have correct IBM', () => { expect(server.IBM).to.equal(1); });
    it('should not have singlePlayer set', () => { expect(server.singlePlayer).to.be.false; });

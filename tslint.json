@@ -75,6 +75,12 @@
          "allow-snake-case",
          "allow-pascal-case"
       ],
-      "unified-signatures": false
+      "unified-signatures": false,
+      "no-unused-variable": [
+         true,
+         {
+            "ignore-pattern": "^_"
+         }
+      ]
    }
 }
