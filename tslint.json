@@ -1,9 +1,19 @@
 {
    "defaultSeverity": "warning",
    "extends": [
-      "tslint:latest"
+      "tslint:recommended"
    ],
+   "linterOptions": {
+      "exclude": [
+         "node_modules/**"
+      ]
+   },
    "rules": {
+      "indent": [
+         true,
+         "spaces",
+         3
+      ],
       "max-line-length": {
          "options": [
             160
@@ -75,12 +85,6 @@
          "allow-snake-case",
          "allow-pascal-case"
       ],
-      "unified-signatures": false,
-      "no-unused-variable": [
-         true,
-         {
-            "ignore-pattern": "^_"
-         }
-      ]
+      "unified-signatures": false
    }
 }

@@ -92,6 +92,9 @@ class OfflineSystem implements SubSystem {
             error(error) {
                console.error('OfflineSystem: SW: Error during service worker registration:', error);
             },
+            updatefound(_registration) {
+               console.log('OfflineSystem: SW: Update found');
+            },
          });
       }
    }

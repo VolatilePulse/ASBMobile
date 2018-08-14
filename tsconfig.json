@@ -1,9 +1,11 @@
 {
    "compilerOptions": {
       "target": "esnext",
-      "module": "esNext",
+      "module": "esnext",
       "jsx": "preserve",
       "moduleResolution": "node",
+      "importHelpers": true,
+      "esModuleInterop": true,
       "alwaysStrict": true,
       "strict": true,
       "noImplicitAny": true,
@@ -15,12 +17,12 @@
       "noImplicitReturns": true,
       "noImplicitThis": true,
       "sourceMap": true,
-      "emitDecoratorMetadata": true,
       "baseUrl": ".",
       "rootDir": "src",
       "lib": [
          "dom",
-         "es2017"
+         "esnext",
+         "dom.iterable",
       ],
       "types": [
          "node",

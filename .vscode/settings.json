@@ -138,6 +138,9 @@
    "[xml]": {
       "editor.formatOnSave": false
    },
+   "[html]": {
+      "editor.formatOnSave": false
+   },
    "typescript.tsdk": "node_modules\\typescript\\lib",
    "typescript.preferences.quoteStyle": "single",
    "javascript.preferences.quoteStyle": "single",

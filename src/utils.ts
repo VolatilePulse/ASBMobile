@@ -214,7 +214,7 @@ export function dbgLog(_target: any, propertyKey: string, descriptor: PropertyDe
 export function ReadDroppedBlob(blob: Blob): Promise<string> {
    return new Promise<string>((resolve, reject) => {
       const fr = new FileReader();
-      fr.addEventListener('loadend', () => resolve(fr.result));
+      fr.addEventListener('loadend', () => resolve(fr.result as string));
       fr.addEventListener('error', () => reject(fr.error));
       fr.readAsText(blob);
    });

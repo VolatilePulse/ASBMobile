@@ -39,8 +39,8 @@
 
 
 <style lang="scss" scoped>
-// The firebaseui CSS - it should already be cached as we asked the browser to prefetch it
-@import url(https://cdn.firebase.com/libs/firebaseui/3.0.0/firebaseui.css);
+// The firebaseui CSS - it should already be cached as we asked the browser to prefetch it - and should match the one specificed in index.html
+@import url(https://www.gstatic.com/firebasejs/ui/3.3.0/firebase-ui-auth.css);
 
 .user-img {
    width: 5rem;
